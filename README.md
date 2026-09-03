@@ -57,7 +57,7 @@ GitHub secret scanning, push protection, Dependabot security updates, and privat
 
 ## Current roadmap
 
-1. Define the problem Honkshool solves, its intended users, and its privacy boundaries.
+1. Complete [issue #1](https://github.com/joshuawyadao/Honkshool/issues/1) to define the problem Honkshool solves, its intended users, and its privacy boundaries.
 2. Choose the initial platform and architecture from those requirements.
 3. Build one end-to-end tracer bullet with focused automated tests.
 4. Document installation, supported environments, limitations, and release policy before inviting end users.

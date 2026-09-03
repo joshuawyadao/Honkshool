@@ -12,7 +12,7 @@ Prepare Honkshool as an honest early-stage public repository using the same comm
 [x] Add the MIT license, Contributor Covenant, contribution guide, security policy, privacy-safe `.gitignore`, issue forms, and pull-request template.
 [x] Add a dependency-free repository verification script, focused publication tests, and a quota-aware GitHub Actions workflow with read-only permissions and pinned actions.
 [x] Run the local verification gate, inspect tracked files for secrets/private paths, validate Markdown links, and confirm the repository contains no generated or local-only artifacts.
-[ ] Commit and push the complete foundation to `main`, then configure the public repository description, topics, wiki setting, private vulnerability reporting, Dependabot security updates, secret scanning, and push protection.
+[x] Commit and push the complete foundation to `main`, configure its public metadata, contribution settings, and security features, verify the hosted workflow, and seed the first product-definition issue.
 
 ## Open questions
 - None. Product scope and technology choices are intentionally deferred to the first project-definition issue rather than guessed during repository setup.

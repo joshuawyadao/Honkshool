@@ -27,7 +27,7 @@ Before application code is added, document:
 6. One tracer-bullet flow that proves the riskiest assumption end to end.
 7. Acceptance criteria and the appropriate test levels for that flow.
 
-Those decisions should become a focused product brief or issue before they become code. Architecture should follow the defined problem rather than be chosen during repository scaffolding.
+Those decisions are tracked in [issue #1](https://github.com/joshuawyadao/Honkshool/issues/1) and should become a focused product brief before they become code. Architecture should follow the defined problem rather than be chosen during repository scaffolding.
 
 ## Working agreement
 
