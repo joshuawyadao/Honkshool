@@ -1,0 +1,63 @@
+# Operating-system and editor state
+.DS_Store
+.AppleDouble
+.LSOverride
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Local environments and credentials
+.env
+.env.*
+!.env.example
+!.env.template
+Secrets.xcconfig
+Local.xcconfig
+*.private.*
+*.key
+*.pem
+*.p8
+*.p12
+*.pfx
+*.mobileprovision
+*.provisionprofile
+credentials*.json
+secrets*.json
+
+# Dependencies, caches, coverage, and build output
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage/
+coverage.xml
+htmlcov/
+.build/
+build/
+dist/
+DerivedData/
+*.xcarchive
+*.dSYM
+*.dSYM.zip
+
+# Local data and generated artifacts
+/local-data/
+/outputs/
+/reports/
+*.sqlite
+*.sqlite3
+*.db
+*.log
+*.tmp
+*.temp
+
+# Local review-tool state
+.brooks-lint-history.json
