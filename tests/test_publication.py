@@ -20,6 +20,7 @@ class PublicRepositoryTests(unittest.TestCase):
             "CODE_OF_CONDUCT.md",
             "docs/Project-Overview.md",
             "docs/Implementation-Plan.md",
+            "docs/Project-Implementation-Plan.md",
             "docs/Product-Brief.md",
             "docs/Decision-Log.md",
             ".github/pull_request_template.md",
@@ -50,9 +51,9 @@ class PublicRepositoryTests(unittest.TestCase):
 
     def test_product_context_and_roadmap_preserve_key_boundaries(self) -> None:
         brief = (PROJECT_ROOT / "docs/Product-Brief.md").read_text(encoding="utf-8")
-        plan = (PROJECT_ROOT / "docs/Implementation-Plan.md").read_text(
-            encoding="utf-8"
-        )
+        project_plan = (
+            PROJECT_ROOT / "docs/Project-Implementation-Plan.md"
+        ).read_text(encoding="utf-8")
         decisions = (PROJECT_ROOT / "docs/Decision-Log.md").read_text(
             encoding="utf-8"
         )
@@ -74,12 +75,24 @@ class PublicRepositoryTests(unittest.TestCase):
             "validation/ten-nap-trial",
             "Physical-device acceptance",
         ):
-            with self.subTest(document="implementation plan", statement=statement):
-                self.assertIn(statement, plan)
+            with self.subTest(
+                document="project implementation plan", statement=statement
+            ):
+                self.assertIn(statement, project_plan)
 
         for decision_id in ("D-001", "D-003", "D-004", "D-010", "D-017"):
             with self.subTest(document="decision log", decision_id=decision_id):
                 self.assertIn(decision_id, decisions)
+
+    def test_durable_project_plan_is_distinct_from_replaceable_task_plan(self) -> None:
+        readme = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+        overview = (PROJECT_ROOT / "docs/Project-Overview.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("docs/Project-Implementation-Plan.md", readme)
+        self.assertIn("docs/Implementation-Plan.md", readme)
+        self.assertIn("Task plans may be overwritten", overview)
 
     def test_privacy_sensitive_artifacts_are_ignored(self) -> None:
         ignore = (PROJECT_ROOT / ".gitignore").read_text(encoding="utf-8")

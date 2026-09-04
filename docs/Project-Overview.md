@@ -9,11 +9,15 @@ The primary outcome is relaxation and rest. Interesting factual exposure is seco
 ## Sources of truth
 
 - [Product brief](Product-Brief.md): purpose, language and safety boundaries, core experience, first content, technical constraints, and first-release scope.
-- [Implementation plan](Implementation-Plan.md): phased delivery sequence, branch-sized milestones, acceptance criteria, test strategy, and validation goal.
+- [Project implementation plan](Project-Implementation-Plan.md): durable phased delivery sequence, branch-sized milestones, acceptance criteria, test strategy, and validation goal.
 - [Decision log](Decision-Log.md): accepted, pending, and deferred product and technical decisions.
 - [Issue #1](https://github.com/joshuawyadao/Honkshool/issues/1): original public product-definition milestone.
 
-When these documents disagree, correct them together in the same pull request. The product brief owns product intent, the decision log owns why a consequential choice changed, and the implementation plan owns sequencing and current next steps.
+When these documents disagree, correct them together in the same pull request. The product brief owns product intent, the decision log owns why a consequential choice changed, and the project implementation plan owns sequencing and current next steps.
+
+## Planning-file convention
+
+The durable roadmap lives in [Project-Implementation-Plan.md](Project-Implementation-Plan.md). The `plan-implement-save` workflow creates or replaces [Implementation-Plan.md](Implementation-Plan.md) for the current feature, fix, or documentation task. Task plans may be overwritten; durable product sequencing and status must never depend on their contents.
 
 ## First target outcome
 

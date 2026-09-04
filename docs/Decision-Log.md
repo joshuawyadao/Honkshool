@@ -1,6 +1,6 @@
 # Decision log
 
-This log preserves consequential Honkshool product and technical choices. The [product brief](Product-Brief.md) records the stable product boundary; the [implementation plan](Implementation-Plan.md) records sequence and status.
+This log preserves consequential Honkshool product and technical choices. The [product brief](Product-Brief.md) records the stable product boundary; the [project implementation plan](Project-Implementation-Plan.md) records sequence and status.
 
 ## How to use this log
 

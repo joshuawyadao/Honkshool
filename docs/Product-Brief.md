@@ -146,4 +146,4 @@ The first useful release is a narrow vertical slice that can:
 - advance journey progress after completed playback; and
 - show local listening history, including partial playback.
 
-Everything else remains deferred until the [implementation plan](Implementation-Plan.md) and real-nap validation justify expansion.
+Everything else remains deferred until the [project implementation plan](Project-Implementation-Plan.md) and real-nap validation justify expansion.

@@ -21,7 +21,9 @@ Honkshool describes sessions as **played**. It does not claim subconscious learn
 - Give future work a consistent issue, pull-request, documentation, and verification workflow.
 - Avoid implying that unfinished software is ready for end users.
 
-Read the [product brief](docs/Product-Brief.md) for the product boundary, the [implementation plan](docs/Implementation-Plan.md) for the phased roadmap, the [decision log](docs/Decision-Log.md) for accepted and unresolved choices, and the [project overview](docs/Project-Overview.md) for a concise status summary.
+Read the [product brief](docs/Product-Brief.md) for the product boundary, the [project implementation plan](docs/Project-Implementation-Plan.md) for the durable phased roadmap, the [decision log](docs/Decision-Log.md) for accepted and unresolved choices, and the [project overview](docs/Project-Overview.md) for a concise status summary.
+
+`docs/Implementation-Plan.md` is intentionally reserved for the current task plan created by the `plan-implement-save` workflow and may be replaced on later implementation branches. Long-lived roadmap updates belong in `docs/Project-Implementation-Plan.md`.
 
 ## Repository map
 
@@ -69,7 +71,7 @@ GitHub secret scanning, push protection, Dependabot security updates, and privat
 4. Build the choose → review → play → alarm → history tracer bullet.
 5. Extend the local journey experience only as needed for an approximately ten-nap personal validation trial.
 
-See the [living implementation plan](docs/Implementation-Plan.md) for acceptance criteria and branch sequence. Questions that gate a phase are recorded in the [decision log](docs/Decision-Log.md), not left implicit in code.
+See the [living project implementation plan](docs/Project-Implementation-Plan.md) for acceptance criteria and branch sequence. Questions that gate a phase are recorded in the [decision log](docs/Decision-Log.md), not left implicit in code.
 
 ## Contributing
 
