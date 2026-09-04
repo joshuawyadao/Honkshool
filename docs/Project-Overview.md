@@ -2,9 +2,45 @@
 
 ## Current state
 
-Honkshool is in its foundation stage. The repository is intentionally public before application development begins so that decisions, safeguards, and contribution practices are visible from the start.
+Honkshool is a pre-implementation, iPhone-first project for calm, uninterrupted factual narration during naps and bedtime. The public repository contains the product definition, delivery roadmap, decision history, contribution and security policies, and automated repository checks. It does not yet contain a runnable app or supported release.
 
-There is no runnable product yet. The repository must not be presented as production-ready software, and no platform, framework, storage system, or deployment model has been selected.
+The primary outcome is relaxation and rest. Interesting factual exposure is secondary, and the product must not claim subconscious learning, guaranteed retention, therapy, or treatment of insomnia or another medical condition.
+
+## Sources of truth
+
+- [Product brief](Product-Brief.md): purpose, language and safety boundaries, core experience, first content, technical constraints, and first-release scope.
+- [Implementation plan](Implementation-Plan.md): phased delivery sequence, branch-sized milestones, acceptance criteria, test strategy, and validation goal.
+- [Decision log](Decision-Log.md): accepted, pending, and deferred product and technical decisions.
+- [Issue #1](https://github.com/joshuawyadao/Honkshool/issues/1): original public product-definition milestone.
+
+When these documents disagree, correct them together in the same pull request. The product brief owns product intent, the decision log owns why a consequential choice changed, and the implementation plan owns sequencing and current next steps.
+
+## First target outcome
+
+The first tracer bullet should let the project owner select one bundled automotive session, choose a rest window, approve a fixed Nap Plan, lock the iPhone, hear calm narration transition to offline ambience or silence, receive a dependable AlarmKit wake alarm, and find the playback recorded locally as partial or complete.
+
+This flow intentionally excludes backend services, accounts, analytics, cloud sync, subscriptions, ads, paid APIs, runtime AI generation, and distribution work.
+
+## Next milestone
+
+The next implementation branch is `spike/audio-and-alarm-feasibility`. It should validate the riskiest behavior on the target iPhone before the app architecture is committed:
+
+1. On-device narration during locked-screen background playback.
+2. Audio-session behavior during pauses, calls, route changes, and app lifecycle events.
+3. A controlled transition to ambience or silence.
+4. AlarmKit authorization, scheduling, cancellation, stop/snooze behavior, and reliability.
+5. The relationship between estimated script duration and a fixed wake time.
+
+Results belong in the decision log and should determine the playback interfaces used by later feature branches.
+
+## Working agreement
+
+- Use focused branches and keep `main` reviewable.
+- Update product, decision, implementation, test, and user-facing documentation with the behavior they describe.
+- Test domain rules at the narrowest useful level, but verify background audio and alarms on physical hardware.
+- Use synthetic fixtures and redact machine-specific paths, identifiers, schedules, and personal listening history from public artifacts.
+- Treat new permissions, network calls, data sources, persistence, and system integrations as privacy and security changes requiring explicit review.
+- Do not announce end-user readiness until installation, signing, supported-device, troubleshooting, and release expectations are documented.
 
 ## Foundation already established
 
@@ -14,36 +50,3 @@ There is no runnable product yet. The repository must not be presented as produc
 - Structured bug and feature request forms that discourage sensitive public attachments.
 - A pull-request checklist covering behavior, tests, documentation, privacy, and security.
 - A dependency-free local verification command mirrored by quota-aware GitHub Actions.
-
-## Next definition milestone
-
-Before application code is added, document:
-
-1. The user problem and the smallest useful outcome.
-2. Intended users and explicit non-users.
-3. Data the product reads, creates, stores, transmits, or deletes.
-4. Privacy, security, accessibility, and failure-mode requirements.
-5. The initial supported platform and why it fits the problem.
-6. One tracer-bullet flow that proves the riskiest assumption end to end.
-7. Acceptance criteria and the appropriate test levels for that flow.
-
-Those decisions are tracked in [issue #1](https://github.com/joshuawyadao/Honkshool/issues/1) and should become a focused product brief before they become code. Architecture should follow the defined problem rather than be chosen during repository scaffolding.
-
-## Working agreement
-
-- Keep `main` reviewable and use focused pull requests for implementation work.
-- Update durable documentation whenever behavior, architecture, data handling, operations, or supported environments change.
-- Add tests at the narrowest level that protects the behavior without duplicating equivalent coverage.
-- Use synthetic fixtures and redact machine-specific paths in public discussions.
-- Treat new permissions, network calls, data sources, and persistent storage as security and privacy changes requiring explicit review.
-- Do not publish binaries or announce end-user readiness until installation, signing, support, and release expectations are documented.
-
-## Deliberately undecided
-
-- Product category and feature scope.
-- Language, framework, and package manager.
-- Client, server, web, mobile, or desktop delivery.
-- Data model and persistence.
-- Hosting and release distribution.
-
-Leaving these decisions open is a constraint, not missing scaffolding. Repository checks should grow alongside the selected stack once the first implementation slice is approved.

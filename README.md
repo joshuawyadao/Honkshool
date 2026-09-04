@@ -1,12 +1,18 @@
 # Honkshool
 
 [![Repository Verify](https://github.com/joshuawyadao/Honkshool/actions/workflows/ci.yml/badge.svg)](https://github.com/joshuawyadao/Honkshool/actions/workflows/ci.yml)
-[![Project status: foundation](https://img.shields.io/badge/status-foundation-6f42c1)](docs/Project-Overview.md)
+[![Project status: planning](https://img.shields.io/badge/status-planning-6f42c1)](docs/Project-Overview.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Honkshool is an early-stage public project. This repository currently provides the project foundation: transparent planning, contribution and security policies, privacy-safe defaults, issue templates, and automated repository checks.
+Honkshool is an early-stage iPhone app for calm, uninterrupted factual narration during naps and bedtime. Its primary purpose is helping the listener relax and fall asleep; exposure to interesting information is secondary.
 
-> **Project status:** Foundation. No application, package, hosted service, or supported release exists yet. The product brief and first runnable tracer bullet are the next milestones.
+> **Project status:** Planning. No application, package, hosted service, or supported release exists yet. The next implementation milestone is a physical-device feasibility spike for narration, background audio, and AlarmKit.
+
+The intended flow is simple:
+
+> Open app → choose content → choose nap duration → review the Nap Plan → start resting.
+
+Honkshool describes sessions as **played**. It does not claim subconscious learning, guaranteed retention, therapy, or treatment of insomnia or another medical condition.
 
 ## Why this repository is public
 
@@ -15,13 +21,13 @@ Honkshool is an early-stage public project. This repository currently provides t
 - Give future work a consistent issue, pull-request, documentation, and verification workflow.
 - Avoid implying that unfinished software is ready for end users.
 
-Read the [project overview](docs/Project-Overview.md) for the current boundaries and the decisions that must be made before implementation begins.
+Read the [product brief](docs/Product-Brief.md) for the product boundary, the [implementation plan](docs/Implementation-Plan.md) for the phased roadmap, the [decision log](docs/Decision-Log.md) for accepted and unresolved choices, and the [project overview](docs/Project-Overview.md) for a concise status summary.
 
 ## Repository map
 
 ```text
 .github/                    Issue forms, pull-request template, and CI
-docs/                       Project overview and implementation plans
+docs/                       Product context, decisions, status, and roadmap
 scripts/                    Local repository verification entry point
 tests/                      Publication and repository-safety checks
 CODE_OF_CONDUCT.md          Community behavior and private reporting channel
@@ -30,7 +36,7 @@ SECURITY.md                 Private vulnerability-reporting policy
 LICENSE                     MIT license
 ```
 
-Application directories will be added only after the product brief establishes the platform and architectural boundaries.
+Application directories will be added during the first authorized implementation branch. The current repository intentionally contains planning and public-development infrastructure only.
 
 ## Start contributing
 
@@ -57,10 +63,13 @@ GitHub secret scanning, push protection, Dependabot security updates, and privat
 
 ## Current roadmap
 
-1. Complete [issue #1](https://github.com/joshuawyadao/Honkshool/issues/1) to define the problem Honkshool solves, its intended users, and its privacy boundaries.
-2. Choose the initial platform and architecture from those requirements.
-3. Build one end-to-end tracer bullet with focused automated tests.
-4. Document installation, supported environments, limitations, and release policy before inviting end users.
+1. Run `spike/audio-and-alarm-feasibility` on the target iPhone to validate narration, background audio, interruptions, Lock Screen controls, and AlarmKit.
+2. Define and test the framework-independent Nap Plan, journey, progress, and history rules.
+3. Prepare one original, citation-backed automotive session and one lawful offline ambience option.
+4. Build the choose → review → play → alarm → history tracer bullet.
+5. Extend the local journey experience only as needed for an approximately ten-nap personal validation trial.
+
+See the [living implementation plan](docs/Implementation-Plan.md) for acceptance criteria and branch sequence. Questions that gate a phase are recorded in the [decision log](docs/Decision-Log.md), not left implicit in code.
 
 ## Contributing
 

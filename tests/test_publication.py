@@ -20,6 +20,8 @@ class PublicRepositoryTests(unittest.TestCase):
             "CODE_OF_CONDUCT.md",
             "docs/Project-Overview.md",
             "docs/Implementation-Plan.md",
+            "docs/Product-Brief.md",
+            "docs/Decision-Log.md",
             ".github/pull_request_template.md",
             ".github/ISSUE_TEMPLATE/config.yml",
             ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -31,18 +33,53 @@ class PublicRepositoryTests(unittest.TestCase):
         missing = [path for path in required if not (PROJECT_ROOT / path).is_file()]
         self.assertEqual(missing, [])
 
-    def test_readme_is_honest_about_foundation_status(self) -> None:
+    def test_readme_is_honest_about_planning_status(self) -> None:
         readme = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
 
         for statement in (
-            "Project status:** Foundation",
+            "Project status:** Planning",
             "No application, package, hosted service, or supported release exists yet",
+            "calm, uninterrupted factual narration",
+            "does not claim subconscious learning",
             "./scripts/verify-repository.sh",
             "SECURITY.md",
             "MIT License",
         ):
             with self.subTest(statement=statement):
                 self.assertIn(statement, readme)
+
+    def test_product_context_and_roadmap_preserve_key_boundaries(self) -> None:
+        brief = (PROJECT_ROOT / "docs/Product-Brief.md").read_text(encoding="utf-8")
+        plan = (PROJECT_ROOT / "docs/Implementation-Plan.md").read_text(
+            encoding="utf-8"
+        )
+        decisions = (PROJECT_ROOT / "docs/Decision-Log.md").read_text(
+            encoding="utf-8"
+        )
+
+        for statement in (
+            "Helping the listener relax and fall asleep is the primary purpose",
+            "played**, not learned, mastered, or retained",
+            "Once playback starts, the route is fixed",
+            "No backend, accounts, analytics, cloud sync, subscriptions, ads",
+            "approximately ten real naps",
+        ):
+            with self.subTest(document="product brief", statement=statement):
+                self.assertIn(statement, brief)
+
+        for statement in (
+            "spike/audio-and-alarm-feasibility",
+            "feature/nap-plan-domain",
+            "feature/nap-playback-runtime",
+            "validation/ten-nap-trial",
+            "Physical-device acceptance",
+        ):
+            with self.subTest(document="implementation plan", statement=statement):
+                self.assertIn(statement, plan)
+
+        for decision_id in ("D-001", "D-003", "D-004", "D-010", "D-017"):
+            with self.subTest(document="decision log", decision_id=decision_id):
+                self.assertIn(decision_id, decisions)
 
     def test_privacy_sensitive_artifacts_are_ignored(self) -> None:
         ignore = (PROJECT_ROOT / ".gitignore").read_text(encoding="utf-8")
