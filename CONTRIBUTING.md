@@ -23,6 +23,8 @@ By participating, you agree to follow the [Contributor Covenant Code of Conduct]
    ./scripts/verify-repository.sh
    ```
 
+   Changes to the experimental iOS target should also pass the simulator-SDK build, generic-device build, and test-bundle compilation in the [feasibility spike guide](docs/Feasibility-Spike.md). Background audio, audio-route handling, Lock Screen controls, and AlarmKit require the physical-device matrix; compilation alone is not acceptance evidence.
+
 5. Describe the user-visible outcome, privacy and security implications, verification performed, and any known limitations in the pull request.
 
 ## Public-data rules

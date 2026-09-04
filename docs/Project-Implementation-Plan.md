@@ -38,6 +38,10 @@ Build Honkshool as a sequence of small, reviewable vertical slices, beginning wi
 
 Remove the largest technical risks before designing the full app around unverified assumptions.
 
+### Current status
+
+The `spike/audio-and-alarm-feasibility` branch contains the first compile-verified iOS test console. Physical-device evidence remains required before Phase 0 or decisions D-001 through D-005 can be marked complete. Follow [Feasibility-Spike.md](Feasibility-Spike.md) for the test matrix and result-recording format.
+
 ### Work
 
 - Create the smallest installable iOS 26 spike necessary to exercise AVSpeechSynthesizer, AVAudioSession, optional ambience, Lock Screen media controls, and AlarmKit.

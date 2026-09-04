@@ -23,6 +23,11 @@ This log preserves consequential Honkshool product and technical choices. The [p
 | D-015 | Keep first-version data local with no account, cloud sync, or analytics. | The personal prototype does not need network identity or behavioral data collection. | Accepted 2026-09-04 |
 | D-016 | Target iPhone and iOS 26 using Swift, SwiftUI, SwiftData, AlarmKit, AVFoundation, and AVSpeechSynthesizer, subject to the feasibility spike. | Native frameworks fit the personal-device scope and avoid recurring services and third-party dependencies. | Accepted 2026-09-04 |
 | D-017 | Validate the product with approximately ten real naps before expanding scope. | Actual habit replacement, calmness, and reliability matter more than feature count. | Accepted 2026-09-04 |
+| D-018 | Use `com.joshuawyadao.Honkshool` as the bundle identifier and test first on an iPhone 14 Pro running iOS 26.6.1, then on the intended replacement iPhone. | A stable identifier and named physical baseline make signing and device evidence reproducible without publishing device identifiers. | Accepted 2026-09-04 |
+| D-019 | Use “Turning Fuel Into Motion” as the first narration example. | It exercises calm engineering explanation and pronunciation without requiring detailed repair instructions. | Accepted 2026-09-04 |
+| D-020 | Offer recommended 20, 30, 45, and 60-minute rest windows, exact custom timing, and one reusable saved default; initialize the personal spike at 35 minutes. | The owner typically allows a 35-minute window for a desired 20-minute nap, while the app must not claim how much actual sleep occurs. | Accepted 2026-09-04 |
+| D-021 | Block an alarm-enabled run until AlarmKit is authorized and the requested alarm schedules successfully. | A plan that promises a wake alarm must never begin after silently losing that guarantee; the user may explicitly disable the alarm instead. | Accepted 2026-09-04 |
+| D-022 | Activate an exclusive playback audio session when a Honkshool run begins. | Existing music or podcast audio should yield so Honkshool provides one controlled, uninterrupted route. | Accepted 2026-09-04 |
 
 ## Pending decisions
 
@@ -30,13 +35,12 @@ This log preserves consequential Honkshool product and technical choices. The [p
 | --- | --- | --- | --- |
 | D-001 | Should narration stream directly from AVSpeechSynthesizer or use a locally rendered/buffered strategy? | Compare background reliability, pause/resume, timing precision, Lock Screen control, power, storage, and implementation complexity on the target device. | Playback architecture in Phase 1 |
 | D-002 | What audio-session and interruption policy should the prototype use? | Define behavior for phone calls, Siri, headphones disconnecting, route changes, other audio, manual pause, and app termination. | First tracer-bullet implementation |
-| D-003 | What AlarmKit authorization and failure experience is acceptable? | Verify target-device APIs and system UI; decide whether a plan can start without alarm permission and how clearly that state is shown before rest begins. | Nap Plan review and alarm integration |
+| D-003 | Does AlarmKit meet the required physical-device reliability and system interaction expectations? | The blocking authorization and scheduling policy is accepted in D-021; verify system prompts, firing after backgrounding or termination, cancellation, stop, snooze, and relaunch reconciliation. | Nap Plan review and alarm integration |
 | D-004 | How should the planner absorb differences between estimated and actual narration duration? | Measure the selected voice and decide where slack, drift, ambience, or silence may adjust without changing narration speed or wake time. | Nap Plan domain rules |
 | D-005 | Which Lock Screen controls and Now Playing metadata belong in the first release? | Balance familiar control with protection against accidental route changes or misleading progress. | Playback runtime |
-| D-006 | Which “How a Car Works” session is the first representative script? | Choose a topic that exercises pronunciation and mental-model writing without requiring visuals or alarming repair instructions. | Prepared content branch |
 | D-007 | Which Apple voice, locale, base rate, pause conventions, and pronunciation mechanism should be standardized? | Run short listening comparisons on the target iPhone and document repeatable narration settings. | Prepared content branch |
 | D-008 | Which ambience asset can lawfully be distributed offline? | Confirm license/provenance, loop quality, file size, loudness, and interaction with narration and drift. | Prepared content branch |
-| D-009 | What are the minimum selectable nap durations and insufficient-time behavior? | Test whether the plan should offer a shortened content selection, ambience-only plan, or prevent plans too short for the first session. | Nap Plan domain rules |
+| D-009 | How should a short rest window behave when no complete factual session fits? | D-020 resolves selection and saved-default behavior; decide whether insufficient windows use a shorter selection, ambience only, or prevent starting. | Nap Plan domain rules |
 
 ## Deferred decisions
 

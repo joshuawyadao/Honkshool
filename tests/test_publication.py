@@ -23,6 +23,16 @@ class PublicRepositoryTests(unittest.TestCase):
             "docs/Project-Implementation-Plan.md",
             "docs/Product-Brief.md",
             "docs/Decision-Log.md",
+            "docs/Feasibility-Spike.md",
+            "Honkshool.xcodeproj/project.pbxproj",
+            "Honkshool.xcodeproj/xcshareddata/xcschemes/Honkshool.xcscheme",
+            "Honkshool/App/HonkshoolApp.swift",
+            "Honkshool/App/FeasibilityConsoleView.swift",
+            "Honkshool/Domain/SpikeModels.swift",
+            "Honkshool/Services/AudioSpikeController.swift",
+            "Honkshool/Services/AlarmSpikeService.swift",
+            "Honkshool/Resources/Info.plist",
+            "HonkshoolTests/SpikeModelsTests.swift",
             ".github/pull_request_template.md",
             ".github/ISSUE_TEMPLATE/config.yml",
             ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -34,12 +44,12 @@ class PublicRepositoryTests(unittest.TestCase):
         missing = [path for path in required if not (PROJECT_ROOT / path).is_file()]
         self.assertEqual(missing, [])
 
-    def test_readme_is_honest_about_planning_status(self) -> None:
+    def test_readme_is_honest_about_feasibility_status(self) -> None:
         readme = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
 
         for statement in (
-            "Project status:** Planning",
-            "No application, package, hosted service, or supported release exists yet",
+            "Project status:** Feasibility spike",
+            "there is no supported release",
             "calm, uninterrupted factual narration",
             "does not claim subconscious learning",
             "./scripts/verify-repository.sh",
@@ -48,6 +58,27 @@ class PublicRepositoryTests(unittest.TestCase):
         ):
             with self.subTest(statement=statement):
                 self.assertIn(statement, readme)
+
+    def test_ios_spike_preserves_platform_and_safety_configuration(self) -> None:
+        project = (PROJECT_ROOT / "Honkshool.xcodeproj/project.pbxproj").read_text(
+            encoding="utf-8"
+        )
+        info = (PROJECT_ROOT / "Honkshool/Resources/Info.plist").read_text(
+            encoding="utf-8"
+        )
+        audio = (
+            PROJECT_ROOT / "Honkshool/Services/AudioSpikeController.swift"
+        ).read_text(encoding="utf-8")
+        alarm = (
+            PROJECT_ROOT / "Honkshool/Services/AlarmSpikeService.swift"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("com.joshuawyadao.Honkshool", project)
+        self.assertIn("IPHONEOS_DEPLOYMENT_TARGET = 26.0", project)
+        self.assertIn("NSAlarmKitUsageDescription", info)
+        self.assertIn("<string>audio</string>", info)
+        self.assertIn("setCategory(.playback, mode: .spokenAudio, options: [])", audio)
+        self.assertIn("AlarmManager.shared", alarm)
 
     def test_product_context_and_roadmap_preserve_key_boundaries(self) -> None:
         brief = (PROJECT_ROOT / "docs/Product-Brief.md").read_text(encoding="utf-8")

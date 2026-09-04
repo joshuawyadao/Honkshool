@@ -1,12 +1,12 @@
 # Honkshool
 
 [![Repository Verify](https://github.com/joshuawyadao/Honkshool/actions/workflows/ci.yml/badge.svg)](https://github.com/joshuawyadao/Honkshool/actions/workflows/ci.yml)
-[![Project status: planning](https://img.shields.io/badge/status-planning-6f42c1)](docs/Project-Overview.md)
+[![Project status: feasibility spike](https://img.shields.io/badge/status-feasibility%20spike-6f42c1)](docs/Project-Overview.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Honkshool is an early-stage iPhone app for calm, uninterrupted factual narration during naps and bedtime. Its primary purpose is helping the listener relax and fall asleep; exposure to interesting information is secondary.
 
-> **Project status:** Planning. No application, package, hosted service, or supported release exists yet. The next implementation milestone is a physical-device feasibility spike for narration, background audio, and AlarmKit.
+> **Project status:** Feasibility spike. An experimental iOS test app now exists, but there is no supported release. It is intentionally designed to measure physical-device narration, background audio, and AlarmKit behavior before production architecture begins.
 
 The intended flow is simple:
 
@@ -29,6 +29,9 @@ Read the [product brief](docs/Product-Brief.md) for the product boundary, the [p
 
 ```text
 .github/                    Issue forms, pull-request template, and CI
+Honkshool/                  Experimental iOS spike source
+HonkshoolTests/             Focused spike-state tests
+Honkshool.xcodeproj/        Shared Xcode project and scheme
 docs/                       Product context, decisions, status, and roadmap
 scripts/                    Local repository verification entry point
 tests/                      Publication and repository-safety checks
@@ -38,7 +41,7 @@ SECURITY.md                 Private vulnerability-reporting policy
 LICENSE                     MIT license
 ```
 
-Application directories will be added during the first authorized implementation branch. The current repository intentionally contains planning and public-development infrastructure only.
+The current application surface is a feasibility console, not the first product UI. Follow the [device test guide](docs/Feasibility-Spike.md) before drawing conclusions from the spike.
 
 ## Start contributing
 
@@ -65,7 +68,7 @@ GitHub secret scanning, push protection, Dependabot security updates, and privat
 
 ## Current roadmap
 
-1. Run `spike/audio-and-alarm-feasibility` on the target iPhone to validate narration, background audio, interruptions, Lock Screen controls, and AlarmKit.
+1. Complete `spike/audio-and-alarm-feasibility` on the target iPhone to validate narration, background audio, interruptions, Lock Screen controls, and AlarmKit.
 2. Define and test the framework-independent Nap Plan, journey, progress, and history rules.
 3. Prepare one original, citation-backed automotive session and one lawful offline ambience option.
 4. Build the choose → review → play → alarm → history tracer bullet.
