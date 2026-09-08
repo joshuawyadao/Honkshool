@@ -120,10 +120,11 @@ Using Xcode 26.6, the iOS 26.5 SDK, and the installed iOS 26.5 simulator/platfor
 - the app builds for the generic iOS Simulator SDK destination without signing;
 - the app builds for the generic physical iOS device destination without signing;
 - automatic signing resolves through an ignored local configuration and produces a signed Debug device build;
+- the signed Debug app installs and launches in the foreground on the iPhone 14 Pro after Developer Mode and profile trust are enabled;
 - all eight focused XCTest cases execute successfully on an iOS 26.5 simulator; and
 - the repository verification suite passes.
 
-Xcode prepared support symbols for the connected iPhone 14 Pro running iOS 26.6.1, selected it as the run destination, registered it for the active Personal Team, and completed a device build. Installation and launch remain blocked until Developer Mode is enabled and confirmed on the iPhone after its required restart. Every physical-device matrix result therefore remains **Not run**; this setup result does not resolve any feasibility decision.
+Xcode prepared support symbols for the connected iPhone 14 Pro running iOS 26.6.1, selected it as the run destination, registered it for the active Personal Team, and completed a device build. After Developer Mode and explicit developer-profile trust were enabled on the phone, the signed app installed and launched successfully. Every behavior-focused physical-device matrix result remains **Not run**; successful installation and launch do not resolve any audio or AlarmKit feasibility decision.
 
 ## Physical-device test matrix
 

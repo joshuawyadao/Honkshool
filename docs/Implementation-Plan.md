@@ -13,7 +13,7 @@ Prepare this checkout and the connected iPhone 14 Pro for repeatable physical-de
 - [x] Add a tracked Xcode configuration that optionally loads an ignored local signing file, then create this checkout's local team setting without committing it.
 - [x] Extend repository checks to require the public signing template and reject committed signing-team or device identifiers while allowing the intended ignored local file.
 - [x] Use automatic provisioning to produce a signed Debug build for the connected iPhone.
-- [x] Install and launch Honkshool on the phone, or identify the exact remaining interactive iOS/Xcode gate if installation is blocked.
+- [x] Install and launch Honkshool on the phone after Developer Mode and explicit developer-profile trust are enabled.
 - [x] Update the feasibility guide with the repeatable local-signing workflow, Developer Mode steps, safe device commands, and current device-readiness result.
 - [x] Run targeted publication tests, the repository verification gate, Xcode build-setting checks, and a generic unsigned device build.
 - [x] Review the diff for personal data, mark the plan complete to the achieved boundary, and save the feature branch.
