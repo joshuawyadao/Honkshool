@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct FeasibilityConsoleView: View {
+  @Environment(\.scenePhase) private var scenePhase
   @StateObject private var audio = AudioSpikeController()
   @StateObject private var alarm = AlarmSpikeService()
 
@@ -16,10 +17,10 @@ struct FeasibilityConsoleView: View {
   @State private var alarmEnabled = true
   @State private var ambienceEnabled = true
   @State private var runMessage = "Configure the test, then start with the screen unlocked."
-
-  private let columns = [
-    GridItem(.adaptive(minimum: 72), spacing: 8)
-  ]
+  @State private var blockedReason: String?
+  @State private var isStarting = false
+  @State private var durationAnchor = Date.now
+  @State private var loadedPreferences = false
 
   var body: some View {
     NavigationStack {
@@ -29,13 +30,42 @@ struct FeasibilityConsoleView: View {
           durationCard
           alarmCard
           playbackCard
-          eventLogCard
+          NavigationLink("Audio event log") {
+            AudioEventLogView(audio: audio)
+          }
+          .buttonStyle(.bordered)
+          .accessibilityIdentifier("audioEventLog")
         }
         .padding()
       }
       .background(Color(.systemGroupedBackground))
       .navigationTitle("Feasibility Lab")
+      .alert(
+        "Test cannot start",
+        isPresented: Binding(
+          get: { blockedReason != nil },
+          set: { if !$0 { blockedReason = nil } }
+        )
+      ) {
+        Button("OK", role: .cancel) { blockedReason = nil }
+      } message: {
+        Text(blockedReason ?? "")
+      }
+      .task { await alarm.observeUpdates() }
+      .task(id: scenePhase) {
+        guard scenePhase == .active else { return }
+        // Alarm and ActivityKit updates can arrive separately. While foregrounded,
+        // reconcile both until the authoritative snooze deadline is available.
+        while !Task.isCancelled {
+          alarm.refresh()
+          do { try await Task.sleep(for: .seconds(1)) } catch { return }
+        }
+      }
+      .onChange(of: selectedMinutes) { durationAnchor = .now }
       .onAppear {
+        alarm.refresh()
+        guard !loadedPreferences else { return }
+        loadedPreferences = true
         selectedMinutes = RestDurationPolicy.normalized(
           minutes: preferredRestMinutes
         )
@@ -44,7 +74,6 @@ struct FeasibilityConsoleView: View {
           startingAt: .now,
           minutes: selectedMinutes
         )
-        alarm.refresh()
       }
     }
   }
@@ -79,7 +108,7 @@ struct FeasibilityConsoleView: View {
             displayedComponents: [.date, .hourAndMinute]
           )
         } else {
-          LazyVGrid(columns: columns, spacing: 8) {
+          HStack(spacing: 8) {
             ForEach(RestDurationPolicy.recommendedMinutes, id: \.self) { minutes in
               DurationButton(
                 minutes: minutes,
@@ -90,20 +119,19 @@ struct FeasibilityConsoleView: View {
               }
             }
 
-            if !RestDurationPolicy.recommendedMinutes.contains(
-              preferredRestMinutes
+          }
+          if !RestDurationPolicy.recommendedMinutes.contains(
+            preferredRestMinutes
+          ) {
+            DurationButton(
+              minutes: preferredRestMinutes,
+              selected: selectedMinutes == preferredRestMinutes,
+              labelPrefix: "Saved"
             ) {
-              DurationButton(
-                minutes: preferredRestMinutes,
-                selected: selectedMinutes == preferredRestMinutes,
-                labelPrefix: "Saved"
-              ) {
-                selectedMinutes = preferredRestMinutes
-                customMinutes = preferredRestMinutes
-              }
+              selectedMinutes = preferredRestMinutes
+              customMinutes = preferredRestMinutes
             }
           }
-
           Stepper(
             "Custom: \(customMinutes) minutes",
             value: $customMinutes,
@@ -147,17 +175,26 @@ struct FeasibilityConsoleView: View {
     SpikeCard(title: "AlarmKit", systemImage: "alarm") {
       VStack(alignment: .leading, spacing: 12) {
         Toggle("Require a wake alarm", isOn: $alarmEnabled)
+          .accessibilityIdentifier("requireAlarm")
 
         LabeledContent("Authorization", value: authorizationText)
+        LabeledContent("Alarm status", value: alarm.alarmStatus.phase.rawValue)
+          .accessibilityIdentifier("alarmStatus")
 
         if let scheduledDate = alarm.scheduledDate {
-          LabeledContent("Scheduled") {
+          LabeledContent("Next alert") {
             Text(
               scheduledDate.formatted(
                 date: .abbreviated,
                 time: .standard
               )
             )
+          }
+          if alarm.alarmStatus.phase == .snoozed {
+            LabeledContent("Snooze remaining") {
+              Text(timerInterval: Date.distantPast...scheduledDate, countsDown: true)
+                .monospacedDigit()
+            }
           }
         }
 
@@ -179,13 +216,13 @@ struct FeasibilityConsoleView: View {
             }
           }
           .buttonStyle(.bordered)
-          .disabled(alarm.authorization != .authorized)
+          .disabled(alarm.authorization != .authorized || alarm.isScheduling || isStarting)
         }
 
         Button("Cancel Honkshool alarm", role: .destructive) {
           alarm.cancel()
         }
-        .disabled(alarm.scheduledDate == nil)
+        .disabled(!alarm.hasTrackedAlarm || alarm.isScheduling)
 
         if alarmEnabled && alarm.authorization != .authorized {
           Label(
@@ -208,6 +245,7 @@ struct FeasibilityConsoleView: View {
         )
 
         LabeledContent("Phase", value: audio.phase.rawValue.capitalized)
+          .accessibilityIdentifier("playbackPhase")
 
         Text(audio.statusMessage)
           .font(.subheadline)
@@ -223,6 +261,8 @@ struct FeasibilityConsoleView: View {
         }
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
+        .disabled(isStarting || alarm.isScheduling)
+        .accessibilityIdentifier("startTest")
 
         HStack {
           Button("Pause") { audio.pause() }
@@ -239,28 +279,10 @@ struct FeasibilityConsoleView: View {
         .buttonStyle(.bordered)
 
         Text(
-          "Starting activates an exclusive playback session, so existing music or podcasts should stop. Playback controls intentionally omit skipping and seeking."
+          "Starting activates an exclusive playback session, so existing music or podcasts should stop. Skipping and seeking are disabled; iOS may still display their controls."
         )
         .font(.footnote)
         .foregroundStyle(.secondary)
-      }
-    }
-  }
-
-  private var eventLogCard: some View {
-    SpikeCard(title: "Audio event log", systemImage: "list.bullet.rectangle") {
-      if audio.eventLog.isEmpty {
-        Text("Audio-session and interruption events will appear here.")
-          .font(.footnote)
-          .foregroundStyle(.secondary)
-      } else {
-        VStack(alignment: .leading, spacing: 8) {
-          ForEach(Array(audio.eventLog.enumerated()), id: \.offset) { _, event in
-            Text(event)
-              .font(.caption.monospaced())
-              .frame(maxWidth: .infinity, alignment: .leading)
-          }
-        }
       }
     }
   }
@@ -270,7 +292,7 @@ struct FeasibilityConsoleView: View {
       return exactWakeTime
     }
     return RestDurationPolicy.wakeDate(
-      startingAt: .now,
+      startingAt: durationAnchor,
       minutes: selectedMinutes
     )
   }
@@ -284,6 +306,11 @@ struct FeasibilityConsoleView: View {
   }
 
   private func startRun() async {
+    guard !isStarting else { return }
+    isStarting = true
+    defer { isStarting = false }
+    durationAnchor = .now
+    alarm.refresh()
     let plannedWakeDate = wakeDate
     var schedule: AlarmScheduleSnapshot = .notScheduled
 
@@ -294,6 +321,7 @@ struct FeasibilityConsoleView: View {
           schedule: schedule,
           now: .now
         )
+        blockedReason = runMessage
         return
       }
 
@@ -319,6 +347,7 @@ struct FeasibilityConsoleView: View {
       )
     case .blocked(let reason):
       runMessage = reason
+      blockedReason = reason
     }
   }
 
@@ -336,6 +365,23 @@ struct FeasibilityConsoleView: View {
     case .ready: "Ready"
     case .blocked(let reason): reason
     }
+  }
+}
+
+private struct AudioEventLogView: View {
+  @ObservedObject var audio: AudioSpikeController
+
+  var body: some View {
+    List(audio.eventLog) { event in
+      Text(event.message)
+        .font(.caption.monospaced())
+    }
+    .overlay {
+      if audio.eventLog.isEmpty {
+        ContentUnavailableView("No audio events yet", systemImage: "waveform")
+      }
+    }
+    .navigationTitle("Audio event log")
   }
 }
 

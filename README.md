@@ -31,6 +31,8 @@ Read the [product brief](docs/Product-Brief.md) for the product boundary, the [p
 .github/                    Issue forms, pull-request template, and CI
 Honkshool/                  Experimental iOS spike source
 HonkshoolTests/             Focused spike-state tests
+HonkshoolUITests/           Blocked-start and scrolling regressions
+HonkshoolAlarmWidget/       Alarm snooze Live Activity
 Honkshool.xcodeproj/        Shared Xcode project and scheme
 docs/                       Product context, decisions, status, and roadmap
 scripts/                    Local repository verification entry point

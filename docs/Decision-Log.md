@@ -42,6 +42,16 @@ This log preserves consequential Honkshool product and technical choices. The [p
 | D-008 | Which ambience asset can lawfully be distributed offline? | Confirm license/provenance, loop quality, file size, loudness, and interaction with narration and drift. | Prepared content branch |
 | D-009 | How should a short rest window behave when no complete factual session fits? | D-020 resolves selection and saved-default behavior; decide whether insufficient windows use a shorter selection, ambience only, or prevent starting. | Nap Plan domain rules |
 
+## Phase 0 evidence: first device run, 2026-09-08
+
+The owner tested on iPhone 14 Pro / iOS 26.6.1 and designated unannotated steps in the chat checklist as passing. The detailed record is in [Feasibility-Spike.md](Feasibility-Spike.md).
+
+- D-001/D-002: locked narration, audio takeover, natural ambience/silence transitions, Siri interruption, and headphone-disconnection behavior passed as reported. Stop incorrectly started ambience; the repair invalidates speech callbacks before cancellation. Playback strategy remains pending the corrected device run.
+- D-003: basic alarm firing, cancellation, stop, and firing after app termination passed as reported. Snooze feedback failed; the owner cancelled before the nine-minute interval elapsed. Add system state reconciliation and the AlarmKit countdown Live Activity, then verify the full snooze cycle before accepting reliability.
+- D-004: the owner accepted timing behavior but did not provide measured durations; planner timing decisions remain pending.
+- D-005: disabled skip/seek controls are acceptable. Usable pause/resume remains required; the first build exposed Stop instead. The repaired build advertises ordinary audio and explicitly handles toggle commands. Confirm the actual Lock Screen layout on device.
+- Blocked-start feedback and scrolling also require device retesting after repairs. These are usability defects, not changes to the standing product constraints.
+
 ## Deferred decisions
 
 These are intentionally outside the first prototype and should not block the current roadmap:

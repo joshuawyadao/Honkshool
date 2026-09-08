@@ -40,7 +40,7 @@ Remove the largest technical risks before designing the full app around unverifi
 
 ### Current status
 
-The `spike/audio-and-alarm-feasibility` branch contains the first compile-verified iOS test console. Physical-device evidence remains required before Phase 0 or decisions D-001 through D-005 can be marked complete. Follow [Feasibility-Spike.md](Feasibility-Spike.md) for the test matrix and result-recording format.
+The `spike/audio-and-alarm-feasibility` branch is installed on the initial iPhone, and the owner has completed the first manual checklist. Background narration, natural transitions, audio takeover, Siri interruption, headphone disconnection, and basic alarms passed as reported. Stop behavior, Lock Screen pause/resume, scrolling, blocked-start feedback, and snooze visibility required repairs. The repair includes a snooze Live Activity and regression tests; the next step is the focused physical retest in [Feasibility-Spike.md](Feasibility-Spike.md), including a full nine-minute snooze re-ring. Phase 0 and decisions D-001 through D-005 remain open until that evidence is collected.
 
 ### Work
 

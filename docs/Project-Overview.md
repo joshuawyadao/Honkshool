@@ -36,7 +36,7 @@ The active implementation branch is `spike/audio-and-alarm-feasibility`. Its tes
 4. AlarmKit authorization, scheduling, cancellation, stop/snooze behavior, and reliability.
 5. The relationship between estimated script duration and a fixed wake time.
 
-Results belong in the decision log and should determine the playback interfaces used by later feature branches.
+The first manual run is recorded in the [feasibility guide](Feasibility-Spike.md). Its reported failures now have a focused repair and retest scope, including a snooze Live Activity. Phase 0 remains open until those checks pass. Results belong in the decision log and should determine the playback interfaces used by later feature branches.
 
 ## Working agreement
 

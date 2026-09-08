@@ -14,6 +14,11 @@
 		A10000000000000000000005 /* AudioSpikeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* AudioSpikeController.swift */; };
 		A10000000000000000000006 /* AlarmSpikeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* AlarmSpikeService.swift */; };
 		A10000000000000000000007 /* SpikeModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* SpikeModelsTests.swift */; };
+		B00000000000000000000001 /* HonkshoolAlarmMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000000000000000000000A /* HonkshoolAlarmMetadata.swift */; };
+		B00000000000000000000002 /* HonkshoolAlarmMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000000000000000000000A /* HonkshoolAlarmMetadata.swift */; };
+		B00000000000000000000003 /* HonkshoolAlarmWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000000000000000000000B /* HonkshoolAlarmWidget.swift */; };
+		B00000000000000000000004 /* FeasibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000000000000000000000D /* FeasibilityUITests.swift */; };
+		B00000000000000000000005 /* HonkshoolAlarmWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B0000000000000000000000E /* HonkshoolAlarmWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,7 +29,35 @@
 			remoteGlobalIDString = A50000000000000000000001;
 			remoteInfo = Honkshool;
 		};
+		B00000000000000000000014 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A40000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B0000000000000000000001E;
+			remoteInfo = HonkshoolAlarmWidget;
+		};
+		B00000000000000000000015 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A40000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A50000000000000000000001;
+			remoteInfo = Honkshool;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B0000000000000000000002E /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				B00000000000000000000005 /* HonkshoolAlarmWidget.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		A20000000000000000000001 /* HonkshoolApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolApp.swift; sourceTree = "<group>"; };
@@ -39,6 +72,12 @@
 		A2000000000000000000000A /* HonkshoolTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HonkshoolTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2000000000000000000000B /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		A2000000000000000000000C /* Local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig.example; sourceTree = "<group>"; };
+		B0000000000000000000000A /* HonkshoolAlarmMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/Shared/HonkshoolAlarmMetadata.swift; sourceTree = SOURCE_ROOT; };
+		B0000000000000000000000B /* HonkshoolAlarmWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolAlarmWidget/HonkshoolAlarmWidget.swift; sourceTree = SOURCE_ROOT; };
+		B0000000000000000000000C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = HonkshoolAlarmWidget/Info.plist; sourceTree = SOURCE_ROOT; };
+		B0000000000000000000000D /* FeasibilityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolUITests/FeasibilityUITests.swift; sourceTree = SOURCE_ROOT; };
+		B0000000000000000000000E /* HonkshoolAlarmWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HonkshoolAlarmWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B0000000000000000000000F /* HonkshoolUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HonkshoolUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +95,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B00000000000000000000029 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B0000000000000000000002C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -63,6 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				A7000000000000000000000A /* Config */,
+				B00000000000000000000032 /* Alarm Activity and UI Tests */,
 				A70000000000000000000002 /* Honkshool */,
 				A70000000000000000000007 /* HonkshoolTests */,
 				A70000000000000000000008 /* Products */,
@@ -128,6 +182,8 @@
 			children = (
 				A20000000000000000000009 /* Honkshool.app */,
 				A2000000000000000000000A /* HonkshoolTests.xctest */,
+				B0000000000000000000000E /* HonkshoolAlarmWidget.appex */,
+				B0000000000000000000000F /* HonkshoolUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -149,6 +205,17 @@
 			path = Config;
 			sourceTree = "<group>";
 		};
+		B00000000000000000000032 /* Alarm Activity and UI Tests */ = {
+			isa = PBXGroup;
+			children = (
+				B0000000000000000000000A /* HonkshoolAlarmMetadata.swift */,
+				B0000000000000000000000B /* HonkshoolAlarmWidget.swift */,
+				B0000000000000000000000C /* Info.plist */,
+				B0000000000000000000000D /* FeasibilityUITests.swift */,
+			);
+			name = "Alarm Activity and UI Tests";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -159,10 +226,12 @@
 				A90000000000000000000001 /* Sources */,
 				A60000000000000000000001 /* Frameworks */,
 				AA0000000000000000000001 /* Resources */,
+				B0000000000000000000002E /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				B00000000000000000000016 /* PBXTargetDependency */,
 			);
 			name = Honkshool;
 			productName = Honkshool;
@@ -186,6 +255,41 @@
 			productName = HonkshoolTests;
 			productReference = A2000000000000000000000A /* HonkshoolTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		B0000000000000000000001E /* HonkshoolAlarmWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B0000000000000000000003C /* Build configuration list for PBXNativeTarget "HonkshoolAlarmWidget" */;
+			buildPhases = (
+				B00000000000000000000028 /* Sources */,
+				B00000000000000000000029 /* Frameworks */,
+				B0000000000000000000002A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HonkshoolAlarmWidget;
+			productName = HonkshoolAlarmWidget;
+			productReference = B0000000000000000000000E /* HonkshoolAlarmWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		B0000000000000000000001F /* HonkshoolUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B0000000000000000000003D /* Build configuration list for PBXNativeTarget "HonkshoolUITests" */;
+			buildPhases = (
+				B0000000000000000000002B /* Sources */,
+				B0000000000000000000002C /* Frameworks */,
+				B0000000000000000000002D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B00000000000000000000017 /* PBXTargetDependency */,
+			);
+			name = HonkshoolUITests;
+			productName = HonkshoolUITests;
+			productReference = B0000000000000000000000F /* HonkshoolUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
@@ -221,6 +325,8 @@
 			targets = (
 				A50000000000000000000001 /* Honkshool */,
 				A50000000000000000000002 /* HonkshoolTests */,
+				B0000000000000000000001E /* HonkshoolAlarmWidget */,
+				B0000000000000000000001F /* HonkshoolUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -240,6 +346,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B0000000000000000000002A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B0000000000000000000002D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -253,6 +373,7 @@
 				A10000000000000000000004 /* SampleContent.swift in Sources */,
 				A10000000000000000000005 /* AudioSpikeController.swift in Sources */,
 				A10000000000000000000006 /* AlarmSpikeService.swift in Sources */,
+				B00000000000000000000001 /* HonkshoolAlarmMetadata.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -264,6 +385,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B00000000000000000000028 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B00000000000000000000002 /* HonkshoolAlarmMetadata.swift in Sources */,
+				B00000000000000000000003 /* HonkshoolAlarmWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B0000000000000000000002B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B00000000000000000000004 /* FeasibilityUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -271,6 +409,16 @@
 			isa = PBXTargetDependency;
 			target = A50000000000000000000001 /* Honkshool */;
 			targetProxy = A30000000000000000000001 /* PBXContainerItemProxy */;
+		};
+		B00000000000000000000016 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B0000000000000000000001E /* HonkshoolAlarmWidget */;
+			targetProxy = B00000000000000000000014 /* PBXContainerItemProxy */;
+		};
+		B00000000000000000000017 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A50000000000000000000001 /* Honkshool */;
+			targetProxy = B00000000000000000000015 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -397,7 +545,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Honkshool.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Honkshool";
-		};
+			};
 			name = Debug;
 		};
 		AC0000000000000000000006 /* Release */ = {
@@ -412,6 +560,76 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Honkshool.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Honkshool";
+			};
+			name = Release;
+		};
+		B00000000000000000000046 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HonkshoolAlarmWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Honkshool Alarm";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joshuawyadao.Honkshool.AlarmWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		B00000000000000000000047 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HonkshoolAlarmWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Honkshool Alarm";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joshuawyadao.Honkshool.AlarmWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		B00000000000000000000048 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joshuawyadao.HonkshoolUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Honkshool;
+			};
+			name = Debug;
+		};
+		B00000000000000000000049 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joshuawyadao.HonkshoolUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Honkshool;
 			};
 			name = Release;
 		};
@@ -441,6 +659,24 @@
 			buildConfigurations = (
 				AC0000000000000000000005 /* Debug */,
 				AC0000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B0000000000000000000003C /* Build configuration list for PBXNativeTarget "HonkshoolAlarmWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B00000000000000000000046 /* Debug */,
+				B00000000000000000000047 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B0000000000000000000003D /* Build configuration list for PBXNativeTarget "HonkshoolUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B00000000000000000000048 /* Debug */,
+				B00000000000000000000049 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

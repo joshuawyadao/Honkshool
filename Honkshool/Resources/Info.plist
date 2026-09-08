@@ -22,6 +22,8 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>NSAlarmKitUsageDescription</key>
 	<string>Honkshool uses a system alarm only when you include a wake alarm in your rest plan.</string>
 	<key>UIApplicationSceneManifest</key>

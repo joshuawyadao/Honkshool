@@ -2,26 +2,43 @@ import AVFoundation
 import Combine
 import MediaPlayer
 
+struct AudioEvent: Identifiable {
+  let id = UUID()
+  let message: String
+}
+
 @MainActor
 final class AudioSpikeController: NSObject, ObservableObject {
   @Published private(set) var phase: PlaybackPhase = .idle
   @Published private(set) var statusMessage = "Ready to test narration."
-  @Published private(set) var eventLog: [String] = []
+  @Published private(set) var eventLog: [AudioEvent] = []
 
-  private let speechSynthesizer = AVSpeechSynthesizer()
+  private let speechSynthesizer: AVSpeechSynthesizer
+  private var activeUtterance: AVSpeechUtterance?
   private let ambienceEngine = AVAudioEngine()
   private let ambiencePlayer = AVAudioPlayerNode()
   private var ambienceBuffer: AVAudioPCMBuffer?
   private var observerTokens: [NSObjectProtocol] = []
   private var shouldTransitionToAmbience = true
   private var remoteCommandsInstalled = false
+  private var remoteCommandTokens: [(MPRemoteCommand, Any)] = []
   private var narrationStartedAt: Date?
 
-  override init() {
+  init(speechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()) {
+    self.speechSynthesizer = speechSynthesizer
     super.init()
     speechSynthesizer.delegate = self
     observeAudioEvents()
     installRemoteCommands()
+  }
+
+  deinit {
+    for token in observerTokens {
+      NotificationCenter.default.removeObserver(token)
+    }
+    for (command, token) in remoteCommandTokens {
+      command.removeTarget(token)
+    }
   }
 
   func startNarration(
@@ -47,6 +64,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
     utterance.preUtteranceDelay = 0.4
     utterance.postUtteranceDelay = 1.0
 
+    activeUtterance = utterance
     phase = .narrating
     narrationStartedAt = .now
     statusMessage = "Narration is playing. Lock the screen to test background audio."
@@ -93,6 +111,14 @@ final class AudioSpikeController: NSObject, ObservableObject {
 
   func stop() {
     stopAudio(updateStatus: true)
+  }
+
+  func togglePlayback() {
+    switch phase {
+    case .narrating, .ambience: pause()
+    case .paused, .interrupted: resume()
+    default: break
+    }
   }
 
   private func configureExclusiveAudioSession() throws {
@@ -177,6 +203,11 @@ final class AudioSpikeController: NSObject, ObservableObject {
   }
 
   private func stopAudio(updateStatus: Bool) {
+    // Invalidate ownership before calling into AVFoundation: cancellation can
+    // deliver delegate callbacks synchronously or after the next run starts.
+    activeUtterance = nil
+    shouldTransitionToAmbience = false
+    narrationStartedAt = nil
     if speechSynthesizer.isSpeaking || speechSynthesizer.isPaused {
       speechSynthesizer.stopSpeaking(at: .immediate)
     }
@@ -189,8 +220,6 @@ final class AudioSpikeController: NSObject, ObservableObject {
       statusMessage = "Playback stopped. Any scheduled alarm remains active."
       appendEvent("Stopped playback; alarm state was not changed")
     }
-    narrationStartedAt = nil
-
     do {
       try AVAudioSession.sharedInstance().setActive(
         false,
@@ -253,6 +282,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
 
     switch type {
     case .began:
+      guard phase == .narrating || phase == .ambience || phase == .paused else { return }
       if speechSynthesizer.isSpeaking {
         _ = speechSynthesizer.pauseSpeaking(at: .word)
       }
@@ -264,6 +294,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
       appendEvent("Interruption began; playback paused")
       updateNowPlayingPlaybackRate(0)
     case .ended:
+      guard phase == .interrupted else { return }
       let rawOptions = notification.userInfo?[AVAudioSessionInterruptionOptionKey] as? UInt ?? 0
       let options = AVAudioSession.InterruptionOptions(rawValue: rawOptions)
       let suggestion = options.contains(.shouldResume)
@@ -281,7 +312,9 @@ final class AudioSpikeController: NSObject, ObservableObject {
     let reason = AVAudioSession.RouteChangeReason(rawValue: rawReason) ?? .unknown
     appendEvent("Audio route changed: \(routeChangeDescription(reason))")
 
-    guard reason == .oldDeviceUnavailable else { return }
+    guard reason == .oldDeviceUnavailable,
+      phase == .narrating || phase == .ambience || phase == .paused
+    else { return }
 
     if speechSynthesizer.isSpeaking {
       _ = speechSynthesizer.pauseSpeaking(at: .word)
@@ -321,17 +354,20 @@ final class AudioSpikeController: NSObject, ObservableObject {
     commands.skipBackwardCommand.isEnabled = false
     commands.changePlaybackPositionCommand.isEnabled = false
 
-    commands.playCommand.addTarget { [weak self] _ in
-      Task { @MainActor in self?.resume() }
-      return .success
-    }
-    commands.pauseCommand.addTarget { [weak self] _ in
-      Task { @MainActor in self?.pause() }
-      return .success
-    }
-    commands.stopCommand.addTarget { [weak self] _ in
-      Task { @MainActor in self?.stop() }
-      return .success
+    let actions: [(MPRemoteCommand, @MainActor (AudioSpikeController) -> Void)] = [
+      (commands.playCommand, { $0.resume() }),
+      (commands.pauseCommand, { $0.pause() }),
+      (commands.togglePlayPauseCommand, { $0.togglePlayback() }),
+      (commands.stopCommand, { $0.stop() }),
+    ]
+    for (command, action) in actions {
+      command.isEnabled = true
+      let token = command.addTarget { [weak self] _ in
+        guard let self else { return .commandFailed }
+        Task { @MainActor in action(self) }
+        return .success
+      }
+      remoteCommandTokens.append((command, token))
     }
   }
 
@@ -339,8 +375,10 @@ final class AudioSpikeController: NSObject, ObservableObject {
     MPNowPlayingInfoCenter.default().nowPlayingInfo = [
       MPMediaItemPropertyTitle: title,
       MPMediaItemPropertyArtist: "Honkshool feasibility spike",
+      MPNowPlayingInfoPropertyMediaType: MPNowPlayingInfoMediaType.audio.rawValue,
       MPNowPlayingInfoPropertyPlaybackRate: playbackRate,
-      MPNowPlayingInfoPropertyIsLiveStream: true,
+      MPNowPlayingInfoPropertyDefaultPlaybackRate: 1,
+      MPNowPlayingInfoPropertyIsLiveStream: false,
     ]
   }
 
@@ -351,15 +389,15 @@ final class AudioSpikeController: NSObject, ObservableObject {
   }
 
   private func fail(_ message: String) {
+    stopAudio(updateStatus: false)
     phase = .failed
     statusMessage = message
     appendEvent(message)
-    updateNowPlayingPlaybackRate(0)
   }
 
   private func appendEvent(_ message: String) {
     let timestamp = Date.now.formatted(date: .omitted, time: .standard)
-    eventLog.insert("\(timestamp) — \(message)", at: 0)
+    eventLog.insert(AudioEvent(message: "\(timestamp) — \(message)"), at: 0)
     eventLog = Array(eventLog.prefix(30))
   }
 }
@@ -369,6 +407,8 @@ extension AudioSpikeController: @preconcurrency AVSpeechSynthesizerDelegate {
     _ synthesizer: AVSpeechSynthesizer,
     didFinish utterance: AVSpeechUtterance
   ) {
+    guard activeUtterance === utterance else { return }
+    activeUtterance = nil
     if let narrationStartedAt {
       let duration = Date.now.timeIntervalSince(narrationStartedAt)
       appendEvent(
@@ -385,6 +425,7 @@ extension AudioSpikeController: @preconcurrency AVSpeechSynthesizerDelegate {
     case .ambience:
       startAmbience()
     case .silence:
+      stopAudio(updateStatus: false)
       phase = .stopped
       statusMessage = "Narration finished and transitioned to silence."
       appendEvent("Transitioned from narration to silence")
@@ -396,6 +437,10 @@ extension AudioSpikeController: @preconcurrency AVSpeechSynthesizerDelegate {
     _ synthesizer: AVSpeechSynthesizer,
     didCancel utterance: AVSpeechUtterance
   ) {
+    guard activeUtterance === utterance else { return }
+    stopAudio(updateStatus: false)
+    phase = .stopped
+    statusMessage = "Narration was cancelled. Playback stopped."
     narrationStartedAt = nil
     appendEvent("Narration delegate reported cancellation")
   }
