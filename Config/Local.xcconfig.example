@@ -1,0 +1,3 @@
+// Copy this file to Local.xcconfig and replace the placeholder with the
+// 10-character Team ID shown by Xcode under Settings > Accounts.
+LOCAL_DEVELOPMENT_TEAM = YOUR_TEAM_ID

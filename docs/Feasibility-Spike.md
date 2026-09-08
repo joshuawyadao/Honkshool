@@ -23,6 +23,7 @@ The generated noise exists only to test the transition and background audio path
 Requirements:
 
 - Xcode 26.6 or newer with an iOS 26 SDK;
+- the matching iOS Simulator/platform component installed in Xcode;
 - an iPhone running iOS 26 or newer;
 - an Apple development team available to Xcode; and
 - bundle identifier `com.joshuawyadao.Honkshool` available to that team.
@@ -33,7 +34,44 @@ The command-line developer directory on this Mac currently points to Command Lin
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 ```
 
-Open `Honkshool.xcodeproj`, select the Honkshool target, choose the appropriate development team under Signing & Capabilities, select the connected iPhone, and run the shared `Honkshool` scheme. The repository does not store a development-team identifier, provisioning profile, or other signing material.
+The shared Xcode configuration loads `Config/Local.xcconfig` when it exists. Create that ignored file once per checkout:
+
+```sh
+cp Config/Local.xcconfig.example Config/Local.xcconfig
+```
+
+Replace `YOUR_TEAM_ID` with the 10-character Team ID shown in Xcode under **Settings → Apple Accounts**. Do not commit the local file. The repository stores only the placeholder template; it does not store a development-team identifier, device identifier, provisioning profile, certificate, or account detail.
+
+If Xcode reports that the bundled iOS platform is not installed, use **Xcode → Settings → Components** or install the currently available component from Terminal:
+
+```sh
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  xcodebuild -downloadPlatform iOS
+```
+
+For a newly connected phone:
+
+1. Unlock the iPhone, connect it by cable, and accept any **Trust This Computer** prompt.
+2. Open `Honkshool.xcodeproj`, select the shared `Honkshool` scheme and the phone as the run destination, then press Run once. Xcode can register the phone and prepare device support through automatic signing.
+3. When Xcode requests it, enable **Settings → Privacy & Security → Developer Mode** on the iPhone, accept the restart, unlock it, and confirm **Turn On**.
+4. Keep the phone unlocked and connected, then press Run again. Accept the iPhone prompt to trust the developer if iOS presents one.
+
+Developer Mode and device trust are security settings controlled on the iPhone; they cannot be silently enabled by this project.
+
+After the first successful Xcode run, a signed command-line build can be reproduced without exposing the team or device identifier:
+
+```sh
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  xcodebuild -quiet \
+  -project Honkshool.xcodeproj \
+  -scheme Honkshool \
+  -configuration Debug \
+  -sdk iphoneos \
+  -destination 'generic/platform=iOS' \
+  -derivedDataPath /tmp/HonkshoolDeviceDerivedData \
+  -allowProvisioningUpdates \
+  build
+```
 
 ## Compile-time verification
 
@@ -77,14 +115,15 @@ Compile success is not evidence that background narration or an alarm is reliabl
 
 ## Current validation status
 
-Using Xcode 26.6 and the installed iOS 26.5 SDK:
+Using Xcode 26.6, the iOS 26.5 SDK, and the installed iOS 26.5 simulator/platform component:
 
 - the app builds for the generic iOS Simulator SDK destination without signing;
 - the app builds for the generic physical iOS device destination without signing;
-- the unit-test bundle compiles with `build-for-testing`; and
+- automatic signing resolves through an ignored local configuration and produces a signed Debug device build;
+- all eight focused XCTest cases execute successfully on an iOS 26.5 simulator; and
 - the repository verification suite passes.
 
-The connected iPhone was visible to Xcode tooling but did not have usable Developer Disk Image support during this run. No compatible iOS simulator runtime is installed. Therefore the XCTest cases have compiled but have not executed, and every physical-device matrix result remains **Not run**. Open the project in Xcode, let it finish device preparation, select the development team, and rerun on the phone before resolving any feasibility decision.
+Xcode prepared support symbols for the connected iPhone 14 Pro running iOS 26.6.1, selected it as the run destination, registered it for the active Personal Team, and completed a device build. Installation and launch remain blocked until Developer Mode is enabled and confirmed on the iPhone after its required restart. Every physical-device matrix result therefore remains **Not run**; this setup result does not resolve any feasibility decision.
 
 ## Physical-device test matrix
 

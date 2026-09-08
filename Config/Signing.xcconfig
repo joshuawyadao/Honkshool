@@ -1,0 +1,5 @@
+// Public signing configuration shared by every target.
+// Personal team values belong only in the ignored Local.xcconfig file.
+LOCAL_DEVELOPMENT_TEAM =
+#include? "Local.xcconfig"
+DEVELOPMENT_TEAM = $(LOCAL_DEVELOPMENT_TEAM)

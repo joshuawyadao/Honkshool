@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import subprocess
 import unittest
 from pathlib import Path
 from urllib.parse import unquote
@@ -33,6 +34,8 @@ class PublicRepositoryTests(unittest.TestCase):
             "Honkshool/Services/AlarmSpikeService.swift",
             "Honkshool/Resources/Info.plist",
             "HonkshoolTests/SpikeModelsTests.swift",
+            "Config/Signing.xcconfig",
+            "Config/Local.xcconfig.example",
             ".github/pull_request_template.md",
             ".github/ISSUE_TEMPLATE/config.yml",
             ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -72,6 +75,9 @@ class PublicRepositoryTests(unittest.TestCase):
         alarm = (
             PROJECT_ROOT / "Honkshool/Services/AlarmSpikeService.swift"
         ).read_text(encoding="utf-8")
+        signing = (PROJECT_ROOT / "Config/Signing.xcconfig").read_text(
+            encoding="utf-8"
+        )
 
         self.assertIn("com.joshuawyadao.Honkshool", project)
         self.assertIn("IPHONEOS_DEPLOYMENT_TARGET = 26.0", project)
@@ -79,6 +85,12 @@ class PublicRepositoryTests(unittest.TestCase):
         self.assertIn("<string>audio</string>", info)
         self.assertIn("setCategory(.playback, mode: .spokenAudio, options: [])", audio)
         self.assertIn("AlarmManager.shared", alarm)
+        self.assertIn("baseConfigurationReference", project)
+        self.assertIn('#include? "Local.xcconfig"', signing)
+        self.assertNotRegex(
+            project + signing,
+            r"DEVELOPMENT_TEAM\s*=\s*[A-Z0-9]{10}",
+        )
 
     def test_product_context_and_roadmap_preserve_key_boundaries(self) -> None:
         brief = (PROJECT_ROOT / "docs/Product-Brief.md").read_text(encoding="utf-8")
@@ -134,6 +146,8 @@ class PublicRepositoryTests(unittest.TestCase):
             "*.pem",
             "credentials*.json",
             "secrets*.json",
+            "Local.xcconfig",
+            "*.mobileprovision",
             "/local-data/",
             "/reports/",
             "*.sqlite",
@@ -173,7 +187,7 @@ class PublicRepositoryTests(unittest.TestCase):
 
         self.assertEqual(broken, [])
 
-    def test_working_tree_has_no_common_private_or_generated_artifacts(self) -> None:
+    def test_working_tree_has_no_unignored_private_or_generated_artifacts(self) -> None:
         forbidden_names = {
             ".DS_Store",
             "Local.xcconfig",
@@ -197,6 +211,29 @@ class PublicRepositoryTests(unittest.TestCase):
             if ".git" in path.parts or not path.is_file():
                 continue
             if path.name in forbidden_names or path.suffix.lower() in forbidden_suffixes:
+                relative = str(path.relative_to(PROJECT_ROOT))
+                ignored = subprocess.run(
+                    ["git", "check-ignore", "--quiet", relative],
+                    cwd=PROJECT_ROOT,
+                    check=False,
+                ).returncode == 0
+                if not ignored:
+                    offenders.append(relative)
+
+        self.assertEqual(offenders, [])
+
+    def test_public_docs_do_not_contain_device_identifiers(self) -> None:
+        device_identifier = re.compile(
+            r"\b(?:"
+            r"[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-"
+            r"[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}"
+            r"|[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}"
+            r")\b"
+        )
+        offenders: list[str] = []
+
+        for path in (*PROJECT_ROOT.glob("*.md"), *PROJECT_ROOT.glob("docs/*.md")):
+            if device_identifier.search(path.read_text(encoding="utf-8")):
                 offenders.append(str(path.relative_to(PROJECT_ROOT)))
 
         self.assertEqual(offenders, [])

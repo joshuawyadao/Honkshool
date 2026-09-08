@@ -37,6 +37,8 @@
 		A20000000000000000000008 /* SpikeModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpikeModelsTests.swift; sourceTree = "<group>"; };
 		A20000000000000000000009 /* Honkshool.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Honkshool.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2000000000000000000000A /* HonkshoolTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HonkshoolTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2000000000000000000000B /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
+		A2000000000000000000000C /* Local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig.example; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +62,7 @@
 		A70000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				A7000000000000000000000A /* Config */,
 				A70000000000000000000002 /* Honkshool */,
 				A70000000000000000000007 /* HonkshoolTests */,
 				A70000000000000000000008 /* Products */,
@@ -135,6 +138,15 @@
 				A20000000000000000000007 /* Info.plist */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		A7000000000000000000000A /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				A2000000000000000000000B /* Signing.xcconfig */,
+				A2000000000000000000000C /* Local.xcconfig.example */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -265,6 +277,7 @@
 /* Begin XCBuildConfiguration section */
 		AC0000000000000000000001 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A2000000000000000000000B /* Signing.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_MODULES = YES;
@@ -299,6 +312,7 @@
 		};
 		AC0000000000000000000002 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A2000000000000000000000B /* Signing.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_MODULES = YES;
