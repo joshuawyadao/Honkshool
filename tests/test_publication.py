@@ -36,7 +36,9 @@ class PublicRepositoryTests(unittest.TestCase):
             "Honkshool/Resources/Info.plist",
             "HonkshoolTests/SpikeModelsTests.swift",
             "HonkshoolUITests/FeasibilityUITests.swift",
+            "HonkshoolAlarmWidget/AlarmLockScreenLayout.swift",
             "HonkshoolAlarmWidget/HonkshoolAlarmWidget.swift",
+            "HonkshoolTests/AlarmLockScreenLayoutTests.swift",
             "Config/Signing.xcconfig",
             "Config/Local.xcconfig.example",
             ".github/pull_request_template.md",
@@ -197,6 +199,20 @@ class PublicRepositoryTests(unittest.TestCase):
         self.assertIn("#if DEBUG", fixtures)
         self.assertIn('launchArgument = "-ui-testing"', fixtures)
         self.assertIn('app.launchArguments = ["-ui-testing"]', ui_tests)
+
+    def test_alarm_lock_screen_layout_preserves_larger_text_support(self) -> None:
+        layout = (
+            PROJECT_ROOT / "HonkshoolAlarmWidget/AlarmLockScreenLayout.swift"
+        ).read_text(encoding="utf-8")
+        tests = (
+            PROJECT_ROOT / "HonkshoolTests/AlarmLockScreenLayoutTests.swift"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn(".padding(.horizontal, 14)", layout)
+        self.assertNotIn(".dynamicTypeSize(", layout)
+        self.assertIn("DynamicTypeSize.xLarge", tests)
+        self.assertIn(".accessibility1", tests)
+        self.assertIn("160", tests)
 
     def test_markdown_relative_links_resolve(self) -> None:
         broken: list[str] = []

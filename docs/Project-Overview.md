@@ -36,7 +36,7 @@ The active implementation branch is `spike/audio-and-alarm-feasibility`. Its tes
 4. AlarmKit authorization, scheduling, cancellation, stop/snooze behavior, and reliability.
 5. The relationship between estimated script duration and a fixed wake time.
 
-The first manual run is recorded in the [feasibility guide](Feasibility-Spike.md). Its reported failures now have a focused repair, 37 passing simulator tests, nine passing deterministic UI tests on the connected iPhone, and pull-request CI. Manual acceptance is reduced to two combined checks for real locked-screen audio/hardware behavior and AlarmKit delivery with a full snooze cycle. Phase 0 remains open until those checks pass. Results belong in the decision log and should determine the playback interfaces used by later feature branches.
+The physical-device audio and AlarmKit checks now pass, including Lock Screen controls, interruption handling, relaunch reconciliation, and the full nine-minute snooze re-ring. A larger-text screenshot exposed one clipped action in the snoozed Live Activity; the compact layout repair has an automated 160-point height regression through the first accessibility text size. Phase 0 remains open only for one system-hosted Lock Screen visual confirmation and recording the resulting decisions.
 
 ## Working agreement
 

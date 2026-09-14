@@ -124,11 +124,11 @@ Using Xcode 26.6, the iOS 26.5 SDK, and the installed iOS 26.5 simulator/platfor
 - the original signed Debug app installed and launched on the iPhone 14 Pro after Developer Mode and profile trust were enabled;
 - the repair app and embedded snooze extension build with automatic signing and install successfully on that phone; its locked screen prevented the automated launch attempt, so open Honkshool after unlocking;
 - the pre-automation baseline passed all 24 simulator tests;
-- the expanded suite passes all 37 simulator tests: 28 unit/controller/service tests and nine deterministic UI tests; and
+- the expanded suite passes all 39 simulator tests: 30 unit/controller/service/layout tests and nine deterministic UI tests; and
 - the same nine deterministic UI tests pass on the connected iPhone 14 Pro running iOS 26.6.2, using fixtures that do not request permission or create a real alarm; and
-- all 11 repository verification tests, strict Swift formatting checks, the unsigned Release simulator build, and `git diff --check` pass.
+- all 12 repository verification tests, strict Swift formatting checks, the unsigned Release simulator build, and `git diff --check` pass.
 
-Xcode prepared support symbols for the connected iPhone 14 Pro running iOS 26.6.1, selected it as the run destination, registered it for the active Personal Team, and completed a device build. After Developer Mode and explicit developer-profile trust were enabled on the phone, the signed app installed and launched successfully. The owner subsequently exercised the chat checklist and reported the results below. Unannotated checklist steps are treated as user-reported passes; the repair build still needs the focused device retest.
+Xcode prepared support symbols for the connected iPhone 14 Pro running iOS 26.6.1, selected it as the run destination, registered it for the active Personal Team, and completed a device build. After Developer Mode and explicit developer-profile trust were enabled on the phone, the signed app installed and launched successfully. The owner subsequently exercised the chat checklist and reported the results below. Unannotated checklist steps are treated as user-reported passes; the original results remain recorded separately from the repaired-device results.
 
 ## Physical-device test matrix
 
@@ -156,9 +156,17 @@ Results below are the owner's report from the original build on iPhone 14 Pro / 
 | Scrolling | Scroll freely from the bottom to the top while the alarm/audio are active. | Failed: page jitter prevented returning to the top. Diagnostics isolated and eager duration layout added; device retest required. |
 | Timing | Compare actual narration and alarm timings with the displayed window. | Timing behavior accepted in the chat checklist; numerical measurements were not supplied. |
 
+### Repaired-device result, 2026-09-14
+
+The owner completed both combined acceptance checks on the iPhone 14 Pro after the playback and AlarmKit repairs:
+
+- locked narration, competing-audio takeover, Lock Screen pause/resume/Stop, Siri interruption, and headphone disconnection all passed;
+- the real alarm fired while locked, snoozed with a matching in-app deadline, preserved that deadline across scrolling and force-quit/relaunch, fired again after the full nine-minute interval, and stopped successfully; and
+- the only reported defect was visual: with larger text and standard Display Zoom, the snoozed Lock Screen Live Activity clipped its bottom **Cancel alarm** control. The alarm behavior itself passed.
+
 ## Repair implementation and focused retest
 
-The Stop callback and live-stream metadata regressions were first run against the original code and both failed, then passed after repair. The UI test repeatedly reached the top during playback and after returning from diagnostics. Its initial final assertion used the wrong accessibility label (`Stopped` instead of the actual combined `Phase, Stopped`); that lookup was corrected without changing the expected stopped state. The exact alarm-enabled scrolling problem, Lock Screen controls, and actual snooze re-ring remain device-only retests, not claims established by simulator success.
+The Stop callback and live-stream metadata regressions were first run against the original code and both failed, then passed after repair. The UI test repeatedly reached the top during playback and after returning from diagnostics. Its initial final assertion used the wrong accessibility label (`Stopped` instead of the actual combined `Phase, Stopped`); that lookup was corrected without changing the expected stopped state. The owner’s repaired-device test subsequently confirmed alarm-enabled scrolling, Lock Screen controls, and the actual snooze re-ring.
 
 - Speech callbacks now belong to one active utterance. Stop invalidates that utterance before asking AVFoundation to cancel it; completion or cancellation from an older run cannot transition a newer run.
 - Narration and ambience advertise ordinary audio rather than live-stream metadata. Play, pause, and toggle commands are registered explicitly. iOS owns the exact Lock Screen layout; disabled skip/seek controls and the output selector are acceptable.
@@ -166,8 +174,9 @@ The Stop callback and live-stream metadata regressions were first run against th
 - The main page uses an eager duration layout. The live diagnostic list has stable event identities and its own **Audio event log** screen, so new rows do not resize the main page while it is being scrolled.
 - Alarm status follows system updates and refreshes while the app is foregrounded. The original fixed alarm date is never displayed as a snooze deadline. Cancellation failures retain the alarm ID and prevent replacing it until cancellation succeeds.
 - The app and new `HonkshoolAlarmWidget` extension share alarm metadata. The Live Activity shows snooze state, the system's next alert time, a countdown, and cancellation. If the precise countdown deadline has not arrived from ActivityKit, the app says it is unavailable instead of inventing a new nine-minute interval.
+- The Lock Screen layout places cancellation beside the activity title and arranges snooze details beside the countdown. It keeps Apple’s 14-point horizontal margin, does not cap Dynamic Type, and stays within the 160-point Live Activity ceiling through the first accessibility text size in the renderer regression.
 
-Apple requires a Live Activity for alarm countdown functionality; its countdown presentation includes the authoritative fire date. See [AlarmKit countdown guidance](https://developer.apple.com/videos/play/wwdc2025/230/) and [countdown fireDate](https://developer.apple.com/documentation/alarmkit/alarmpresentationstate/mode-swift.enum/countdown/firedate).
+Apple requires a Live Activity for alarm countdown functionality; its countdown presentation includes the authoritative fire date. Apple also notes that the system may truncate a Live Activity above 160 points and specifies a 14-point Lock Screen margin. See [AlarmKit countdown guidance](https://developer.apple.com/videos/play/wwdc2025/230/), [countdown fireDate](https://developer.apple.com/documentation/alarmkit/alarmpresentationstate/mode-swift.enum/countdown/firedate), and [Live Activity layout guidance](https://developer.apple.com/design/human-interface-guidelines/live-activities).
 
 Run the complete automated app and UI suite on an installed simulator:
 
@@ -179,12 +188,9 @@ Set `HONKSHOOL_TEST_DESTINATION` when the default latest iPhone 17 Pro simulator
 
 ## Minimal physical-device acceptance
 
-Only two combined checks remain. Run them once on the repaired iPhone 14 Pro build, and repeat them when moving to a materially different phone or iOS release:
+The functional audio and AlarmKit checks pass. After installing the compact Live Activity repair, only one visual confirmation remains: schedule the **60-second test**, lock the phone, snooze it, and confirm the complete **Cancel** control remains inside the card at the owner’s existing larger text setting. There is no need to repeat the full nine-minute wait for this layout-only check.
 
-1. **Locked audio and hardware:** Play music or a podcast, start Honkshool with its alarm disabled, and lock the phone. Confirm the other audio yields, narration continues, Lock Screen pause/resume works, and Stop remains silent. In the same run, invoke Siri once and disconnect headphones once; both should pause until explicit resume.
-2. **Real AlarmKit delivery:** Schedule a **60-second test**, lock the phone, and confirm it rings. Snooze it, confirm the Lock Screen countdown and matching **Snoozed** deadline in Honkshool, scroll from bottom to top once, then force-quit and reopen the app. The deadline must not reset. Let the full nine minutes elapse and confirm the alarm rings again, then Stop it.
-
-Authorization messaging, scheduling failure, in-app Stop and pause/resume, active-alarm scrolling, event-log navigation, snooze/paused/ringing/unavailable presentation, cancellation routing, reusable duration persistence, and exact-time control availability are automated. A separate nine-minute cancellation wait is no longer required because cancellation identity and removal are covered at the service and UI levels and the original unsnoozed device cancellation passed.
+Authorization messaging, scheduling failure, in-app Stop and pause/resume, active-alarm scrolling, event-log navigation, snooze/paused/ringing/unavailable presentation, cancellation routing, reusable duration persistence, exact-time control availability, and the Live Activity’s large-text height are automated. The renderer cannot reproduce Apple’s system-hosted card exactly, so the final visual glance remains physical-device evidence.
 
 ## Recording results
 
@@ -196,4 +202,4 @@ For each test, record only:
 - whether the screen was locked and the app foregrounded, backgrounded, or terminated; and
 - a concise behavior note or reproducible failure.
 
-Resolve or refine decisions D-001 through D-005 in the [decision log](Decision-Log.md) only after the relevant physical-device evidence exists. Keep Phase 0 unchecked in the [project implementation plan](Project-Implementation-Plan.md) until the exit criteria are met.
+Use the repaired-device evidence to resolve or explicitly defer decisions D-001 through D-005 in the [decision log](Decision-Log.md). Keep Phase 0 open only until the compact snooze card is visually confirmed and those decisions are recorded.

@@ -1,33 +1,32 @@
 # Plan
 
-Reduce the Honkshool feasibility spike's manual test burden by making simulator UI tests deterministic, expanding service and controller regression coverage, and running the complete iOS suite locally and in pull-request CI. Preserve a short physical-device checklist only for behaviors that depend on real iOS system UI, background execution, audio hardware, or alarm delivery.
+Fix the snoozed AlarmKit Live Activity so its cancellation control remains inside the 160-point Lock Screen presentation at the owner’s larger text setting. Extract the Lock Screen layout into a renderable seam, reproduce the overflow with an image-renderer regression test, compact the layout without capping Dynamic Type, and retain one real-device confirmation for Apple’s system-hosted surface.
 
 ## Scope
 
-- In: Debug-only UI-test launch fixtures, alarm and playback UI flows, controller interruption coverage, alarm-state/error coverage, a single simulator test command, macOS GitHub Actions execution, public-repository safeguards, and updated feasibility documentation.
-- Out: Automating private iOS system UI, claiming simulator substitutes prove physical alarm reliability, production feature work, and changing the nine-minute product snooze interval.
+- In: Snoozed Lock Screen Live Activity layout, larger Dynamic Type rendering, cancellation-control accessibility, a focused layout regression test, physical-test evidence documentation, and installation of the repaired build for confirmation.
+- Out: Changing the nine-minute snooze behavior, reducing the owner’s text size, changing alarm reliability logic, redesigning the in-app feasibility console, or claiming that a rendered test fully substitutes for Apple’s Lock Screen host.
 
 ## Action items
 
-- [x] Record the current 24-test baseline and identify each manual check that can be represented by deterministic controller, service, or UI state.
-- [x] Add debug-only app launch fixtures for authorized, denied, scheduling-failed, snoozed, paused, alerting, and unavailable AlarmKit states plus deterministic speech.
-- [x] Expand UI tests for blocked explanations, successful and failed scheduling, Stop, pause/resume, active-alarm scrolling, snooze presentation/cancellation, other alarm states, and saved duration behavior.
-- [x] Expand controller and alarm-service tests for interruptions, inactive-event safety, authorization transitions, repeated snooze deadlines, schedule failure, and cancellation/relaunch boundaries.
-- [x] Add a portable `scripts/test-ios.sh` entry point that defaults to the CI-compatible latest iPhone 17 Pro simulator, supports a destination override, and runs the full test scheme without signing.
-- [x] Add a read-only macOS 26 pull-request CI job for the complete iOS suite and extend publication tests to protect the fixture, script, and workflow contract.
-- [x] Update README.md, CONTRIBUTING.md, the pull-request template, Feasibility-Spike.md, Project-Implementation-Plan.md, and Project-Overview.md with the automated/manual boundary and minimal combined device checklist.
-- [x] Run targeted tests, the complete iOS suite, strict Swift formatting, repository verification, Debug test builds, a Release build, and workflow syntax checks; document anything only a physical phone can establish.
-- [x] Review and prepare the scoped test-automation changes for commit and push on the current spike branch.
+- [x] Extract the Lock Screen presentation from `HonkshoolAlarmWidget.swift` into a reusable SwiftUI layout that preserves the current overflowing structure before repair.
+- [x] Add an `ImageRenderer` XCTest at the iPhone 14 Pro’s 371-point content width, Apple’s 160-point Live Activity height limit, and larger Dynamic Type; confirm it fails on the captured snoozed layout at 216 points.
+- [x] Move the cancellation action into a compact header/body composition, use the 14-point Lock Screen horizontal margin, retain an accessible “Cancel alarm” label, and avoid capping Dynamic Type.
+- [x] Verify countdown, paused, alerting, and fallback states still fit the Lock Screen ceiling and that the unchanged Dynamic Island presentations compile.
+- [x] Update `Feasibility-Spike.md`, `Project-Implementation-Plan.md`, `Project-Overview.md`, and the decision evidence to record the functional physical-device passes and isolate the remaining visual confirmation.
+- [x] Run the focused red/green regression, complete iOS suite, public-repository checks, strict Swift formatting, Release build, and `git diff --check`.
+- [x] Check for a connected iPhone; none is currently available, so leave only installation and a 60-second alarm/snooze Lock Screen visual confirmation for the owner.
+- [x] Review and prepare the scoped fix for commit and push on the current feasibility branch.
 
 ## Open questions
 
-- None. Keep test substitutes debug-only and describe their evidence limits explicitly.
+- None. Preserve the user’s larger text setting and treat the screenshot as the authoritative system-hosted reproduction.
 
 ## Validation
 
-- Pre-change baseline: 24 simulator tests passed.
-- Final simulator suite: 37 of 37 passed, comprising 28 unit/controller/service tests and 9 deterministic UI tests.
-- The same nine deterministic UI tests passed on the connected iPhone 14 Pro running iOS 26.6.2 without requesting permission or creating a real alarm.
-- Public-repository verification: 11 of 11 tests passed.
-- Strict Swift formatting, property-list validation, workflow syntax parsing, `git diff --check`, build-for-testing, and the unsigned Release simulator build passed.
-- Two combined physical-device checks remain because private Lock Screen/system alarm UI, background execution, hardware audio routing, and real alarm delivery cannot be established by simulator substitutes.
+- Red: the extracted pre-fix snoozed layout measured 216 points at xLarge against the 160-point system ceiling.
+- Green: the compact snoozed layout passes at xLarge, xxLarge, xxxLarge, and accessibility1; paused, alerting, and fallback states also pass at accessibility1.
+- Complete simulator suite: 39 of 39 tests pass.
+- Public-repository checks: 12 of 12 pass.
+- Strict Swift formatting, property-list validation, the unsigned Release simulator build, and `git diff --check` pass.
+- No physical iPhone was connected for installation; Apple’s system-hosted snooze card still requires one visual confirmation after installation.

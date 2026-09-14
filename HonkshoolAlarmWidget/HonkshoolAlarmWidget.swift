@@ -13,16 +13,14 @@ struct HonkshoolAlarmWidgets: WidgetBundle {
 struct HonkshoolAlarmActivity: Widget {
   var body: some WidgetConfiguration {
     ActivityConfiguration(for: AlarmAttributes<HonkshoolAlarmMetadata>.self) { context in
-      VStack(alignment: .leading, spacing: 10) {
-        Label("Honkshool", systemImage: "alarm")
-          .font(.headline)
-        AlarmCountdownContent(state: context.state)
+      AlarmLockScreenLayout(presentation: AlarmLockScreenPresentation(state: context.state)) {
         Button(intent: CancelHonkshoolAlarmIntent(alarmID: context.state.alarmID.uuidString)) {
-          Label("Cancel alarm", systemImage: "xmark.circle")
+          Label("Cancel", systemImage: "xmark.circle")
         }
         .buttonStyle(.bordered)
+        .controlSize(.small)
+        .accessibilityLabel("Cancel alarm")
       }
-      .padding()
       .activityBackgroundTint(.indigo.opacity(0.15))
     } dynamicIsland: { context in
       DynamicIsland {
@@ -43,6 +41,23 @@ struct HonkshoolAlarmActivity: Widget {
       } minimal: {
         Image(systemName: "alarm")
       }
+    }
+  }
+}
+
+extension AlarmLockScreenPresentation {
+  fileprivate init(state: AlarmPresentationState) {
+    switch state.mode {
+    case .countdown(let countdown):
+      self.init(
+        mode: .countdown(startDate: countdown.startDate, fireDate: countdown.fireDate)
+      )
+    case .paused:
+      self.init(mode: .paused)
+    case .alert:
+      self.init(mode: .alert)
+    @unknown default:
+      self.init(mode: .fallback)
     }
   }
 }

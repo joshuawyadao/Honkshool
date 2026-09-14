@@ -52,6 +52,16 @@ The owner tested on iPhone 14 Pro / iOS 26.6.1 and designated unannotated steps 
 - D-005: disabled skip/seek controls are acceptable. Usable pause/resume remains required; the first build exposed Stop instead. The repaired build advertises ordinary audio and explicitly handles toggle commands. Confirm the actual Lock Screen layout on device.
 - Blocked-start feedback and scrolling also require device retesting after repairs. These are usability defects, not changes to the standing product constraints.
 
+## Phase 0 evidence: repaired device run, 2026-09-14
+
+The owner completed the two focused checks on the repaired iPhone 14 Pro build. No personal alarm time, device identifier, or private diagnostic output is recorded.
+
+- D-001/D-002: competing audio yielded; narration continued while locked; Lock Screen pause/resume/Stop, Siri interruption, and headphone disconnection behaved as specified. This supplies the missing corrected-device evidence for the direct-speech and interruption-policy decisions.
+- D-003: a real locked alarm fired, snoozed to the same deadline shown in Honkshool, survived scrolling and force-quit/relaunch without resetting, fired again after the complete nine-minute interval, and stopped successfully. This supplies the missing AlarmKit reliability evidence.
+- D-004: no numerical narration-duration measurements were supplied. Retain the safe fallback of a fixed wake alarm with unused plan time filled by ambience or silence, and resolve estimator variance during Nap Plan domain work.
+- D-005: Lock Screen pause/resume/Stop passed and disabled skip/seek affordances remained acceptable. The snoozed AlarmKit Live Activity exposed one separate larger-text clipping defect; a compact, uncapped Dynamic Type layout and renderer regression address it, pending one visual confirmation on the system-hosted Lock Screen.
+- Blocked-start feedback and active-alarm scrolling passed after repair.
+
 ## Deferred decisions
 
 These are intentionally outside the first prototype and should not block the current roadmap:
