@@ -99,6 +99,7 @@ struct FeasibilityConsoleView: View {
     SpikeCard(title: "Rest window", systemImage: "timer") {
       VStack(alignment: .leading, spacing: 12) {
         Toggle("Choose an exact wake time", isOn: $usesExactWakeTime)
+          .accessibilityIdentifier("useExactWakeTime")
 
         if usesExactWakeTime {
           DatePicker(
@@ -107,6 +108,7 @@ struct FeasibilityConsoleView: View {
             in: Date.now...,
             displayedComponents: [.date, .hourAndMinute]
           )
+          .accessibilityIdentifier("exactWakeTime")
         } else {
           HStack(spacing: 8) {
             ForEach(RestDurationPolicy.recommendedMinutes, id: \.self) { minutes in
@@ -154,6 +156,7 @@ struct FeasibilityConsoleView: View {
               runMessage = "Saved a reusable \(normalized)-minute default."
             }
             .buttonStyle(.bordered)
+            .accessibilityIdentifier("saveDefaultDuration")
           }
         }
 
@@ -178,6 +181,7 @@ struct FeasibilityConsoleView: View {
           .accessibilityIdentifier("requireAlarm")
 
         LabeledContent("Authorization", value: authorizationText)
+          .accessibilityIdentifier("alarmAuthorization")
         LabeledContent("Alarm status", value: alarm.alarmStatus.phase.rawValue)
           .accessibilityIdentifier("alarmStatus")
 
@@ -190,23 +194,27 @@ struct FeasibilityConsoleView: View {
               )
             )
           }
+          .accessibilityIdentifier("nextAlertTime")
           if alarm.alarmStatus.phase == .snoozed {
             LabeledContent("Snooze remaining") {
               Text(timerInterval: Date.distantPast...scheduledDate, countsDown: true)
                 .monospacedDigit()
             }
+            .accessibilityIdentifier("snoozeRemaining")
           }
         }
 
         Text(alarm.statusMessage)
           .font(.footnote)
           .foregroundStyle(.secondary)
+          .accessibilityIdentifier("alarmMessage")
 
         HStack {
           Button("Authorize") {
             Task { await alarm.requestAuthorization() }
           }
           .buttonStyle(.borderedProminent)
+          .accessibilityIdentifier("authorizeAlarm")
 
           Button("60-second test") {
             Task {
@@ -216,12 +224,14 @@ struct FeasibilityConsoleView: View {
             }
           }
           .buttonStyle(.bordered)
+          .accessibilityIdentifier("shortAlarmTest")
           .disabled(alarm.authorization != .authorized || alarm.isScheduling || isStarting)
         }
 
         Button("Cancel Honkshool alarm", role: .destructive) {
           alarm.cancel()
         }
+        .accessibilityIdentifier("cancelAlarm")
         .disabled(!alarm.hasTrackedAlarm || alarm.isScheduling)
 
         if alarmEnabled && alarm.authorization != .authorized {
@@ -243,15 +253,18 @@ struct FeasibilityConsoleView: View {
           "Transition to generated ambience",
           isOn: $ambienceEnabled
         )
+        .accessibilityIdentifier("ambienceEnabled")
 
         LabeledContent("Phase", value: audio.phase.rawValue.capitalized)
           .accessibilityIdentifier("playbackPhase")
 
         Text(audio.statusMessage)
           .font(.subheadline)
+          .accessibilityIdentifier("playbackMessage")
         Text(runMessage)
           .font(.footnote)
           .foregroundStyle(.secondary)
+          .accessibilityIdentifier("runMessage")
 
         Button {
           Task { await startRun() }
@@ -269,12 +282,15 @@ struct FeasibilityConsoleView: View {
             .disabled(
               audio.phase != .narrating && audio.phase != .ambience
             )
+            .accessibilityIdentifier("pausePlayback")
           Button("Resume") { audio.resume() }
             .disabled(
               audio.phase != .paused && audio.phase != .interrupted
             )
+            .accessibilityIdentifier("resumePlayback")
           Button("Stop", role: .destructive) { audio.stop() }
             .disabled(audio.phase == .idle || audio.phase == .stopped)
+            .accessibilityIdentifier("stopPlayback")
         }
         .buttonStyle(.bordered)
 

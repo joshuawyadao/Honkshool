@@ -40,7 +40,7 @@ Remove the largest technical risks before designing the full app around unverifi
 
 ### Current status
 
-The `spike/audio-and-alarm-feasibility` branch is installed on the initial iPhone, and the owner has completed the first manual checklist. Background narration, natural transitions, audio takeover, Siri interruption, headphone disconnection, and basic alarms passed as reported. Stop behavior, Lock Screen pause/resume, scrolling, blocked-start feedback, and snooze visibility required repairs. The repair includes a snooze Live Activity and regression tests; the next step is the focused physical retest in [Feasibility-Spike.md](Feasibility-Spike.md), including a full nine-minute snooze re-ring. Phase 0 and decisions D-001 through D-005 remain open until that evidence is collected.
+The `spike/audio-and-alarm-feasibility` branch is installed on the initial iPhone, and the owner has completed the first manual checklist. Background narration, natural transitions, audio takeover, Siri interruption, headphone disconnection, and basic alarms passed as reported. The repair includes a snooze Live Activity, deterministic debug fixtures, 37 passing simulator tests, nine passing deterministic UI tests on the connected iPhone, 11 passing public-repository checks, and macOS pull-request CI. Only the two combined physical checks in [Feasibility-Spike.md](Feasibility-Spike.md) remain, including actual locked-screen audio and a full nine-minute snooze re-ring. Phase 0 and decisions D-001 through D-005 remain open until that evidence is collected.
 
 ### Work
 

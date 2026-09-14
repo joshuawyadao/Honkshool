@@ -156,7 +156,7 @@ final class AlarmSpikeService: ObservableObject {
     defaults: UserDefaults = .standard,
     now: @escaping () -> Date = { .now }
   ) {
-    let system = system ?? AppleAlarmSystem()
+    let system = system ?? Self.defaultSystem()
     self.system = system
     self.defaults = defaults
     self.now = now
@@ -166,6 +166,13 @@ final class AlarmSpikeService: ObservableObject {
     }
     // Restored dates are never presented as current before system reconciliation.
     refresh()
+  }
+
+  private static func defaultSystem() -> any AlarmSystem {
+    #if DEBUG
+      if let fixture = UITestFixtures.makeAlarmSystem() { return fixture }
+    #endif
+    return AppleAlarmSystem()
   }
 
   var hasTrackedAlarm: Bool { scheduledAlarmID != nil }

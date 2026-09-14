@@ -29,11 +29,14 @@ class PublicRepositoryTests(unittest.TestCase):
             "Honkshool.xcodeproj/xcshareddata/xcschemes/Honkshool.xcscheme",
             "Honkshool/App/HonkshoolApp.swift",
             "Honkshool/App/FeasibilityConsoleView.swift",
+            "Honkshool/App/UITestFixtures.swift",
             "Honkshool/Domain/SpikeModels.swift",
             "Honkshool/Services/AudioSpikeController.swift",
             "Honkshool/Services/AlarmSpikeService.swift",
             "Honkshool/Resources/Info.plist",
             "HonkshoolTests/SpikeModelsTests.swift",
+            "HonkshoolUITests/FeasibilityUITests.swift",
+            "HonkshoolAlarmWidget/HonkshoolAlarmWidget.swift",
             "Config/Signing.xcconfig",
             "Config/Local.xcconfig.example",
             ".github/pull_request_template.md",
@@ -42,6 +45,7 @@ class PublicRepositoryTests(unittest.TestCase):
             ".github/ISSUE_TEMPLATE/feature_request.yml",
             ".github/workflows/ci.yml",
             "scripts/verify-repository.sh",
+            "scripts/test-ios.sh",
         )
 
         missing = [path for path in required if not (PROJECT_ROOT / path).is_file()]
@@ -168,6 +172,31 @@ class PublicRepositoryTests(unittest.TestCase):
         self.assertIn("persist-credentials: false", workflow)
         self.assertRegex(workflow, r"actions/checkout@[0-9a-f]{40}")
         self.assertIn("cancel-in-progress: true", workflow)
+
+    def test_ios_tests_run_in_pull_requests_with_debug_only_fixtures(self) -> None:
+        workflow = (PROJECT_ROOT / ".github/workflows/ci.yml").read_text(
+            encoding="utf-8"
+        )
+        test_script = (PROJECT_ROOT / "scripts/test-ios.sh").read_text(
+            encoding="utf-8"
+        )
+        fixtures = (
+            PROJECT_ROOT / "Honkshool/App/UITestFixtures.swift"
+        ).read_text(encoding="utf-8")
+        ui_tests = (
+            PROJECT_ROOT / "HonkshoolUITests/FeasibilityUITests.swift"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("runs-on: macos-26", workflow)
+        self.assertIn("./scripts/test-ios.sh", workflow)
+        self.assertIn("timeout-minutes: 20", workflow)
+        self.assertIn("xcodebuild -quiet", test_script)
+        self.assertIn("-parallel-testing-enabled NO", test_script)
+        self.assertIn("HONKSHOOL_TEST_DESTINATION", test_script)
+        self.assertTrue(test_script.startswith("#!/bin/sh\nset -eu\n"))
+        self.assertIn("#if DEBUG", fixtures)
+        self.assertIn('launchArgument = "-ui-testing"', fixtures)
+        self.assertIn('app.launchArguments = ["-ui-testing"]', ui_tests)
 
     def test_markdown_relative_links_resolve(self) -> None:
         broken: list[str] = []

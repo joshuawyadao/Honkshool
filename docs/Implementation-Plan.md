@@ -1,31 +1,33 @@
 # Plan
 
-Repair the failures reported during the first iPhone 14 Pro feasibility run on the existing spike branch. Preserve the owner's passing observations, reproduce callback and presentation failures, add focused regression coverage, and prepare an updated build for device retesting.
+Reduce the Honkshool feasibility spike's manual test burden by making simulator UI tests deterministic, expanding service and controller regression coverage, and running the complete iOS suite locally and in pull-request CI. Preserve a short physical-device checklist only for behaviors that depend on real iOS system UI, background execution, audio hardware, or alarm delivery.
 
 ## Scope
 
-- In: Stop/callback correctness, Lock Screen pause/resume, visible blocked-start feedback, stable scrolling, current AlarmKit snooze state and timing, cancellation, regression tests, updated device results, and installing the repaired build.
-- Out: production playback architecture, new product features, assuming a nine-minute snooze re-ring passed (the owner cancelled it), and publishing personal device/signing data.
+- In: Debug-only UI-test launch fixtures, alarm and playback UI flows, controller interruption coverage, alarm-state/error coverage, a single simulator test command, macOS GitHub Actions execution, public-repository safeguards, and updated feasibility documentation.
+- Out: Automating private iOS system UI, claiming simulator substitutes prove physical alarm reliability, production feature work, and changing the nine-minute product snooze interval.
 
 ## Action items
 
-- [x] Capture failing controller regressions and inspect Apple SDK/documentation for media commands and authoritative snooze timing.
-- [x] Invalidate stopped/replaced speech before cancellation and ignore stale callbacks; configure ordinary pause/resume media controls.
-- [x] Observe system alarm updates and foreground refresh, render snoozed/alerting/paused states, and preserve cancellation tracking on errors. Add the Live Activity extension required by AlarmKit for visible snooze countdowns and use its authoritative fire date rather than estimating from foreground time.
-- [x] Make blocked-start feedback visible and isolate changing diagnostics from the main scrolling layout.
-- [x] Test callback races, alarm reconciliation/cancellation, and critical UI behavior; document any device-only reproduction limits.
-- [x] Update Feasibility-Spike.md, Project-Implementation-Plan.md, Decision-Log.md, Project-Overview.md, and README.md with user-reported results, fixes, and pending retests.
-- [x] Run simulator tests, formatting, repository checks, and a signed device build; install on the connected phone and attempt launch. Installation succeeded; iOS blocked launch because the phone was locked.
-- [x] Review and save the scoped changes and task plan to the spike branch using the commit/push workflow.
-
-## Validation and handoff
-
-- Original-code regression run: both Stop/callback and live-stream metadata assertions failed as expected before their repairs.
-- Final iOS 26.5 simulator run: 24/24 tests passed (22 unit/controller/service, two UI), with zero skips. Tests live in `HonkshoolTests/SpikeModelsTests.swift` and `HonkshoolUITests/FeasibilityUITests.swift`.
-- Repository verification: 10/10 passed. Strict Swift formatting and whitespace checks passed.
-- Signed iPhone app and embedded Live Activity build/install succeeded. No alarm was scheduled during installation. Unlock the iPhone and open Honkshool to begin retesting.
-- The exact device scrolling symptom, Lock Screen pause/resume, and full nine-minute snooze cycle require the owner's focused retest in [Feasibility-Spike.md](Feasibility-Spike.md). Phase 0 remains open; implementation completion is not a physical-device pass.
+- [x] Record the current 24-test baseline and identify each manual check that can be represented by deterministic controller, service, or UI state.
+- [x] Add debug-only app launch fixtures for authorized, denied, scheduling-failed, snoozed, paused, alerting, and unavailable AlarmKit states plus deterministic speech.
+- [x] Expand UI tests for blocked explanations, successful and failed scheduling, Stop, pause/resume, active-alarm scrolling, snooze presentation/cancellation, other alarm states, and saved duration behavior.
+- [x] Expand controller and alarm-service tests for interruptions, inactive-event safety, authorization transitions, repeated snooze deadlines, schedule failure, and cancellation/relaunch boundaries.
+- [x] Add a portable `scripts/test-ios.sh` entry point that defaults to the CI-compatible latest iPhone 17 Pro simulator, supports a destination override, and runs the full test scheme without signing.
+- [x] Add a read-only macOS 26 pull-request CI job for the complete iOS suite and extend publication tests to protect the fixture, script, and workflow contract.
+- [x] Update README.md, CONTRIBUTING.md, the pull-request template, Feasibility-Spike.md, Project-Implementation-Plan.md, and Project-Overview.md with the automated/manual boundary and minimal combined device checklist.
+- [x] Run targeted tests, the complete iOS suite, strict Swift formatting, repository verification, Debug test builds, a Release build, and workflow syntax checks; document anything only a physical phone can establish.
+- [x] Review and prepare the scoped test-automation changes for commit and push on the current spike branch.
 
 ## Open questions
 
-- None. Treat unannotated checks from the chat checklist as user-reported passes. Separate automated regression results from the pending physical retest.
+- None. Keep test substitutes debug-only and describe their evidence limits explicitly.
+
+## Validation
+
+- Pre-change baseline: 24 simulator tests passed.
+- Final simulator suite: 37 of 37 passed, comprising 28 unit/controller/service tests and 9 deterministic UI tests.
+- The same nine deterministic UI tests passed on the connected iPhone 14 Pro running iOS 26.6.2 without requesting permission or creating a real alarm.
+- Public-repository verification: 11 of 11 tests passed.
+- Strict Swift formatting, property-list validation, workflow syntax parsing, `git diff --check`, build-for-testing, and the unsigned Release simulator build passed.
+- Two combined physical-device checks remain because private Lock Screen/system alarm UI, background execution, hardware audio routing, and real alarm delivery cannot be established by simulator substitutes.

@@ -19,6 +19,7 @@
 		B00000000000000000000003 /* HonkshoolAlarmWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000000000000000000000B /* HonkshoolAlarmWidget.swift */; };
 		B00000000000000000000004 /* FeasibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000000000000000000000D /* FeasibilityUITests.swift */; };
 		B00000000000000000000005 /* HonkshoolAlarmWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B0000000000000000000000E /* HonkshoolAlarmWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C00000000000000000000001 /* UITestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000002 /* UITestFixtures.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -78,6 +79,7 @@
 		B0000000000000000000000D /* FeasibilityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolUITests/FeasibilityUITests.swift; sourceTree = SOURCE_ROOT; };
 		B0000000000000000000000E /* HonkshoolAlarmWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HonkshoolAlarmWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0000000000000000000000F /* HonkshoolUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HonkshoolUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C00000000000000000000002 /* UITestFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestFixtures.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,6 +142,7 @@
 			children = (
 				A20000000000000000000001 /* HonkshoolApp.swift */,
 				A20000000000000000000002 /* FeasibilityConsoleView.swift */,
+				C00000000000000000000002 /* UITestFixtures.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -374,6 +377,7 @@
 				A10000000000000000000005 /* AudioSpikeController.swift in Sources */,
 				A10000000000000000000006 /* AlarmSpikeService.swift in Sources */,
 				B00000000000000000000001 /* HonkshoolAlarmMetadata.swift in Sources */,
+				C00000000000000000000001 /* UITestFixtures.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

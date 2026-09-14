@@ -36,7 +36,7 @@ The active implementation branch is `spike/audio-and-alarm-feasibility`. Its tes
 4. AlarmKit authorization, scheduling, cancellation, stop/snooze behavior, and reliability.
 5. The relationship between estimated script duration and a fixed wake time.
 
-The first manual run is recorded in the [feasibility guide](Feasibility-Spike.md). Its reported failures now have a focused repair and retest scope, including a snooze Live Activity. Phase 0 remains open until those checks pass. Results belong in the decision log and should determine the playback interfaces used by later feature branches.
+The first manual run is recorded in the [feasibility guide](Feasibility-Spike.md). Its reported failures now have a focused repair, 37 passing simulator tests, nine passing deterministic UI tests on the connected iPhone, and pull-request CI. Manual acceptance is reduced to two combined checks for real locked-screen audio/hardware behavior and AlarmKit delivery with a full snooze cycle. Phase 0 remains open until those checks pass. Results belong in the decision log and should determine the playback interfaces used by later feature branches.
 
 ## Working agreement
 
@@ -54,4 +54,4 @@ The first manual run is recorded in the [feasibility guide](Feasibility-Spike.md
 - Privacy-safe ignore rules for credentials, local configuration, personal data, logs, databases, and build output.
 - Structured bug and feature request forms that discourage sensitive public attachments.
 - A pull-request checklist covering behavior, tests, documentation, privacy, and security.
-- A dependency-free local verification command mirrored by quota-aware GitHub Actions.
+- Dependency-free repository verification plus a one-command iOS unit/UI suite, both mirrored by read-only GitHub Actions.

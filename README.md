@@ -35,7 +35,7 @@ HonkshoolUITests/           Blocked-start and scrolling regressions
 HonkshoolAlarmWidget/       Alarm snooze Live Activity
 Honkshool.xcodeproj/        Shared Xcode project and scheme
 docs/                       Product context, decisions, status, and roadmap
-scripts/                    Local repository verification entry point
+scripts/                    Repository verification and iOS test entry points
 tests/                      Publication and repository-safety checks
 CODE_OF_CONDUCT.md          Community behavior and private reporting channel
 CONTRIBUTING.md             Contribution workflow and quality expectations
@@ -44,6 +44,18 @@ LICENSE                     MIT license
 ```
 
 The current application surface is a feasibility console, not the first product UI. Follow the [device test guide](docs/Feasibility-Spike.md) before drawing conclusions from the spike.
+
+## Automated validation
+
+On a Mac with Xcode 26 and an installed iOS 26 simulator, run the complete unit and UI suite with one command:
+
+```sh
+./scripts/test-ios.sh
+```
+
+The script defaults to the latest iPhone 17 Pro simulator. Set `HONKSHOOL_TEST_DESTINATION` to any compatible Xcode destination when needed. Pull requests run the same suite on a read-only GitHub-hosted macOS 26 runner in addition to the portable repository checks.
+
+UI tests use debug-only simulated alarm states and deterministic speech. They never request real AlarmKit permission, schedule a system alarm, or replace the small physical-device check described in the feasibility guide.
 
 ## Start contributing
 

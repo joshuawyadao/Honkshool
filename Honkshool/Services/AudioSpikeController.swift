@@ -24,10 +24,15 @@ final class AudioSpikeController: NSObject, ObservableObject {
   private var remoteCommandTokens: [(MPRemoteCommand, Any)] = []
   private var narrationStartedAt: Date?
 
-  init(speechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()) {
-    self.speechSynthesizer = speechSynthesizer
+  init(speechSynthesizer: AVSpeechSynthesizer? = nil) {
+    #if DEBUG
+      self.speechSynthesizer =
+        speechSynthesizer ?? UITestFixtures.makeSpeechSynthesizer() ?? AVSpeechSynthesizer()
+    #else
+      self.speechSynthesizer = speechSynthesizer ?? AVSpeechSynthesizer()
+    #endif
     super.init()
-    speechSynthesizer.delegate = self
+    self.speechSynthesizer.delegate = self
     observeAudioEvents()
     installRemoteCommands()
   }
@@ -264,9 +269,14 @@ final class AudioSpikeController: NSObject, ObservableObject {
         queue: .main
       ) { [weak self] _ in
         Task { @MainActor in
-          self?.appendEvent("Media services reset; start a new test run")
-          self?.phase = .interrupted
-          self?.statusMessage = "Media services reset. Start a new test run."
+          guard let self,
+            self.phase == .narrating || self.phase == .ambience || self.phase == .paused
+              || self.phase == .interrupted
+          else { return }
+          self.stopAudio(updateStatus: false)
+          self.appendEvent("Media services reset; start a new test run")
+          self.phase = .interrupted
+          self.statusMessage = "Media services reset. Start a new test run."
         }
       }
     )

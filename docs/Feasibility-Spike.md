@@ -123,8 +123,10 @@ Using Xcode 26.6, the iOS 26.5 SDK, and the installed iOS 26.5 simulator/platfor
 - automatic signing resolves through an ignored local configuration and produces a signed Debug device build;
 - the original signed Debug app installed and launched on the iPhone 14 Pro after Developer Mode and profile trust were enabled;
 - the repair app and embedded snooze extension build with automatic signing and install successfully on that phone; its locked screen prevented the automated launch attempt, so open Honkshool after unlocking;
-- all 24 simulator tests pass: 22 model/controller/alarm-service tests and two UI tests, with no failures or skips; and
-- all 10 repository verification tests, strict Swift formatting checks, and `git diff --check` pass.
+- the pre-automation baseline passed all 24 simulator tests;
+- the expanded suite passes all 37 simulator tests: 28 unit/controller/service tests and nine deterministic UI tests; and
+- the same nine deterministic UI tests pass on the connected iPhone 14 Pro running iOS 26.6.2, using fixtures that do not request permission or create a real alarm; and
+- all 11 repository verification tests, strict Swift formatting checks, the unsigned Release simulator build, and `git diff --check` pass.
 
 Xcode prepared support symbols for the connected iPhone 14 Pro running iOS 26.6.1, selected it as the run destination, registered it for the active Personal Team, and completed a device build. After Developer Mode and explicit developer-profile trust were enabled on the phone, the signed app installed and launched successfully. The owner subsequently exercised the chat checklist and reported the results below. Unannotated checklist steps are treated as user-reported passes; the repair build still needs the focused device retest.
 
@@ -167,25 +169,22 @@ The Stop callback and live-stream metadata regressions were first run against th
 
 Apple requires a Live Activity for alarm countdown functionality; its countdown presentation includes the authoritative fire date. See [AlarmKit countdown guidance](https://developer.apple.com/videos/play/wwdc2025/230/) and [countdown fireDate](https://developer.apple.com/documentation/alarmkit/alarmpresentationstate/mode-swift.enum/countdown/firedate).
 
-Run the automated app and UI suite on an installed simulator:
-
-Use a simulator where Honkshool's AlarmKit authorization has not been granted (or has been denied). The blocked-start UI test intentionally exercises that real system state; the suite never taps Authorize. Controller tests use deterministic speech and alarm substitutes, and cannot establish physical-device alarm reliability.
+Run the complete automated app and UI suite on an installed simulator:
 
 ```sh
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
-  xcodebuild -quiet -project Honkshool.xcodeproj -scheme Honkshool \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.5' \
-  -derivedDataPath /tmp/HonkshoolFixesDerivedData \
-  -parallel-testing-enabled NO test
+./scripts/test-ios.sh
 ```
 
-On the repaired iPhone build, concentrate on:
+Set `HONKSHOOL_TEST_DESTINATION` when the default latest iPhone 17 Pro simulator is unavailable. Pull requests run the same command on GitHub's macOS 26 runner. Debug-only launch fixtures exercise not-determined, denied, authorized, scheduling-failed, snoozed, paused, alerting, and unavailable alarm states without showing a system permission prompt or creating an alarm. Deterministic speech makes Stop and pause/resume tests fast. These substitutes verify Honkshool logic and UI only; they do not prove that iOS delivers audio or alarms while locked.
 
-1. Start without alarm permission and confirm the explanation is visible. If permission is already granted, temporarily revoke it in iOS Settings, test, then restore it.
-2. With the alarm explicitly disabled, start narration and press Stop midway. Remain in silence, then start again and test Lock Screen pause/resume. Repeat Stop during ambience.
-3. Start an alarm-enabled run and scroll repeatedly between the bottom and top. Open **Audio event log**, return, and repeat.
-4. Schedule a **60-second test**, lock the phone, and tap Snooze when it rings. Confirm a visible countdown on the Lock Screen; reopen Honkshool and confirm **Snoozed**, the same next alert time, and a decreasing countdown. Let all nine minutes elapse without cancelling or scheduling another test and confirm it rings again.
-5. Repeat snooze, cancel it from the app or Live Activity, and confirm the alarm does not ring. During a separate snooze, force-quit/reopen and confirm the displayed deadline does not reset.
+## Minimal physical-device acceptance
+
+Only two combined checks remain. Run them once on the repaired iPhone 14 Pro build, and repeat them when moving to a materially different phone or iOS release:
+
+1. **Locked audio and hardware:** Play music or a podcast, start Honkshool with its alarm disabled, and lock the phone. Confirm the other audio yields, narration continues, Lock Screen pause/resume works, and Stop remains silent. In the same run, invoke Siri once and disconnect headphones once; both should pause until explicit resume.
+2. **Real AlarmKit delivery:** Schedule a **60-second test**, lock the phone, and confirm it rings. Snooze it, confirm the Lock Screen countdown and matching **Snoozed** deadline in Honkshool, scroll from bottom to top once, then force-quit and reopen the app. The deadline must not reset. Let the full nine minutes elapse and confirm the alarm rings again, then Stop it.
+
+Authorization messaging, scheduling failure, in-app Stop and pause/resume, active-alarm scrolling, event-log navigation, snooze/paused/ringing/unavailable presentation, cancellation routing, reusable duration persistence, and exact-time control availability are automated. A separate nine-minute cancellation wait is no longer required because cancellation identity and removal are covered at the service and UI levels and the original unsnoozed device cancellation passed.
 
 ## Recording results
 

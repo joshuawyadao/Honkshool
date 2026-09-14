@@ -219,6 +219,85 @@ final class PlaybackRegressionTests: XCTestCase {
     XCTAssertTrue(MPRemoteCommandCenter.shared().togglePlayPauseCommand.isEnabled)
     XCTAssertFalse(MPRemoteCommandCenter.shared().changePlaybackPositionCommand.isEnabled)
   }
+
+  func testSystemInterruptionPausesAndRequiresExplicitResume() async {
+    let speech = FakeSpeechSynthesizer()
+    let audio = AudioSpikeController(speechSynthesizer: speech)
+    defer { audio.stop() }
+    audio.startNarration(script: "Test", title: "Test", transitionToAmbience: false)
+    NotificationCenter.default.post(
+      name: AVAudioSession.interruptionNotification,
+      object: nil,
+      userInfo: [
+        AVAudioSessionInterruptionTypeKey: AVAudioSession.InterruptionType.began.rawValue
+      ]
+    )
+    await wait(for: .interrupted, in: audio)
+    XCTAssertTrue(speech.isPaused)
+
+    NotificationCenter.default.post(
+      name: AVAudioSession.interruptionNotification,
+      object: nil,
+      userInfo: [
+        AVAudioSessionInterruptionTypeKey: AVAudioSession.InterruptionType.ended.rawValue,
+        AVAudioSessionInterruptionOptionKey: AVAudioSession.InterruptionOptions.shouldResume
+          .rawValue,
+      ]
+    )
+    for _ in 0..<5 { await Task.yield() }
+    XCTAssertEqual(audio.phase, .interrupted)
+    XCTAssertTrue(audio.statusMessage.contains("Resume manually"))
+    audio.resume()
+    XCTAssertEqual(audio.phase, .narrating)
+  }
+
+  func testDisconnectedOutputPausesUntilExplicitResume() async {
+    let speech = FakeSpeechSynthesizer()
+    let audio = AudioSpikeController(speechSynthesizer: speech)
+    defer { audio.stop() }
+    audio.startNarration(script: "Test", title: "Test", transitionToAmbience: false)
+    NotificationCenter.default.post(
+      name: AVAudioSession.routeChangeNotification,
+      object: nil,
+      userInfo: [
+        AVAudioSessionRouteChangeReasonKey:
+          AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue
+      ]
+    )
+    await wait(for: .interrupted, in: audio)
+    XCTAssertTrue(speech.isPaused)
+    XCTAssertTrue(audio.statusMessage.contains("Audio output disconnected"))
+    audio.resume()
+    XCTAssertEqual(audio.phase, .narrating)
+  }
+
+  func testMediaServicesResetInvalidatesActiveAudioButDoesNotReviveStoppedAudio() async {
+    let speech = FakeSpeechSynthesizer()
+    let audio = AudioSpikeController(speechSynthesizer: speech)
+    audio.startNarration(script: "Test", title: "Test", transitionToAmbience: true)
+    NotificationCenter.default.post(
+      name: AVAudioSession.mediaServicesWereResetNotification, object: nil
+    )
+    await wait(for: .interrupted, in: audio)
+    XCTAssertFalse(speech.isSpeaking)
+    XCTAssertNil(MPNowPlayingInfoCenter.default().nowPlayingInfo)
+    audio.stop()
+    NotificationCenter.default.post(
+      name: AVAudioSession.mediaServicesWereResetNotification, object: nil
+    )
+    for _ in 0..<5 { await Task.yield() }
+    XCTAssertEqual(audio.phase, .stopped)
+  }
+
+  private func wait(for phase: PlaybackPhase, in audio: AudioSpikeController) async {
+    if audio.phase == phase { return }
+    let changed = expectation(description: "Playback reached \(phase.rawValue)")
+    let observation = audio.$phase.dropFirst().sink { updatedPhase in
+      if updatedPhase == phase { changed.fulfill() }
+    }
+    await fulfillment(of: [changed], timeout: 2)
+    observation.cancel()
+  }
 }
 
 @MainActor
@@ -421,5 +500,29 @@ final class AlarmRegressionTests: XCTestCase {
       XCTAssertEqual(service.alarmStatus.phase, .snoozed)
       XCTAssertEqual(service.scheduledDate, deadline)
     }
+  }
+
+  func testAuthorizationRefreshesAfterSystemGrant() async {
+    let system = FakeAlarmSystem()
+    system.authorization = .notDetermined
+    let service = AlarmSpikeService(system: system, defaults: defaults, now: { self.now })
+    XCTAssertEqual(service.authorization, .notDetermined)
+    system.authorization = .authorized
+    await service.requestAuthorization()
+    XCTAssertEqual(service.authorization, .authorized)
+    XCTAssertEqual(service.alarmStatus.phase, .none)
+    XCTAssertEqual(service.statusMessage, "Authorized. No Honkshool alarm is scheduled.")
+  }
+
+  func testCancelWithoutTrackedAlarmIsIdempotent() {
+    let system = FakeAlarmSystem()
+    let service = AlarmSpikeService(system: system, defaults: defaults, now: { self.now })
+    XCTAssertTrue(service.cancel())
+    XCTAssertTrue(system.cancelledIDs.isEmpty)
+    XCTAssertFalse(service.hasTrackedAlarm)
+  }
+
+  func testProductSnoozeIntervalRemainsNineMinutes() {
+    XCTAssertEqual(HonkshoolAlarmMetadata.snoozeSeconds, 9 * 60)
   }
 }
