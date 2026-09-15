@@ -23,6 +23,11 @@
 		D00000000000000000000001 /* AlarmLockScreenLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000004 /* AlarmLockScreenLayout.swift */; };
 		D00000000000000000000002 /* AlarmLockScreenLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000004 /* AlarmLockScreenLayout.swift */; };
 		D00000000000000000000003 /* AlarmLockScreenLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000005 /* AlarmLockScreenLayoutTests.swift */; };
+		E10000000000000000000001 /* NapContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000001 /* NapContent.swift */; };
+		E10000000000000000000002 /* NapPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000002 /* NapPlan.swift */; };
+		E10000000000000000000003 /* NapPlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000003 /* NapPlayback.swift */; };
+		E10000000000000000000004 /* NapPlannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000004 /* NapPlannerTests.swift */; };
+		E10000000000000000000005 /* NapPlaybackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000005 /* NapPlaybackTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +90,11 @@
 		C00000000000000000000002 /* UITestFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestFixtures.swift; sourceTree = "<group>"; };
 		D00000000000000000000004 /* AlarmLockScreenLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolAlarmWidget/AlarmLockScreenLayout.swift; sourceTree = SOURCE_ROOT; };
 		D00000000000000000000005 /* AlarmLockScreenLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/AlarmLockScreenLayoutTests.swift; sourceTree = SOURCE_ROOT; };
+		E20000000000000000000001 /* NapContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapContent.swift; sourceTree = "<group>"; };
+		E20000000000000000000002 /* NapPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlan.swift; sourceTree = "<group>"; };
+		E20000000000000000000003 /* NapPlayback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlayback.swift; sourceTree = "<group>"; };
+		E20000000000000000000004 /* NapPlannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlannerTests.swift; sourceTree = "<group>"; };
+		E20000000000000000000005 /* NapPlaybackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlaybackTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -163,6 +173,9 @@
 		A70000000000000000000005 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				E20000000000000000000003 /* NapPlayback.swift */,
+				E20000000000000000000002 /* NapPlan.swift */,
+				E20000000000000000000001 /* NapContent.swift */,
 				A20000000000000000000003 /* SpikeModels.swift */,
 			);
 			path = Domain;
@@ -180,6 +193,8 @@
 		A70000000000000000000007 /* HonkshoolTests */ = {
 			isa = PBXGroup;
 			children = (
+				E20000000000000000000005 /* NapPlaybackTests.swift */,
+				E20000000000000000000004 /* NapPlannerTests.swift */,
 				A20000000000000000000008 /* SpikeModelsTests.swift */,
 			);
 			path = HonkshoolTests;
@@ -377,6 +392,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E10000000000000000000003 /* NapPlayback.swift in Sources */,
+				E10000000000000000000002 /* NapPlan.swift in Sources */,
+				E10000000000000000000001 /* NapContent.swift in Sources */,
 				A10000000000000000000001 /* HonkshoolApp.swift in Sources */,
 				A10000000000000000000002 /* FeasibilityConsoleView.swift in Sources */,
 				A10000000000000000000003 /* SpikeModels.swift in Sources */,
@@ -392,6 +410,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E10000000000000000000005 /* NapPlaybackTests.swift in Sources */,
+				E10000000000000000000004 /* NapPlannerTests.swift in Sources */,
 				D00000000000000000000002 /* AlarmLockScreenLayout.swift in Sources */,
 				D00000000000000000000003 /* AlarmLockScreenLayoutTests.swift in Sources */,
 				A10000000000000000000007 /* SpikeModelsTests.swift in Sources */,
