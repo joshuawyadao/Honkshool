@@ -11,6 +11,7 @@ Close the feasibility milestone using completed physical-device evidence, resolv
 - [x] Fix the Brooks review finding that UI-test fixtures share real alarm/preferences storage; isolate all three consumers and add a regression. The full simulator suite, Release build, strict formatting, repository checks, and diff check pass.
 - [x] Address Codex feedback: cancel tracked alarms before alarm-disabled starts, expose a terminal state after media reset, and reactivate audio on manual resume, including stopped ambience engines. Focused regressions and the complete simulator suite pass; save each item separately.
 - Report latest review/CI readiness without merging. Leave nap-planning work for the next targeted branch.
+- [ ] Address the next review pass: active-run replacement, reset latching, wake-preview freshness, pending speech pauses, D-006 history, and bounded alarm reconciliation. Save each verified item and rerun the complete suite.
 - [x] Address final-review races: snapshot/lock run options across scheduling and restore the ambience loop even when its engine remains running. Both have regressions; the full suite and Release build pass.
 
 ## Completed layout-repair context

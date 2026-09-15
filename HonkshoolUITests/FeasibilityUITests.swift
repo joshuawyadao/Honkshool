@@ -109,6 +109,7 @@ final class FeasibilityUITests: XCTestCase {
     let app = launch(alarm: .authorized)
     startRun(in: app)
     assertLabel(app.staticTexts["alarmStatus"], equals: "Alarm status, Scheduled")
+    XCTAssertFalse(app.buttons["startTest"].isEnabled)
 
     let log = app.buttons["audioEventLog"]
     scrollTo(log, in: app)
@@ -128,6 +129,7 @@ final class FeasibilityUITests: XCTestCase {
     stop.tap()
     assertLabel(app.staticTexts["playbackPhase"], equals: "Phase, Stopped")
     assertLabel(app.staticTexts["alarmStatus"], equals: "Alarm status, Scheduled")
+    XCTAssertTrue(app.buttons["startTest"].isEnabled)
   }
 
   func testInAppPauseResumeAndStopControlsDrivePlaybackState() {

@@ -277,7 +277,7 @@ struct FeasibilityConsoleView: View {
         }
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
-        .disabled(isStarting || alarm.isScheduling)
+        .disabled(isStarting || alarm.isScheduling || !audio.canStartNewRun)
         .accessibilityIdentifier("startTest")
 
         HStack {
@@ -325,7 +325,7 @@ struct FeasibilityConsoleView: View {
   }
 
   private func startRun() async {
-    guard !isStarting else { return }
+    guard !isStarting && audio.canStartNewRun else { return }
     isStarting = true
     defer { isStarting = false }
     let runAlarmEnabled = alarmEnabled

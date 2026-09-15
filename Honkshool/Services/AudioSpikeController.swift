@@ -26,6 +26,10 @@ final class AudioSpikeController: NSObject, ObservableObject {
   private var remoteCommandTokens: [(MPRemoteCommand, Any)] = []
   private var narrationStartedAt: Date?
 
+  var canStartNewRun: Bool {
+    phase == .idle || phase == .stopped || phase == .failed
+  }
+
   init(
     speechSynthesizer: AVSpeechSynthesizer? = nil,
     ambienceEngine: AVAudioEngine = AVAudioEngine(),
