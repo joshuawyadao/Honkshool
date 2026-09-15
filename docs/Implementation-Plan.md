@@ -7,10 +7,10 @@ Close the feasibility milestone using completed physical-device evidence, resolv
 - [x] Record the final larger-text snooze pass and resolve or explicitly defer Phase 0 decisions.
 - [x] Align the feasibility guide, roadmap, overview, README, and contribution guidance.
 - [x] Verify repository checks and public-safe documentation (12/12 and `git diff --check` pass); prepare for commit and push.
-- [ ] Open the PR, request Codex review, perform a sampled Brooks review, and address actionable findings and CI failures.
+- [x] Open [PR #2](https://github.com/joshuawyadao/Honkshool/pull/2), request Codex review, and perform a sampled Brooks review. Latest-commit review and CI status remain authoritative on the PR.
 - [x] Fix the Brooks review finding that UI-test fixtures share real alarm/preferences storage; isolate all three consumers and add a regression. The full simulator suite, Release build, strict formatting, repository checks, and diff check pass.
-- [ ] Address Codex feedback: cancel tracked alarms before alarm-disabled starts, expose a terminal state after media reset, and reactivate audio on manual resume. Add regressions and validate before saving each item.
-- [ ] Report readiness without merging. Leave nap-planning work for the next targeted branch.
+- [x] Address Codex feedback: cancel tracked alarms before alarm-disabled starts, expose a terminal state after media reset, and reactivate audio on manual resume, including stopped ambience engines. Focused regressions and the complete simulator suite pass; save each item separately.
+- Report latest review/CI readiness without merging. Leave nap-planning work for the next targeted branch.
 
 ## Completed layout-repair context
 
@@ -37,6 +37,8 @@ The preceding task extracted and compacted the snoozed Lock Screen presentation,
 - None. Preserve the user’s larger text setting and treat the screenshot as the authoritative system-hosted reproduction.
 
 ## Validation
+
+- PR follow-up: 46/46 simulator tests (35 unit/controller/service/layout and 11 UI), 12/12 repository checks, strict formatting, and the unsigned Release simulator build pass. The original physical evidence below predates the narrow review fixes; it is not relabeled as a new hardware run.
 
 - Red: the extracted pre-fix snoozed layout measured 216 points at xLarge against the 160-point system ceiling.
 - Green: the compact snoozed layout passes at xLarge, xxLarge, xxxLarge, and accessibility1; paused, alerting, and fallback states also pass at accessibility1.

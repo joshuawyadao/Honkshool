@@ -15,16 +15,28 @@ final class AudioSpikeController: NSObject, ObservableObject {
 
   private let speechSynthesizer: AVSpeechSynthesizer
   private var activeUtterance: AVSpeechUtterance?
-  private let ambienceEngine = AVAudioEngine()
+  private let ambienceEngine: AVAudioEngine
+  private let activateAudioSession: () throws -> Void
   private let ambiencePlayer = AVAudioPlayerNode()
   private var ambienceBuffer: AVAudioPCMBuffer?
+  private var hasAmbienceToResume = false
   private var observerTokens: [NSObjectProtocol] = []
   private var shouldTransitionToAmbience = true
   private var remoteCommandsInstalled = false
   private var remoteCommandTokens: [(MPRemoteCommand, Any)] = []
   private var narrationStartedAt: Date?
 
-  init(speechSynthesizer: AVSpeechSynthesizer? = nil) {
+  init(
+    speechSynthesizer: AVSpeechSynthesizer? = nil,
+    ambienceEngine: AVAudioEngine = AVAudioEngine(),
+    activateAudioSession: @escaping () throws -> Void = {
+      let session = AVAudioSession.sharedInstance()
+      try session.setCategory(.playback, mode: .spokenAudio, options: [])
+      try session.setActive(true)
+    }
+  ) {
+    self.ambienceEngine = ambienceEngine
+    self.activateAudioSession = activateAudioSession
     #if DEBUG
       self.speechSynthesizer =
         speechSynthesizer ?? UITestFixtures.makeSpeechSynthesizer() ?? AVSpeechSynthesizer()
@@ -96,17 +108,38 @@ final class AudioSpikeController: NSObject, ObservableObject {
 
   func resume() {
     guard phase == .paused || phase == .interrupted else { return }
+    guard speechSynthesizer.isPaused || hasAmbienceToResume else {
+      fail("Nothing is available to resume; start a new test.")
+      return
+    }
 
-    if speechSynthesizer.isPaused {
-      _ = speechSynthesizer.continueSpeaking()
-      phase = .narrating
-      statusMessage = "Narration resumed."
-    } else if ambienceEngine.isRunning {
-      ambiencePlayer.play()
-      phase = .ambience
-      statusMessage = "Neutral ambience resumed."
-    } else {
-      statusMessage = "Nothing is available to resume; start a new test."
+    do {
+      try configureExclusiveAudioSession()
+      if speechSynthesizer.isPaused {
+        guard speechSynthesizer.continueSpeaking() else {
+          fail("Narration could not resume; start a new test.")
+          return
+        }
+        phase = .narrating
+        statusMessage = "Narration resumed."
+      } else {
+        if !ambienceEngine.isRunning {
+          guard let ambienceBuffer else {
+            fail("Ambience is unavailable; start a new test.")
+            return
+          }
+          // Interruption may stop the engine and invalidate its scheduled loop.
+          ambiencePlayer.stop()
+          ambienceEngine.prepare()
+          try ambienceEngine.start()
+          ambiencePlayer.scheduleBuffer(ambienceBuffer, at: nil, options: .loops)
+        }
+        ambiencePlayer.play()
+        phase = .ambience
+        statusMessage = "Neutral ambience resumed."
+      }
+    } catch {
+      fail("Audio could not resume: \(error.localizedDescription)")
       return
     }
 
@@ -127,9 +160,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
   }
 
   private func configureExclusiveAudioSession() throws {
-    let session = AVAudioSession.sharedInstance()
-    try session.setCategory(.playback, mode: .spokenAudio, options: [])
-    try session.setActive(true)
+    try activateAudioSession()
     appendEvent("Activated exclusive playback audio session")
   }
 
@@ -168,6 +199,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
         options: .loops
       )
       ambiencePlayer.play()
+      hasAmbienceToResume = true
       phase = .ambience
       statusMessage = "Narration finished. Generated neutral ambience is looping."
       appendEvent("Transitioned from narration to generated neutral ambience")
@@ -211,6 +243,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
     // Invalidate ownership before calling into AVFoundation: cancellation can
     // deliver delegate callbacks synchronously or after the next run starts.
     activeUtterance = nil
+    hasAmbienceToResume = false
     shouldTransitionToAmbience = false
     narrationStartedAt = nil
     if speechSynthesizer.isSpeaking || speechSynthesizer.isPaused {

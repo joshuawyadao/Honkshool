@@ -158,6 +158,7 @@ final class SpikeModelsTests: XCTestCase {
 private final class FakeSpeechSynthesizer: AVSpeechSynthesizer {
   var utterances: [AVSpeechUtterance] = []
   var onStop: (() -> Void)?
+  var canContinue = true
   private var testSpeaking = false
   private var testPaused = false
 
@@ -183,6 +184,7 @@ private final class FakeSpeechSynthesizer: AVSpeechSynthesizer {
   }
 
   override func continueSpeaking() -> Bool {
+    guard canContinue else { return false }
     testPaused = false
     testSpeaking = true
     return true
@@ -191,6 +193,72 @@ private final class FakeSpeechSynthesizer: AVSpeechSynthesizer {
 
 @MainActor
 final class PlaybackRegressionTests: XCTestCase {
+  func testManualResumeReactivatesAudioBeforeContinuingSpeech() {
+    let speech = FakeSpeechSynthesizer()
+    var activations = 0
+    let audio = AudioSpikeController(speechSynthesizer: speech) {
+      activations += 1
+      if activations == 2 { XCTAssertTrue(speech.isPaused) }
+    }
+    defer { audio.stop() }
+    audio.startNarration(script: "Test", title: "Test", transitionToAmbience: false)
+    audio.pause()
+    audio.resume()
+    XCTAssertEqual(activations, 2)
+    XCTAssertEqual(audio.phase, .narrating)
+  }
+
+  func testResumeActivationFailureNeverAdvertisesPlayingAudio() {
+    enum ActivationError: Error { case unavailable }
+    let speech = FakeSpeechSynthesizer()
+    var activations = 0
+    let audio = AudioSpikeController(speechSynthesizer: speech) {
+      activations += 1
+      if activations > 1 { throw ActivationError.unavailable }
+    }
+    defer { audio.stop() }
+    audio.startNarration(script: "Test", title: "Test", transitionToAmbience: false)
+    audio.pause()
+    audio.resume()
+    XCTAssertEqual(audio.phase, .failed)
+    XCTAssertFalse(speech.isSpeaking)
+    XCTAssertNil(MPNowPlayingInfoCenter.default().nowPlayingInfo)
+  }
+
+  func testSpeechResumeFailureNeverAdvertisesPlayingAudio() {
+    let speech = FakeSpeechSynthesizer()
+    let audio = AudioSpikeController(speechSynthesizer: speech)
+    defer { audio.stop() }
+    audio.startNarration(script: "Test", title: "Test", transitionToAmbience: false)
+    audio.pause()
+    speech.canContinue = false
+    audio.resume()
+    XCTAssertEqual(audio.phase, .failed)
+    XCTAssertNil(MPNowPlayingInfoCenter.default().nowPlayingInfo)
+  }
+
+  func testInterruptedAmbienceRestartsStoppedEngineOnExplicitResume() async throws {
+    let speech = FakeSpeechSynthesizer()
+    let engine = AVAudioEngine()
+    let audio = AudioSpikeController(speechSynthesizer: speech, ambienceEngine: engine)
+    defer { audio.stop() }
+    audio.startNarration(script: "Test", title: "Test", transitionToAmbience: true)
+    let utterance = try XCTUnwrap(speech.utterances.first)
+    _ = speech.stopSpeaking(at: .immediate)
+    audio.speechSynthesizer(speech, didFinish: utterance)
+    XCTAssertEqual(audio.phase, .ambience)
+    NotificationCenter.default.post(
+      name: AVAudioSession.interruptionNotification, object: nil,
+      userInfo: [AVAudioSessionInterruptionTypeKey: AVAudioSession.InterruptionType.began.rawValue]
+    )
+    await wait(for: .interrupted, in: audio)
+    engine.stop()
+    XCTAssertFalse(engine.isRunning)
+    audio.resume()
+    XCTAssertTrue(engine.isRunning)
+    XCTAssertEqual(audio.phase, .ambience)
+  }
+
   func testStopInvalidatesTheUtteranceBeforeSynchronousCompletion() throws {
     let speech = FakeSpeechSynthesizer()
     let audio = AudioSpikeController(speechSynthesizer: speech)
