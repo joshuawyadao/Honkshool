@@ -38,6 +38,16 @@ final class FeasibilityUITests: XCTestCase {
     XCTAssertTrue(app.switches["requireAlarm"].isEnabled)
   }
 
+  func testWakePreviewDistinguishesRelativeEstimateFromStartedRun() {
+    let app = launch(alarm: .authorized)
+    XCTAssertTrue(app.staticTexts["wakePreview"].label.hasPrefix("Wake if started now"))
+    startRun(in: app)
+    XCTAssertTrue(app.staticTexts["wakePreview"].label.hasPrefix("Run wake"))
+    let fixedLabel = app.staticTexts["wakePreview"].label
+    app.swipeDown()
+    XCTAssertEqual(app.staticTexts["wakePreview"].label, fixedLabel)
+  }
+
   func testAlarmDisabledStartCancelsTrackedSnooze() {
     let app = launch(alarm: .snoozed)
     let toggle = app.switches["requireAlarm"]

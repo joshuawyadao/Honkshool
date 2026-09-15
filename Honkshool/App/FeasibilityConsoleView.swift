@@ -19,7 +19,7 @@ struct FeasibilityConsoleView: View {
   @State private var runMessage = "Configure the test, then start with the screen unlocked."
   @State private var blockedReason: String?
   @State private var isStarting = false
-  @State private var durationAnchor = Date.now
+  @State private var runWakeDate: Date?
   @State private var loadedPreferences = false
 
   var body: some View {
@@ -63,7 +63,6 @@ struct FeasibilityConsoleView: View {
           do { try await Task.sleep(for: .seconds(1)) } catch { return }
         }
       }
-      .onChange(of: selectedMinutes) { durationAnchor = .now }
       .onAppear {
         alarm.refresh()
         guard !loadedPreferences else { return }
@@ -162,10 +161,20 @@ struct FeasibilityConsoleView: View {
           }
         }
 
-        LabeledContent("Planned wake") {
-          Text(wakeDate.formatted(date: .abbreviated, time: .shortened))
+        if let runWakeDate, isStarting || !audio.canStartNewRun {
+          wakeTimeRow("Run wake", date: runWakeDate)
+        } else if usesExactWakeTime {
+          wakeTimeRow("Selected wake", date: exactWakeTime)
+        } else {
+          TimelineView(.periodic(from: .now, by: 1)) { context in
+            wakeTimeRow(
+              "Wake if started now",
+              date: RestDurationPolicy.wakeDate(
+                startingAt: context.date, minutes: selectedMinutes
+              )
+            )
+          }
         }
-        .font(.subheadline)
 
         Text(
           "This is a rest window, not an estimate or promise of actual sleep time."
@@ -306,14 +315,12 @@ struct FeasibilityConsoleView: View {
     }
   }
 
-  private var wakeDate: Date {
-    if usesExactWakeTime {
-      return exactWakeTime
+  private func wakeTimeRow(_ title: String, date: Date) -> some View {
+    LabeledContent(title) {
+      Text(date.formatted(date: .abbreviated, time: .shortened))
     }
-    return RestDurationPolicy.wakeDate(
-      startingAt: durationAnchor,
-      minutes: selectedMinutes
-    )
+    .font(.subheadline)
+    .accessibilityIdentifier("wakePreview")
   }
 
   private var authorizationText: String {
@@ -330,9 +337,12 @@ struct FeasibilityConsoleView: View {
     defer { isStarting = false }
     let runAlarmEnabled = alarmEnabled
     let runAmbienceEnabled = ambienceEnabled
-    durationAnchor = .now
     alarm.refresh()
-    let plannedWakeDate = wakeDate
+    let plannedWakeDate =
+      usesExactWakeTime
+      ? exactWakeTime
+      : RestDurationPolicy.wakeDate(startingAt: .now, minutes: selectedMinutes)
+    runWakeDate = plannedWakeDate
     var schedule: AlarmScheduleSnapshot = .notScheduled
 
     if runAlarmEnabled {

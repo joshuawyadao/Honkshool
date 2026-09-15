@@ -153,6 +153,14 @@ final class SpikeModelsTests: XCTestCase {
 
     XCTAssertEqual(wakeDate.timeIntervalSince(now), 35 * 60)
   }
+
+  func testRelativeWakeEstimateAdvancesWithTheProposedStartTime() {
+    let earlier = RestDurationPolicy.wakeDate(startingAt: now, minutes: 35)
+    let later = RestDurationPolicy.wakeDate(
+      startingAt: now.addingTimeInterval(600), minutes: 35
+    )
+    XCTAssertEqual(later.timeIntervalSince(earlier), 600)
+  }
 }
 
 private final class FakeSpeechSynthesizer: AVSpeechSynthesizer {
