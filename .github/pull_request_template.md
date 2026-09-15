@@ -11,6 +11,7 @@
 <!-- List automated checks and any manual acceptance checks performed. -->
 
 - [ ] I ran `./scripts/verify-repository.sh`, or explained why it was not applicable.
+- [ ] For iOS changes, I ran `./scripts/test-ios.sh`, or explained why it was not applicable.
 - [ ] I added or updated tests for behavior changes, or this change does not affect executable behavior.
 - [ ] I updated canonical documentation for changed behavior, architecture, data handling, operations, or supported environments.
 - [ ] I excluded credentials, personal data, private configuration, logs, and generated artifacts.

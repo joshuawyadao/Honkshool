@@ -23,6 +23,14 @@ By participating, you agree to follow the [Contributor Covenant Code of Conduct]
    ./scripts/verify-repository.sh
    ```
 
+   Changes to the experimental iOS target should also pass the complete automated simulator suite:
+
+   ```sh
+   ./scripts/test-ios.sh
+   ```
+
+   The [feasibility spike guide](docs/Feasibility-Spike.md) documents destination overrides, completed physical acceptance, and when to repeat affected locked-screen audio, hardware-routing, or AlarmKit checks. Simulator success is not physical-device acceptance evidence.
+
 5. Describe the user-visible outcome, privacy and security implications, verification performed, and any known limitations in the pull request.
 
 ## Public-data rules

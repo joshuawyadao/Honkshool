@@ -1,12 +1,12 @@
 # Honkshool
 
 [![Repository Verify](https://github.com/joshuawyadao/Honkshool/actions/workflows/ci.yml/badge.svg)](https://github.com/joshuawyadao/Honkshool/actions/workflows/ci.yml)
-[![Project status: planning](https://img.shields.io/badge/status-planning-6f42c1)](docs/Project-Overview.md)
+[![Project status: feasibility spike](https://img.shields.io/badge/status-feasibility%20spike-6f42c1)](docs/Project-Overview.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Honkshool is an early-stage iPhone app for calm, uninterrupted factual narration during naps and bedtime. Its primary purpose is helping the listener relax and fall asleep; exposure to interesting information is secondary.
 
-> **Project status:** Planning. No application, package, hosted service, or supported release exists yet. The next implementation milestone is a physical-device feasibility spike for narration, background audio, and AlarmKit.
+> **Project status:** Feasibility spike. An experimental iOS test app now exists, but there is no supported release. It is intentionally designed to measure physical-device narration, background audio, and AlarmKit behavior before production architecture begins.
 
 The intended flow is simple:
 
@@ -29,8 +29,13 @@ Read the [product brief](docs/Product-Brief.md) for the product boundary, the [p
 
 ```text
 .github/                    Issue forms, pull-request template, and CI
+Honkshool/                  Experimental iOS spike source
+HonkshoolTests/             Focused spike-state tests
+HonkshoolUITests/           Blocked-start and scrolling regressions
+HonkshoolAlarmWidget/       Alarm snooze Live Activity
+Honkshool.xcodeproj/        Shared Xcode project and scheme
 docs/                       Product context, decisions, status, and roadmap
-scripts/                    Local repository verification entry point
+scripts/                    Repository verification and iOS test entry points
 tests/                      Publication and repository-safety checks
 CODE_OF_CONDUCT.md          Community behavior and private reporting channel
 CONTRIBUTING.md             Contribution workflow and quality expectations
@@ -38,7 +43,19 @@ SECURITY.md                 Private vulnerability-reporting policy
 LICENSE                     MIT license
 ```
 
-Application directories will be added during the first authorized implementation branch. The current repository intentionally contains planning and public-development infrastructure only.
+The current application surface is a feasibility console, not the first product UI. Follow the [device test guide](docs/Feasibility-Spike.md) before drawing conclusions from the spike.
+
+## Automated validation
+
+On a Mac with Xcode 26 and an installed iOS 26 simulator, run the complete unit and UI suite with one command:
+
+```sh
+./scripts/test-ios.sh
+```
+
+The script defaults to the latest iPhone 17 Pro simulator. Set `HONKSHOOL_TEST_DESTINATION` to any compatible Xcode destination when needed. Pull requests run the same suite on a read-only GitHub-hosted macOS 26 runner in addition to the portable repository checks.
+
+UI tests use debug-only simulated alarm states, deterministic speech, and isolated preferences that leave real alarm tracking and saved defaults untouched. They never request real AlarmKit permission, schedule a system alarm, or replace the physical-device acceptance evidence described in the feasibility guide.
 
 ## Start contributing
 
@@ -65,7 +82,7 @@ GitHub secret scanning, push protection, Dependabot security updates, and privat
 
 ## Current roadmap
 
-1. Run `spike/audio-and-alarm-feasibility` on the target iPhone to validate narration, background audio, interruptions, Lock Screen controls, and AlarmKit.
+1. Completed feasibility validation on the target iPhone: narration, background audio, tested interruptions, Lock Screen controls, AlarmKit, and the larger-text snooze layout (2026-09-15). Branch review and merge precede the next milestone; this remains an experimental console.
 2. Define and test the framework-independent Nap Plan, journey, progress, and history rules.
 3. Prepare one original, citation-backed automotive session and one lawful offline ambience option.
 4. Build the choose → review → play → alarm → history tracer bullet.

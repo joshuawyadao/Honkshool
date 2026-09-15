@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import subprocess
 import unittest
 from pathlib import Path
 from urllib.parse import unquote
@@ -23,23 +24,41 @@ class PublicRepositoryTests(unittest.TestCase):
             "docs/Project-Implementation-Plan.md",
             "docs/Product-Brief.md",
             "docs/Decision-Log.md",
+            "docs/Feasibility-Spike.md",
+            "Honkshool.xcodeproj/project.pbxproj",
+            "Honkshool.xcodeproj/xcshareddata/xcschemes/Honkshool.xcscheme",
+            "Honkshool/App/HonkshoolApp.swift",
+            "Honkshool/App/FeasibilityConsoleView.swift",
+            "Honkshool/App/UITestFixtures.swift",
+            "Honkshool/Domain/SpikeModels.swift",
+            "Honkshool/Services/AudioSpikeController.swift",
+            "Honkshool/Services/AlarmSpikeService.swift",
+            "Honkshool/Resources/Info.plist",
+            "HonkshoolTests/SpikeModelsTests.swift",
+            "HonkshoolUITests/FeasibilityUITests.swift",
+            "HonkshoolAlarmWidget/AlarmLockScreenLayout.swift",
+            "HonkshoolAlarmWidget/HonkshoolAlarmWidget.swift",
+            "HonkshoolTests/AlarmLockScreenLayoutTests.swift",
+            "Config/Signing.xcconfig",
+            "Config/Local.xcconfig.example",
             ".github/pull_request_template.md",
             ".github/ISSUE_TEMPLATE/config.yml",
             ".github/ISSUE_TEMPLATE/bug_report.yml",
             ".github/ISSUE_TEMPLATE/feature_request.yml",
             ".github/workflows/ci.yml",
             "scripts/verify-repository.sh",
+            "scripts/test-ios.sh",
         )
 
         missing = [path for path in required if not (PROJECT_ROOT / path).is_file()]
         self.assertEqual(missing, [])
 
-    def test_readme_is_honest_about_planning_status(self) -> None:
+    def test_readme_is_honest_about_feasibility_status(self) -> None:
         readme = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
 
         for statement in (
-            "Project status:** Planning",
-            "No application, package, hosted service, or supported release exists yet",
+            "Project status:** Feasibility spike",
+            "there is no supported release",
             "calm, uninterrupted factual narration",
             "does not claim subconscious learning",
             "./scripts/verify-repository.sh",
@@ -48,6 +67,36 @@ class PublicRepositoryTests(unittest.TestCase):
         ):
             with self.subTest(statement=statement):
                 self.assertIn(statement, readme)
+
+    def test_ios_spike_preserves_platform_and_safety_configuration(self) -> None:
+        project = (PROJECT_ROOT / "Honkshool.xcodeproj/project.pbxproj").read_text(
+            encoding="utf-8"
+        )
+        info = (PROJECT_ROOT / "Honkshool/Resources/Info.plist").read_text(
+            encoding="utf-8"
+        )
+        audio = (
+            PROJECT_ROOT / "Honkshool/Services/AudioSpikeController.swift"
+        ).read_text(encoding="utf-8")
+        alarm = (
+            PROJECT_ROOT / "Honkshool/Services/AlarmSpikeService.swift"
+        ).read_text(encoding="utf-8")
+        signing = (PROJECT_ROOT / "Config/Signing.xcconfig").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("com.joshuawyadao.Honkshool", project)
+        self.assertIn("IPHONEOS_DEPLOYMENT_TARGET = 26.0", project)
+        self.assertIn("NSAlarmKitUsageDescription", info)
+        self.assertIn("<string>audio</string>", info)
+        self.assertIn("setCategory(.playback, mode: .spokenAudio, options: [])", audio)
+        self.assertIn("AlarmManager.shared", alarm)
+        self.assertIn("baseConfigurationReference", project)
+        self.assertIn('#include? "Local.xcconfig"', signing)
+        self.assertNotRegex(
+            project + signing,
+            r"DEVELOPMENT_TEAM\s*=\s*[A-Z0-9]{10}",
+        )
 
     def test_product_context_and_roadmap_preserve_key_boundaries(self) -> None:
         brief = (PROJECT_ROOT / "docs/Product-Brief.md").read_text(encoding="utf-8")
@@ -103,6 +152,8 @@ class PublicRepositoryTests(unittest.TestCase):
             "*.pem",
             "credentials*.json",
             "secrets*.json",
+            "Local.xcconfig",
+            "*.mobileprovision",
             "/local-data/",
             "/reports/",
             "*.sqlite",
@@ -124,6 +175,45 @@ class PublicRepositoryTests(unittest.TestCase):
         self.assertRegex(workflow, r"actions/checkout@[0-9a-f]{40}")
         self.assertIn("cancel-in-progress: true", workflow)
 
+    def test_ios_tests_run_in_pull_requests_with_debug_only_fixtures(self) -> None:
+        workflow = (PROJECT_ROOT / ".github/workflows/ci.yml").read_text(
+            encoding="utf-8"
+        )
+        test_script = (PROJECT_ROOT / "scripts/test-ios.sh").read_text(
+            encoding="utf-8"
+        )
+        fixtures = (
+            PROJECT_ROOT / "Honkshool/App/UITestFixtures.swift"
+        ).read_text(encoding="utf-8")
+        ui_tests = (
+            PROJECT_ROOT / "HonkshoolUITests/FeasibilityUITests.swift"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("runs-on: macos-26", workflow)
+        self.assertIn("./scripts/test-ios.sh", workflow)
+        self.assertIn("timeout-minutes: 20", workflow)
+        self.assertIn("xcodebuild -quiet", test_script)
+        self.assertIn("-parallel-testing-enabled NO", test_script)
+        self.assertIn("HONKSHOOL_TEST_DESTINATION", test_script)
+        self.assertTrue(test_script.startswith("#!/bin/sh\nset -eu\n"))
+        self.assertIn("#if DEBUG", fixtures)
+        self.assertIn('launchArgument = "-ui-testing"', fixtures)
+        self.assertIn('app.launchArguments = ["-ui-testing"]', ui_tests)
+
+    def test_alarm_lock_screen_layout_preserves_larger_text_support(self) -> None:
+        layout = (
+            PROJECT_ROOT / "HonkshoolAlarmWidget/AlarmLockScreenLayout.swift"
+        ).read_text(encoding="utf-8")
+        tests = (
+            PROJECT_ROOT / "HonkshoolTests/AlarmLockScreenLayoutTests.swift"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn(".padding(.horizontal, 14)", layout)
+        self.assertNotIn(".dynamicTypeSize(", layout)
+        self.assertIn("DynamicTypeSize.xLarge", tests)
+        self.assertIn(".accessibility1", tests)
+        self.assertIn("160", tests)
+
     def test_markdown_relative_links_resolve(self) -> None:
         broken: list[str] = []
         link_pattern = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
@@ -142,7 +232,7 @@ class PublicRepositoryTests(unittest.TestCase):
 
         self.assertEqual(broken, [])
 
-    def test_working_tree_has_no_common_private_or_generated_artifacts(self) -> None:
+    def test_working_tree_has_no_unignored_private_or_generated_artifacts(self) -> None:
         forbidden_names = {
             ".DS_Store",
             "Local.xcconfig",
@@ -166,6 +256,29 @@ class PublicRepositoryTests(unittest.TestCase):
             if ".git" in path.parts or not path.is_file():
                 continue
             if path.name in forbidden_names or path.suffix.lower() in forbidden_suffixes:
+                relative = str(path.relative_to(PROJECT_ROOT))
+                ignored = subprocess.run(
+                    ["git", "check-ignore", "--quiet", relative],
+                    cwd=PROJECT_ROOT,
+                    check=False,
+                ).returncode == 0
+                if not ignored:
+                    offenders.append(relative)
+
+        self.assertEqual(offenders, [])
+
+    def test_public_docs_do_not_contain_device_identifiers(self) -> None:
+        device_identifier = re.compile(
+            r"\b(?:"
+            r"[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-"
+            r"[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}"
+            r"|[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}"
+            r")\b"
+        )
+        offenders: list[str] = []
+
+        for path in (*PROJECT_ROOT.glob("*.md"), *PROJECT_ROOT.glob("docs/*.md")):
+            if device_identifier.search(path.read_text(encoding="utf-8")):
                 offenders.append(str(path.relative_to(PROJECT_ROOT)))
 
         self.assertEqual(offenders, [])

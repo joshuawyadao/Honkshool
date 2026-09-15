@@ -44,6 +44,8 @@ htmlcov/
 build/
 dist/
 DerivedData/
+xcuserdata/
+*.xcuserstate
 *.xcarchive
 *.dSYM
 *.dSYM.zip

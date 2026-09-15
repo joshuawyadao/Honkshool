@@ -9,7 +9,7 @@ Build Honkshool as a sequence of small, reviewable vertical slices, beginning wi
 
 ## Action items
 
-- [ ] Resolve the Phase 0 decision gates and run `spike/audio-and-alarm-feasibility` to prove narration, background audio, interruptions, Lock Screen controls, and AlarmKit behavior on the target iPhone.
+- [x] Resolve or explicitly defer the Phase 0 decision gates and run `spike/audio-and-alarm-feasibility` to establish narration, background audio, interruptions, Lock Screen controls, and AlarmKit feasibility on the target iPhone.
 - [ ] Build `feature/nap-plan-domain` with framework-independent journey, session, route, timing, completion, and history rules plus focused unit tests.
 - [ ] Build `feature/local-content-catalog` with one citation-backed Enthusiast session from “How a Car Works,” source metadata, pronunciations, duration estimates, and one lawful offline ambience asset.
 - [ ] Build `feature/nap-plan-review` so a listener can continue or select local content, choose a duration or wake time, inspect the fixed route, select ambience or silence, and confirm the final alarm.
@@ -38,12 +38,16 @@ Build Honkshool as a sequence of small, reviewable vertical slices, beginning wi
 
 Remove the largest technical risks before designing the full app around unverified assumptions.
 
+### Current status
+
+Complete as of 2026-09-15, pending branch review and merge. Corrected-device checks passed for background narration, natural transitions, audio takeover, Lock Screen controls, Siri interruption, headphone disconnection, alarm delivery, cancellation, app relaunch, and the full nine-minute snooze re-ring. The owner confirmed the compact snoozed Live Activity fits at the existing larger text setting with standard Display Zoom. D-001, D-002, D-003, and D-005 are accepted; D-004 is explicitly deferred with a fixed wake deadline and ambience/silence fallback. After review and merge, the next targeted branch is the nap-planning core; it has not been implemented.
+
 ### Work
 
 - Create the smallest installable iOS 26 spike necessary to exercise AVSpeechSynthesizer, AVAudioSession, optional ambience, Lock Screen media controls, and AlarmKit.
-- Compare direct speech synthesis with any feasible pre-rendered/local-buffer approach. Evaluate pause/resume fidelity, background behavior, route changes, interruptions, spoken duration accuracy, and power/storage tradeoffs.
+- Evaluate direct speech and consider a locally buffered alternative. Direct speech passed the required device behaviors and is accepted for the prototype; comparative power/storage benchmarks and quantitative duration calibration are deferred, not claimed complete.
 - Verify alarm authorization, scheduling, cancellation, stop/snooze behavior, background reliability, and recovery after app relaunch on the personal target iPhone.
-- Decide how a Nap Plan handles narration estimates that differ from actual playback duration.
+- Defer detailed narration-estimate variance rules to Phase 1 while preserving a fixed wake deadline, unchanged speech speed, and ambience/silence for unused time.
 - Record device model, iOS build, test cases, results, and decisions without checking in personal identifiers or diagnostic exports.
 
 ### Exit criteria

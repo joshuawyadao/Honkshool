@@ -2,7 +2,7 @@
 
 ## Current state
 
-Honkshool is a pre-implementation, iPhone-first project for calm, uninterrupted factual narration during naps and bedtime. The public repository contains the product definition, delivery roadmap, decision history, contribution and security policies, and automated repository checks. It does not yet contain a runnable app or supported release.
+Honkshool is an iPhone-first project for calm, uninterrupted factual narration during naps and bedtime. The repository now contains an experimental iOS 26 feasibility console for audio and alarm testing in addition to the product definition, delivery roadmap, decision history, contribution and security policies, and automated repository checks. It does not contain a supported release or the intended product UI.
 
 The primary outcome is relaxation and rest. Interesting factual exposure is secondary, and the product must not claim subconscious learning, guaranteed retention, therapy, or treatment of insomnia or another medical condition.
 
@@ -11,6 +11,7 @@ The primary outcome is relaxation and rest. Interesting factual exposure is seco
 - [Product brief](Product-Brief.md): purpose, language and safety boundaries, core experience, first content, technical constraints, and first-release scope.
 - [Project implementation plan](Project-Implementation-Plan.md): durable phased delivery sequence, branch-sized milestones, acceptance criteria, test strategy, and validation goal.
 - [Decision log](Decision-Log.md): accepted, pending, and deferred product and technical decisions.
+- [Feasibility spike guide](Feasibility-Spike.md): Xcode setup, current implementation boundary, and the physical-device evidence checklist.
 - [Issue #1](https://github.com/joshuawyadao/Honkshool/issues/1): original public product-definition milestone.
 
 When these documents disagree, correct them together in the same pull request. The product brief owns product intent, the decision log owns why a consequential choice changed, and the project implementation plan owns sequencing and current next steps.
@@ -27,15 +28,9 @@ This flow intentionally excludes backend services, accounts, analytics, cloud sy
 
 ## Next milestone
 
-The next implementation branch is `spike/audio-and-alarm-feasibility`. It should validate the riskiest behavior on the target iPhone before the app architecture is committed:
+Phase 0 feasibility is complete as of 2026-09-15 on `spike/audio-and-alarm-feasibility`, pending review and merge. Physical audio/alarm checks passed, including Lock Screen controls, Siri interruption, headphone loss, relaunch reconciliation, and the full nine-minute snooze re-ring. The owner confirmed that the repaired snoozed card fits at the existing larger text setting. Automated layout coverage extends through the first accessibility text size, not every accessibility size.
 
-1. On-device narration during locked-screen background playback.
-2. Audio-session behavior during pauses, calls, route changes, and app lifecycle events.
-3. A controlled transition to ambience or silence.
-4. AlarmKit authorization, scheduling, cancellation, stop/snooze behavior, and reliability.
-5. The relationship between estimated script duration and a fixed wake time.
-
-Results belong in the decision log and should determine the playback interfaces used by later feature branches.
+Next is the framework-independent nap-planning core: content identity, immutable routes, timing, completion, and history rules with focused unit tests. Resolve narration-estimate variance (D-004) and short-window behavior (D-009) before implementing those rules. The wake deadline remains fixed; narration must not be accelerated to fit. No Phase 1 code is included in this closeout.
 
 ## Working agreement
 
@@ -53,4 +48,4 @@ Results belong in the decision log and should determine the playback interfaces 
 - Privacy-safe ignore rules for credentials, local configuration, personal data, logs, databases, and build output.
 - Structured bug and feature request forms that discourage sensitive public attachments.
 - A pull-request checklist covering behavior, tests, documentation, privacy, and security.
-- A dependency-free local verification command mirrored by quota-aware GitHub Actions.
+- Dependency-free repository verification plus a one-command iOS unit/UI suite, both mirrored by read-only GitHub Actions.
