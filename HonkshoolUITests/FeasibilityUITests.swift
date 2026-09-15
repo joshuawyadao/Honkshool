@@ -18,6 +18,34 @@ final class FeasibilityUITests: XCTestCase {
     continueAfterFailure = false
   }
 
+  func testAudioActivationFailureShowsAlertWithoutClaimingPlaybackStarted() {
+    for requiresAlarm in [true, false] {
+      let app = launch(alarm: .authorized, failAudioActivation: true)
+      if !requiresAlarm {
+        let toggle = app.switches["requireAlarm"]
+        scrollTo(toggle, in: app)
+        toggle.tap()
+      }
+      let start = app.buttons["startTest"]
+      scrollTo(start, in: app)
+      start.tap()
+      assertAlert(in: app, contains: "Playback did not start")
+      assertAlert(in: app, contains: "Audio session activation failed")
+      if requiresAlarm { assertAlert(in: app, contains: "wake alarm remains active") }
+      app.alerts.buttons["OK"].tap()
+      assertLabel(app.staticTexts["playbackPhase"], equals: "Phase, Failed")
+      assertLabel(
+        app.staticTexts["alarmStatus"],
+        equals: requiresAlarm ? "Alarm status, Scheduled" : "Alarm status, No alarm"
+      )
+      XCTAssertFalse(app.staticTexts["runMessage"].label.contains("Lock the screen"))
+      XCTAssertEqual(
+        app.staticTexts["runMessage"].label.contains("wake alarm remains active"), requiresAlarm
+      )
+      app.terminate()
+    }
+  }
+
   func testSchedulingLocksRunOptionsUntilAlarmIsReady() {
     let app = launch(alarm: .delayedSchedule)
     let start = app.buttons["startTest"]
@@ -221,13 +249,16 @@ final class FeasibilityUITests: XCTestCase {
     XCTAssertTrue(app.datePickers["exactWakeTime"].waitForExistence(timeout: 5))
   }
 
-  private func launch(alarm: AlarmScenario, reset: Bool = true) -> XCUIApplication {
+  private func launch(
+    alarm: AlarmScenario, reset: Bool = true, failAudioActivation: Bool = false
+  ) -> XCUIApplication {
     let app = XCUIApplication()
     app.launchArguments = ["-ui-testing"]
     app.launchEnvironment = [
       "HONKSHOOL_UI_TEST_ALARM": alarm.rawValue,
       "HONKSHOOL_UI_TEST_AUDIO": "1",
       "HONKSHOOL_UI_TEST_RESET": reset ? "1" : "0",
+      "HONKSHOOL_UI_TEST_AUDIO_FAILURE": failAudioActivation ? "1" : "0",
     ]
     app.launch()
     return app

@@ -5,7 +5,7 @@ Close the feasibility milestone using completed physical-device evidence, resolv
 ## Closeout action items
 
 - [x] Gate Start and Resume while a system interruption is active, retain manual resume after it ends, and cover pending-pause/Stop cases in controller regressions. PlaybackRegressionTests, strict formatting, and the diff check pass; the feasibility guide records the gate.
-- [ ] Announce a successful run only after audio activation succeeds; show the failure and retained alarm status otherwise. Add deterministic activation-failure UI coverage, run the full suite and Release build, then save and recheck PR gates.
+- [x] Announce a successful run only after audio activation succeeds; show the failure and retained alarm status otherwise. Deterministic activation-failure UI coverage passes for both alarm choices; the full 58-test suite, Release build, strict formatting, and repository checks pass. Recheck GitHub gates after saving.
 - [x] Record the final larger-text snooze pass and resolve or explicitly defer Phase 0 decisions.
 - [x] Align the feasibility guide, roadmap, overview, README, and contribution guidance.
 - [x] Verify repository checks and public-safe documentation (12/12 and `git diff --check` pass); prepare for commit and push.
@@ -43,7 +43,7 @@ The preceding task extracted and compacted the snoozed Lock Screen presentation,
 
 ## Validation
 
-- PR follow-up: 55/55 simulator tests (42 unit/controller/service/layout and 13 UI), 12/12 repository checks, strict formatting, and the unsigned Release simulator build pass. The original physical evidence below predates the review fixes; it is not relabeled as a new hardware run. On the next installation, spot-check the changed snoozed-card layout and interruption/resume behavior.
+- PR follow-up: 58/58 simulator tests (44 unit/controller/service/layout and 14 UI), 12/12 repository checks, strict formatting, and the unsigned Release simulator build pass. The original physical evidence below predates the review fixes; it is not relabeled as a new hardware run. On the next installation, spot-check the changed snoozed-card layout and interruption/resume behavior.
 
 - Red: the extracted pre-fix snoozed layout measured 216 points at xLarge against the 160-point system ceiling.
 - Green: the compact snoozed layout passes at xLarge, xxLarge, xxxLarge, and accessibility1; paused, alerting, and fallback states also pass at accessibility1.

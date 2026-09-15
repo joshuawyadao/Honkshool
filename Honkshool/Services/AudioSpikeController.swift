@@ -17,7 +17,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
   private let speechSynthesizer: AVSpeechSynthesizer
   private var activeUtterance: AVSpeechUtterance?
   private let ambienceEngine: AVAudioEngine
-  private let activateAudioSession: () throws -> Void
+  private let activateAudioSession: @MainActor () throws -> Void
   private let ambiencePlayer: AVAudioPlayerNode
   private var ambienceBuffer: AVAudioPCMBuffer?
   private var hasAmbienceToResume = false
@@ -43,7 +43,10 @@ final class AudioSpikeController: NSObject, ObservableObject {
     speechSynthesizer: AVSpeechSynthesizer? = nil,
     ambienceEngine: AVAudioEngine = AVAudioEngine(),
     ambiencePlayer: AVAudioPlayerNode = AVAudioPlayerNode(),
-    activateAudioSession: @escaping () throws -> Void = {
+    activateAudioSession: @escaping @MainActor () throws -> Void = {
+      #if DEBUG
+        try UITestFixtures.failAudioActivationIfRequested()
+      #endif
       let session = AVAudioSession.sharedInstance()
       try session.setCategory(.playback, mode: .spokenAudio, options: [])
       try session.setActive(true)

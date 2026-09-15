@@ -65,6 +65,13 @@ enum SpikePreferences {
       return UITestSpeechSynthesizer()
     }
 
+    static func failAudioActivationIfRequested() throws {
+      guard isEnabled,
+        ProcessInfo.processInfo.environment["HONKSHOOL_UI_TEST_AUDIO_FAILURE"] == "1"
+      else { return }
+      throw UITestFixtureError.requestedFailure
+    }
+
     private static var scenario: UITestAlarmScenario? {
       guard let rawValue = ProcessInfo.processInfo.environment[alarmScenarioEnvironmentKey]
       else { return nil }

@@ -369,15 +369,23 @@ struct FeasibilityConsoleView: View {
       now: .now
     ) {
     case .ready:
-      runMessage =
-        runAlarmEnabled
-        ? "Alarm scheduled before playback. Lock the screen and observe the test."
-        : "Alarm explicitly disabled. Lock the screen and observe the test."
       audio.startNarration(
         script: SampleContent.narration,
         title: SampleContent.sessionTitle,
         transitionToAmbience: runAmbienceEnabled
       )
+      guard audio.phase == .narrating else {
+        runMessage = "Playback did not start. \(audio.statusMessage)"
+        if alarm.hasTrackedAlarm {
+          runMessage += " The wake alarm remains active; cancel it separately if no longer needed."
+        }
+        blockedReason = runMessage
+        return
+      }
+      runMessage =
+        runAlarmEnabled
+        ? "Alarm scheduled before playback. Lock the screen and observe the test."
+        : "Alarm explicitly disabled. Lock the screen and observe the test."
     case .blocked(let reason):
       runMessage = reason
       blockedReason = reason
