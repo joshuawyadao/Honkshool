@@ -119,7 +119,7 @@ class PublicRepositoryTests(unittest.TestCase):
 
         for statement in (
             "spike/audio-and-alarm-feasibility",
-            "feature/nap-plan-domain",
+            "codex/nap-plan-domain",
             "feature/nap-playback-runtime",
             "validation/ten-nap-trial",
             "Physical-device acceptance",

@@ -53,6 +53,10 @@ A Nap Plan can contain:
 - offline ambience or silence; and
 - an optional final wake alarm.
 
+The planned wake deadline stays fixed even when narration takes longer than estimated. At the deadline, narration stops and unfinished content remains resumable; an unfinished session is not marked complete. Honkshool never accelerates speech or delays the alarm to finish a session. If narration finishes early, the selected ambience or silence fills unused time.
+
+When no complete factual session fits, the plan uses the selected ambience or silence. A shorter factual session may be used if it is already available and fits. Honkshool does not generate, compress, or truncate a session merely to fit a short window. The listener sees the resulting plan before starting. These timing rules are recorded in [D-004 and D-009](Decision-Log.md#phase-1-timing-resolution-2026-09-15).
+
 Before starting, the plan shows the duration or wake time, current journey and upcoming sessions, any journey boundary crossed, post-narration behavior, ambience selection, and alarm status and time.
 
 At a journey boundary, the default can be to continue into the recommended journey, transition to ambience, or fade to silence. If a nap crosses into another journey, the proposed route is selected and displayed before the nap and is implicitly approved unless the listener changes it.

@@ -29,17 +29,17 @@ This log preserves consequential Honkshool product and technical choices. The [p
 | D-020 | Offer recommended 20, 30, 45, and 60-minute rest windows, exact custom timing, and one reusable saved default; initialize the personal spike at 35 minutes. | The owner typically allows a 35-minute window for a desired 20-minute nap, while the app must not claim how much actual sleep occurs. | Accepted 2026-09-04 |
 | D-021 | Block an alarm-enabled run until AlarmKit is authorized and the requested alarm schedules successfully. | A plan that promises a wake alarm must never begin after silently losing that guarantee; the user may explicitly disable the alarm instead. | Accepted 2026-09-04 |
 | D-022 | Activate an exclusive playback audio session when a Honkshool run begins. | Existing music or podcast audio should yield so Honkshool provides one controlled, uninterrupted route. | Accepted 2026-09-04 |
+| D-004 | Keep the planned wake deadline fixed. Stop narration at that deadline, retain partial progress for resumption, and mark a session complete only when playback actually reaches its end. Fill unused time with the selected ambience or silence; never accelerate speech or delay the alarm. | Duration estimates can differ from actual narration, but rest timing and honest completion history must remain dependable. | Accepted 2026-09-15; resolves the Phase 0 deferral below |
+| D-009 | If no complete factual session fits, use the selected ambience or silence. An already available shorter factual session may be selected if it fits; never generate, compress, or truncate a session merely to fit. Show the resulting plan before starting. | Short rest windows must remain useful and predictable without rushing narration or hiding a changed plan. | Accepted 2026-09-15 |
 
 ## Pending decisions
 
-Resolved on 2026-09-15 from the corrected device runs: D-001, D-002, D-003, and D-005. Their accepted decisions and evidence are recorded in the closeout section below. D-004 is explicitly deferred from Phase 0 to Phase 1.
+Resolved on 2026-09-15 from the corrected device runs: D-001, D-002, D-003, and D-005. Their accepted decisions and evidence are recorded in the closeout section below. The owner subsequently resolved D-004 and D-009 for Phase 1; the dated timing resolution below preserves their earlier questions and Phase 0 deferral.
 
 | ID | Question | What must be learned | Needed before |
 | --- | --- | --- | --- |
-| D-004 | How should the planner absorb differences between estimated and actual narration duration? | Deferred from Phase 0 on 2026-09-15: preserve a fixed wake deadline, never accelerate speech, and fill unused time with ambience or silence. Measure the selected voice and specify overrun/partial-playback handling in Phase 1; the spike does not execute a timed Nap Plan. | Nap Plan domain rules |
 | D-007 | Which Apple voice, locale, base rate, pause conventions, and pronunciation mechanism should be standardized? | Run short listening comparisons on the target iPhone and document repeatable narration settings. | Prepared content branch |
 | D-008 | Which ambience asset can lawfully be distributed offline? | Confirm license/provenance, loop quality, file size, loudness, and interaction with narration and drift. | Prepared content branch |
-| D-009 | How should a short rest window behave when no complete factual session fits? | D-020 resolves selection and saved-default behavior; decide whether insufficient windows use a shorter selection, ambience only, or prevent starting. | Nap Plan domain rules |
 
 ## Phase 0 evidence: first device run, 2026-09-08
 
@@ -70,7 +70,16 @@ The owner completed the two focused checks on the repaired iPhone 14 Pro build. 
 
 The compact-layout repair was installed and launched on the iPhone 14 Pro. Nine deterministic UI tests passed on the connected device (reported iOS 26.6.2), separately from real alarm tests. The owner then confirmed that the snoozed Lock Screen card fits correctly with larger text and standard Display Zoom. This closes the final reported visual defect; the earlier failure record remains above.
 
-Phase 0 is complete with D-004 explicitly deferred with the fallback above. Renderer coverage extends through the first accessibility text size, not every accessibility size. Replacement-device checks and numerical narration-duration calibration remain future evidence.
+Phase 0 is complete. At its closeout, D-004 was explicitly deferred with the fallback above; the subsequent Phase 1 timing resolution below closes that product question. Renderer coverage extends through the first accessibility text size, not every accessibility size. Replacement-device checks and numerical narration-duration calibration remain future evidence.
+
+## Phase 1 timing resolution, 2026-09-15
+
+The owner approved the following product rules before implementation of the nap-planning domain. This approval resolves the pending choices; it does not supply numerical voice-duration measurements or runtime enforcement evidence.
+
+- **D-004 — Estimated versus actual narration duration:** The original question was how the planner should absorb differences between estimated and actual narration duration. Phase 0 deferred the full rule while retaining a fixed wake deadline, no speech acceleration, and ambience or silence for unused time. The approved resolution keeps that deadline fixed even when narration overruns: stop narration at the deadline, keep partial progress available for later resumption, and do not mark an unfinished session complete. Never accelerate speech or delay the alarm. Early completion leaves the remaining time for the selected ambience or silence. Configurable duration estimates and later voice calibration support planning; neither changes the deadline or completion rule.
+- **D-009 — Short rest windows:** The original question was whether a window too short for a complete factual session should select shorter content, use ambience only, or prevent starting; D-020 had already settled timing selection and saved-default behavior. The approved resolution uses the selected ambience or silence when no complete session fits. A shorter factual session may be used when it is already available and fits. Do not generate, compress, or truncate a session merely to fit. Show the resulting plan before starting so the listener approves the route and fallback before resting.
+
+These rules complete the product decisions needed for Nap Plan domain work. Production playback integration must later enforce the fixed deadline and supply actual completion and resume information; voice measurement remains part of prepared-content validation.
 
 ## Deferred beyond the first prototype
 

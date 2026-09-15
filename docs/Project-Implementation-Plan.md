@@ -10,7 +10,7 @@ Build Honkshool as a sequence of small, reviewable vertical slices, beginning wi
 ## Action items
 
 - [x] Resolve or explicitly defer the Phase 0 decision gates and run `spike/audio-and-alarm-feasibility` to establish narration, background audio, interruptions, Lock Screen controls, and AlarmKit feasibility on the target iPhone.
-- [ ] Build `feature/nap-plan-domain` with framework-independent journey, session, route, timing, completion, and history rules plus focused unit tests.
+- [x] Implement `codex/nap-plan-domain` with framework-independent journey, session, route, timing, completion, and history rules plus focused unit tests. Runtime execution and persistence remain in later branches.
 - [ ] Build `feature/local-content-catalog` with one citation-backed Enthusiast session from “How a Car Works,” source metadata, pronunciations, duration estimates, and one lawful offline ambience asset.
 - [ ] Build `feature/nap-plan-review` so a listener can continue or select local content, choose a duration or wake time, inspect the fixed route, select ambience or silence, and confirm the final alarm.
 - [ ] Build `feature/nap-playback-runtime` to execute the approved plan without mid-nap prompts, support background playback and appropriate media controls, transition after narration, and recover safely from expected audio interruptions.
@@ -40,7 +40,7 @@ Remove the largest technical risks before designing the full app around unverifi
 
 ### Current status
 
-Complete as of 2026-09-15, pending branch review and merge. Corrected-device checks passed for background narration, natural transitions, audio takeover, Lock Screen controls, Siri interruption, headphone disconnection, alarm delivery, cancellation, app relaunch, and the full nine-minute snooze re-ring. The owner confirmed the compact snoozed Live Activity fits at the existing larger text setting with standard Display Zoom. D-001, D-002, D-003, and D-005 are accepted; D-004 is explicitly deferred with a fixed wake deadline and ambience/silence fallback. After review and merge, the next targeted branch is the nap-planning core; it has not been implemented.
+Complete as of 2026-09-15; squash-merged through PR #2 as `45dcc71`. Corrected-device checks passed for background narration, natural transitions, audio takeover, Lock Screen controls, Siri interruption, headphone disconnection, alarm delivery, cancellation, app relaunch, and the full nine-minute snooze re-ring. The owner confirmed the compact snoozed Live Activity fits at the existing larger text setting with standard Display Zoom. D-001, D-002, D-003, and D-005 are accepted. D-004 was deferred at Phase 0 closeout and subsequently resolved with D-009 for Phase 1; the dated decision history remains in the decision log.
 
 ### Work
 
@@ -62,13 +62,17 @@ Complete as of 2026-09-15, pending branch review and merge. Corrected-device che
 
 Represent content and assemble a deterministic Nap Plan without coupling the rules to SwiftUI, SwiftData, speech, or AlarmKit.
 
+### Current status
+
+Implemented on `codex/nap-plan-domain` on 2026-09-15. The Foundation-only core snapshots deterministic plans, explicit approved routes and shorter alternatives, timing/fallback segments, and optional alarm deadlines. Pure playback outcomes retain partial checkpoints and advance progress only on actual completion; append-only history preserves replay, restart, and alternate paths. See [Nap-Planning-Domain.md](Nap-Planning-Domain.md) for allocation policy and the future adapter contract. This branch does not connect the domain to the feasibility console or provide persistence. The next branch is prepared local content.
+
 ### Core concepts
 
 - `Journey`: a finite ordered set of sessions and the branches available at completion.
-- `Session`: an original script, source references, summary, detail level, duration estimate, and pronunciation guidance.
+- `Session`: stable identity, content revision, title, and configurable duration estimate now; original script, source references, summary, detail level, and pronunciation guidance in Phase 2.
 - `NapRequest`: selected duration or wake time, starting point, post-journey behavior, ambience, and alarm preference.
 - `NapPlan`: immutable approved route containing settling, factual sessions, drift, ambience or silence, and optional alarm timing.
-- `PlaybackRecord`: local evidence of what was played, for how long, and whether it completed.
+- `PlaybackRecord`: in-memory evidence of what was played, for how long, and whether it completed, including revision-specific resume information; local persistence follows in Phase 3.
 
 ### Exit criteria
 

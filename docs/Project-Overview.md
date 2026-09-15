@@ -2,7 +2,7 @@
 
 ## Current state
 
-Honkshool is an iPhone-first project for calm, uninterrupted factual narration during naps and bedtime. The repository now contains an experimental iOS 26 feasibility console for audio and alarm testing in addition to the product definition, delivery roadmap, decision history, contribution and security policies, and automated repository checks. It does not contain a supported release or the intended product UI.
+Honkshool is an iPhone-first project for calm, uninterrupted factual narration during naps and bedtime. The repository now contains an experimental iOS 26 feasibility console for audio and alarm testing and a separate Foundation-only nap-planning domain, in addition to the product definition, delivery roadmap, decision history, contribution and security policies, and automated repository checks. It does not contain a supported release or the intended product UI.
 
 The primary outcome is relaxation and rest. Interesting factual exposure is secondary, and the product must not claim subconscious learning, guaranteed retention, therapy, or treatment of insomnia or another medical condition.
 
@@ -11,6 +11,7 @@ The primary outcome is relaxation and rest. Interesting factual exposure is seco
 - [Product brief](Product-Brief.md): purpose, language and safety boundaries, core experience, first content, technical constraints, and first-release scope.
 - [Project implementation plan](Project-Implementation-Plan.md): durable phased delivery sequence, branch-sized milestones, acceptance criteria, test strategy, and validation goal.
 - [Decision log](Decision-Log.md): accepted, pending, and deferred product and technical decisions.
+- [Nap-planning domain](Nap-Planning-Domain.md): immutable plans, timing, playback outcomes, resume/history rules, and the future adapter contract.
 - [Feasibility spike guide](Feasibility-Spike.md): Xcode setup, current implementation boundary, and the physical-device evidence checklist.
 - [Issue #1](https://github.com/joshuawyadao/Honkshool/issues/1): original public product-definition milestone.
 
@@ -28,9 +29,11 @@ This flow intentionally excludes backend services, accounts, analytics, cloud sy
 
 ## Next milestone
 
-Phase 0 feasibility is complete as of 2026-09-15 on `spike/audio-and-alarm-feasibility`, pending review and merge. Physical audio/alarm checks passed, including Lock Screen controls, Siri interruption, headphone loss, relaunch reconciliation, and the full nine-minute snooze re-ring. The owner confirmed that the repaired snoozed card fits at the existing larger text setting. Automated layout coverage extends through the first accessibility text size, not every accessibility size.
+Phase 0 feasibility is complete as of 2026-09-15, squash-merged through PR #2 as `45dcc71`. Physical audio/alarm checks passed, including Lock Screen controls, Siri interruption, headphone loss, relaunch reconciliation, and the full nine-minute snooze re-ring. The owner confirmed that the repaired snoozed card fits at the existing larger text setting. Automated layout coverage extends through the first accessibility text size, not every accessibility size.
 
-Next is the framework-independent nap-planning core: content identity, immutable routes, timing, completion, and history rules with focused unit tests. Resolve narration-estimate variance (D-004) and short-window behavior (D-009) before implementing those rules. The wake deadline remains fixed; narration must not be accelerated to fit. No Phase 1 code is included in this closeout.
+Phase 1 is implemented on `codex/nap-plan-domain`: stable content identity, immutable routes, fixed deadlines, configurable settling/drift and fallback, completion-based progress, and partial/resumable listening history, with focused unit tests. D-004 and D-009 are accepted in the decision log. The console remains unchanged and the new core has no runtime or persistence connection.
+
+Next is the prepared-content branch: one original citation-backed automotive session, measured narration estimates, and one lawful offline ambience asset. D-007 (voice/pacing) and D-008 (ambience provenance) remain open for that work; plan review, runtime cutoff enforcement, and SwiftData history follow.
 
 ## Working agreement
 

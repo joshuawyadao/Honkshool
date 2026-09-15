@@ -1,53 +1,23 @@
 # Plan
 
-Close the feasibility milestone using completed physical-device evidence, resolve supported decisions, align the durable roadmap, and prepare the existing branch for review. Do not merge or begin Phase 1 implementation.
-
-## Closeout action items
-
-- [x] Gate Start and Resume while a system interruption is active, retain manual resume after it ends, and cover pending-pause/Stop cases in controller regressions. PlaybackRegressionTests, strict formatting, and the diff check pass; the feasibility guide records the gate.
-- [x] Announce a successful run only after audio activation succeeds; show the failure and retained alarm status otherwise. Deterministic activation-failure UI coverage passes for both alarm choices; the full 58-test suite, Release build, strict formatting, and repository checks pass. Recheck GitHub gates after saving.
-- [x] Record the final larger-text snooze pass and resolve or explicitly defer Phase 0 decisions.
-- [x] Align the feasibility guide, roadmap, overview, README, and contribution guidance.
-- [x] Verify repository checks and public-safe documentation (12/12 and `git diff --check` pass); prepare for commit and push.
-- [x] Open [PR #2](https://github.com/joshuawyadao/Honkshool/pull/2), request Codex review, and perform a sampled Brooks review. Latest-commit review and CI status remain authoritative on the PR.
-- [x] Fix the Brooks review finding that UI-test fixtures share real alarm/preferences storage; isolate all three consumers and add a regression. The full simulator suite, Release build, strict formatting, repository checks, and diff check pass.
-- [x] Address Codex feedback: cancel tracked alarms before alarm-disabled starts, expose a terminal state after media reset, and reactivate audio on manual resume, including stopped ambience engines. Focused regressions and the complete simulator suite pass; save each item separately.
-- Report latest review/CI readiness without merging. Leave nap-planning work for the next targeted branch.
-- [x] Address the next review pass: active-run replacement, reset latching, wake-preview freshness, pending speech pauses, D-006 history, and bounded alarm reconciliation. Each item has been verified and saved separately.
-- [x] Resolve the CI layout failure: reproduce the 179-point UTC/US overflow, give the deadline its own full-width row, cover locale/time-zone variants, improve failure diagnostics, and rerun the complete suite and Release build.
-- [x] Address final-review races: snapshot/lock run options across scheduling and restore the ambience loop even when its engine remains running. Both have regressions; the full suite and Release build pass.
-
-## Completed layout-repair context
-
-The preceding task extracted and compacted the snoozed Lock Screen presentation, added a renderer regression, and retained one physical visual check. Its scope and validation are preserved below.
+Implement Honkshool's deterministic nap-planning core on `codex/nap-plan-domain`, based on current main (`45dcc71`, PR #2). Keep approved routes and wake deadlines fixed, preserve partial playback and all prior listening history, and leave the feasibility console intact.
 
 ## Scope
 
-- In: Snoozed Lock Screen Live Activity layout, larger Dynamic Type rendering, cancellation-control accessibility, a focused layout regression test, physical-test evidence documentation, and installation of the repaired build for confirmation.
-- Out: Changing the nine-minute snooze behavior, reducing the owner’s text size, changing alarm reliability logic, redesigning the in-app feasibility console, or claiming that a rendered test fully substitutes for Apple’s Lock Screen host.
+- In: Foundation-only content identities and estimates, requests and immutable plans, preselected transitions and shorter alternatives, settling/drift/fallback timing, playback outcomes, resume checkpoints, completion-based progress, tests, and current project documentation.
+- Out: product UI, production playback/alarm adapters, persistence, final content/voice/ambience selection, new dependencies, backend services, distribution, and PR creation or merge.
 
 ## Action items
 
-- [x] Extract the Lock Screen presentation from `HonkshoolAlarmWidget.swift` into a reusable SwiftUI layout that preserves the current overflowing structure before repair.
-- [x] Add an `ImageRenderer` XCTest at the iPhone 14 Pro’s 371-point content width, Apple’s 160-point Live Activity height limit, and larger Dynamic Type; confirm it fails on the captured snoozed layout at 216 points.
-- [x] Move the cancellation action into a compact header/body composition, use the 14-point Lock Screen horizontal margin, retain an accessible “Cancel alarm” label, and avoid capping Dynamic Type.
-- [x] Verify countdown, paused, alerting, and fallback states still fit the Lock Screen ceiling and that the unchanged Dynamic Island presentations compile.
-- [x] Update `Feasibility-Spike.md`, `Project-Implementation-Plan.md`, `Project-Overview.md`, and the decision evidence to record the functional physical-device passes and isolate the remaining visual confirmation.
-- [x] Run the focused red/green regression, complete iOS suite, public-repository checks, strict Swift formatting, Release build, and `git diff --check`.
-- [x] Check for a connected iPhone; none is currently available, so leave only installation and a 60-second alarm/snooze Lock Screen visual confirmation for the owner.
-- [x] Review and prepare the scoped fix for commit and push on the current feasibility branch.
+- [x] Inspect supplied AGENTS instructions (no repository AGENTS.md exists), README, Product-Brief, Project-Implementation-Plan, Decision-Log, Project-Overview, Swift domain/tests, Xcode configuration, and validation scripts; confirm clean main, fetch origin, fast-forward safely, and create the requested feature branch.
+- [x] Record approved D-004 and D-009 with dated resolutions and retained Phase 0 evidence; correct stale pending-review/merge wording in README and durable status docs.
+- [x] Add small value types and deterministic planning rules in `Honkshool/Domain`, with injected dates, identities, catalog availability, configurable durations, and immutable route snapshots. Document allocation and preapproved shorter-candidate policy.
+- [x] Add explicit playback outcomes and resumable content checkpoints, enforcing the fixed deadline and natural-completion-only advancement with append-only listening history.
+- [x] Add focused XCTest coverage for timing edges, short windows and fallbacks, approved boundaries, missing content, early/late outcomes, resume, immutable routes, replay/restart/alternate history, and invalid inputs; register files in the Xcode project.
+- [x] Run targeted domain XCTest cases, the complete `./scripts/test-ios.sh` suite on available iPhone 17 Pro / iOS 26.5, `./scripts/verify-repository.sh`, a Foundation-only compilation, and a Release simulator build. Results: 45 focused tests and 103 full-suite tests passed with zero failures/skips, 12 repository checks passed, Foundation-only compilation and Release simulator build passed, and all new Swift files passed strict formatting lint. Xcode 27.0 reported one internal QoS warning during the full suite; no phone installation or physical acceptance was needed. Existing test assertions were retained; the repository roadmap assertion now uses the actual feature branch name.
+- [x] Review invariants and update `docs/Nap-Planning-Domain.md`, Product-Brief, README, Project-Overview, and the durable `docs/Project-Implementation-Plan.md` with completed scope and remaining prepared-content/runtime/persistence work.
+- [x] Inspect the final diff, stage only task files, commit with a concrete message referencing this plan, and push `codex/nap-plan-domain` using `save-branch`.
 
 ## Open questions
 
-- None. Preserve the user’s larger text setting and treat the screenshot as the authoritative system-hosted reproduction.
-
-## Validation
-
-- PR follow-up: 58/58 simulator tests (44 unit/controller/service/layout and 14 UI), 12/12 repository checks, strict formatting, and the unsigned Release simulator build pass. The original physical evidence below predates the review fixes; it is not relabeled as a new hardware run. On the next installation, spot-check the changed snoozed-card layout and interruption/resume behavior.
-
-- Red: the extracted pre-fix snoozed layout measured 216 points at xLarge against the 160-point system ceiling.
-- Green: the compact snoozed layout passes at xLarge, xxLarge, xxxLarge, and accessibility1; paused, alerting, and fallback states also pass at accessibility1.
-- Complete simulator suite: 39 of 39 tests pass.
-- Public-repository checks: 12 of 12 pass.
-- Strict Swift formatting, property-list validation, the unsigned Release simulator build, and `git diff --check` pass.
-- Follow-up on 2026-09-15: the signed repair was installed and launched on the iPhone 14 Pro, nine deterministic device UI tests passed, and the owner confirmed the snoozed card fits correctly at the existing larger text setting. No further manual check is needed for this documentation-only closeout.
+- None. The owner approved fixed-deadline overrun handling and short-window fallback. Routine policies remain explicit: reserve settling then drift within the available window; preserve ordered sessions without skipping; choose shorter content only from caller-supplied preapproved alternatives; do not append content after playback starts.
