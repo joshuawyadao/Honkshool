@@ -12,6 +12,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
   @Published private(set) var phase: PlaybackPhase = .idle
   @Published private(set) var statusMessage = "Ready to test narration."
   @Published private(set) var eventLog: [AudioEvent] = []
+  @Published private(set) var interruptionIsActive = false
 
   private let speechSynthesizer: AVSpeechSynthesizer
   private var activeUtterance: AVSpeechUtterance?
@@ -30,7 +31,12 @@ final class AudioSpikeController: NSObject, ObservableObject {
   private var resumeAfterPause = false
 
   var canStartNewRun: Bool {
-    !requiresRelaunch && (phase == .idle || phase == .stopped || phase == .failed)
+    !requiresRelaunch && !interruptionIsActive
+      && (phase == .idle || phase == .stopped || phase == .failed)
+  }
+
+  var canResume: Bool {
+    !requiresRelaunch && !interruptionIsActive && (phase == .paused || phase == .interrupted)
   }
 
   init(
@@ -72,6 +78,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
     title: String,
     transitionToAmbience: Bool
   ) {
+    guard !interruptionIsActive else { return }
     guard !requiresRelaunch else {
       phase = .failed
       statusMessage = "Media services reset. Relaunch Honkshool before starting a new test."
@@ -121,7 +128,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
   }
 
   func resume() {
-    guard phase == .paused || phase == .interrupted else { return }
+    guard canResume else { return }
     if pauseRequested && !speechSynthesizer.isPaused {
       resumeAfterPause = true
       statusMessage = "Waiting for narration to reach a pause boundary."
@@ -356,6 +363,10 @@ final class AudioSpikeController: NSObject, ObservableObject {
 
     switch type {
     case .began:
+      interruptionIsActive = true
+      resumeAfterPause = false
+      MPRemoteCommandCenter.shared().playCommand.isEnabled = false
+      MPRemoteCommandCenter.shared().togglePlayPauseCommand.isEnabled = false
       guard phase == .narrating || phase == .ambience || phase == .paused else { return }
       if speechSynthesizer.isSpeaking {
         _ = requestNarrationPause()
@@ -364,10 +375,13 @@ final class AudioSpikeController: NSObject, ObservableObject {
         ambiencePlayer.pause()
       }
       phase = .interrupted
-      statusMessage = "Audio was interrupted. The spike will not resume automatically."
+      statusMessage = "Audio is interrupted. Wait for it to end before resuming manually."
       appendEvent("Interruption began; playback paused")
       updateNowPlayingPlaybackRate(0)
     case .ended:
+      interruptionIsActive = false
+      MPRemoteCommandCenter.shared().playCommand.isEnabled = true
+      MPRemoteCommandCenter.shared().togglePlayPauseCommand.isEnabled = true
       guard phase == .interrupted else { return }
       let rawOptions = notification.userInfo?[AVAudioSessionInterruptionOptionKey] as? UInt ?? 0
       let options = AVAudioSession.InterruptionOptions(rawValue: rawOptions)

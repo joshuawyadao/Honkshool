@@ -219,6 +219,39 @@ private final class TrackingAmbiencePlayer: AVAudioPlayerNode, @unchecked Sendab
 
 @MainActor
 final class PlaybackRegressionTests: XCTestCase {
+  func testInterruptionCancelsResumeQueuedAtSpeechBoundary() async throws {
+    let speech = FakeSpeechSynthesizer()
+    speech.delaysPause = true
+    var activations = 0
+    let audio = AudioSpikeController(
+      speechSynthesizer: speech, activateAudioSession: { activations += 1 }
+    )
+    defer { audio.stop() }
+    audio.startNarration(script: "Test", title: "Test", transitionToAmbience: false)
+    let utterance = try XCTUnwrap(speech.utterances.first)
+    audio.pause()
+    audio.resume()
+    NotificationCenter.default.post(
+      name: AVAudioSession.interruptionNotification, object: nil,
+      userInfo: [AVAudioSessionInterruptionTypeKey: AVAudioSession.InterruptionType.began.rawValue]
+    )
+    await wait(for: .interrupted, in: audio)
+    audio.resume()
+    speech.completePause()
+    audio.speechSynthesizer(speech, didPause: utterance)
+    XCTAssertEqual(audio.phase, .interrupted)
+    XCTAssertEqual(activations, 1)
+    NotificationCenter.default.post(
+      name: AVAudioSession.interruptionNotification, object: nil,
+      userInfo: [AVAudioSessionInterruptionTypeKey: AVAudioSession.InterruptionType.ended.rawValue]
+    )
+    for _ in 0..<5 { await Task.yield() }
+    XCTAssertEqual(audio.phase, .interrupted)
+    audio.resume()
+    XCTAssertEqual(audio.phase, .narrating)
+    XCTAssertEqual(activations, 2)
+  }
+
   func testImmediateResumeWaitsForSpeechPauseBoundary() throws {
     let speech = FakeSpeechSynthesizer()
     speech.delaysPause = true
@@ -342,6 +375,13 @@ final class PlaybackRegressionTests: XCTestCase {
     engine.stop()
     XCTAssertFalse(engine.isRunning)
     audio.resume()
+    XCTAssertFalse(engine.isRunning)
+    NotificationCenter.default.post(
+      name: AVAudioSession.interruptionNotification, object: nil,
+      userInfo: [AVAudioSessionInterruptionTypeKey: AVAudioSession.InterruptionType.ended.rawValue]
+    )
+    for _ in 0..<5 { await Task.yield() }
+    audio.resume()
     XCTAssertTrue(engine.isRunning)
     XCTAssertEqual(audio.phase, .ambience)
   }
@@ -404,7 +444,10 @@ final class PlaybackRegressionTests: XCTestCase {
 
   func testSystemInterruptionPausesAndRequiresExplicitResume() async {
     let speech = FakeSpeechSynthesizer()
-    let audio = AudioSpikeController(speechSynthesizer: speech)
+    var activations = 0
+    let audio = AudioSpikeController(
+      speechSynthesizer: speech, activateAudioSession: { activations += 1 }
+    )
     defer { audio.stop() }
     audio.startNarration(script: "Test", title: "Test", transitionToAmbience: false)
     NotificationCenter.default.post(
@@ -416,6 +459,12 @@ final class PlaybackRegressionTests: XCTestCase {
     )
     await wait(for: .interrupted, in: audio)
     XCTAssertTrue(speech.isPaused)
+    XCTAssertFalse(audio.canResume)
+    XCTAssertFalse(MPRemoteCommandCenter.shared().playCommand.isEnabled)
+    audio.resume()
+    audio.togglePlayback()
+    XCTAssertEqual(activations, 1)
+    XCTAssertEqual(audio.phase, .interrupted)
 
     NotificationCenter.default.post(
       name: AVAudioSession.interruptionNotification,
@@ -429,8 +478,34 @@ final class PlaybackRegressionTests: XCTestCase {
     for _ in 0..<5 { await Task.yield() }
     XCTAssertEqual(audio.phase, .interrupted)
     XCTAssertTrue(audio.statusMessage.contains("Resume manually"))
+    XCTAssertTrue(audio.canResume)
+    XCTAssertEqual(activations, 1)
     audio.resume()
     XCTAssertEqual(audio.phase, .narrating)
+    XCTAssertEqual(activations, 2)
+  }
+
+  func testInterruptionBlocksNewRunsEvenAfterStopOrWhileIdle() async {
+    let speech = FakeSpeechSynthesizer()
+    let audio = AudioSpikeController(speechSynthesizer: speech, activateAudioSession: {})
+    NotificationCenter.default.post(
+      name: AVAudioSession.interruptionNotification, object: nil,
+      userInfo: [AVAudioSessionInterruptionTypeKey: AVAudioSession.InterruptionType.began.rawValue]
+    )
+    for _ in 0..<5 { await Task.yield() }
+    XCTAssertFalse(audio.canStartNewRun)
+    audio.startNarration(script: "Test", title: "Test", transitionToAmbience: false)
+    audio.stop()
+    XCTAssertFalse(audio.canStartNewRun)
+    audio.startNarration(script: "Test", title: "Test", transitionToAmbience: false)
+    XCTAssertTrue(speech.utterances.isEmpty)
+    NotificationCenter.default.post(
+      name: AVAudioSession.interruptionNotification, object: nil,
+      userInfo: [AVAudioSessionInterruptionTypeKey: AVAudioSession.InterruptionType.ended.rawValue]
+    )
+    for _ in 0..<5 { await Task.yield() }
+    XCTAssertTrue(audio.canStartNewRun)
+    XCTAssertEqual(audio.phase, .stopped)
   }
 
   func testDisconnectedOutputPausesUntilExplicitResume() async {

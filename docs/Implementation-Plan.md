@@ -4,6 +4,8 @@ Close the feasibility milestone using completed physical-device evidence, resolv
 
 ## Closeout action items
 
+- [x] Gate Start and Resume while a system interruption is active, retain manual resume after it ends, and cover pending-pause/Stop cases in controller regressions. PlaybackRegressionTests, strict formatting, and the diff check pass; the feasibility guide records the gate.
+- [ ] Announce a successful run only after audio activation succeeds; show the failure and retained alarm status otherwise. Add deterministic activation-failure UI coverage, run the full suite and Release build, then save and recheck PR gates.
 - [x] Record the final larger-text snooze pass and resolve or explicitly defer Phase 0 decisions.
 - [x] Align the feasibility guide, roadmap, overview, README, and contribution guidance.
 - [x] Verify repository checks and public-safe documentation (12/12 and `git diff --check` pass); prepare for commit and push.

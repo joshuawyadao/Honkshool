@@ -295,9 +295,7 @@ struct FeasibilityConsoleView: View {
             )
             .accessibilityIdentifier("pausePlayback")
           Button("Resume") { audio.resume() }
-            .disabled(
-              audio.phase != .paused && audio.phase != .interrupted
-            )
+            .disabled(!audio.canResume)
             .accessibilityIdentifier("resumePlayback")
           Button("Stop", role: .destructive) { audio.stop() }
             .disabled(audio.phase == .idle || audio.phase == .stopped)
