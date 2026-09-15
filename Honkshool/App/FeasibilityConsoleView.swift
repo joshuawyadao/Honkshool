@@ -56,12 +56,11 @@ struct FeasibilityConsoleView: View {
       .task { await alarm.observeUpdates() }
       .task(id: scenePhase) {
         guard scenePhase == .active else { return }
-        // Alarm and ActivityKit updates can arrive separately. While foregrounded,
-        // reconcile both until the authoritative snooze deadline is available.
-        while !Task.isCancelled {
-          alarm.refresh()
-          do { try await Task.sleep(for: .seconds(1)) } catch { return }
-        }
+        alarm.refresh()
+      }
+      .task(id: scenePhase == .active && alarm.needsCountdownReconciliation) {
+        guard scenePhase == .active && alarm.needsCountdownReconciliation else { return }
+        await alarm.reconcileCountdown()
       }
       .onAppear {
         alarm.refresh()

@@ -516,6 +516,7 @@ private final class FakeAlarmSystem: AlarmSystem {
   var failCancellation = false
   var failReads = false
   var failScheduling = false
+  var readCount = 0
   var scheduledIDs: [UUID] = []
   var cancelledIDs: [UUID] = []
   var continuation: AsyncStream<Void>.Continuation?
@@ -525,6 +526,7 @@ private final class FakeAlarmSystem: AlarmSystem {
 
   func requestAuthorization() async throws -> AlarmAuthorizationSnapshot { authorization }
   func alarms() throws -> [SystemAlarmRecord] {
+    readCount += 1
     if failReads { throw Failure.requested }
     return records
   }
@@ -561,6 +563,51 @@ final class AlarmRegressionTests: XCTestCase {
 
   override func tearDown() {
     defaults.removePersistentDomain(forName: suiteName)
+  }
+
+  func testReconciliationDoesNotPollWithoutAnUnresolvedCountdown() async {
+    let system = FakeAlarmSystem()
+    let service = AlarmSpikeService(system: system, defaults: defaults, now: { self.now })
+    var delays: [Duration] = []
+    let initialReads = system.readCount
+    await service.reconcileCountdown { delays.append($0) }
+    XCTAssertTrue(delays.isEmpty)
+    XCTAssertEqual(system.readCount, initialReads)
+    _ = await service.schedule(at: now.addingTimeInterval(60))
+    let scheduledReads = system.readCount
+    await service.reconcileCountdown { delays.append($0) }
+    XCTAssertTrue(delays.isEmpty)
+    XCTAssertEqual(system.readCount, scheduledReads)
+  }
+
+  func testUnresolvedCountdownBacksOffThenStopsWhenDeadlineArrives() async throws {
+    let system = FakeAlarmSystem()
+    let service = AlarmSpikeService(system: system, defaults: defaults, now: { self.now })
+    _ = await service.schedule(at: now.addingTimeInterval(60))
+    let id = try XCTUnwrap(system.scheduledIDs.first)
+    system.records = [
+      SystemAlarmRecord(id: id, state: .countdown, originalDate: now, countdownFireDate: nil)
+    ]
+    service.refresh()
+    XCTAssertTrue(service.needsCountdownReconciliation)
+    var delays: [Duration] = []
+    let deadline = now.addingTimeInterval(540)
+    await service.reconcileCountdown { delay in
+      delays.append(delay)
+      if delays.count == 7 {
+        system.records = [
+          SystemAlarmRecord(
+            id: id, state: .countdown, originalDate: self.now, countdownFireDate: deadline
+          )
+        ]
+      }
+    }
+    XCTAssertEqual(delays, Array(repeating: .seconds(1), count: 5) + [.seconds(30), .seconds(30)])
+    XCTAssertFalse(service.needsCountdownReconciliation)
+    XCTAssertEqual(service.scheduledDate, deadline)
+    let resolvedReads = system.readCount
+    await service.reconcileCountdown { _ in XCTFail("Resolved countdown must not poll") }
+    XCTAssertEqual(system.readCount, resolvedReads)
   }
 
   func testSnoozeRefreshUsesSystemDeadlineAndSurvivesRelaunch() async throws {

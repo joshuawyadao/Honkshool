@@ -177,7 +177,24 @@ final class AlarmSpikeService: ObservableObject {
   }
 
   var hasTrackedAlarm: Bool { scheduledAlarmID != nil }
+  var needsCountdownReconciliation: Bool {
+    hasTrackedAlarm && alarmStatus.phase == .snoozed && alarmStatus.nextAlertDate == nil
+  }
   var scheduledDate: Date? { alarmStatus.nextAlertDate }
+
+  func reconcileCountdown(
+    wait: (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
+  ) async {
+    var attempts = 0
+    while needsCountdownReconciliation && !Task.isCancelled {
+      // Alarm and ActivityKit updates may arrive separately. Retry briefly,
+      // then back off; ordinary alarm changes arrive through alarmUpdates.
+      do { try await wait(.seconds(attempts < 5 ? 1 : 30)) } catch { return }
+      guard needsCountdownReconciliation && !Task.isCancelled else { return }
+      refresh()
+      attempts += 1
+    }
+  }
 
   var scheduleSnapshot: AlarmScheduleSnapshot {
     guard alarmStatus.phase == .scheduled, let scheduledDate else { return .notScheduled }
