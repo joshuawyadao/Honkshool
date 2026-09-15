@@ -1,6 +1,18 @@
 # Plan
 
-Fix the snoozed AlarmKit Live Activity so its cancellation control remains inside the 160-point Lock Screen presentation at the owner’s larger text setting. Extract the Lock Screen layout into a renderable seam, reproduce the overflow with an image-renderer regression test, compact the layout without capping Dynamic Type, and retain one real-device confirmation for Apple’s system-hosted surface.
+Close the feasibility milestone using completed physical-device evidence, resolve supported decisions, align the durable roadmap, and prepare the existing branch for review. Do not merge or begin Phase 1 implementation.
+
+## Closeout action items
+
+- [x] Record the final larger-text snooze pass and resolve or explicitly defer Phase 0 decisions.
+- [x] Align the feasibility guide, roadmap, overview, README, and contribution guidance.
+- [x] Verify repository checks and public-safe documentation (12/12 and `git diff --check` pass); prepare for commit and push.
+- [ ] Open the PR, request Codex review, perform a sampled Brooks review, and address actionable findings and CI failures.
+- [ ] Report readiness without merging. Leave nap-planning work for the next targeted branch.
+
+## Completed layout-repair context
+
+The preceding task extracted and compacted the snoozed Lock Screen presentation, added a renderer regression, and retained one physical visual check. Its scope and validation are preserved below.
 
 ## Scope
 
@@ -29,4 +41,4 @@ Fix the snoozed AlarmKit Live Activity so its cancellation control remains insid
 - Complete simulator suite: 39 of 39 tests pass.
 - Public-repository checks: 12 of 12 pass.
 - Strict Swift formatting, property-list validation, the unsigned Release simulator build, and `git diff --check` pass.
-- No physical iPhone was connected for installation; Apple’s system-hosted snooze card still requires one visual confirmation after installation.
+- Follow-up on 2026-09-15: the signed repair was installed and launched on the iPhone 14 Pro, nine deterministic device UI tests passed, and the owner confirmed the snoozed card fits correctly at the existing larger text setting. No further manual check is needed for this documentation-only closeout.

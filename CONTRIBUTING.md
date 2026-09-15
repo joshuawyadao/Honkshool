@@ -29,7 +29,7 @@ By participating, you agree to follow the [Contributor Covenant Code of Conduct]
    ./scripts/test-ios.sh
    ```
 
-   The [feasibility spike guide](docs/Feasibility-Spike.md) documents destination overrides and the two combined physical checks that remain for real locked-screen audio, hardware routing, and AlarmKit delivery. Simulator success is not physical-device acceptance evidence.
+   The [feasibility spike guide](docs/Feasibility-Spike.md) documents destination overrides, completed physical acceptance, and when to repeat affected locked-screen audio, hardware-routing, or AlarmKit checks. Simulator success is not physical-device acceptance evidence.
 
 5. Describe the user-visible outcome, privacy and security implications, verification performed, and any known limitations in the pull request.
 

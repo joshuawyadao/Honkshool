@@ -31,13 +31,11 @@ This log preserves consequential Honkshool product and technical choices. The [p
 
 ## Pending decisions
 
+Resolved on 2026-09-15 from the corrected device runs: D-001, D-002, D-003, and D-005. Their accepted decisions and evidence are recorded in the closeout section below. D-004 is explicitly deferred from Phase 0 to Phase 1.
+
 | ID | Question | What must be learned | Needed before |
 | --- | --- | --- | --- |
-| D-001 | Should narration stream directly from AVSpeechSynthesizer or use a locally rendered/buffered strategy? | Compare background reliability, pause/resume, timing precision, Lock Screen control, power, storage, and implementation complexity on the target device. | Playback architecture in Phase 1 |
-| D-002 | What audio-session and interruption policy should the prototype use? | Define behavior for phone calls, Siri, headphones disconnecting, route changes, other audio, manual pause, and app termination. | First tracer-bullet implementation |
-| D-003 | Does AlarmKit meet the required physical-device reliability and system interaction expectations? | The blocking authorization and scheduling policy is accepted in D-021; verify system prompts, firing after backgrounding or termination, cancellation, stop, snooze, and relaunch reconciliation. | Nap Plan review and alarm integration |
-| D-004 | How should the planner absorb differences between estimated and actual narration duration? | Measure the selected voice and decide where slack, drift, ambience, or silence may adjust without changing narration speed or wake time. | Nap Plan domain rules |
-| D-005 | Which Lock Screen controls and Now Playing metadata belong in the first release? | Balance familiar control with protection against accidental route changes or misleading progress. | Playback runtime |
+| D-004 | How should the planner absorb differences between estimated and actual narration duration? | Deferred from Phase 0 on 2026-09-15: preserve a fixed wake deadline, never accelerate speech, and fill unused time with ambience or silence. Measure the selected voice and specify overrun/partial-playback handling in Phase 1; the spike does not execute a timed Nap Plan. | Nap Plan domain rules |
 | D-007 | Which Apple voice, locale, base rate, pause conventions, and pronunciation mechanism should be standardized? | Run short listening comparisons on the target iPhone and document repeatable narration settings. | Prepared content branch |
 | D-008 | Which ambience asset can lawfully be distributed offline? | Confirm license/provenance, loop quality, file size, loudness, and interaction with narration and drift. | Prepared content branch |
 | D-009 | How should a short rest window behave when no complete factual session fits? | D-020 resolves selection and saved-default behavior; decide whether insufficient windows use a shorter selection, ambience only, or prevent starting. | Nap Plan domain rules |
@@ -62,7 +60,18 @@ The owner completed the two focused checks on the repaired iPhone 14 Pro build. 
 - D-005: Lock Screen pause/resume/Stop passed and disabled skip/seek affordances remained acceptable. The snoozed AlarmKit Live Activity exposed one separate larger-text clipping defect; a compact, uncapped Dynamic Type layout and renderer regression address it, pending one visual confirmation on the system-hosted Lock Screen.
 - Blocked-start feedback and active-alarm scrolling passed after repair.
 
-## Deferred decisions
+## Phase 0 closeout: accepted decisions, 2026-09-15
+
+- **D-001 — Direct speech:** Use AVSpeechSynthesizer directly for the initial prototype. Corrected-device background playback and controls passed. Buffered audio remains an alternative if measured reliability or timing requires it; comparative power/storage benchmarks were not performed.
+- **D-002 — Interruption policy:** Pause for system interruptions and headphone loss, requiring explicit resume. Stop ends narration and ambience while leaving the separately managed wake alarm intact. Termination ends playback; relaunch does not automatically restart it. Siri and headphone checks passed; calls follow the same interruption policy but a separate real-call check was not performed.
+- **D-003 — AlarmKit:** Proceed with Honkshool-owned alarms, retaining D-021's authorization/scheduling gate and the tested nine-minute snooze. Reconcile alarm state and snooze deadlines from the system. Locked delivery, cancellation, stop, termination/relaunch, and the full snooze re-ring passed. This establishes personal-prototype feasibility, not a reliability guarantee across all devices or OS versions.
+- **D-005 — Lock Screen controls:** Offer play/pause and Stop through supported system media controls, ordinary audio metadata, and disabled skip/seek. Show snooze state and cancellation in the Live Activity. Visible but disabled skip/seek is acceptable; iOS controls the exact system layout.
+
+The compact-layout repair was installed and launched on the iPhone 14 Pro. Nine deterministic UI tests passed on the connected device (reported iOS 26.6.2), separately from real alarm tests. The owner then confirmed that the snoozed Lock Screen card fits correctly with larger text and standard Display Zoom. This closes the final reported visual defect; the earlier failure record remains above.
+
+Phase 0 is complete with D-004 explicitly deferred with the fallback above. Renderer coverage extends through the first accessibility text size, not every accessibility size. Replacement-device checks and numerical narration-duration calibration remain future evidence.
+
+## Deferred beyond the first prototype
 
 These are intentionally outside the first prototype and should not block the current roadmap:
 

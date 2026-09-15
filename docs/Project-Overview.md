@@ -28,15 +28,9 @@ This flow intentionally excludes backend services, accounts, analytics, cloud sy
 
 ## Next milestone
 
-The active implementation branch is `spike/audio-and-alarm-feasibility`. Its test console must validate the riskiest behavior on the target iPhone before the app architecture is committed:
+Phase 0 feasibility is complete as of 2026-09-15 on `spike/audio-and-alarm-feasibility`, pending review and merge. Physical audio/alarm checks passed, including Lock Screen controls, Siri interruption, headphone loss, relaunch reconciliation, and the full nine-minute snooze re-ring. The owner confirmed that the repaired snoozed card fits at the existing larger text setting. Automated layout coverage extends through the first accessibility text size, not every accessibility size.
 
-1. On-device narration during locked-screen background playback.
-2. Audio-session behavior during pauses, calls, route changes, and app lifecycle events.
-3. A controlled transition to ambience or silence.
-4. AlarmKit authorization, scheduling, cancellation, stop/snooze behavior, and reliability.
-5. The relationship between estimated script duration and a fixed wake time.
-
-The physical-device audio and AlarmKit checks now pass, including Lock Screen controls, interruption handling, relaunch reconciliation, and the full nine-minute snooze re-ring. A larger-text screenshot exposed one clipped action in the snoozed Live Activity; the compact layout repair has an automated 160-point height regression through the first accessibility text size. Phase 0 remains open only for one system-hosted Lock Screen visual confirmation and recording the resulting decisions.
+Next is the framework-independent nap-planning core: content identity, immutable routes, timing, completion, and history rules with focused unit tests. Resolve narration-estimate variance (D-004) and short-window behavior (D-009) before implementing those rules. The wake deadline remains fixed; narration must not be accelerated to fit. No Phase 1 code is included in this closeout.
 
 ## Working agreement
 

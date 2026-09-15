@@ -82,7 +82,7 @@ GitHub secret scanning, push protection, Dependabot security updates, and privat
 
 ## Current roadmap
 
-1. Complete `spike/audio-and-alarm-feasibility` on the target iPhone to validate narration, background audio, interruptions, Lock Screen controls, and AlarmKit.
+1. Completed feasibility validation on the target iPhone: narration, background audio, tested interruptions, Lock Screen controls, AlarmKit, and the larger-text snooze layout (2026-09-15). Branch review and merge precede the next milestone; this remains an experimental console.
 2. Define and test the framework-independent Nap Plan, journey, progress, and history rules.
 3. Prepare one original, citation-backed automotive session and one lawful offline ambience option.
 4. Build the choose → review → play → alarm → history tracer bullet.

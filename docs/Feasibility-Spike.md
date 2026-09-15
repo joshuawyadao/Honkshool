@@ -122,7 +122,7 @@ Using Xcode 26.6, the iOS 26.5 SDK, and the installed iOS 26.5 simulator/platfor
 - the app builds for the generic physical iOS device destination without signing;
 - automatic signing resolves through an ignored local configuration and produces a signed Debug device build;
 - the original signed Debug app installed and launched on the iPhone 14 Pro after Developer Mode and profile trust were enabled;
-- the repair app and embedded snooze extension build with automatic signing and install successfully on that phone; its locked screen prevented the automated launch attempt, so open Honkshool after unlocking;
+- the compact-layout repair (`e398f6d`) and embedded snooze extension built with automatic signing, installed, and launched on that phone on 2026-09-15;
 - the pre-automation baseline passed all 24 simulator tests;
 - the expanded suite passes all 39 simulator tests: 30 unit/controller/service/layout tests and nine deterministic UI tests; and
 - the same nine deterministic UI tests pass on the connected iPhone 14 Pro running iOS 26.6.2, using fixtures that do not request permission or create a real alarm; and
@@ -188,9 +188,9 @@ Set `HONKSHOOL_TEST_DESTINATION` when the default latest iPhone 17 Pro simulator
 
 ## Minimal physical-device acceptance
 
-The functional audio and AlarmKit checks pass. After installing the compact Live Activity repair, only one visual confirmation remains: schedule the **60-second test**, lock the phone, snooze it, and confirm the complete **Cancel** control remains inside the card at the owner’s existing larger text setting. There is no need to repeat the full nine-minute wait for this layout-only check.
+All requested checks for this feasibility milestone are complete. On 2026-09-15, after installation of the compact Live Activity repair, the owner confirmed that the snoozed Lock Screen card fits correctly at the existing larger text setting with standard Display Zoom. No additional manual test is required for this documentation-only closeout.
 
-Authorization messaging, scheduling failure, in-app Stop and pause/resume, active-alarm scrolling, event-log navigation, snooze/paused/ringing/unavailable presentation, cancellation routing, reusable duration persistence, exact-time control availability, and the Live Activity’s large-text height are automated. The renderer cannot reproduce Apple’s system-hosted card exactly, so the final visual glance remains physical-device evidence.
+Authorization messaging, scheduling failure, in-app Stop and pause/resume, active-alarm scrolling, event-log navigation, snooze/paused/ringing/unavailable presentation, cancellation routing, reusable duration persistence, exact-time control availability, and the Live Activity’s large-text height are automated. The renderer cannot reproduce Apple’s system-hosted card exactly; the owner’s visual confirmation is separate physical-device evidence. Repeat affected physical checks when audio/alarm behavior or the target device/OS changes. A separate real-call check, numerical narration-duration measurements, and accessibility sizes beyond the first accessibility setting are not covered by this closeout.
 
 ## Recording results
 
@@ -202,4 +202,4 @@ For each test, record only:
 - whether the screen was locked and the app foregrounded, backgrounded, or terminated; and
 - a concise behavior note or reproducible failure.
 
-Use the repaired-device evidence to resolve or explicitly defer decisions D-001 through D-005 in the [decision log](Decision-Log.md). Keep Phase 0 open only until the compact snooze card is visually confirmed and those decisions are recorded.
+Phase 0 is complete: the [decision log](Decision-Log.md) accepts D-001, D-002, D-003, and D-005 and explicitly defers D-004 with a safe fallback. The next milestone is the nap-planning core after this branch is reviewed and merged; this console is not a supported product release.
