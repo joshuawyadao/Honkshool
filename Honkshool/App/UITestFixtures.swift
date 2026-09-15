@@ -78,6 +78,7 @@ enum SpikePreferences {
     case authorized
     case scheduleFailure = "schedule-failure"
     case cancelFailure = "cancel-failure"
+    case delayedSchedule = "delayed-schedule"
     case snoozed
     case paused
     case alerting
@@ -156,6 +157,7 @@ enum SpikePreferences {
 
     func schedule(id: UUID, at date: Date) async throws {
       if scenario == .scheduleFailure { throw UITestFixtureError.requestedFailure }
+      if scenario == .delayedSchedule { try await Task.sleep(for: .seconds(8)) }
       records = [
         SystemAlarmRecord(
           id: id, state: .scheduled, originalDate: date, countdownFireDate: nil

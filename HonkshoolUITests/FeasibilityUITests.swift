@@ -7,6 +7,7 @@ final class FeasibilityUITests: XCTestCase {
     case authorized
     case scheduleFailure = "schedule-failure"
     case cancelFailure = "cancel-failure"
+    case delayedSchedule = "delayed-schedule"
     case snoozed
     case paused
     case alerting
@@ -15,6 +16,26 @@ final class FeasibilityUITests: XCTestCase {
 
   override func setUpWithError() throws {
     continueAfterFailure = false
+  }
+
+  func testSchedulingLocksRunOptionsUntilAlarmIsReady() {
+    let app = launch(alarm: .delayedSchedule)
+    let start = app.buttons["startTest"]
+    scrollTo(start, in: app)
+    start.tap()
+    XCTAssertFalse(app.switches["requireAlarm"].isEnabled)
+    XCTAssertFalse(app.switches["ambienceEnabled"].isEnabled)
+    XCTAssertFalse(app.switches["useExactWakeTime"].isEnabled)
+    let scheduled = XCTNSPredicateExpectation(
+      predicate: NSPredicate(format: "label == %@", "Phase, Narrating"),
+      object: app.staticTexts["playbackPhase"]
+    )
+    XCTAssertEqual(XCTWaiter.wait(for: [scheduled], timeout: 15), .completed)
+    assertLabel(
+      app.staticTexts["runMessage"],
+      equals: "Alarm scheduled before playback. Lock the screen and observe the test."
+    )
+    XCTAssertTrue(app.switches["requireAlarm"].isEnabled)
   }
 
   func testAlarmDisabledStartCancelsTrackedSnooze() {

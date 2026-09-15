@@ -28,7 +28,9 @@ struct FeasibilityConsoleView: View {
         VStack(spacing: 16) {
           introductionCard
           durationCard
+            .disabled(isStarting || alarm.isScheduling)
           alarmCard
+            .disabled(isStarting || alarm.isScheduling)
           playbackCard
           NavigationLink("Audio event log") {
             AudioEventLogView(audio: audio)
@@ -254,6 +256,7 @@ struct FeasibilityConsoleView: View {
           isOn: $ambienceEnabled
         )
         .accessibilityIdentifier("ambienceEnabled")
+        .disabled(isStarting || alarm.isScheduling)
 
         LabeledContent("Phase", value: audio.phase.rawValue.capitalized)
           .accessibilityIdentifier("playbackPhase")
@@ -325,12 +328,14 @@ struct FeasibilityConsoleView: View {
     guard !isStarting else { return }
     isStarting = true
     defer { isStarting = false }
+    let runAlarmEnabled = alarmEnabled
+    let runAmbienceEnabled = ambienceEnabled
     durationAnchor = .now
     alarm.refresh()
     let plannedWakeDate = wakeDate
     var schedule: AlarmScheduleSnapshot = .notScheduled
 
-    if alarmEnabled {
+    if runAlarmEnabled {
       guard alarm.authorization == .authorized else {
         runMessage = blockedMessage(
           authorization: alarm.authorization,
@@ -351,20 +356,20 @@ struct FeasibilityConsoleView: View {
     }
 
     switch FeasibilityRunGate.evaluate(
-      alarmEnabled: alarmEnabled,
+      alarmEnabled: runAlarmEnabled,
       authorization: alarm.authorization,
       schedule: schedule,
       now: .now
     ) {
     case .ready:
       runMessage =
-        alarmEnabled
+        runAlarmEnabled
         ? "Alarm scheduled before playback. Lock the screen and observe the test."
         : "Alarm explicitly disabled. Lock the screen and observe the test."
       audio.startNarration(
         script: SampleContent.narration,
         title: SampleContent.sessionTitle,
-        transitionToAmbience: ambienceEnabled
+        transitionToAmbience: runAmbienceEnabled
       )
     case .blocked(let reason):
       runMessage = reason
