@@ -186,6 +186,10 @@ Run the complete automated app and UI suite on an installed simulator:
 
 Set `HONKSHOOL_TEST_DESTINATION` when the default latest iPhone 17 Pro simulator is unavailable. Pull requests run the same command on GitHub's macOS 26 runner. Debug-only launch fixtures exercise not-determined, denied, authorized, scheduling-failed, snoozed, paused, alerting, and unavailable alarm states without showing a system permission prompt or creating an alarm. Deterministic speech makes Stop and pause/resume tests fast. These substitutes verify Honkshool logic and UI only; they do not prove that iOS delivers audio or alarms while locked.
 
+UI-test launches use a dedicated preferences suite for fake alarm identity and saved duration, shared by the fixture setup, alarm service, and duration UI. Ordinary launches and Release builds retain standard preferences. This prevents a simulator or physical-device test from overwriting the real app's tracked alarm or saved default. A storage-isolation regression supplements the existing saved-duration relaunch UI test.
+
+The PR review safeguard was validated on 2026-09-15 with Xcode 27.0 against the installed iOS 26.5 iPhone 17 Pro simulator, plus an unsigned Release simulator build, strict formatting, and all 12 repository checks. On machines with newer runtimes, select this baseline explicitly with `HONKSHOOL_TEST_DESTINATION='platform=iOS Simulator,name=iPhone 17 Pro,OS=26.5' ./scripts/test-ios.sh`; the default `OS=latest` may have no matching iPhone 17 Pro. This does not replace the earlier physical alarm evidence or imply iOS 27 device acceptance.
+
 ## Minimal physical-device acceptance
 
 All requested checks for this feasibility milestone are complete. On 2026-09-15, after installation of the compact Live Activity repair, the owner confirmed that the snoozed Lock Screen card fits correctly at the existing larger text setting with standard Display Zoom. No additional manual test is required for this documentation-only closeout.

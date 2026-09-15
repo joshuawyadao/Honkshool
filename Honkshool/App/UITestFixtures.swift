@@ -1,3 +1,24 @@
+import Foundation
+
+@MainActor
+enum SpikePreferences {
+  static var defaults: UserDefaults {
+    #if DEBUG
+      return store(uiTesting: UITestFixtures.isEnabled)
+    #else
+      return .standard
+    #endif
+  }
+
+  #if DEBUG
+    static func store(uiTesting: Bool) -> UserDefaults {
+      guard uiTesting else { return .standard }
+      // Physical-device UI tests must not erase a real alarm's tracking ID.
+      return UserDefaults(suiteName: "com.joshuawyadao.Honkshool.ui-tests")!
+    }
+  #endif
+}
+
 #if DEBUG
   import AVFoundation
   import AlarmKit
@@ -18,8 +39,9 @@
       ProcessInfo.processInfo.arguments.contains(launchArgument)
     }
 
-    static func preparePersistentState(defaults: UserDefaults = .standard) {
+    static func preparePersistentState(defaults: UserDefaults? = nil) {
       guard isEnabled else { return }
+      let defaults = defaults ?? SpikePreferences.defaults
       if ProcessInfo.processInfo.environment[resetEnvironmentKey] == "1" {
         defaults.removeObject(forKey: storedAlarmIDKey)
         defaults.removeObject(forKey: storedAlarmDateKey)

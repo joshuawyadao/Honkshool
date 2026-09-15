@@ -10,6 +10,33 @@ final class SpikeModelsTests: XCTestCase {
   private let now = Date(timeIntervalSince1970: 1_000)
 
   @MainActor
+  func testUITestPreferencesDoNotOverwriteRealAlarmOrDuration() {
+    let keys = ["feasibilityAlarmID", "feasibilityAlarmDate", "preferredRestMinutes"]
+    let standard = SpikePreferences.store(uiTesting: false)
+    XCTAssertTrue(standard === UserDefaults.standard)
+    let original = keys.map { standard.object(forKey: $0) as? NSObject }
+    let isolated = SpikePreferences.store(uiTesting: true)
+    let previousTestValues = keys.map { isolated.object(forKey: $0) }
+    defer {
+      for (key, value) in zip(keys, previousTestValues) {
+        if let value {
+          isolated.set(value, forKey: key)
+        } else {
+          isolated.removeObject(forKey: key)
+        }
+      }
+    }
+    isolated.set("synthetic-alarm", forKey: keys[0])
+    isolated.set(1_000.0, forKey: keys[1])
+    isolated.set(45, forKey: keys[2])
+
+    XCTAssertEqual(SpikePreferences.store(uiTesting: true).integer(forKey: keys[2]), 45)
+    for (key, expected) in zip(keys, original) {
+      XCTAssertEqual(standard.object(forKey: key) as? NSObject, expected)
+    }
+  }
+
+  @MainActor
   func testLateCompletionCannotRestartAudioAfterStop() {
     let audio = AudioSpikeController(speechSynthesizer: FakeSpeechSynthesizer())
     audio.stop()

@@ -153,10 +153,11 @@ final class AlarmSpikeService: ObservableObject {
 
   init(
     system: (any AlarmSystem)? = nil,
-    defaults: UserDefaults = .standard,
+    defaults: UserDefaults? = nil,
     now: @escaping () -> Date = { .now }
   ) {
     let system = system ?? Self.defaultSystem()
+    let defaults = defaults ?? SpikePreferences.defaults
     self.system = system
     self.defaults = defaults
     self.now = now

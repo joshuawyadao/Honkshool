@@ -55,7 +55,7 @@ On a Mac with Xcode 26 and an installed iOS 26 simulator, run the complete unit 
 
 The script defaults to the latest iPhone 17 Pro simulator. Set `HONKSHOOL_TEST_DESTINATION` to any compatible Xcode destination when needed. Pull requests run the same suite on a read-only GitHub-hosted macOS 26 runner in addition to the portable repository checks.
 
-UI tests use debug-only simulated alarm states and deterministic speech. They never request real AlarmKit permission, schedule a system alarm, or replace the small physical-device check described in the feasibility guide.
+UI tests use debug-only simulated alarm states, deterministic speech, and isolated preferences that leave real alarm tracking and saved defaults untouched. They never request real AlarmKit permission, schedule a system alarm, or replace the physical-device acceptance evidence described in the feasibility guide.
 
 ## Start contributing
 

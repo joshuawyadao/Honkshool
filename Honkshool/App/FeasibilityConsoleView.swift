@@ -5,7 +5,7 @@ struct FeasibilityConsoleView: View {
   @StateObject private var audio = AudioSpikeController()
   @StateObject private var alarm = AlarmSpikeService()
 
-  @AppStorage("preferredRestMinutes")
+  @AppStorage("preferredRestMinutes", store: SpikePreferences.defaults)
   private var preferredRestMinutes = RestDurationPolicy.initialSavedMinutes
 
   @State private var selectedMinutes = RestDurationPolicy.initialSavedMinutes
