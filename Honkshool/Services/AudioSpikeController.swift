@@ -274,9 +274,10 @@ final class AudioSpikeController: NSObject, ObservableObject {
               || self.phase == .interrupted
           else { return }
           self.stopAudio(updateStatus: false)
-          self.appendEvent("Media services reset; start a new test run")
-          self.phase = .interrupted
-          self.statusMessage = "Media services reset. Start a new test run."
+          self.appendEvent("Media services reset; playback is no longer resumable")
+          self.phase = .failed
+          self.statusMessage =
+            "Media services reset. Relaunch Honkshool before starting a new test."
         }
       }
     )

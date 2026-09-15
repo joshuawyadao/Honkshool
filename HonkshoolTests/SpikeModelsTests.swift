@@ -305,9 +305,13 @@ final class PlaybackRegressionTests: XCTestCase {
     NotificationCenter.default.post(
       name: AVAudioSession.mediaServicesWereResetNotification, object: nil
     )
-    await wait(for: .interrupted, in: audio)
+    await wait(for: .failed, in: audio)
     XCTAssertFalse(speech.isSpeaking)
     XCTAssertNil(MPNowPlayingInfoCenter.default().nowPlayingInfo)
+    audio.resume()
+    audio.togglePlayback()
+    XCTAssertEqual(audio.phase, .failed)
+    XCTAssertFalse(speech.isSpeaking)
     audio.stop()
     NotificationCenter.default.post(
       name: AVAudioSession.mediaServicesWereResetNotification, object: nil
