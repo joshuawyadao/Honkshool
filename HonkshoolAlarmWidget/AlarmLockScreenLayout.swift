@@ -44,18 +44,15 @@ private struct AlarmLockScreenStatus: View {
   var body: some View {
     switch presentation.mode {
     case .countdown(let startDate, let fireDate):
-      HStack(alignment: .firstTextBaseline, spacing: 12) {
-        VStack(alignment: .leading, spacing: 2) {
+      VStack(alignment: .leading, spacing: 2) {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
           Text("Snoozed")
             .font(.headline)
-          HStack(spacing: 4) {
-            Text("Next alert")
-            Text(fireDate, style: .time)
-          }
+          Spacer(minLength: 8)
+          Text(timerInterval: startDate...fireDate, countsDown: true)
+            .font(.title.monospacedDigit())
         }
-        Spacer(minLength: 8)
-        Text(timerInterval: startDate...fireDate, countsDown: true)
-          .font(.title.monospacedDigit())
+        Text("Next alert \(fireDate, style: .time)")
       }
     case .paused:
       Text("Snooze paused")

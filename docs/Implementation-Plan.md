@@ -11,7 +11,8 @@ Close the feasibility milestone using completed physical-device evidence, resolv
 - [x] Fix the Brooks review finding that UI-test fixtures share real alarm/preferences storage; isolate all three consumers and add a regression. The full simulator suite, Release build, strict formatting, repository checks, and diff check pass.
 - [x] Address Codex feedback: cancel tracked alarms before alarm-disabled starts, expose a terminal state after media reset, and reactivate audio on manual resume, including stopped ambience engines. Focused regressions and the complete simulator suite pass; save each item separately.
 - Report latest review/CI readiness without merging. Leave nap-planning work for the next targeted branch.
-- [ ] Address the next review pass: active-run replacement, reset latching, wake-preview freshness, pending speech pauses, D-006 history, and bounded alarm reconciliation. Save each verified item and rerun the complete suite.
+- [x] Address the next review pass: active-run replacement, reset latching, wake-preview freshness, pending speech pauses, D-006 history, and bounded alarm reconciliation. Each item has been verified and saved separately.
+- [x] Resolve the CI layout failure: reproduce the 179-point UTC/US overflow, give the deadline its own full-width row, cover locale/time-zone variants, improve failure diagnostics, and rerun the complete suite and Release build.
 - [x] Address final-review races: snapshot/lock run options across scheduling and restore the ambience loop even when its engine remains running. Both have regressions; the full suite and Release build pass.
 
 ## Completed layout-repair context
@@ -40,7 +41,7 @@ The preceding task extracted and compacted the snoozed Lock Screen presentation,
 
 ## Validation
 
-- PR follow-up: 48/48 simulator tests (36 unit/controller/service/layout and 12 UI), 12/12 repository checks, strict formatting, and the unsigned Release simulator build pass. The original physical evidence below predates the narrow review fixes; it is not relabeled as a new hardware run.
+- PR follow-up: 55/55 simulator tests (42 unit/controller/service/layout and 13 UI), 12/12 repository checks, strict formatting, and the unsigned Release simulator build pass. The original physical evidence below predates the review fixes; it is not relabeled as a new hardware run. On the next installation, spot-check the changed snoozed-card layout and interruption/resume behavior.
 
 - Red: the extracted pre-fix snoozed layout measured 216 points at xLarge against the 160-point system ceiling.
 - Green: the compact snoozed layout passes at xLarge, xxLarge, xxxLarge, and accessibility1; paused, alerting, and fallback states also pass at accessibility1.

@@ -9,21 +9,21 @@ final class AlarmLockScreenLayoutTests: XCTestCase {
       mode: .countdown(startDate: startDate, fireDate: startDate.addingTimeInterval(540))
     )
 
-    for dynamicTypeSize in [
-      DynamicTypeSize.xLarge,
-      .xxLarge,
-      .xxxLarge,
-      .accessibility1,
-    ] {
-      let height = try renderedHeight(
-        for: presentation, dynamicTypeSize: dynamicTypeSize
-      )
-
-      XCTAssertLessThanOrEqual(
-        height,
-        160,
-        "Snoozed layout measured \(height) points at \(dynamicTypeSize)."
-      )
+    for localeIdentifier in ["en_US", "en_GB"] {
+      for timeZoneOffset in [0, -7 * 3_600, 12 * 3_600] {
+        for dynamicTypeSize in [
+          DynamicTypeSize.xLarge, .xxLarge, .xxxLarge, .accessibility1,
+        ] {
+          let height = try renderedHeight(
+            for: presentation, dynamicTypeSize: dynamicTypeSize,
+            localeIdentifier: localeIdentifier, timeZoneOffset: timeZoneOffset
+          )
+          XCTAssertLessThanOrEqual(
+            height, 160,
+            "Snoozed layout measured \(height) points at \(dynamicTypeSize), \(localeIdentifier), UTC offset \(timeZoneOffset)."
+          )
+        }
+      }
     }
   }
 
@@ -47,7 +47,9 @@ final class AlarmLockScreenLayoutTests: XCTestCase {
 
   private func renderedHeight(
     for presentation: AlarmLockScreenPresentation,
-    dynamicTypeSize: DynamicTypeSize
+    dynamicTypeSize: DynamicTypeSize,
+    localeIdentifier: String = "en_US",
+    timeZoneOffset: Int = 0
   ) throws -> CGFloat {
     let content = AlarmLockScreenLayout(presentation: presentation) {
       Button(action: {}) {
@@ -58,6 +60,8 @@ final class AlarmLockScreenLayoutTests: XCTestCase {
       .accessibilityLabel("Cancel alarm")
     }
     .environment(\.dynamicTypeSize, dynamicTypeSize)
+    .environment(\.locale, Locale(identifier: localeIdentifier))
+    .environment(\.timeZone, TimeZone(secondsFromGMT: timeZoneOffset)!)
 
     let renderer = ImageRenderer(content: content)
     renderer.scale = 1

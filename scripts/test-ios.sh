@@ -16,12 +16,32 @@ fi
 
 cd "$PROJECT_ROOT"
 
-DEVELOPER_DIR="$HONKSHOOL_XCODE_PATH" xcodebuild -quiet \
+test_result_directory=$(mktemp -d "${TMPDIR:-/tmp}/honkshool-test-results.XXXXXX")
+test_result_path="$test_result_directory/TestResults.xcresult"
+printf 'Test results: %s\n' "$test_result_path"
+
+if DEVELOPER_DIR="$HONKSHOOL_XCODE_PATH" xcodebuild -quiet \
   -project Honkshool.xcodeproj \
   -scheme Honkshool \
   -destination "$HONKSHOOL_TEST_DESTINATION" \
   -derivedDataPath "$HONKSHOOL_TEST_DERIVED_DATA" \
+  -resultBundlePath "$test_result_path" \
   -parallel-testing-enabled NO \
-  test
-
-printf 'PASS: Honkshool iOS automated tests completed successfully.\n'
+  test; then
+  printf 'PASS: Honkshool iOS automated tests completed successfully.\n'
+else
+  test_exit_code=$?
+  if [ -d "$test_result_path" ]; then
+    DEVELOPER_DIR="$HONKSHOOL_XCODE_PATH" xcrun xcresulttool get test-results summary \
+      --path "$test_result_path" | python3 -c '
+import json
+import sys
+result = json.load(sys.stdin)
+print("Test summary: {} passed, {} failed, {} skipped".format(
+    result.get("passedTests"), result.get("failedTests"), result.get("skippedTests")))
+for failure in result.get("testFailures", []):
+    print("{}: {}".format(failure.get("testName", "Test"), failure.get("failureText", "")))
+' || true
+  fi
+  exit "$test_exit_code"
+fi

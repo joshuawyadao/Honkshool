@@ -182,7 +182,7 @@ The Stop callback and live-stream metadata regressions were first run against th
 - Alarm status follows system updates and refreshes while the app is foregrounded. The original fixed alarm date is never displayed as a snooze deadline. Cancellation failures retain the alarm ID and prevent replacing it until cancellation succeeds.
 - Foreground polling runs only while a tracked snooze is missing its ActivityKit deadline, with five one-second retries followed by 30-second backoff. It stops when the deadline is found, the alarm state changes, or the app leaves the foreground; idle and scheduled alarms rely on system updates and a foreground-entry refresh.
 - The app and new `HonkshoolAlarmWidget` extension share alarm metadata. The Live Activity shows snooze state, the system's next alert time, a countdown, and cancellation. If the precise countdown deadline has not arrived from ActivityKit, the app says it is unavailable instead of inventing a new nine-minute interval.
-- The Lock Screen layout places cancellation beside the activity title and arranges snooze details beside the countdown. It keeps Apple’s 14-point horizontal margin, does not cap Dynamic Type, and stays within the 160-point Live Activity ceiling through the first accessibility text size in the renderer regression.
+- The Lock Screen layout places cancellation beside the activity title, pairs snooze state with the countdown, and gives the next-alert time a full-width row. It keeps Apple’s 14-point horizontal margin and does not cap Dynamic Type. CI exposed a 179-point overflow for a longer US/UTC time label; the regression now checks US/UK locales and three time-zone offsets through the first accessibility text size against the unchanged 160-point ceiling.
 
 Apple requires a Live Activity for alarm countdown functionality; its countdown presentation includes the authoritative fire date. Apple also notes that the system may truncate a Live Activity above 160 points and specifies a 14-point Lock Screen margin. See [AlarmKit countdown guidance](https://developer.apple.com/videos/play/wwdc2025/230/), [countdown fireDate](https://developer.apple.com/documentation/alarmkit/alarmpresentationstate/mode-swift.enum/countdown/firedate), and [Live Activity layout guidance](https://developer.apple.com/design/human-interface-guidelines/live-activities).
 
@@ -191,6 +191,8 @@ Run the complete automated app and UI suite on an installed simulator:
 ```sh
 ./scripts/test-ios.sh
 ```
+
+The script prints a fresh result-bundle path for every run and prints failed assertions from that bundle while preserving Xcode's failure exit code. The final local PR-repair run passed 55 tests (42 unit/controller/service/layout and 13 UI); repository checks and Release compilation also passed. Raw device diagnostics and result bundles remain local, not committed.
 
 Set `HONKSHOOL_TEST_DESTINATION` when the default latest iPhone 17 Pro simulator is unavailable. Pull requests run the same command on GitHub's macOS 26 runner. Debug-only launch fixtures exercise not-determined, denied, authorized, scheduling-failed, snoozed, paused, alerting, and unavailable alarm states without showing a system permission prompt or creating an alarm. Deterministic speech makes Stop and pause/resume tests fast. These substitutes verify Honkshool logic and UI only; they do not prove that iOS delivers audio or alarms while locked.
 
@@ -201,6 +203,8 @@ The PR review safeguards were validated on 2026-09-15 with Xcode 27.0 against th
 ## Minimal physical-device acceptance
 
 All requested checks for this feasibility milestone are complete. On 2026-09-15, after installation of the compact Live Activity repair, the owner confirmed that the snoozed Lock Screen card fits correctly at the existing larger text setting with standard Display Zoom. No additional manual test is required for this documentation-only closeout.
+
+Subsequent PR review changed audio edge-case handling and reflowed the deadline row after reproducing the CI-specific larger-text overflow. The earlier physical confirmation is retained as historical evidence, not represented as a test of these later commits. On the next device installation, repeat only affected checks: a quick snoozed-card glance and explicit interruption/resume; a separate real-call check remains outside the completed evidence.
 
 Authorization messaging, scheduling failure, in-app Stop and pause/resume, active-alarm scrolling, event-log navigation, snooze/paused/ringing/unavailable presentation, cancellation routing, reusable duration persistence, exact-time control availability, and the Live Activity’s large-text height are automated. The renderer cannot reproduce Apple’s system-hosted card exactly; the owner’s visual confirmation is separate physical-device evidence. Repeat affected physical checks when audio/alarm behavior or the target device/OS changes. A separate real-call check, numerical narration-duration measurements, and accessibility sizes beyond the first accessibility setting are not covered by this closeout.
 
