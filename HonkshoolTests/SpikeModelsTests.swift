@@ -159,6 +159,7 @@ private final class FakeSpeechSynthesizer: AVSpeechSynthesizer {
   var utterances: [AVSpeechUtterance] = []
   var onStop: (() -> Void)?
   var canContinue = true
+  var delaysPause = false
   private var testSpeaking = false
   private var testPaused = false
 
@@ -179,9 +180,11 @@ private final class FakeSpeechSynthesizer: AVSpeechSynthesizer {
   }
 
   override func pauseSpeaking(at boundary: AVSpeechBoundary) -> Bool {
-    testPaused = true
+    if !delaysPause { testPaused = true }
     return true
   }
+
+  func completePause() { testPaused = true }
 
   override func continueSpeaking() -> Bool {
     guard canContinue else { return false }
@@ -208,6 +211,38 @@ private final class TrackingAmbiencePlayer: AVAudioPlayerNode, @unchecked Sendab
 
 @MainActor
 final class PlaybackRegressionTests: XCTestCase {
+  func testImmediateResumeWaitsForSpeechPauseBoundary() throws {
+    let speech = FakeSpeechSynthesizer()
+    speech.delaysPause = true
+    let audio = AudioSpikeController(speechSynthesizer: speech)
+    defer { audio.stop() }
+    audio.startNarration(script: "Test", title: "Test", transitionToAmbience: false)
+    let utterance = try XCTUnwrap(speech.utterances.first)
+    audio.pause()
+    XCTAssertFalse(speech.isPaused)
+    audio.resume()
+    XCTAssertEqual(audio.phase, .paused)
+    speech.completePause()
+    audio.speechSynthesizer(speech, didPause: utterance)
+    XCTAssertEqual(audio.phase, .narrating)
+    XCTAssertFalse(speech.isPaused)
+  }
+
+  func testStopClearsResumeQueuedForPendingPause() throws {
+    let speech = FakeSpeechSynthesizer()
+    speech.delaysPause = true
+    let audio = AudioSpikeController(speechSynthesizer: speech)
+    audio.startNarration(script: "Test", title: "Test", transitionToAmbience: true)
+    let utterance = try XCTUnwrap(speech.utterances.first)
+    audio.pause()
+    audio.resume()
+    audio.stop()
+    audio.speechSynthesizer(speech, didPause: utterance)
+    XCTAssertEqual(audio.phase, .stopped)
+    XCTAssertFalse(speech.isSpeaking)
+    XCTAssertNil(MPNowPlayingInfoCenter.default().nowPlayingInfo)
+  }
+
   func testRouteLossRestoresPurgedAmbienceLoopWithRunningEngine() async throws {
     let speech = FakeSpeechSynthesizer()
     let engine = AVAudioEngine()

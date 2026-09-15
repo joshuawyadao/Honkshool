@@ -26,6 +26,8 @@ final class AudioSpikeController: NSObject, ObservableObject {
   private var remoteCommandTokens: [(MPRemoteCommand, Any)] = []
   private var narrationStartedAt: Date?
   private var requiresRelaunch = false
+  private var pauseRequested = false
+  private var resumeAfterPause = false
 
   var canStartNewRun: Bool {
     !requiresRelaunch && (phase == .idle || phase == .stopped || phase == .failed)
@@ -105,7 +107,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
   func pause() {
     switch phase {
     case .narrating:
-      guard speechSynthesizer.pauseSpeaking(at: .word) else { return }
+      guard requestNarrationPause() else { return }
     case .ambience:
       ambiencePlayer.pause()
     default:
@@ -120,6 +122,13 @@ final class AudioSpikeController: NSObject, ObservableObject {
 
   func resume() {
     guard phase == .paused || phase == .interrupted else { return }
+    if pauseRequested && !speechSynthesizer.isPaused {
+      resumeAfterPause = true
+      statusMessage = "Waiting for narration to reach a pause boundary."
+      return
+    }
+    pauseRequested = false
+    resumeAfterPause = false
     guard speechSynthesizer.isPaused || hasAmbienceToResume else {
       fail("Nothing is available to resume; start a new test.")
       return
@@ -175,6 +184,14 @@ final class AudioSpikeController: NSObject, ObservableObject {
   private func configureExclusiveAudioSession() throws {
     try activateAudioSession()
     appendEvent("Activated exclusive playback audio session")
+  }
+
+  private func requestNarrationPause() -> Bool {
+    pauseRequested = true
+    resumeAfterPause = false
+    let accepted = speechSynthesizer.pauseSpeaking(at: .word)
+    if !accepted { pauseRequested = false }
+    return accepted
   }
 
   private func startAmbience() {
@@ -256,6 +273,8 @@ final class AudioSpikeController: NSObject, ObservableObject {
     // Invalidate ownership before calling into AVFoundation: cancellation can
     // deliver delegate callbacks synchronously or after the next run starts.
     activeUtterance = nil
+    pauseRequested = false
+    resumeAfterPause = false
     hasAmbienceToResume = false
     shouldTransitionToAmbience = false
     narrationStartedAt = nil
@@ -339,7 +358,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
     case .began:
       guard phase == .narrating || phase == .ambience || phase == .paused else { return }
       if speechSynthesizer.isSpeaking {
-        _ = speechSynthesizer.pauseSpeaking(at: .word)
+        _ = requestNarrationPause()
       }
       if ambiencePlayer.isPlaying {
         ambiencePlayer.pause()
@@ -372,7 +391,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
     else { return }
 
     if speechSynthesizer.isSpeaking {
-      _ = speechSynthesizer.pauseSpeaking(at: .word)
+      _ = requestNarrationPause()
     }
     if ambiencePlayer.isPlaying {
       ambiencePlayer.pause()
@@ -458,6 +477,18 @@ final class AudioSpikeController: NSObject, ObservableObject {
 }
 
 extension AudioSpikeController: @preconcurrency AVSpeechSynthesizerDelegate {
+  func speechSynthesizer(
+    _ synthesizer: AVSpeechSynthesizer,
+    didPause utterance: AVSpeechUtterance
+  ) {
+    guard activeUtterance === utterance else { return }
+    pauseRequested = false
+    if resumeAfterPause {
+      resumeAfterPause = false
+      resume()
+    }
+  }
+
   func speechSynthesizer(
     _ synthesizer: AVSpeechSynthesizer,
     didFinish utterance: AVSpeechUtterance
