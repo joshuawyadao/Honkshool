@@ -25,9 +25,10 @@ final class AudioSpikeController: NSObject, ObservableObject {
   private var remoteCommandsInstalled = false
   private var remoteCommandTokens: [(MPRemoteCommand, Any)] = []
   private var narrationStartedAt: Date?
+  private var requiresRelaunch = false
 
   var canStartNewRun: Bool {
-    phase == .idle || phase == .stopped || phase == .failed
+    !requiresRelaunch && (phase == .idle || phase == .stopped || phase == .failed)
   }
 
   init(
@@ -69,6 +70,11 @@ final class AudioSpikeController: NSObject, ObservableObject {
     title: String,
     transitionToAmbience: Bool
   ) {
+    guard !requiresRelaunch else {
+      phase = .failed
+      statusMessage = "Media services reset. Relaunch Honkshool before starting a new test."
+      return
+    }
     stopAudio(updateStatus: false)
     shouldTransitionToAmbience = transitionToAmbience
 
@@ -309,10 +315,8 @@ final class AudioSpikeController: NSObject, ObservableObject {
         queue: .main
       ) { [weak self] _ in
         Task { @MainActor in
-          guard let self,
-            self.phase == .narrating || self.phase == .ambience || self.phase == .paused
-              || self.phase == .interrupted
-          else { return }
+          guard let self else { return }
+          self.requiresRelaunch = true
           self.stopAudio(updateStatus: false)
           self.appendEvent("Media services reset; playback is no longer resumable")
           self.phase = .failed

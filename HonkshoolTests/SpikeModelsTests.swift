@@ -410,7 +410,7 @@ final class PlaybackRegressionTests: XCTestCase {
     XCTAssertEqual(audio.phase, .narrating)
   }
 
-  func testMediaServicesResetInvalidatesActiveAudioButDoesNotReviveStoppedAudio() async {
+  func testMediaServicesResetInvalidatesAudioUntilControllerRecreation() async {
     let speech = FakeSpeechSynthesizer()
     let audio = AudioSpikeController(speechSynthesizer: speech)
     audio.startNarration(script: "Test", title: "Test", transitionToAmbience: true)
@@ -425,11 +425,34 @@ final class PlaybackRegressionTests: XCTestCase {
     XCTAssertEqual(audio.phase, .failed)
     XCTAssertFalse(speech.isSpeaking)
     audio.stop()
+    XCTAssertFalse(audio.canStartNewRun)
+    let priorCount = speech.utterances.count
+    audio.startNarration(script: "New", title: "New", transitionToAmbience: false)
+    XCTAssertEqual(speech.utterances.count, priorCount)
+    XCTAssertEqual(audio.phase, .failed)
     NotificationCenter.default.post(
       name: AVAudioSession.mediaServicesWereResetNotification, object: nil
     )
     for _ in 0..<5 { await Task.yield() }
-    XCTAssertEqual(audio.phase, .stopped)
+    XCTAssertEqual(audio.phase, .failed)
+  }
+
+  func testIdleAndStoppedMediaResetsAlsoPreventNewRuns() async {
+    for startsStopped in [false, true] {
+      let speech = FakeSpeechSynthesizer()
+      let audio = AudioSpikeController(speechSynthesizer: speech)
+      if startsStopped { audio.stop() }
+      NotificationCenter.default.post(
+        name: AVAudioSession.mediaServicesWereResetNotification, object: nil
+      )
+      await wait(for: .failed, in: audio)
+      XCTAssertFalse(audio.canStartNewRun)
+      audio.stop()
+      XCTAssertFalse(audio.canStartNewRun)
+      audio.startNarration(script: "New", title: "New", transitionToAmbience: true)
+      XCTAssertTrue(speech.utterances.isEmpty)
+      XCTAssertEqual(audio.phase, .failed)
+    }
   }
 
   private func wait(for phase: PlaybackPhase, in audio: AudioSpikeController) async {
