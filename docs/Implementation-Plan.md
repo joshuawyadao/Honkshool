@@ -11,7 +11,7 @@ Close the feasibility milestone using completed physical-device evidence, resolv
 - [x] Fix the Brooks review finding that UI-test fixtures share real alarm/preferences storage; isolate all three consumers and add a regression. The full simulator suite, Release build, strict formatting, repository checks, and diff check pass.
 - [x] Address Codex feedback: cancel tracked alarms before alarm-disabled starts, expose a terminal state after media reset, and reactivate audio on manual resume, including stopped ambience engines. Focused regressions and the complete simulator suite pass; save each item separately.
 - Report latest review/CI readiness without merging. Leave nap-planning work for the next targeted branch.
-- [ ] Address final-review races: snapshot/lock run options across scheduling and restore the ambience loop even when its engine remains running; validate and save each fix.
+- [x] Address final-review races: snapshot/lock run options across scheduling and restore the ambience loop even when its engine remains running. Both have regressions; the full suite and Release build pass.
 
 ## Completed layout-repair context
 
@@ -39,7 +39,7 @@ The preceding task extracted and compacted the snoozed Lock Screen presentation,
 
 ## Validation
 
-- PR follow-up: 46/46 simulator tests (35 unit/controller/service/layout and 11 UI), 12/12 repository checks, strict formatting, and the unsigned Release simulator build pass. The original physical evidence below predates the narrow review fixes; it is not relabeled as a new hardware run.
+- PR follow-up: 48/48 simulator tests (36 unit/controller/service/layout and 12 UI), 12/12 repository checks, strict formatting, and the unsigned Release simulator build pass. The original physical evidence below predates the narrow review fixes; it is not relabeled as a new hardware run.
 
 - Red: the extracted pre-fix snoozed layout measured 216 points at xLarge against the 160-point system ceiling.
 - Green: the compact snoozed layout passes at xLarge, xxLarge, xxxLarge, and accessibility1; paused, alerting, and fallback states also pass at accessibility1.

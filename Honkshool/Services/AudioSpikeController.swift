@@ -17,7 +17,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
   private var activeUtterance: AVSpeechUtterance?
   private let ambienceEngine: AVAudioEngine
   private let activateAudioSession: () throws -> Void
-  private let ambiencePlayer = AVAudioPlayerNode()
+  private let ambiencePlayer: AVAudioPlayerNode
   private var ambienceBuffer: AVAudioPCMBuffer?
   private var hasAmbienceToResume = false
   private var observerTokens: [NSObjectProtocol] = []
@@ -29,6 +29,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
   init(
     speechSynthesizer: AVSpeechSynthesizer? = nil,
     ambienceEngine: AVAudioEngine = AVAudioEngine(),
+    ambiencePlayer: AVAudioPlayerNode = AVAudioPlayerNode(),
     activateAudioSession: @escaping () throws -> Void = {
       let session = AVAudioSession.sharedInstance()
       try session.setCategory(.playback, mode: .spokenAudio, options: [])
@@ -36,6 +37,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
     }
   ) {
     self.ambienceEngine = ambienceEngine
+    self.ambiencePlayer = ambiencePlayer
     self.activateAudioSession = activateAudioSession
     #if DEBUG
       self.speechSynthesizer =
@@ -123,17 +125,18 @@ final class AudioSpikeController: NSObject, ObservableObject {
         phase = .narrating
         statusMessage = "Narration resumed."
       } else {
+        guard let ambienceBuffer else {
+          fail("Ambience is unavailable; start a new test.")
+          return
+        }
+        // Route changes can purge the player queue even if the engine stays running.
+        // A neutral loop has no meaningful playback position to preserve.
+        ambiencePlayer.stop()
         if !ambienceEngine.isRunning {
-          guard let ambienceBuffer else {
-            fail("Ambience is unavailable; start a new test.")
-            return
-          }
-          // Interruption may stop the engine and invalidate its scheduled loop.
-          ambiencePlayer.stop()
           ambienceEngine.prepare()
           try ambienceEngine.start()
-          ambiencePlayer.scheduleBuffer(ambienceBuffer, at: nil, options: .loops)
         }
+        ambiencePlayer.scheduleBuffer(ambienceBuffer, at: nil, options: .loops)
         ambiencePlayer.play()
         phase = .ambience
         statusMessage = "Neutral ambience resumed."

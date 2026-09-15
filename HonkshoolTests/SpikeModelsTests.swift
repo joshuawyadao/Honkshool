@@ -191,8 +191,52 @@ private final class FakeSpeechSynthesizer: AVSpeechSynthesizer {
   }
 }
 
+// The test and controller schedule buffers on the main actor; rendering never reads this counter.
+private final class TrackingAmbiencePlayer: AVAudioPlayerNode, @unchecked Sendable {
+  private(set) var scheduledBufferCount = 0
+
+  override func scheduleBuffer(
+    _ buffer: AVAudioPCMBuffer,
+    at when: AVAudioTime?,
+    options: AVAudioPlayerNodeBufferOptions = [],
+    completionHandler: AVAudioNodeCompletionHandler? = nil
+  ) {
+    scheduledBufferCount += 1
+    super.scheduleBuffer(buffer, at: when, options: options, completionHandler: completionHandler)
+  }
+}
+
 @MainActor
 final class PlaybackRegressionTests: XCTestCase {
+  func testRouteLossRestoresPurgedAmbienceLoopWithRunningEngine() async throws {
+    let speech = FakeSpeechSynthesizer()
+    let engine = AVAudioEngine()
+    let player = TrackingAmbiencePlayer()
+    let audio = AudioSpikeController(
+      speechSynthesizer: speech, ambienceEngine: engine, ambiencePlayer: player
+    )
+    defer { audio.stop() }
+    audio.startNarration(script: "Test", title: "Test", transitionToAmbience: true)
+    let utterance = try XCTUnwrap(speech.utterances.first)
+    _ = speech.stopSpeaking(at: .immediate)
+    audio.speechSynthesizer(speech, didFinish: utterance)
+    XCTAssertEqual(player.scheduledBufferCount, 1)
+    NotificationCenter.default.post(
+      name: AVAudioSession.routeChangeNotification, object: nil,
+      userInfo: [
+        AVAudioSessionRouteChangeReasonKey:
+          AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue
+      ]
+    )
+    await wait(for: .interrupted, in: audio)
+    player.stop()  // Reproduce a purged queue without stopping the engine.
+    XCTAssertTrue(engine.isRunning)
+    audio.resume()
+    XCTAssertEqual(player.scheduledBufferCount, 2)
+    XCTAssertTrue(player.isPlaying)
+    XCTAssertEqual(audio.phase, .ambience)
+  }
+
   func testManualResumeReactivatesAudioBeforeContinuingSpeech() {
     let speech = FakeSpeechSynthesizer()
     var activations = 0
