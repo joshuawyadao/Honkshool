@@ -6,6 +6,7 @@ final class FeasibilityUITests: XCTestCase {
     case denied
     case authorized
     case scheduleFailure = "schedule-failure"
+    case cancelFailure = "cancel-failure"
     case snoozed
     case paused
     case alerting
@@ -14,6 +15,34 @@ final class FeasibilityUITests: XCTestCase {
 
   override func setUpWithError() throws {
     continueAfterFailure = false
+  }
+
+  func testAlarmDisabledStartCancelsTrackedSnooze() {
+    let app = launch(alarm: .snoozed)
+    let toggle = app.switches["requireAlarm"]
+    scrollTo(toggle, in: app)
+    toggle.tap()
+    let start = app.buttons["startTest"]
+    scrollTo(start, in: app)
+    start.tap()
+    assertLabel(app.staticTexts["alarmStatus"], equals: "Alarm status, No alarm")
+    assertLabel(app.staticTexts["playbackPhase"], equals: "Phase, Narrating")
+    assertLabel(
+      app.staticTexts["runMessage"],
+      equals: "Alarm explicitly disabled. Lock the screen and observe the test."
+    )
+  }
+
+  func testAlarmDisabledStartBlocksWhenCancellationFails() {
+    let app = launch(alarm: .cancelFailure)
+    let toggle = app.switches["requireAlarm"]
+    scrollTo(toggle, in: app)
+    toggle.tap()
+    let start = app.buttons["startTest"]
+    scrollTo(start, in: app)
+    start.tap()
+    assertAlert(in: app, contains: "could not be cancelled")
+    assertLabel(app.staticTexts["playbackPhase"], equals: "Phase, Idle")
   }
 
   func testNotDeterminedStartExplainsBlockAndAuthorizationAllowsStart() {

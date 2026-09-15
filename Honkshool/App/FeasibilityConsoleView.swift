@@ -343,6 +343,11 @@ struct FeasibilityConsoleView: View {
 
       let scheduled = await alarm.schedule(at: plannedWakeDate)
       schedule = scheduled ? .scheduled(plannedWakeDate) : .failed
+    } else if !alarm.cancel() {
+      runMessage =
+        "The previous alarm could not be cancelled. Playback is blocked; retry cancellation."
+      blockedReason = runMessage
+      return
     }
 
     switch FeasibilityRunGate.evaluate(

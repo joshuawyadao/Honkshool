@@ -9,6 +9,7 @@ Close the feasibility milestone using completed physical-device evidence, resolv
 - [x] Verify repository checks and public-safe documentation (12/12 and `git diff --check` pass); prepare for commit and push.
 - [ ] Open the PR, request Codex review, perform a sampled Brooks review, and address actionable findings and CI failures.
 - [x] Fix the Brooks review finding that UI-test fixtures share real alarm/preferences storage; isolate all three consumers and add a regression. The full simulator suite, Release build, strict formatting, repository checks, and diff check pass.
+- [ ] Address Codex feedback: cancel tracked alarms before alarm-disabled starts, expose a terminal state after media reset, and reactivate audio on manual resume. Add regressions and validate before saving each item.
 - [ ] Report readiness without merging. Leave nap-planning work for the next targeted branch.
 
 ## Completed layout-repair context

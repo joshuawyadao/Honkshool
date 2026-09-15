@@ -77,6 +77,7 @@ enum SpikePreferences {
     case denied
     case authorized
     case scheduleFailure = "schedule-failure"
+    case cancelFailure = "cancel-failure"
     case snoozed
     case paused
     case alerting
@@ -92,7 +93,7 @@ enum SpikePreferences {
 
     var startsWithTrackedAlarm: Bool {
       switch self {
-      case .snoozed, .paused, .alerting, .readFailure: true
+      case .snoozed, .paused, .alerting, .readFailure, .cancelFailure: true
       default: false
       }
     }
@@ -112,7 +113,7 @@ enum SpikePreferences {
       authorization = scenario.authorization
       let originalDate = Date.now.addingTimeInterval(60)
       switch scenario {
-      case .snoozed:
+      case .snoozed, .cancelFailure:
         records = [
           SystemAlarmRecord(
             id: alarmID,
@@ -164,6 +165,7 @@ enum SpikePreferences {
     }
 
     func cancel(id: UUID) throws {
+      if scenario == .cancelFailure { throw UITestFixtureError.requestedFailure }
       records.removeAll { $0.id == id || $0.id == initialAlarmID }
       continuation?.yield(())
     }
