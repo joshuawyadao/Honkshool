@@ -97,6 +97,31 @@ The unchanged revision-1 catalog script has a complete local Mac audition using 
 
 The original F file is unchanged. This full-session derivative is a new listening candidate, not evidence of identical prosody or owner acceptance. The rain candidate is also prepared, with CC0 provenance and objective signal checks. See [Audio-Preparation.md](Audio-Preparation.md) for commands, measurements, and limitations.
 
+## Sibilance follow-up, 2026-09-17
+
+The owner approved the presented narration's **tempo and cadence**, but reported that the voice still sounded robotic around “s” syllables. Preserve the timing. This is not acceptance of the full voice quality, an assessment of every paragraph, or rain approval.
+
+The earlier full-session processor already reduces selected high-frequency cores by roughly 5 dB. A new short candidate, **G**, tests gentle level reduction on the original gain-adjusted closing paragraph. It avoids frequency-domain reconstruction of the sound. This is a comparison of processing methods, not a diagnosis that filtering caused the reported synthetic quality.
+
+G's detector keeps the same 20 ms analysis window and 5 ms hop, but tightens the seed high-band ratio to 0.80, continuation to 0.65, and maximum low-band share to 0.15. The existing −42 dBFS floor and 15 ms minimum seed remain. Twenty selected regions lie entirely within the prior processor's windows. A smooth positive gain of up to **−3 dB** multiplies the original samples directly, with up to 15 ms raised-cosine fades inside each region and no pre-roll or release into neighboring speech. Analysis uses a spectrum only to choose regions; synthesis, spectral reconstruction, normalization, pitch shift, and time stretching are absent.
+
+| Check | Result |
+| --- | --- |
+| Paragraph duration / frame count | 24.586667 seconds / 1,180,160 frames |
+| Dry preview with original lead/tail | 25.086667 seconds / 1,204,160 frames |
+| Format | Mono, 48 kHz, signed 16-bit PCM WAV |
+| Selected regions / nonzero gain-mask support | 20 / 1.294167 seconds |
+| Original frames outside mask | 1,118,040; 94.736307% bit-identical |
+| Flat-core waveform correlation with original | 0.999999965; deviation limited to 16-bit rounding |
+| Whole-paragraph RMS, previous / G | −22.953876 / −22.932112 dBFS |
+| G sample peak | −5.443772 dBFS; no clipping |
+| Timing and zeros | Zero measured lag; all original zero samples and frame positions preserved |
+| Transition variant | Same 40.086667-second timeline and byte-identical rain segment |
+
+The local dry files are `Previous-Spectral-softening.wav` and `G-Original-consonant-shape.wav`; the transition file is `G-Narration-to-rain.wav`. G's dry-file SHA-256 is `acf09aa3259754667bb59fd3c6cbc03914d79cf66d9b1ec9adb18c968b61e331`; its transition-file SHA-256 is `1a184a97f2baf071e9ae1951d899b1b3d4173ef98676dc846d2d0fe67eb27cea`. The source paragraph fingerprint is `aeb7ada7361468f2059bdc5048d533e7a51fd6fff19ac678a712e024651fea73`.
+
+The original F file, full-session master, configured 675-second estimate, catalog text, and rain resource remain unchanged. G is a short unaccepted candidate kept outside the repository; it has not been applied across the full session. Detection is not verified phoneme alignment, and local whole-band attenuation can still affect voiced transitions. Signal preservation checks do not prove subjective naturalness. Listening should determine whether the consonant texture improves without losing clarity; continued synthetic quality would warrant evaluating the source voice instead of repeatedly increasing attenuation.
+
 ## Remaining validation
 
 1. Compare F on headphones/AirPods at ordinary low listening volume when convenient. MacBook-speaker approval is sufficient to continue current development.

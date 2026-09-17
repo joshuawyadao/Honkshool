@@ -2,7 +2,7 @@
 
 ## Status, 2026-09-17
 
-The first full-session Mac narration audition and a bundled rain candidate are prepared. The owner has not yet heard these new files. [Audition F](Narration-Reference.md) remains the accepted provisional reference and is unchanged. This preparation supplies measured assets and development tools; it does not establish iPhone voice availability, listening acceptance, or a production playback connection.
+The first full-session Mac narration audition and a bundled rain candidate are prepared. After listening to the presented audio, the owner approved its tempo and cadence but reported robotic “s” syllables. This feedback does not establish that the entire session or rain candidate was reviewed. [Audition F](Narration-Reference.md) remains the accepted provisional reference and is unchanged. This preparation supplies measured assets and development tools; it does not establish iPhone voice availability, listening acceptance, or a production playback connection.
 
 The machine-readable [narration measurements](Audio-Preparation-Measurements.json) and [rain provenance](../Honkshool/Resources/GentleRain-Provenance.json) retain exact fingerprints, settings, and checks. Full narration audio and listening previews remain local, outside the repository. The rain candidate is [GentleRain.wav](../Honkshool/Resources/GentleRain.wav).
 
@@ -14,7 +14,7 @@ The Mac renderer uses `com.apple.siri.natural.Aaron`, reported as Voice 1 with q
 
 The local audition then applies the reference's constant −4.06 dB gain and the existing E/F processing recipe independently to each paragraph: E supplies spectral softening, while F's narrow mask limits changes to candidate high-frequency bursts. The detector does not identify verified phonemes. **92.67965% of paragraph frames remain bit-identical to the gain-adjusted base outside those regions.** This percentage excludes the silence added between paragraphs and at the ends. The measurement file retains the earlier scripts' C/E comparison field names; for this run, “C” denotes each new paragraph's gain-adjusted base, not the separate 97-word C audition.
 
-Assembly adds one second between each pair of paragraphs, 0.25 seconds at the beginning, and 0.50 seconds at the end: 12.75 seconds in total. It does not transfer C's passage-specific sentence-gap insertions to the new text. No speech is pitch-shifted or time-stretched. These choices preserve the base speaking rate and paragraph context; equivalent perceived pacing and comfort over the full session still require listening.
+Assembly adds one second between each pair of paragraphs, 0.25 seconds at the beginning, and 0.50 seconds at the end: 12.75 seconds in total. It does not transfer C's passage-specific sentence-gap insertions to the new text. No speech is pitch-shifted or time-stretched. The owner subsequently approved the presented tempo and cadence. Sibilance quality and comfort over the full session remain open.
 
 | Property | Recorded value |
 | --- | --- |
@@ -94,7 +94,7 @@ python3 scripts/prepare-rain.py \
 
 ## Remaining evidence
 
-1. Listen to the full narration for pronunciation, pacing, processed consonants, and comfort. The owner's earlier approval applies to F, not automatically to this longer audition.
+1. Retain the approved tempo and cadence while checking revised consonant handling, pronunciation, and full-session comfort. A short level-only candidate is documented in the [sibilance follow-up](Narration-Reference.md#sibilance-follow-up-2026-09-17); it has not replaced the full audition.
 2. Check the rain alone across repeated loop boundaries and alongside narration and drift. Accept or revise the short source, filtering, and level based on listening.
 3. Verify the exact available voices and intended playback behavior on iPhone, including headphones. Mac file preparation supplies no evidence of equivalent direct-speech output on that device.
 4. Connect accepted content and ambience through the future playback adapter, enforcing the fixed deadline and recording actual partial progress and completion. Bundling a candidate does not make it available to the current runtime.
