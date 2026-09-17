@@ -6,7 +6,7 @@ The bundled [PreparedCatalog.json](../Honkshool/Resources/PreparedCatalog.json) 
 
 The script follows a common four-stroke, spark-ignition petrol car engine. It covers the relationship between combustion, the piston and crankshaft, the operating cycle, valves, several cylinders, the transmission, cooling, and lubrication. It deliberately avoids repair instructions, failure warnings, performance rankings, and claims of learning or retention. Natural delivery and breathing room between ideas remain the narration direction.
 
-This source and script-consistency review was completed on 2026-09-16. Full-session listening remains unverified.
+This source and script-consistency review was completed on 2026-09-16. Full-session Mac audio preparation followed on 2026-09-17; listening acceptance remains unverified.
 
 ## Original writing and sources
 
@@ -39,16 +39,16 @@ The narration was written as original connected prose after reviewing the source
 
 ## Duration and narration status
 
-The current script has **1,838 words in 13 paragraphs**, counting word tokens with apostrophes kept inside words and hyphenated compounds counted as separate words. Its planning estimate is **765 seconds (12 minutes 45 seconds)**:
+The unchanged revision-1 script has **1,838 words in 13 paragraphs**, counting word tokens with apostrophes kept inside words and hyphenated compounds counted separately. Its initial 765-second editorial estimate assumed 150 words per minute plus paragraph pauses; it was explicitly unmeasured.
 
-`ceil((1838 / 150 * 60 + 13 * 2) / 5) * 5`
+On 2026-09-17 the complete Mac development audition measured **674.222 seconds (11 minutes 14.222 seconds)**. Every whole paragraph received a completed synthesis callback using the reference Aaron voice at rate `0.45`. Offline processing retained that timing, with 0.25 seconds of leading silence, one second between paragraphs, and 0.5 seconds at the end. The configurable planning estimate is now **675 seconds**, calculated as `ceil(674.222 / 5) * 5`. The text and revision did not change.
 
-This assumes 150 words per minute, plus two seconds at each of the 12 paragraph boundaries and after the final paragraph, rounded up to five seconds. It is an **unmeasured, configurable planning estimate**, not a guarantee of the rendered duration. It neither fixes a permanent session length nor implies that this script will reproduce audition F's pace at a particular speech-rate setting. Nap deadlines remain fixed if actual narration overruns this estimate.
+[Audio-Preparation.md](Audio-Preparation.md) and its measurement record preserve the script hash, paragraph frame counts, processing evidence, and full-file fingerprint. The estimate describes this Mac audition; target-iPhone direct-speech timing remains uncalibrated. Actual overruns still stop at the fixed wake deadline and retain partial progress.
 
-The session has not yet been rendered or auditioned in full. Its pronunciation notes are authoring guidance; this branch does not apply them through a speech engine. Later preparation must measure the complete narration and check technical words, pauses, consonants, and transitions before calibration of the estimate.
+The full script has been rendered, but not accepted through full-session listening. Pronunciation notes remain authoring guidance, not applied speech substitutions. Technical words, pauses, consonants, sustained comfort, and target-device output still need listening review.
 
 ## Relationship to earlier audio
 
 The 97-word narration audition was a short voice-and-processing comparison. The owner accepted **F** as a provisional development reference after listening through MacBook speakers. That acceptance does not cover this full script, iPhone playback, or AirPods output. The existing feasibility spike script is also separate and remains available for its original technical purpose.
 
-This prepared catalog bundles text and source metadata only. It does not bundle F's processed audio, implement its filtering, select a final rain recording, or change the playback runtime. A lawful, consistent gentle-rain asset and target-device listening checks remain open work. See the [decision log](Decision-Log.md) and [durable roadmap](Project-Implementation-Plan.md).
+This prepared catalog bundles text and source metadata, alongside a separately prepared CC0 rain candidate. Local processed narration stays outside the repository, and the playback runtime remains unchanged. Rain listening acceptance and target-device narration checks remain open work. See the [decision log](Decision-Log.md) and [durable roadmap](Project-Implementation-Plan.md).

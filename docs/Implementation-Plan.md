@@ -1,30 +1,32 @@
 # Plan
 
-Continue prepared-content development on `codex/local-content-catalog` from current main (`c5025ad`, PR #3). Preserve the owner's acceptance of narration audition F as a provisional listening reference, then add a small bundled catalog that supplies original narration and source metadata to the existing nap-planning domain.
+Continue `codex/local-content-catalog` with a review of the saved catalog and a bounded audio-preparation pass. Render the full prepared session using audition F's natural voice/rate and conservative focused softening, prepare a reusable gentle-rain candidate with documented provenance, and record measured evidence without claiming target-iPhone equivalence.
 
 ## Scope
 
-- In: a Foundation-only validated catalog loader, stable session/journey metadata, one original citation-backed Enthusiast script, explicit configurable duration estimates, pronunciation notes, script-bound resume validation, bundled-resource tests, and current product/decision/roadmap documentation.
-- Out: feasibility-console redesign, production playback or filtering integration, persistence, a final rain asset, voice downloads, headphone/device installation, paid services, dependencies, distribution, and PR creation or merge. F is a Mac audition with offline processing; its acceptance does not establish identical iPhone direct-speech output. Full-session duration measurement and ambience acceptance remain later Phase 2 work.
+- In: read-only Brooks review of `cbfde27`, reproducible Mac narration rendering, local full-session and short listening samples, a lawful offline rain candidate, duration/asset metadata, focused verification, and updated audio/content/roadmap documentation.
+- Out: PR creation or merge, production playback or DSP integration, feasibility-console redesign, persistence, voice downloads, new dependencies, paid services, automatic playback, physical-device installation, and unverified claims of listening approval. The original F file and timing remain unchanged; this full script needs its own listening review.
 
 ## Action items
 
-- [x] Read supplied AGENTS instructions (no repository AGENTS.md exists), canonical docs, current domain/content/tests, and validation configuration; verify clean main equals freshly fetched origin/main and create the feature branch.
-- [x] Record D-007's provisional F acceptance and natural-delivery priority, MacBook-speaker-only evidence, unchanged pacing, and outstanding iPhone/AirPods validation. Record gentle rain as D-008's approved direction while preserving the unresolved asset/provenance question. Document the reference recipe and fingerprint without publishing machine-specific paths or unverified audio assets.
-- [x] Implement and register a small immutable prepared catalog, bundled JSON loading, source/metadata/reference validation, conversion to `NapCatalog`, and revision-aware UTF-16 resume validation without importing playback frameworks.
-- [x] Research and author the first original session with multiple primary sources, paragraph-level citation references, summary, pronunciation notes, and an explicitly unmeasured planning estimate. Bundle it separately from the spike script; document factual review and remaining audio preparation.
-- [x] Add focused XCTest coverage for bundled availability, planning integration, source separation, malformed/unsupported data, duplicate/dangling IDs, missing/empty metadata, configurable estimates, and valid/invalid Unicode or revision-specific resume points. Preserve existing tests.
-- [x] Run focused catalog tests, the complete simulator suite on an available destination, repository checks, Foundation-only typechecking, formatting checks, and a Release simulator build. Verify resource packaging and privacy-safe docs; no physical listening check is required to finish this branch.
-- [x] Review code and content, update README, Product-Brief, Project-Overview, Nap-Planning-Domain, and the durable Project-Implementation-Plan with completed scope and remaining calibration/rain/runtime work.
-- [x] Use `save-branch` to inspect, explicitly stage, commit, and push the completed branch without opening a PR.
+- [x] Inspect current branch/status and freshly fetched remote state, product decisions, prepared content, tests, and the existing A–F rendering/processing artifacts; preserve unrelated changes.
+- [x] Review the saved catalog with Brooks review and address any concrete findings before extending it. The scoped review found no actionable findings.
+- [x] Add a small Mac-only rendering tool that selects the explicit reference voice/rate, requires complete speech callbacks, and produces paragraph audio plus exact script/revision and duration evidence. Never silently substitute a voice or publish an incomplete render.
+- [x] Prepare the full narration and a brief comparison using the existing offline F processing recipe, preserving natural articulation, pause frames, and duration; retain local previews outside the repository. Calibrate the configurable estimate with clearly labelled Mac-only evidence.
+- [x] Select a gentle-rain candidate with explicit redistribution terms; preserve provenance and the original/derived fingerprints, prepare its loop and level, and verify decoded audio, seam continuity, absence of clipping, and loudness consistency. Do not declare subjective acceptance from signal checks.
+- [x] Add focused tests for new tooling/asset contracts and run the appropriate repository checks, affected simulator tests, and Release build; preserve existing assertions and document blocked checks honestly.
+- [x] Update Content-Catalog, Content-Review, Narration-Reference, Decision-Log, README, Project-Overview, and the durable Project-Implementation-Plan with measurements, limitations, and next work. Add a focused audio-preparation/provenance document.
+- [x] Review the final diff, then use `save-branch` to stage only this work, commit, and push; report samples, validation, review findings, and remaining device/listening work.
 
 ## Open questions
 
-- None block this bounded slice. F is the approved development reference, not a claim of final device validation. Silence remains the only available fallback until a lawful gentle-rain asset is prepared. The existing direct-speech decision stays in force; any runtime change needed to reproduce F requires separate implementation and evidence.
+- None block offline preparation. F remains the accepted sound reference and direct speech remains the initial runtime decision. Mac renders provide development timing evidence only; target-iPhone voice availability, output, and timing still require a later device check. Gentle rain is the approved direction; this candidate's listening acceptance remains pending.
 
-## Validation results
+## Results and validation
 
-- Focused `PreparedCatalogTests`: 22 passed, no failures or skips. Full simulator suite: 125 passed (111 unit tests and 14 UI tests), no failures or skips, on iPhone 17 Pro / iOS 26.5.
-- The first full-suite invocation through `scripts/test-ios.sh` stalled in Xcode's simulator diagnostic collection and was terminated without a complete result. Running the same full suite with `-parallel-testing-enabled NO -collect-test-diagnostics never` completed successfully; no tests or assertions were removed. The successful result contains one internal quality-of-service priority-inversion warning; the focused catalog result contains none.
-- `./scripts/verify-repository.sh`: all 12 checks passed. Foundation-only domain/catalog typechecking and strict Swift formatting checks passed. The Release simulator build passed, and its bundled JSON was byte-identical to the source resource.
-- Independent code review found no actionable correctness issues. Source/script consistency, documentation links, resource registration, and absence of private local paths in public docs were checked. Full-session audio measurement, target-device voice availability, headphone listening, and a final rain asset remain outside this slice.
+- Brooks review of the saved catalog and a separate review of the audio-preparation diff found no actionable issues. These were scoped code/evidence reviews, not subjective listening assessments.
+- The unchanged 13-paragraph revision-1 script rendered completely on the Mac at the explicit reference voice/rate. Full processed duration is 674.222 seconds; the configurable estimate is 675 seconds. The original F fingerprint is unchanged. A compact AAC listening copy decoded to the exact original 32,362,656 frames without clipping.
+- The CC0 rain candidate is bundled with provenance. Deterministic preparation retains an unbroken loop, with no clipped samples and objective seam/level checks. These checks do not establish subjective calmness or accept the short repeating recording.
+- Focused catalog/audio tests: 23 passed. Full simulator regression: 126 passed (112 unit and 14 UI), zero failures/skips, on iPhone 17 Pro / iOS 26.5. Optional Xcode diagnostic collection was disabled because the earlier branch-validation run stalled there; no tests or assertions were omitted. The full result retains one internal priority-inversion warning; focused tests have no runtime warnings.
+- Portable repository suite: 26 passed, including 14 audio/measurement checks and 12 existing publication checks. Swift renderer typechecking with warnings as errors, strict formatting, help, and four invalid-input checks passed. The Release simulator build and byte-for-byte resource packaging checks passed.
+- No physical-device installation or listening check was required to produce this candidate. iPhone voice compatibility/timing, full-session comfort/pronunciation, rain acceptance, and production playback integration remain open and are documented in the durable roadmap.

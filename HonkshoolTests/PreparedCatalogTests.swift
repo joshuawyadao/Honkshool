@@ -1,8 +1,35 @@
+import AVFoundation
+import CryptoKit
 import XCTest
 
 @testable import Honkshool
 
 final class PreparedCatalogTests: XCTestCase {
+  func testRainCandidateAndProvenanceAreBundledAndDecodable() throws {
+    let url = try XCTUnwrap(Bundle.main.url(forResource: "GentleRain", withExtension: "wav"))
+    let provenanceURL = try XCTUnwrap(
+      Bundle.main.url(forResource: "GentleRain-Provenance", withExtension: "json"))
+    let provenance = try XCTUnwrap(
+      JSONSerialization.jsonObject(with: Data(contentsOf: provenanceURL)) as? [String: Any])
+    let hash = SHA256.hash(data: try Data(contentsOf: url)).map { String(format: "%02x", $0) }
+      .joined()
+    XCTAssertEqual(provenance["preparedSHA256"] as? String, hash)
+    XCTAssertEqual(provenance["license"] as? String, "CC0-1.0")
+    XCTAssertEqual(provenance["status"] as? String, "prepared-candidate-awaiting-listening")
+
+    let audio = try AVAudioFile(forReading: url)
+    let metadata = try XCTUnwrap(provenance["validation"] as? [String: Any])
+    XCTAssertEqual(audio.processingFormat.channelCount, 1)
+    XCTAssertEqual(audio.processingFormat.sampleRate, 44_100)
+    XCTAssertEqual(audio.length, (metadata["frameCount"] as? NSNumber)?.int64Value)
+    let buffer = try XCTUnwrap(
+      AVAudioPCMBuffer(
+        pcmFormat: audio.processingFormat, frameCapacity: AVAudioFrameCount(audio.length)))
+    try audio.read(into: buffer)
+    XCTAssertEqual(Int64(buffer.frameLength), audio.length)
+    XCTAssertGreaterThan(buffer.frameLength, 0)
+  }
+
   func testBundledCatalogLoadsPreparedJourneyAndSourceBackedNarration() throws {
     let catalog = try PreparedCatalog.load()
     let journey = try XCTUnwrap(catalog.journeys.first { $0.id == "how-a-car-works" })

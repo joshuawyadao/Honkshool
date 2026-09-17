@@ -31,6 +31,8 @@
 		F10000000000000000000001 /* PreparedCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000001 /* PreparedCatalog.swift */; };
 		F10000000000000000000002 /* PreparedCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000002 /* PreparedCatalogTests.swift */; };
 		F10000000000000000000003 /* PreparedCatalog.json in Resources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000003 /* PreparedCatalog.json */; };
+		F10000000000000000000004 /* GentleRain.wav in Resources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000004 /* GentleRain.wav */; };
+		F10000000000000000000005 /* GentleRain-Provenance.json in Resources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000005 /* GentleRain-Provenance.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,6 +103,8 @@
 		F20000000000000000000001 /* PreparedCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreparedCatalog.swift; sourceTree = "<group>"; };
 		F20000000000000000000002 /* PreparedCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreparedCatalogTests.swift; sourceTree = "<group>"; };
 		F20000000000000000000003 /* PreparedCatalog.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = PreparedCatalog.json; sourceTree = "<group>"; };
+		F20000000000000000000004 /* GentleRain.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "GentleRain.wav"; sourceTree = "<group>"; };
+		F20000000000000000000005 /* GentleRain-Provenance.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "GentleRain-Provenance.json"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -223,6 +227,8 @@
 			isa = PBXGroup;
 			children = (
 				A20000000000000000000007 /* Info.plist */,
+				F20000000000000000000004 /* GentleRain.wav */,
+				F20000000000000000000005 /* GentleRain-Provenance.json */,
 				F20000000000000000000003 /* PreparedCatalog.json */,
 			);
 			path = Resources;
@@ -370,6 +376,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F10000000000000000000004 /* GentleRain.wav in Resources */,
+				F10000000000000000000005 /* GentleRain-Provenance.json in Resources */,
 				F10000000000000000000003 /* PreparedCatalog.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -91,10 +91,16 @@ Source fingerprints retained in the audition manifests:
 
 The fingerprint, encoding, frame count, RMS, peak, and absence of clipping were checked against F when this record was written. The event, frequency-band, and waveform-comparison results above come from the recorded audition validation. Signal checks establish file properties and preservation of timing; they do not prove subjective comfort or naturalness.
 
+## Full-session preparation, 2026-09-17
+
+The unchanged revision-1 catalog script has a complete local Mac audition using the same explicit Aaron voice, `0.45` rate, and focused E/F softening approach. It measures **674.222 seconds**; the configurable catalog estimate is **675 seconds**, rounded up to five seconds. Whole paragraphs preserve connected prose, with one added second between paragraphs, 0.25 seconds before speech, and 0.5 seconds after it. The passage-specific sentence-gap insertions in C were not automatically transferred to unrelated sentences.
+
+The original F file is unchanged. This full-session derivative is a new listening candidate, not evidence of identical prosody or owner acceptance. The rain candidate is also prepared, with CC0 provenance and objective signal checks. See [Audio-Preparation.md](Audio-Preparation.md) for commands, measurements, and limitations.
+
 ## Remaining validation
 
 1. Compare F on headphones/AirPods at ordinary low listening volume when convenient. MacBook-speaker approval is sufficient to continue current development.
 2. Enumerate voices available to the target iPhone app and verify supported direct-speech delivery against this reference. Do not silently substitute a lower-quality voice or assume that the Mac identifier is usable on iPhone.
-3. Check pronunciation of the prepared script's technical terms, naturalness over a full session, and measured duration. Keep duration estimates configurable; the fixed wake deadline remains governed by D-004.
+3. Check pronunciation of the prepared script's technical terms, naturalness over a full session, and duration on the intended iPhone playback path. A full Mac measurement is now recorded, but does not replace that check. Keep duration estimates configurable; the fixed wake deadline remains governed by D-004.
 4. Validate any proposed production voice or processing change with a short comparison before treating it as equivalent to F. If direct speech cannot meet the reference, record the evidence and make an explicit runtime decision before adopting a different strategy.
-5. Select and review a lawfully distributable gentle-rain asset under D-008, then check the combination with narration, drift, and silence. F's voice-only approval does not establish a rain mix or asset license.
+5. Audition the prepared CC0 gentle-rain candidate under D-008, then check the combination with narration, drift, and silence. F's voice-only approval does not establish a rain mix or asset license.

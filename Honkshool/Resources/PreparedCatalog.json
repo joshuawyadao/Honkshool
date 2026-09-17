@@ -18,8 +18,8 @@
       "detailLevel": "enthusiast",
       "language": "en-US",
       "summary": "A calm account of how a common four-stroke petrol engine turns combustion pressure into rotation, how that rotation reaches the wheels, and how valves, coolant, and oil support the movement.",
-      "estimatedDuration": 765,
-      "durationEstimateBasis": "Unmeasured planning estimate: 1838 spoken words at 150 words per minute, plus 2 seconds per paragraph boundary and final pause (13 paragraphs), rounded up to the next 5 seconds. This is configurable metadata, not a measured runtime or a guarantee of equivalence to audition F.",
+      "estimatedDuration": 675,
+      "durationEstimateBasis": "Mac development audition measured 674.222 seconds on 2026-09-17 using Aaron at AVSpeechUtterance rate 0.45, whole-paragraph rendering, focused F-style softening, and 12.75 seconds of added pauses; rounded up to the next five-second increment, 675 seconds. Target-iPhone direct-speech timing remains uncalibrated; this is a configurable planning estimate, not a completion condition.",
       "sources": [
         {
           "id": "doe-engine-basics",

@@ -2,14 +2,14 @@
 
 `Honkshool/Content/PreparedCatalog.swift` loads the app-bundled `Honkshool/Resources/PreparedCatalog.json`. It uses Foundation only and makes no network requests. This is the prepared-content boundary between authored narration and the existing [nap-planning domain](Nap-Planning-Domain.md).
 
-The catalog currently contains **How a Car Works → Turning Fuel Into Motion** at Enthusiast detail. The script is original, with paragraph-linked references and an editorial duration estimate. [Content-Review.md](Content-Review.md) records factual review and estimation evidence. The existing feasibility console continues to use `SampleContent`; the new catalog has no production playback or persistence connection yet.
+The catalog currently contains **How a Car Works → Turning Fuel Into Motion** at Enthusiast detail. The script is original, with paragraph-linked references and a configurable duration estimate informed by a Mac development render. [Content-Review.md](Content-Review.md) records factual review and estimation evidence. The existing feasibility console continues to use `SampleContent`; the new catalog has no production playback or persistence connection yet.
 
 ## Loading and planning
 
 - `PreparedCatalog(data:)` decodes injected JSON and returns immutable journeys, prepared sessions keyed by stable ID, and a `planningCatalog` snapshot.
 - `PreparedCatalog.load(bundle:)` reads the named JSON resource from the supplied bundle, defaulting to the app bundle. Missing resources, malformed JSON, unsupported schemas, and invalid metadata throw errors. Loading does not silently substitute the spike script or partially accept a broken catalog.
 - `planningCatalog` contains the existing `Journey` and `Session` values, including their configured duration estimates. It can be passed directly to `NapPlanner.makePlan`; loading never selects or changes a route.
-- No ambience file ships in this slice. Callers must continue to supply an empty available-ambience set until an actual asset is ready. A requested but unavailable ambience resolves to silence under the existing planner rules.
+- A CC0 rain candidate and its provenance now ship as resources. They are not connected to playback or exposed as an available planner choice yet; callers continue to supply an empty available-ambience set until that adapter is implemented. A requested but unavailable ambience resolves to silence under the existing planner rules.
 
 There is no clock, random choice, speech framework, persistence API, or content download in the loader. The only file access is the bundle adapter; decoding and validation operate on `Data`.
 
@@ -45,12 +45,12 @@ Keep IDs stable across editorial updates. Change `revision` whenever narration t
 
 F combines a Mac-rendered Apple voice with editorial pauses and narrowly applied offline softening. The catalog does not assume that the Mac voice identifier exists in the iPhone app or that direct speech reproduces those edits. D-001's accepted direct-speech strategy remains unchanged. Any change of playback strategy must be separately implemented and validated.
 
-The full-session estimate is explicitly editorial and unmeasured. It is not a completion condition, a reason to change speaking rate, or permission to move the fixed wake deadline. Full narration preparation, measurement on the intended playback path, and pronunciation/listening review remain open.
+The full Mac audition measures 674.222 seconds; the configurable estimate is 675 seconds, rounded up to five seconds. This is development evidence, not calibrated iPhone timing. It is not a completion condition, a reason to change speaking rate, or permission to move the fixed wake deadline. Measurement on the intended playback path and pronunciation/listening review remain open. See [Audio-Preparation.md](Audio-Preparation.md) for the raw-render command, processing recipe, fingerprints, rain provenance, and validation limits.
 
-Gentle steady rain is the approved direction; no exact ambience recording, license, loudness, or loop has been accepted. Silence is the available fallback. No generated audition WAV or third-party sound recording is published by this branch.
+Gentle steady rain is the approved direction. A processed window-rain candidate and its CC0 provenance are bundled, with objective loop and level checks. Its subjective comfort and final selection remain pending. Silence remains the available fallback until the accepted asset is connected to playback. Generated narration auditions remain outside the repository.
 
 ## Verification
 
-`PreparedCatalogTests` exercises the packaged resource and planner connection, malformed and inconsistent data, citation separation, estimate changes, missing bundles, and exact revision/Unicode resume behavior. These tests run through the existing app-hosted unit-test target, so bundled loading checks the actual application resource rather than a separate test fixture copy.
+`PreparedCatalogTests` exercises the packaged resource and planner connection, malformed and inconsistent data, citation separation, estimate changes, missing bundles, exact revision/Unicode resume behavior, and actual decoding of the rain file with matching provenance. These tests run through the existing app-hosted unit-test target, so bundled loading checks the actual application resource rather than a separate test fixture copy. Portable audio tests verify asset fingerprints, PCM properties, loop boundaries, preparation errors, and script/measurement consistency.
 
 Run `./scripts/test-ios.sh` for the full simulator suite and `./scripts/verify-repository.sh` for repository checks. The loader and `NapContent.swift` also typecheck with Foundation alone. No phone installation, audio playback, or new manual acceptance is needed for this catalog branch.
