@@ -28,6 +28,9 @@
 		E10000000000000000000003 /* NapPlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000003 /* NapPlayback.swift */; };
 		E10000000000000000000004 /* NapPlannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000004 /* NapPlannerTests.swift */; };
 		E10000000000000000000005 /* NapPlaybackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000005 /* NapPlaybackTests.swift */; };
+		F10000000000000000000001 /* PreparedCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000001 /* PreparedCatalog.swift */; };
+		F10000000000000000000002 /* PreparedCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000002 /* PreparedCatalogTests.swift */; };
+		F10000000000000000000003 /* PreparedCatalog.json in Resources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000003 /* PreparedCatalog.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +98,9 @@
 		E20000000000000000000003 /* NapPlayback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlayback.swift; sourceTree = "<group>"; };
 		E20000000000000000000004 /* NapPlannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlannerTests.swift; sourceTree = "<group>"; };
 		E20000000000000000000005 /* NapPlaybackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlaybackTests.swift; sourceTree = "<group>"; };
+		F20000000000000000000001 /* PreparedCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreparedCatalog.swift; sourceTree = "<group>"; };
+		F20000000000000000000002 /* PreparedCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreparedCatalogTests.swift; sourceTree = "<group>"; };
+		F20000000000000000000003 /* PreparedCatalog.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = PreparedCatalog.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -166,6 +172,7 @@
 			isa = PBXGroup;
 			children = (
 				A20000000000000000000004 /* SampleContent.swift */,
+				F20000000000000000000001 /* PreparedCatalog.swift */,
 			);
 			path = Content;
 			sourceTree = "<group>";
@@ -194,6 +201,7 @@
 			isa = PBXGroup;
 			children = (
 				E20000000000000000000005 /* NapPlaybackTests.swift */,
+				F20000000000000000000002 /* PreparedCatalogTests.swift */,
 				E20000000000000000000004 /* NapPlannerTests.swift */,
 				A20000000000000000000008 /* SpikeModelsTests.swift */,
 			);
@@ -215,6 +223,7 @@
 			isa = PBXGroup;
 			children = (
 				A20000000000000000000007 /* Info.plist */,
+				F20000000000000000000003 /* PreparedCatalog.json */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -361,6 +370,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F10000000000000000000003 /* PreparedCatalog.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -399,6 +409,7 @@
 				A10000000000000000000002 /* FeasibilityConsoleView.swift in Sources */,
 				A10000000000000000000003 /* SpikeModels.swift in Sources */,
 				A10000000000000000000004 /* SampleContent.swift in Sources */,
+				F10000000000000000000001 /* PreparedCatalog.swift in Sources */,
 				A10000000000000000000005 /* AudioSpikeController.swift in Sources */,
 				A10000000000000000000006 /* AlarmSpikeService.swift in Sources */,
 				B00000000000000000000001 /* HonkshoolAlarmMetadata.swift in Sources */,
@@ -411,6 +422,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E10000000000000000000005 /* NapPlaybackTests.swift in Sources */,
+				F10000000000000000000002 /* PreparedCatalogTests.swift in Sources */,
 				E10000000000000000000004 /* NapPlannerTests.swift in Sources */,
 				D00000000000000000000002 /* AlarmLockScreenLayout.swift in Sources */,
 				D00000000000000000000003 /* AlarmLockScreenLayoutTests.swift in Sources */,

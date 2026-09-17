@@ -38,8 +38,8 @@ Resolved on 2026-09-15 from the corrected device runs: D-001, D-002, D-003, and 
 
 | ID | Question | What must be learned | Needed before |
 | --- | --- | --- | --- |
-| D-007 | Which Apple voice, locale, base rate, pause conventions, and pronunciation mechanism should be standardized? | Run short listening comparisons on the target iPhone and document repeatable narration settings. | Prepared content branch |
-| D-008 | Which ambience asset can lawfully be distributed offline? | Confirm license/provenance, loop quality, file size, loudness, and interaction with narration and drift. | Prepared content branch |
+| D-007 | Which Apple voice, locale, base rate, pause conventions, and pronunciation mechanism should be standardized? | Sound and pacing direction provisionally accepted 2026-09-16 below. Still verify headphone comfort, target-iPhone voice availability and equivalent direct-speech delivery, and technical pronunciation. | Final narration settings and production playback integration |
+| D-008 | Which ambience asset can lawfully be distributed offline? | Gentle, steady rain direction accepted 2026-09-16 below. Still select an asset and confirm license/provenance, loop quality, file size, loudness, and interaction with narration and drift. | Shipping the prepared ambience asset |
 
 ## Phase 0 evidence: first device run, 2026-09-08
 
@@ -80,6 +80,14 @@ The owner approved the following product rules before implementation of the nap-
 - **D-009 — Short rest windows:** The original question was whether a window too short for a complete factual session should select shorter content, use ambience only, or prevent starting; D-020 had already settled timing selection and saved-default behavior. The approved resolution uses the selected ambience or silence when no complete session fits. A shorter factual session may be used when it is already available and fits. Do not generate, compress, or truncate a session merely to fit. Show the resulting plan before starting so the listener approves the route and fallback before resting.
 
 These rules complete the product decisions needed for Nap Plan domain work. Production playback integration must later enforce the fixed deadline and supply actual completion and resume information; voice measurement remains part of prepared-content validation.
+
+## Narration and ambience direction, 2026-09-16
+
+The following records partial resolutions of D-007 and D-008 while preserving their original questions above. These choices permit continued development; they do not close the remaining device and asset checks.
+
+- **D-007 — Provisional narration reference:** The owner accepted audition F, `F-Natural-syllables-focused-softening.wav`, after listening through MacBook speakers. Natural, human-sounding delivery is more important than slower syllables. A's delivery was preferred to slower B; C's additional sentence and paragraph pauses supplied the desired breathing room. E softened “s” sounds but made surrounding syllables robotic and distracting. F retains C's timing and original surrounding speech, applying E's softening only within narrow candidate bursts. Use F as the development and listening reference. Headphone/AirPods listening, target-iPhone voice availability and equivalent playback, technical pronunciation, and comfort over a full session remain unverified. The [narration reference](Narration-Reference.md) records the passage, settings, processing, fingerprint, measurements, and remaining checks.
+- **D-001 — Runtime boundary unchanged:** Direct AVSpeechSynthesizer speech remains the accepted initial playback strategy. F is an offline processed Mac audition, not evidence that the exact result can be reproduced through that strategy on iPhone. The successful Mac audition used Siri Voice 1/Aaron through an interpreted Swift renderer. Do not infer availability of that exact voice in the compiled iPhone app or adopt buffered narration from this listening approval. A runtime change, if later needed to meet the accepted sound, requires its own explicit decision and supporting evidence.
+- **D-008 — Ambience direction:** The owner selected gentle, steady rain for its consistent volume and texture. Avoid thunder, sudden surges, and sharp drips, and require a seamless loop. No final asset or distribution license has been accepted. Provenance, license, file size, loop quality, loudness, and interaction with narration and drift remain to be checked. Silence remains a valid selection and fallback.
 
 ## Deferred beyond the first prototype
 

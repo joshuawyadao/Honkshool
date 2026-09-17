@@ -11,7 +11,8 @@ Build Honkshool as a sequence of small, reviewable vertical slices, beginning wi
 
 - [x] Resolve or explicitly defer the Phase 0 decision gates and run `spike/audio-and-alarm-feasibility` to establish narration, background audio, interruptions, Lock Screen controls, and AlarmKit feasibility on the target iPhone.
 - [x] Implement `codex/nap-plan-domain` with framework-independent journey, session, route, timing, completion, and history rules plus focused unit tests. Runtime execution and persistence remain in later branches.
-- [ ] Build `feature/local-content-catalog` with one citation-backed Enthusiast session from “How a Car Works,” source metadata, pronunciations, duration estimates, and one lawful offline ambience asset.
+- [x] Build `codex/local-content-catalog` with a validated bundled catalog, one original citation-backed Enthusiast session from “How a Car Works,” source metadata, pronunciation guidance, configurable editorial estimates, and script-bound resume validation. Record F as the provisional narration reference.
+- [ ] Finish Phase 2 audio preparation: reproduce the approved listening character on the target playback path, measure the full session, and prepare one lawful offline gentle-rain asset. Silence remains the available fallback until then.
 - [ ] Build `feature/nap-plan-review` so a listener can continue or select local content, choose a duration or wake time, inspect the fixed route, select ambience or silence, and confirm the final alarm.
 - [ ] Build `feature/nap-playback-runtime` to execute the approved plan without mid-nap prompts, support background playback and appropriate media controls, transition after narration, and recover safely from expected audio interruptions.
 - [ ] Build `feature/alarm-and-history` to schedule and manage only Honkshool alarms, persist partial and completed playback locally with SwiftData, advance sessions only on completion, and expose resume and history views.
@@ -64,7 +65,7 @@ Represent content and assemble a deterministic Nap Plan without coupling the rul
 
 ### Current status
 
-Implemented on `codex/nap-plan-domain` on 2026-09-15. The Foundation-only core snapshots deterministic plans, explicit approved routes and shorter alternatives, timing/fallback segments, and optional alarm deadlines. Pure playback outcomes retain partial checkpoints and advance progress only on actual completion; append-only history preserves replay, restart, and alternate paths. See [Nap-Planning-Domain.md](Nap-Planning-Domain.md) for allocation policy and the future adapter contract. This branch does not connect the domain to the feasibility console or provide persistence. The next branch is prepared local content.
+Implemented on `codex/nap-plan-domain` on 2026-09-15 and squash-merged through PR #3 as `c5025ad`. The Foundation-only core snapshots deterministic plans, explicit approved routes and shorter alternatives, timing/fallback segments, and optional alarm deadlines. Pure playback outcomes retain partial checkpoints and advance progress only on actual completion; append-only history preserves replay, restart, and alternate paths. See [Nap-Planning-Domain.md](Nap-Planning-Domain.md) for allocation policy and the future adapter contract. This branch does not connect the domain to the feasibility console or provide persistence. Prepared local content follows below.
 
 ### Core concepts
 
@@ -82,6 +83,12 @@ Implemented on `codex/nap-plan-domain` on 2026-09-15. The Foundation-only core s
 - The route cannot change after the plan is approved and playback begins.
 
 ## Phase 2: prepared content
+
+### Current status
+
+The catalog slice is implemented on `codex/local-content-catalog` (2026-09-16): bundled original prose, paragraph-linked sources, summary, pronunciation guidance, validated stable identities/references, configurable estimates, planner integration, and script-aware resume checks. The feasibility console continues to use its separate spike script. See [Content-Catalog.md](Content-Catalog.md) and [Content-Review.md](Content-Review.md).
+
+F is the provisional [narration reference](Narration-Reference.md), accepted through MacBook speakers. Natural delivery takes priority over slowing syllables. AirPods/target-iPhone listening, matching the processed Mac audition on the actual playback path, and full-session duration measurement remain open. The bundled estimate is editorial, not a measured runtime. Gentle rain is the approved ambience direction, but no final asset is bundled; silence remains available. Phase 2 exit criteria are therefore not yet complete.
 
 ### Goal
 

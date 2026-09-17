@@ -6,7 +6,7 @@
 
 Honkshool is an early-stage iPhone app for calm, uninterrupted factual narration during naps and bedtime. Its primary purpose is helping the listener relax and fall asleep; exposure to interesting information is secondary.
 
-> **Project status:** Feasibility spike. An experimental iOS test app now exists, but there is no supported release. The console measures physical-device narration, background audio, and AlarmKit behavior. A separate, tested nap-planning domain now models plans and listening history; it is not yet connected to the console or persisted.
+> **Project status:** Feasibility spike. An experimental iOS test app now exists, but there is no supported release. The console measures physical-device narration, background audio, and AlarmKit behavior. A separate, tested nap-planning domain models plans and listening history. A bundled prepared-content catalog supplies an original sourced session to that domain; neither is connected to the console or persisted yet.
 
 The intended flow is simple:
 
@@ -29,7 +29,7 @@ Read the [product brief](docs/Product-Brief.md) for the product boundary, the [p
 
 ```text
 .github/                    Issue forms, pull-request template, and CI
-Honkshool/                  Feasibility console and independent nap domain
+Honkshool/                  Feasibility console, nap domain, and prepared content
 HonkshoolTests/             Domain, spike-state, and layout tests
 HonkshoolUITests/           Blocked-start and scrolling regressions
 HonkshoolAlarmWidget/       Alarm snooze Live Activity
@@ -83,8 +83,8 @@ GitHub secret scanning, push protection, Dependabot security updates, and privat
 ## Current roadmap
 
 1. Completed feasibility validation on the target iPhone: narration, background audio, tested interruptions, Lock Screen controls, AlarmKit, and the larger-text snooze layout (2026-09-15). Squash-merged through PR #2 as `45dcc71`; this remains an experimental console.
-2. Implemented and tested the framework-independent Nap Plan, journey, progress, and history rules on `codex/nap-plan-domain`; see the [domain contract](docs/Nap-Planning-Domain.md). Fixed deadlines and short-window fallback follow approved D-004/D-009.
-3. Prepare one original, citation-backed automotive session and one lawful offline ambience option.
+2. Implemented and tested the framework-independent Nap Plan, journey, progress, and history rules, squash-merged through PR #3 as `c5025ad`; see the [domain contract](docs/Nap-Planning-Domain.md). Fixed deadlines and short-window fallback follow approved D-004/D-009.
+3. Added a [bundled content catalog](docs/Content-Catalog.md) with an original citation-backed automotive session, source metadata, pronunciation guidance, and a provisional duration estimate. Narration F is the approved [development listening reference](docs/Narration-Reference.md); full-session audio calibration and a lawful gentle-rain asset remain open.
 4. Build the choose → review → play → alarm → history tracer bullet.
 5. Extend the local journey experience only as needed for an approximately ten-nap personal validation trial.
 

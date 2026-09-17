@@ -105,9 +105,11 @@ The first prototype includes only Enthusiast-level content. Future “Simpler ne
 
 ## Audio and ambience
 
-The first version uses one carefully selected Apple on-device voice. Calmness comes from the script and pacing: a modestly slower speaking rate, natural punctuation, short sentences, pauses between ideas and paragraphs, careful technical pronunciation, gradual volume reduction in the drift phase, and minimal pitch manipulation.
+The first version intends to use one carefully selected Apple on-device voice. Natural, human-sounding delivery takes priority over slowing individual syllables. Aim for an audiobook or narrative essay: connected prose, natural punctuation, space between ideas and paragraphs, careful technical pronunciation, gradual volume reduction in the drift phase, and minimal pitch manipulation. Preserve natural articulation and use pauses for breathing room; soften distracting sibilants only where needed, without making surrounding syllables sound processed.
 
-Ambience is independent of the subject. The first version needs one lawfully distributable offline ambience option and silence. Ambience remains available without a network connection and provides a fallback if other future content is unavailable.
+The owner accepted audition F as a provisional development reference on 2026-09-16 after listening through MacBook speakers. It keeps the natural speaking rate of audition A and the added pauses of C, with focused softening of sharp “s” sounds. This establishes the desired sound and pacing; it does not establish that the same Mac voice or processed result is available through direct speech on iPhone. Headphone listening, target-iPhone equivalence, and technical pronunciation remain open. See the [narration reference](Narration-Reference.md) and [D-007](Decision-Log.md#narration-and-ambience-direction-2026-09-16).
+
+Ambience is independent of the subject. The approved direction is gentle, steady rain with consistent volume and texture, without thunder, sudden surges, or sharp drips. The first version still needs a lawfully distributable offline asset with a seamless loop; silence remains a valid choice and fallback. The asset's provenance, license, loop quality, loudness, and interaction with narration remain pending under [D-008](Decision-Log.md#narration-and-ambience-direction-2026-09-16).
 
 A normal factual session initially targets approximately 12–15 minutes, but this is a hypothesis to test rather than a permanent constant.
 
