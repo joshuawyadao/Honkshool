@@ -142,6 +142,41 @@ Local files are `H-Gentler-consonants-same-cadence.wav` (SHA-256 `447d2e723c95a4
 
 H remains a short listening candidate. Reducing prominence can also reduce consonant audibility, so the owner must judge clarity and naturalness together. No claim is made that the synthesis itself has improved. G, the full-session master, the original F file, the 675-second estimate, app code, and rain asset are preserved.
 
+## Word-focused follow-up, 2026-09-17
+
+The owner reports that **H sounds better**, with residual robotic quality in **first, distant, is, nothing, complete, settle, and space**. Preserve that relative improvement and the approved timing; this is not final voice acceptance. Candidate **I** keeps H as its PCM baseline and tests small, local level changes around six of those words. **Complete remains unchanged**: the conservative noise detector finds no qualifying event there. Its reported artifact remains unresolved, and weakening the voiced syllables would not establish a fix.
+
+A diagnostic render using the same whole paragraph, voice, and settings produced a CAF byte-identical to the original (SHA-256 `b2141529606f4e1bb4f9644c5848b0eb7baa3662619c794b03fa96c704f1edd6`). Word metadata offsets reset at an internal chunk; an independently rendered suffix reproduced the original PCM exactly from frame 587,264, establishing that mapping. **These metadata anchors are not acoustic word or phoneme boundaries.** For example, the anchor for “settle” falls after the nearby high-frequency burst. Explicit local neighborhoods and signal inspection guide this audition; phoneme identity and exclusion of neighboring coarticulation are not proven. Diagnostic synthesis supplies location evidence only; it does not replace any sample in I.
+
+Analysis uses a 20 ms Hann window and 5 ms hop on the original gain-adjusted paragraph. Within the selected neighborhoods, candidate frames require a 3,500–11,000 Hz share of at least 0.45 relative to 200–14,000 Hz, a 200–2,500 Hz share below 0.35, RMS above −42 dBFS, and high-band spectral flatness above 0.10. Events must span at least 15 ms. An additional smooth positive gain multiplies H's samples directly, with raised-cosine fades up to 20 ms wholly inside each event. There is no spectral reconstruction, normalization, pitch shift, time stretching, or whole-word attenuation.
+
+| Local neighborhood | Original paragraph time | Selected events | Maximum additional reduction from H |
+| --- | --- | --- | --- |
+| first | 6.650–7.035 s | 3 | 1 dB |
+| distant | 11.670–12.155 s | 3 | 1 dB |
+| is | 13.250–13.345 s | 1 | 1.5 dB |
+| nothing | 13.540–13.635 s | 1 | 1 dB |
+| complete | 17.570–17.845 s inspected | 0 | Unchanged |
+| settle | 20.330–20.485 s | 1 | 1 dB |
+| space | 22.045–22.445 s | 2 | 1 dB |
+
+These are search neighborhoods, not claims of word onset/end. The dry preview adds 0.25 seconds before this timeline. “Is” receives a slightly larger local adjustment because H's strict low-band guard missed the mixed-noise region there; this still does not identify the cause of its perceived robotic texture.
+
+| Check | I result |
+| --- | --- |
+| Dry duration / frames | 25.086667 seconds / 1,204,160, identical to H |
+| Additional edit support | 11 events / 33,578 frames / 0.699542 seconds |
+| Paragraph samples outside new mask | 1,146,582; 97.154793% bit-identical to H |
+| Actual changed samples after rounding | 31,744 |
+| Paragraph RMS, H / I | −22.943690 / −22.947053 dBFS |
+| Peak / clipping | −5.443772 dBFS / none |
+| Preserved properties | Exact sample positions, original zeros, lead/tail silence, polarity, and all samples outside new mask |
+| Rain transition | 40.086667 seconds; all 732,000 frames after the paragraph identical to H |
+
+The local dry file is `I-Word-focused-gentle-transitions.wav` (SHA-256 `c0679e136a7e939124ffbc3196d47d81614a52536dc0dffd42050f0747a18fa4`). The transition file is `I-Narration-to-rain.wav` (SHA-256 `98329295151c2fcd509766004317af341938971ffa70fc63b668d0db527d37d4`). The local manifest retains the exact regions, gain settings, source fingerprints, and corrected marker evidence. These artifacts and diagnostic scripts remain outside the repository.
+
+I requires listening feedback. Level reduction changes prominence, not the source synthesis itself; measurements cannot prove naturalness or unchanged perceived emphasis. If the remaining texture persists, evaluate source delivery rather than indefinitely reducing consonants. Original F, G/H, the full-session master, catalog estimate/text, rain, app code, and D-001's runtime choice remain unchanged. No new app tests or build are needed for this documentation-only repository change; direct audio checks and repository checks cover this iteration.
+
 ## Remaining validation
 
 1. Compare F on headphones/AirPods at ordinary low listening volume when convenient. MacBook-speaker approval is sufficient to continue current development.

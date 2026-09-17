@@ -107,6 +107,11 @@ This preparation extends the earlier evidence without superseding the owner's ac
 - **D-007 — Preferred tuning direction:** The owner reports that G makes “s” sounds less robotic while keeping them clear, but that the synthetic quality remains noticeable. Continue this direction while preserving the approved tempo and cadence. This is relative improvement, not final voice or full-session acceptance.
 - **Candidate H:** A short comparison increases G's maximum level-only attenuation from 3 to 4.5 dB within precisely the same regions and fades. Timing, neighboring samples, source text, full-session audio, rain, and the runtime decision are unchanged. The [tuning record](Narration-Reference.md#continuing-the-g-direction-2026-09-17) preserves its fingerprints and checks. H requires listening feedback before wider application; signal checks alone cannot establish naturalness or clarity.
 
+## H feedback and specific residual words, 2026-09-17
+
+- **D-007 — Preferred H, remaining artifacts:** The owner reports H sounds better and identifies first, distant, is, nothing, complete, settle, and space as still robotic. Retain the approved tempo/cadence and the improvement over G. This remains relative preference, not final voice, full-session, device, or rain acceptance.
+- **Candidate I and evidence limits:** A short local audition adds smooth level reduction only in signal-selected regions near six named words. Complete stays exactly as in H because the conservative detector finds no qualifying noisy event; its reported artifact remains unresolved. A byte-identical diagnostic synthesis maps speech metadata to the original PCM, but signal inspection shows those anchors are not exact acoustic word boundaries. The [reference record](Narration-Reference.md#word-focused-follow-up-2026-09-17) preserves the scope, settings, fingerprints, and checks. Listening must determine benefit and clarity. D-001, original F, the full-session master, configured estimate, and rain remain unchanged.
+
 ## Deferred beyond the first prototype
 
 These are intentionally outside the first prototype and should not block the current roadmap:
