@@ -1,29 +1,28 @@
 # Plan
 
-Refine the local narration audition after the owner approved its tempo and cadence but reported robotic “s” syllables. Preserve every sample position and pause, compare the unprocessed paragraph with the spectral-softened result, and prepare a short alternative that softens only the level of narrowly selected consonant bursts.
+Continue the owner-preferred direction of candidate G after feedback that its “s” sounds are less robotic and remain clear, but still too noticeable. Make one controlled increase in local attenuation while preserving G's exact timing, detector regions, and smooth fades.
 
 ## Scope
 
-- In: signal inspection, a local short comparison, exact timing/waveform checks, and updated narration feedback/evidence on `codex/local-content-catalog`.
-- Out: production DSP or playback changes, new voices, speech regeneration, stretching, pitch changes, rain changes, replacement of the full-session reference before listening acceptance, dependencies, PR creation, and merge.
+- In: a short H audition, independent PCM comparison, and documented feedback/results on `codex/local-content-catalog`.
+- Out: changing tempo, cadence, pauses, region boundaries, voice, text, pitch, full-session master, rain, app code, runtime DSP, dependencies, or opening/merging a PR.
 
 ## Action items
 
-- [x] Inspect the clean saved branch, existing reference recipe, raw paragraph audio, full-session evidence, and validation configuration; refresh remote status without discarding work.
-- [x] Compare existing raw and processed consonant regions and select a conservative alternative that avoids reconstructing their frequency components while retaining the approved timing.
-- [x] Generate a short local audition from the original gain-adjusted PCM, with smooth attenuation confined inside a stricter subset of the existing detected regions and no edits to adjacent speech or pauses. Preserve previous artifacts.
-- [x] Verify matching frame counts, bit-identical samples outside selected regions, intact silence, no clipping, unchanged timing, and a controlled level difference; obtain an independent check. No test-file changes or iOS rebuild are needed because this slice commits documentation only and changes no app resource or executable code.
-- [x] Record the owner's positive cadence feedback and remaining sibilance issue in the narration reference, preparation record, decision log, and durable roadmap; run repository checks and inspect the final diff.
-- [x] Use `save-branch` to commit and push the documented audition evidence, then present the short candidate without claiming subjective improvement or promoting it to the full session.
+- [x] Inspect the clean branch, G's generation recipe, reference evidence, and current validation scope.
+- [x] Generate H from the original gain-adjusted paragraph, increasing the maximum direct sample attenuation from 3 to 4.5 dB inside the same 20 regions. Preserve G and earlier files.
+- [x] Verify exact frame counts, original silence, unchanged samples outside G's mask, no clipping/polarity changes/amplitude increases, and unchanged rain/timeline; have an independent reviewer recompute the output.
+- [x] Record that the owner prefers G's clearer, less robotic consonants while further improvement is still requested. Update the narration reference, audio preparation status, decision history, and durable roadmap without declaring H accepted.
+- [x] Run repository checks, inspect the documentation-only diff, then use `save-branch` to commit/push the checkpoint. App/test code and resources are unchanged, so no new test files or iOS build are needed; artifact checks validate this local audio revision.
+- [x] Present the short H comparison at the same playback level and timing, leaving adoption across the session dependent on listening feedback.
 
 ## Open questions
 
-- None block the short audition. A word or timestamp was requested as optional guidance; absent that detail, use the complete closing paragraph from the most recent short preview. Listening feedback will determine whether to use this approach more broadly. If the synthetic character persists, further attenuation alone may not meet the intended voice quality.
+- None block this controlled increment. The owner confirmed G's improvement and clarity; H tests whether a further 1.5 dB reduction makes those sounds less noticeable without losing clarity. Signal measurements cannot establish that listening outcome.
 
 ## Results
 
-- Candidate G uses 20 stricter noise-dominant regions within the prior windows, with smooth attenuation of up to 3 dB on original PCM. The paragraph remains 1,180,160 frames; the dry comparison remains 1,204,160 frames (25.086667 seconds).
-- Independent recomputation matched the exported candidate exactly: 94.736307% of paragraph frames remain unchanged outside the mask, all zero samples and pauses are intact, waveform alignment has zero measured lag, and no clipping or amplitude increase occurs. The transition's rain and timing are byte-identical to the previous preview.
-- Original F, the full-session master, catalog text/estimate, app/runtime code, and rain asset remain unchanged. G is local and unaccepted; no subjective improvement is claimed from signal checks.
-- All 26 portable repository checks passed. No test files changed and no simulator/build rerun was warranted for this documentation-only repository change; the previous 126 simulator tests and Release build remain historical validation of unchanged app resources/code.
-- Optional word/timestamp guidance was not available during preparation, so the complete closing paragraph was used as stated. The next step is listening comparison before applying this approach across the session.
+- H changes only maximum attenuation: 4.5 dB instead of G's 3 dB, retaining all 20 event boundaries and fades. The dry preview is exactly 1,204,160 frames / 25.086667 seconds. 94.736307% of paragraph frames remain bit-identical to G and the original outside the mask.
+- Independent standard-library reconstruction matched every exported sample. No clipping, polarity flips, amplitude increases, altered zero samples, or edits outside G's mask were found. Rain and transition timing remain unchanged. Perceived naturalness and clarity still require listening.
+- All 26 repository checks passed. Documentation is the only repository change; no test files or app resources/code changed, so no simulator/build rerun was warranted. Previous full-session and voice-reference artifacts remain preserved.
+- The owner's preference for G is recorded as relative improvement with remaining work, not final acceptance. H remains a local short comparison pending listening feedback.

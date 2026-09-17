@@ -122,6 +122,26 @@ The local dry files are `Previous-Spectral-softening.wav` and `G-Original-conson
 
 The original F file, full-session master, configured 675-second estimate, catalog text, and rain resource remain unchanged. G is a short unaccepted candidate kept outside the repository; it has not been applied across the full session. Detection is not verified phoneme alignment, and local whole-band attenuation can still affect voiced transitions. Signal preservation checks do not prove subjective naturalness. Listening should determine whether the consonant texture improves without losing clarity; continued synthetic quality would warrant evaluating the source voice instead of repeatedly increasing attenuation.
 
+## Continuing the G direction, 2026-09-17
+
+The owner confirmed that **G makes the “s” sounds less robotic while keeping them clear**, but the synthetic character remains noticeable and needs more work. G's level-only method is the preferred direction for further tuning; this is not final voice acceptance. Keep the approved tempo and cadence.
+
+Candidate **H** changes one parameter: the maximum direct sample attenuation increases from 3 to **4.5 dB** on the original PCM. It reuses G's exact 20 regions, detector results, 15 ms maximum inside fades, and zero pre-roll/release. No newly selected region or neighboring sample is touched. In flat event cores, H's amplitude is 84.1395% of G's, a further 1.5 dB reduction. The recorded waveform is retained apart from this smooth gain and integer rounding.
+
+| Check | H result |
+| --- | --- |
+| Dry duration / frame count | 25.086667 seconds / 1,204,160 frames, equal to G |
+| Edited support | Same 1.294167 seconds / 20 regions |
+| Samples outside the mask | 94.736307% bit-identical to both G and the original base |
+| Paragraph RMS, G / H | −22.932112 / −22.943690 dBFS |
+| Peak / clipping | −5.443772 dBFS / none |
+| Flat-core correlation with original | 0.999999948 |
+| Preserved properties | All original zero samples, word timing, pauses, polarity, and rain-transition timeline |
+
+Local files are `H-Gentler-consonants-same-cadence.wav` (SHA-256 `447d2e723c95a4b383a1818160a54f4bd2841fddf2846e47e4ff9b366cfd134b`) and `H-Narration-to-rain.wav` (SHA-256 `5944202953a19d1d13b6a2e70924f7768516aa291252bc9a2fc9ef1141ada950`). The source and G fingerprints remain those recorded above. H has no amplitude increases relative to G; direct PCM comparison, rather than playback-clock measurement, verifies unchanged sample positions.
+
+H remains a short listening candidate. Reducing prominence can also reduce consonant audibility, so the owner must judge clarity and naturalness together. No claim is made that the synthesis itself has improved. G, the full-session master, the original F file, the 675-second estimate, app code, and rain asset are preserved.
+
 ## Remaining validation
 
 1. Compare F on headphones/AirPods at ordinary low listening volume when convenient. MacBook-speaker approval is sufficient to continue current development.

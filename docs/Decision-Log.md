@@ -38,7 +38,7 @@ Resolved on 2026-09-15 from the corrected device runs: D-001, D-002, D-003, and 
 
 | ID | Question | What must be learned | Needed before |
 | --- | --- | --- | --- |
-| D-007 | Which Apple voice, locale, base rate, pause conventions, and pronunciation mechanism should be standardized? | Sound direction provisionally accepted 2026-09-16; full Mac audition prepared and measured 2026-09-17 below. Tempo and cadence approved in the sibilance follow-up below; robotic consonants remain unresolved. Still verify full-session pronunciation and comfort, headphone listening, target-iPhone voice availability, and equivalent intended playback. | Final narration settings and production playback integration |
+| D-007 | Which Apple voice, locale, base rate, pause conventions, and pronunciation mechanism should be standardized? | Sound direction provisionally accepted 2026-09-16; full Mac audition prepared and measured 2026-09-17 below. Tempo and cadence approved; G reduced the robotic quality while preserving clarity, but more improvement is requested. H is a short follow-up, pending listening. Still verify full-session pronunciation and comfort, headphone listening, target-iPhone voice availability, and equivalent intended playback. | Final narration settings and production playback integration |
 | D-008 | Which ambience asset can lawfully be distributed offline? | Gentle-rain direction accepted 2026-09-16; alxl CC0 source, provenance, prepared loop, file size, and signal levels documented 2026-09-17 below. Still verify perceived loop quality, comfort, narration/drift interaction, user acceptance, and runtime integration. | Enabling the prepared ambience candidate in playback |
 
 ## Phase 0 evidence: first device run, 2026-09-08
@@ -101,6 +101,11 @@ This preparation extends the earlier evidence without superseding the owner's ac
 
 - **D-007 — Preserve tempo and cadence:** The owner approves the presented narration's tempo and cadence, while reporting robotic “s” syllables. Keep word timing and pauses unchanged. This feedback does not close voice quality, technical pronunciation, headphone/device checks, or rain acceptance.
 - **Short comparison:** Candidate G restores the original closing paragraph and applies up to 3 dB of smooth level reduction in a stricter subset of noise-dominant regions. It avoids spectral signal reconstruction and preserves the full frame count and every sample outside its mask. The [reference record](Narration-Reference.md#sibilance-follow-up-2026-09-17) contains the settings, fingerprints, and verification. G remains unaccepted; the original F reference, full-session audition, estimate, and runtime decision are unchanged.
+
+## G feedback and controlled continuation, 2026-09-17
+
+- **D-007 — Preferred tuning direction:** The owner reports that G makes “s” sounds less robotic while keeping them clear, but that the synthetic quality remains noticeable. Continue this direction while preserving the approved tempo and cadence. This is relative improvement, not final voice or full-session acceptance.
+- **Candidate H:** A short comparison increases G's maximum level-only attenuation from 3 to 4.5 dB within precisely the same regions and fades. Timing, neighboring samples, source text, full-session audio, rain, and the runtime decision are unchanged. The [tuning record](Narration-Reference.md#continuing-the-g-direction-2026-09-17) preserves its fingerprints and checks. H requires listening feedback before wider application; signal checks alone cannot establish naturalness or clarity.
 
 ## Deferred beyond the first prototype
 
