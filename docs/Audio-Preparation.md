@@ -1,8 +1,10 @@
 # Audio preparation
 
-## Status, 2026-09-17
+## Status, 2026-09-20
 
-The first full-session Mac narration audition and a bundled rain candidate are prepared. After listening to the presented audio, the owner approved its tempo and cadence but reported robotic “s” syllables. The subsequent short G audition was reported to make “s” sounds less robotic while keeping them clear, but the issue remains noticeable. The owner then reported H sounded better, identifying seven residual words: first, distant, is, nothing, complete, settle, and space. I tests small additional level changes in signal-selected regions near six of them; complete remains unchanged because it lacks the same qualifying noise pattern. Its artifact remains unresolved. This feedback does not establish that the entire session or rain candidate was reviewed. [Audition F](Narration-Reference.md) remains the accepted provisional reference and is unchanged. This preparation supplies measured assets and development tools; it does not establish iPhone voice availability, listening acceptance, or a production playback connection.
+The first full-session Mac audition and bundled rain candidate are prepared, but narration quality remains unresolved. The owner liked the tempo/cadence and heard relative improvement from G/H; I's word-focused attenuation still sounded robotic. Unprocessed Aaron renders at rates 0.45 and 0.50 subsequently retained the problem across Mac and iPhone playback, with the faster version only slightly better. The next comparison changes the source voice using installed Samantha and Daniel. See the [source-voice investigation](Narration-Reference.md#source-voice-investigation-2026-09-20) for exact files, delivery evidence, and limits.
+
+[Audition F](Narration-Reference.md) remains the unchanged provisional reference accepted on MacBook speakers. No short follow-up has replaced the full-session master or its measured 675-second estimate. This preparation does not establish final listening acceptance, iPhone synthesis equivalence, or a production playback connection.
 
 The machine-readable [narration measurements](Audio-Preparation-Measurements.json) and [rain provenance](../Honkshool/Resources/GentleRain-Provenance.json) retain exact fingerprints, settings, and checks. Full narration audio and listening previews remain local, outside the repository. The rain candidate is [GentleRain.wav](../Honkshool/Resources/GentleRain.wav).
 
@@ -94,7 +96,7 @@ python3 scripts/prepare-rain.py \
 
 ## Remaining evidence
 
-1. Retain the approved tempo and cadence while checking revised consonant handling, pronunciation, and full-session comfort. The owner prefers H to G; I is the next local comparison in [the tuning record](Narration-Reference.md#word-focused-follow-up-2026-09-17). Complete remains unresolved and unchanged. Reproducible speech metadata did not provide exact acoustic boundaries, so this is a passage-specific audition, not a general word processor. None of these short revisions has replaced the full audition.
+1. Evaluate the source-voice comparison for naturalness while retaining restful delivery. Aaron remains noticeably robotic in the cross-device rate test; further local attenuation is not the next step. A successful short sample must still pass pronunciation and full-session comfort checks before adoption.
 2. Check the rain alone across repeated loop boundaries and alongside narration and drift. Accept or revise the short source, filtering, and level based on listening.
 3. Verify the exact available voices and intended playback behavior on iPhone, including headphones. Mac file preparation supplies no evidence of equivalent direct-speech output on that device.
 4. Connect accepted content and ambience through the future playback adapter, enforcing the fixed deadline and recording actual partial progress and completion. Bundling a candidate does not make it available to the current runtime.

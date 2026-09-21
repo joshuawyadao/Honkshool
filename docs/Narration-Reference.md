@@ -2,9 +2,9 @@
 
 ## Status and scope
 
-**Audition F is the provisional development and listening reference, accepted 2026-09-16.** The owner listened through MacBook speakers and approved continuing development with this sound. Headphone/AirPods listening and target-iPhone playback have not been checked.
+**Audition F is the provisional development reference accepted on MacBook speakers on 2026-09-16.** Subsequent headphone listening exposed persistent robotic consonants. As of 2026-09-20, unprocessed Aaron comparisons also sound robotic when the same WAVs play on iPhone; the slightly faster version is only a small improvement. Final voice acceptance remains open. The [cross-device evidence below](#source-voice-investigation-2026-09-20) preserves the distinction between file playback and direct iPhone synthesis.
 
-Natural, human-sounding delivery takes priority over slower syllables. Aim for an audiobook or narrative essay, retaining natural articulation and allowing space between ideas. Keep the pacing of F. Sibilant softening should reduce sharp “s” sounds without making adjacent syllables sound processed.
+Natural, human-sounding delivery takes priority over slower syllables. Aim for an audiobook or narrative essay, retaining natural articulation and allowing space between ideas. F established the relaxed pacing direction. The latest feedback permits slightly quicker natural articulation, but speeding Aaron up has not resolved the texture. Preserve restful delivery and compare source voices before further consonant attenuation.
 
 This is a 97-word audition, not a complete factual session, an approved distribution asset, or a production playback implementation. [D-007](Decision-Log.md#narration-and-ambience-direction-2026-09-16) remains partly open. [D-001](Decision-Log.md#phase-0-closeout-accepted-decisions-2026-09-15) still selects direct AVSpeechSynthesizer speech for the initial prototype; accepting this processed reference does not select buffered playback.
 
@@ -175,11 +175,47 @@ These are search neighborhoods, not claims of word onset/end. The dry preview ad
 
 The local dry file is `I-Word-focused-gentle-transitions.wav` (SHA-256 `c0679e136a7e939124ffbc3196d47d81614a52536dc0dffd42050f0747a18fa4`). The transition file is `I-Narration-to-rain.wav` (SHA-256 `98329295151c2fcd509766004317af341938971ffa70fc63b668d0db527d37d4`). The local manifest retains the exact regions, gain settings, source fingerprints, and corrected marker evidence. These artifacts and diagnostic scripts remain outside the repository.
 
-I requires listening feedback. Level reduction changes prominence, not the source synthesis itself; measurements cannot prove naturalness or unchanged perceived emphasis. If the remaining texture persists, evaluate source delivery rather than indefinitely reducing consonants. Original F, G/H, the full-session master, catalog estimate/text, rain, app code, and D-001's runtime choice remain unchanged. No new app tests or build are needed for this documentation-only repository change; direct audio checks and repository checks cover this iteration.
+I initially required listening feedback; the owner subsequently reported the robotic quality remained noticeable, as recorded below. Level reduction changes prominence, not the source synthesis itself; measurements cannot prove naturalness or unchanged perceived emphasis. If the remaining texture persists, evaluate source delivery rather than indefinitely reducing consonants. Original F, G/H, the full-session master, catalog estimate/text, rain, app code, and D-001's runtime choice remain unchanged. No new app tests or build are needed for this documentation-only repository change; direct audio checks and repository checks cover this iteration.
+
+## Source-voice investigation, 2026-09-20
+
+### What the owner heard
+
+I did not resolve the reported synthetic texture. The owner then compared fresh, unprocessed renders of the same closing paragraph at Aaron rates `0.45` and `0.50`. Both remained robotic; the faster one was slightly better. The faster file sounded identical in the Codex Mac preview and QuickTime. The owner subsequently heard roughly the same robotic quality from both WAVs on iPhone, using AirPods Pro 2. Other audio on those headphones was reported to sound normal.
+
+This makes a Codex-specific or Mac-only playback defect less likely and supports investigating the source voice. It does not identify Aaron's synthesis architecture, prove the exact cause, or exclude every device/headphone contribution. Playing Mac-generated WAVs on iPhone does not test AVSpeechSynthesizer or voice availability in the iPhone app.
+
+### Unprocessed rate controls
+
+Both controls use the unchanged whole closing paragraph (index 12, revision 1 of `turning-fuel-into-motion`), pitch multiplier 1 and utterance volume 1. They apply only constant −4.06 dB gain, signed 16-bit PCM conversion, and 0.25 seconds of silence at each end. There is no de-essing, time stretching, internal pause insertion, or rain.
+
+| Mobile filename | API rate | Raw speech / padded duration | WAV SHA-256 |
+| --- | --- | --- | --- |
+| `Honkshool-01-Current-Pace.wav` | 0.45 | 24.586667 / 25.086667 s | `938c744909f0fc022c7b744ffa6a0a02632ba3fa91e24f7ff2e340083f290657` |
+| `Honkshool-02-Slightly-Faster.wav` | 0.50 | 23.253333 / 23.753333 s | `a2ea703d2215b3fa857f895e91396bd39f5504d33b999f9a2691a2cc8a264278` |
+
+The measured rate increase over this passage is 5.73%; the API settings do not imply a linear percentage change. Independent structural checks found valid WAV lengths, no clipping, and exact agreement with the raw PCM plus gain/padding. I adds no new exact-zero samples relative to its unprocessed source. These checks found no added digital dropout evidence; they do not prove perceptual smoothness.
+
+The exact two files were copied to the owner's iCloud Drive with explicit authorization, verified byte-identical, and confirmed uploaded. The owner could then listen on iPhone. Local-path previews and attempted inline audio cards had not appeared in Codex Mobile. This is a development-file delivery method, not an app cloud-sync feature.
+
+### Installed source-voice comparison
+
+An interpreted Swift inventory on the Mac found 47 English entries. Aaron is the only enhanced English voice family available: `com.apple.siri.natural.Aaron` and `com.apple.ttsbundle.gryphon-neural_Aaron_en-US_premium` both report Voice 1, en-US, quality 2. The second identifier is not evidence of a distinct voice or premium API quality. Alex is absent. No additional voice was downloaded.
+
+The next diagnostic candidates are **Samantha** (`com.apple.voice.compact.en-US.Samantha`) and **Daniel** (`com.apple.voice.compact.en-GB.Daniel`), both API quality 1. They provide distinct voices, with an accent change for Daniel, but are not assumed naturalness upgrades. A quality enum cannot establish the owner's listening preference. Their complete-paragraph renders use rate 0.50, pitch 1, volume 1, and an explicit false assistive-technology-settings preference. Equal numeric rates do not guarantee equal durations or cadence across voices.
+
+| Candidate | Raw / padded duration | Padded frames | Constant gain | Peak dBFS | WAV SHA-256 |
+| --- | --- | --- | --- | --- | --- |
+| `Honkshool-03-Samantha.wav` | 23.241995 / 23.742041 s | 523,512 | −7.099787 dB | −7.649085 | `a08bc0f0db0a33d817f3dc8276b0b9b233ba3ba95b979f466b76c73270ad48e7` |
+| `Honkshool-04-Daniel.wav` | 24.364444 / 24.864490 s | 548,262 | −3.500004 dB | −4.352476 | `e12cbe9c3fc703df3aa863d130ef1f6c86b07646c3bf8a9d29710b8e193728f1` |
+
+Both WAVs preserve the native mono 22,050 Hz sample rate, with signed 16-bit PCM conversion and 5,513 silence frames at each end (0.250023 seconds, the nearest frame to 0.25 seconds). A single constant gain matches each whole-file RMS to the faster Aaron control, approximately −22.882914 dBFS, without compression or local gain changes. There is no filtering, de-essing, resampling, internal pause editing, time stretching, or rain. RMS matching reduces an overall level confound but does not establish equal perceived loudness. Each voice retains its native timing; Samantha's raw duration is close to Aaron's 23.253333 seconds, while Daniel is 1.111111 seconds longer.
+
+The text SHA-256 is `b8a4430c440833cb4b7175a6647e0c96a059cc13bf11ac9ccce12f941f18cd4e`. Raw CAF fingerprints are `daf0417f6476d1cae5d0fd01338ee057abea46f8c3093ad34bf09dbaa8ad4e5a` (Samantha) and `02ff212dcb93265a4b1a869b74971301ac86d98ca5a3bd7f3622f11acff67edd` (Daniel). The local render/export manifests and scratch tools preserve the exact procedure outside Git. Rendering uses the established completion callback, nonzero PCM, and quiet-period guard before sealing each file. Independent CAF/WAV parsing confirms exact frame counts, hashes, and sample-for-sample reconstruction from each source plus its constant gain and padding; neither candidate clips. RMS differs from the Aaron control by less than 0.000001 dB. Original F and the full-session master retain their recorded hashes. Listening must determine whether either changes the distracting texture. No candidate has replaced original F, the full-session master, catalog estimate, or app runtime.
 
 ## Remaining validation
 
-1. Compare F on headphones/AirPods at ordinary low listening volume when convenient. MacBook-speaker approval is sufficient to continue current development.
+1. Compare source voices at an ordinary comfortable volume. The cross-device Aaron rate test remains unsatisfactory; evaluate naturalness and clarity before further full-session preparation. F remains a historical provisional reference, not final headphone acceptance.
 2. Enumerate voices available to the target iPhone app and verify supported direct-speech delivery against this reference. Do not silently substitute a lower-quality voice or assume that the Mac identifier is usable on iPhone.
 3. Check pronunciation of the prepared script's technical terms, naturalness over a full session, and duration on the intended iPhone playback path. A full Mac measurement is now recorded, but does not replace that check. Keep duration estimates configurable; the fixed wake deadline remains governed by D-004.
 4. Validate any proposed production voice or processing change with a short comparison before treating it as equivalent to F. If direct speech cannot meet the reference, record the evidence and make an explicit runtime decision before adopting a different strategy.
