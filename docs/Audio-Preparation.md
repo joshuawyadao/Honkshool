@@ -4,9 +4,9 @@
 
 The accepted narration direction is now **Kokoro-82M v1.0 voice `bm_george` at model speed `0.86`**. The owner found both Kokoro Heart and George much more human and natural than the Apple auditions, preferred George's calm documentary character, and selected the more spacious of two native-duration comparisons. See the [accepted Kokoro reference](Narration-Reference.md#accepted-kokoro-george-direction-2026-09-21) for exact assets, settings, samples, fingerprints, and validation.
 
-[Audition F](Narration-Reference.md), the Apple premium comparisons, and the Aaron full-session master remain unchanged historical references. The configurable 675-second estimate still describes that earlier Mac render; the selected Kokoro voice has not yet rendered the complete session. Target-iPhone Kokoro feasibility, full-session pronunciation/timing, rain acceptance, and production integration remain open.
+[Audition F](Narration-Reference.md), the Apple premium comparisons, and the Aaron full-session master remain unchanged historical references. The complete Kokoro George session is now bundled as lossless PCM and connected to the feasibility console. It measures 727.625 seconds, and the configurable planning estimate is 730 seconds. Physical-iPhone playback, full-session pronunciation/comfort, rain acceptance, and production Nap Plan/history integration remain open.
 
-The machine-readable [narration measurements](Audio-Preparation-Measurements.json) preserve the historical Apple work, and [rain provenance](../Honkshool/Resources/GentleRain-Provenance.json) retains the bundled ambience evidence. Kokoro model assets, manifests, scratch tools, full narration audio, and listening previews remain local outside the repository. The rain candidate is [GentleRain.wav](../Honkshool/Resources/GentleRain.wav).
+The machine-readable [narration measurements](Audio-Preparation-Measurements.json) preserve the historical Apple work. [George narration provenance](../Honkshool/Resources/GeorgeNarration-Provenance.json) identifies the bundled [prepared narration](../Honkshool/Resources/Turning-Fuel-Into-Motion-George.wav), and [rain provenance](../Honkshool/Resources/GentleRain-Provenance.json) retains the ambience evidence. Kokoro model weights and the isolated preparation environment remain outside the repository; the app contains the prepared session rather than a model runtime. The rain candidate is [GentleRain.wav](../Honkshool/Resources/GentleRain.wav).
 
 ## Accepted Kokoro cadence evidence
 
@@ -14,9 +14,34 @@ The selected comparison uses the unchanged first three paragraphs of **Turning F
 
 Kokoro predicts new phoneme durations for each speed. The accepted output is not a post-render time stretch. Preparation adds one second between the three paragraphs, 0.25 seconds at each end, and one constant gain over the assembled file. It adds no filtering, de-essing, pitch shift, resampling, compression, rain, or word-level edits. Exact catalog text, model revision, model/voice assets, chunk order, PCM construction, output hashes, levels, and absence of clipping passed. The owner's listening establishes the preferred sound; file checks do not independently transcribe the output or prove full-session comfort.
 
-This acceptance does not add Kokoro to the app. A later implementation must first validate an on-device path and decide whether to prepare audio before a nap or synthesize locally during preparation. Either approach must expose a reliable measured duration before Nap Plan approval and remain compatible with D-004's fixed deadline.
+The implementation uses preparation-time synthesis. It does not add Kokoro model weights or an inference dependency to the app. The exact prepared file gives planning a measured duration before approval and lets AVFoundation reproduce the accepted output without a network or metered service.
 
-## Full narration audition
+## Prepared George full session and app asset
+
+All 13 unchanged catalog paragraphs, totaling 1,829 words, were rendered with the pinned Kokoro-82M v1.0 model revision `f3ff3571791e39611d31c381e3a41a3af07b4987`, voice `bm_george`, and native model speed `0.86`. Assembly uses one second between paragraphs, 0.25 seconds at each end, and one constant gain targeting the accepted excerpt's level. It applies no filtering, de-essing, pitch shift, resampling, compression, rain, local word edits, or waveform time stretching.
+
+| Property | Prepared value |
+| --- | --- |
+| Duration / planning estimate | 727.625 seconds / 730 seconds |
+| Encoding | WAV, mono, 24,000 Hz, signed 16-bit PCM |
+| Frame count / file size | 17,463,000 frames / 34,926,044 bytes |
+| Whole-file RMS / sample peak | −22.882915 / −4.871702 dBFS |
+| Full-file SHA-256 | `7117b18ce10e45844b6eba29936370131290baf30131b71cf2b01d5999847f37` |
+| Model / voice SHA-256 | `496dba118d1a58f5f3db2efc88dbdc216e0483fc89fe6e47ee1f2c53f18ad1e4` / `f1bc812213dc59774769e5c80004b13eeb79bd78130b11b2d7f934542dab811b` |
+| Construction checks | Exact catalog text and chunk order, pinned inputs, exact WAV readback, recorded silence, levels, and zero clipping passed |
+
+The app loads this asset from catalog metadata. A missing or invalid asset visibly fails the run; it never substitutes an Apple voice. AVAudioPlayer supplies prepared-file pause/resume and completion while the existing audio-session, interruption, route-change, remote-command, and ambience path remains in control. A captured deadline task stops prepared narration or subsequent ambience at the planned wake time. Unit tests inject the player and deadline scheduler so deadline, failure, completion, and stale-callback behavior remain deterministic.
+
+Run preparation from the repository root in an isolated environment containing the package versions recorded in the provenance and the pinned Hugging Face cache:
+
+```sh
+python3 scripts/prepare-kokoro-narration.py \
+  --cache-root /path/to/pinned-kokoro-cache
+```
+
+The cache root must contain `model-assets.json` and the matching local Hugging Face files. The script operates offline, rejects asset hash or text/chunk mismatches, and writes the WAV plus provenance. The shipped model checkpoint is 327,212,226 bytes, while this single lossless prepared session is 34,926,044 bytes. For the curated first prototype, prepared audio therefore avoids a large model and third-party inference runtime while preserving exact sound and duration. The open-source [Kokoro Swift port](https://github.com/mlalma/kokoro-ios) remains relevant if later catalog scale justifies live synthesis; its own documentation requires applications to supply model and voice files.
+
+## Historical Aaron full narration audition
 
 The audition renders all 13 paragraphs of **Turning Fuel Into Motion**, session `turning-fuel-into-motion`, script revision `1`, from the [prepared catalog](../Honkshool/Resources/PreparedCatalog.json). Paragraph text is unchanged. The complete spoken script has 10,824 UTF-16 code units and SHA-256 `7e44406d9d07d90463ffcceb977be64cbb43cbd6fe50524e769b3ce34af56f52`.
 
@@ -104,9 +129,9 @@ python3 scripts/prepare-rain.py \
 
 ## Remaining evidence
 
-1. Validate an on-device Kokoro implementation on the target iPhone, including audio parity, packaging/notices, app/model size, latency, memory, thermals, battery, locked-screen/background behavior, and interruptions.
-2. Render and listen to the full session with George at model speed `0.86`; verify technical pronunciation, chunk boundaries, comfort, and measured duration before recalibrating the catalog estimate.
+1. Install the prepared-audio build on the target iPhone and verify audio parity, locked-screen/background playback, pause/resume, interruption recovery, route loss, natural completion, and fixed-deadline stopping. Simulator and generic-device builds do not replace this check.
+2. Listen to the complete George `0.86` session and verify every technical term, longer-form calmness, and chunk transitions. The construction and timing checks do not prove spoken-word accuracy or comfort.
 3. Check the rain alone across repeated loop boundaries and alongside selected narration and drift. Accept or revise the short source, filtering, and level based on listening.
-4. Connect accepted content and ambience through the future playback adapter, enforcing the fixed deadline and recording actual partial progress and completion. Bundling a candidate does not make it available to the current runtime.
+4. Connect the prepared adapter to the production Nap Plan and persistence flow so actual partial positions and genuine completion update history correctly. The feasibility console does not persist listening progress.
 
-[D-023](Decision-Log.md#kokoro-narration-direction-2026-09-21) selects the preferred narration sound and reopens the production runtime boundary established by D-001. [D-008](Decision-Log.md#audio-preparation-evidence-2026-09-17) remains open, and silence remains the valid fallback.
+[D-023](Decision-Log.md#kokoro-narration-direction-2026-09-21) selects the preferred narration sound. [D-024](Decision-Log.md#prepared-kokoro-playback-2026-09-21) implements it as prepared local audio for the curated prototype while preserving D-001's device evidence. [D-008](Decision-Log.md#audio-preparation-evidence-2026-09-17) remains open, and silence remains the valid fallback.

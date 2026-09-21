@@ -34,6 +34,8 @@ class PublicRepositoryTests(unittest.TestCase):
             "Honkshool/Services/AudioSpikeController.swift",
             "Honkshool/Services/AlarmSpikeService.swift",
             "Honkshool/Resources/Info.plist",
+            "Honkshool/Resources/GeorgeNarration-Provenance.json",
+            "Honkshool/Resources/Turning-Fuel-Into-Motion-George.wav",
             "HonkshoolTests/SpikeModelsTests.swift",
             "HonkshoolUITests/FeasibilityUITests.swift",
             "HonkshoolAlarmWidget/AlarmLockScreenLayout.swift",
@@ -48,6 +50,7 @@ class PublicRepositoryTests(unittest.TestCase):
             ".github/workflows/ci.yml",
             "scripts/verify-repository.sh",
             "scripts/test-ios.sh",
+            "scripts/prepare-kokoro-narration.py",
         )
 
         missing = [path for path in required if not (PROJECT_ROOT / path).is_file()]
@@ -129,7 +132,7 @@ class PublicRepositoryTests(unittest.TestCase):
             ):
                 self.assertIn(statement, project_plan)
 
-        for decision_id in ("D-001", "D-003", "D-004", "D-010", "D-017"):
+        for decision_id in ("D-001", "D-003", "D-004", "D-010", "D-017", "D-024"):
             with self.subTest(document="decision log", decision_id=decision_id):
                 self.assertIn(decision_id, decisions)
 

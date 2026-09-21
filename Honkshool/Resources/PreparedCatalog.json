@@ -18,8 +18,14 @@
       "detailLevel": "enthusiast",
       "language": "en-US",
       "summary": "A calm account of how a common four-stroke petrol engine turns combustion pressure into rotation, how that rotation reaches the wheels, and how valves, coolant, and oil support the movement.",
-      "estimatedDuration": 675,
-      "durationEstimateBasis": "Mac development audition measured 674.222 seconds on 2026-09-17 using Aaron at AVSpeechUtterance rate 0.45, whole-paragraph rendering, focused F-style softening, and 12.75 seconds of added pauses; rounded up to the next five-second increment, 675 seconds. Target-iPhone direct-speech timing remains uncalibrated; this is a configurable planning estimate, not a completion condition.",
+      "estimatedDuration": 730,
+      "durationEstimateBasis": "The complete prepared Kokoro-82M v1.0 bm_george render at native model speed 0.86 measures 727.625 seconds with one-second paragraph gaps and 250 ms end padding; rounded up to the next five-second increment, 730 seconds. The estimate remains configurable and is not a completion condition.",
+      "narrationAsset": {
+        "resource": "Turning-Fuel-Into-Motion-George",
+        "fileExtension": "wav",
+        "duration": 727.625,
+        "sha256": "7117b18ce10e45844b6eba29936370131290baf30131b71cf2b01d5999847f37"
+      },
       "sources": [
         {
           "id": "doe-engine-basics",

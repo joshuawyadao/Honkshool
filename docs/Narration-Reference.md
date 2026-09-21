@@ -6,7 +6,7 @@
 
 Natural, human-sounding delivery takes priority over a numerically slow rate. Aim for a calm documentary or narrative essay: connected speech, clear technical pronunciation, natural emphasis, and space between ideas. The selected Kokoro setting slows the model's predicted durations before synthesis; it does not stretch a finished waveform or apply consonant processing.
 
-F, the Aaron full-session render, and all Apple premium comparisons remain historical references. D-001's direct AVSpeechSynthesizer spike proved important device behavior, but D-023 supersedes it as the production narration direction because AVSpeechSynthesizer does not produce the accepted George output. A separate on-device feasibility slice must validate a Kokoro implementation before app integration.
+F, the Aaron full-session render, and all Apple premium comparisons remain historical references. D-001's direct AVSpeechSynthesizer spike proved important device behavior, but D-023 supersedes it as the production narration direction because AVSpeechSynthesizer does not produce the accepted George output. D-024 now uses preparation-time Kokoro generation and bundled AVFoundation playback for the curated prototype; physical-iPhone playback evidence is still required.
 
 ## Accepted passage
 
@@ -255,7 +255,7 @@ A selector is technically feasible: the current feasibility controller already a
 
 For a subsequent product implementation, a small curated selector should show voice name/accent and a preview, distinguish installed voices from unavailable downloads, and save the listener's choice. Resolve and validate the exact voice before starting. A different voice can change narration duration, so regenerate and review the Nap Plan using an estimate measured for the selected voice/settings; retain D-004's fixed deadline. Freeze voice/settings for the active run and apply changes to a later plan, with no mid-nap prompt or silent lower-quality substitution. Actual completion and revision-specific partial progress remain authoritative.
 
-Short Mac auditions do not establish target-iPhone voice availability, technical pronunciation, or full-session comfort. A replacement requires a complete timing measurement before replacing the configured 675-second estimate. The exported Apple WAVs remain personal test artifacts; public distribution of recordings needs a separate review of applicable voice-license terms, rather than inferring redistribution rights from a free download.
+At the end of the Apple comparison, short Mac auditions did not establish target-iPhone voice availability, technical pronunciation, or full-session comfort, and the configured estimate was still 675 seconds. The later Kokoro preparation below replaces that current timing basis while preserving this historical conclusion. The exported Apple WAVs remain personal test artifacts; public distribution of recordings needs a separate review of applicable voice-license terms, rather than inferring redistribution rights from a free download.
 
 ## Accepted Kokoro George direction, 2026-09-21
 
@@ -276,15 +276,16 @@ All Kokoro auditions use official `hexgrad/Kokoro-82M` v1.0 assets at repository
 | George factual opening | First three paragraphs, 408 words | `1.0` | 141.000 s | `edcc4a7b1352dfc0e7f3fe3e475f3c46a0c81122e06b3d73193c97c5bd362cc6` |
 | George gently slower | Same 408 words | `0.92` | 148.050 s | `390d666904d10e5b0480cc736951f212356c8e7bae6aa46692b6b8114e010a6b` |
 | **George spacious — selected** | Same 408 words | **`0.86`** | **155.975 s** | `fa62df1623cf17f6261127cc1d51cbcb055f9fc9e01402b938e14ff2416cafa7` |
+| **George complete prepared session** | All 13 paragraphs, 1,829 words | **`0.86`** | **727.625 s** | `7117b18ce10e45844b6eba29936370131290baf30131b71cf2b01d5999847f37` |
 
-The 408-word files contain one second between paragraphs and 0.25 seconds of silence at each end. Each output receives one constant whole-file gain for comparison. Model speed changes predicted phoneme durations during synthesis; no finished WAV is time-stretched. There is no filtering, de-essing, pitch shifting, resampling, compression, rain, or local word editing. Exact catalog text, model and voice hashes, generated chunk order, PCM construction, output hashes, levels, and absence of clipping passed local checks. Those checks do not independently transcribe the speech or establish naturalness; the owner's listening provides the preference evidence.
+The 408-word files and complete asset contain one second between paragraphs and 0.25 seconds of silence at each end. Each output receives one constant whole-file gain. Model speed changes predicted phoneme durations during synthesis; no finished WAV is time-stretched. There is no filtering, de-essing, pitch shifting, resampling, compression, rain, or local word editing. Exact catalog text, model and voice hashes, generated chunk order, PCM construction, output hashes, levels, and absence of clipping passed local checks. Those checks do not independently transcribe the speech or establish naturalness; the owner's excerpt listening provides preference evidence, and complete-session listening remains open.
 
-Generated audio, model weights, the isolated Python environment, manifests, and scratch renderers remain local and outside Git. No app dependency, bundled model, generated narration, catalog estimate, or playback behavior changes in this documentation checkpoint.
+The verified complete-session WAV and compact provenance are bundled with the app. Model weights and the isolated Python environment remain outside Git. The catalog estimate is now 730 seconds, rounded up from the measured 727.625-second asset. The feasibility console loads that exact file with AVAudioPlayer, never silently falls back to an Apple voice, and stops narration or following ambience at its captured wake deadline. No Kokoro inference dependency is shipped.
 
 ## Remaining validation
 
-1. Run a bounded target-iPhone Kokoro feasibility check before integrating a runtime: verify audio parity, app/model size, memory, thermal and battery effects, synthesis latency, locked-screen/background behavior, interruptions, fixed-deadline stopping, and required third-party notices.
-2. Render and listen to the complete prepared session with George at speed `0.86`; verify every technical term, longer-form calmness, chunk transitions, and total duration before replacing the configurable 675-second historical estimate.
-3. Decide whether narration should be generated ahead of playback or on device during preparation. Either approach must remain local for the first version, expose a reliable duration before Nap Plan approval, and never require a network or metered API during a nap.
+1. Install the prepared-audio build on the target iPhone and verify audio parity, locked-screen/background behavior, pause/resume, interruptions, route loss, natural completion, and fixed-deadline stopping.
+2. Listen to the complete prepared session and verify every technical term, longer-form calmness, and chunk transitions. Its duration and construction are verified; spoken-word accuracy and comfort remain listening judgments.
+3. Keep preparation-time generation for the curated prototype. Reconsider live inference only if a larger catalog makes the 327 MB model and third-party runtime preferable to individual prepared assets.
 4. Audition the prepared CC0 gentle-rain candidate alone and with selected George narration, then check drift and silence transitions. The voice selection does not establish a rain mix or asset acceptance.
 5. Keep a voice selector deferred. George is the default direction; any later alternative must be explicitly previewed and selected before plan approval, with voice-specific timing and no mid-nap or silent fallback changes.

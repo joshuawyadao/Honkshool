@@ -5,6 +5,34 @@ import XCTest
 @testable import Honkshool
 
 final class PreparedCatalogTests: XCTestCase {
+  func testGeorgeNarrationAndProvenanceAreBundledAndMatchCatalog() throws {
+    let catalog = try PreparedCatalog.load()
+    let prepared = try XCTUnwrap(catalog.sessions["turning-fuel-into-motion"])
+    let metadata = try XCTUnwrap(prepared.narrationAsset)
+    let url = try prepared.narrationURL()
+    let provenanceURL = try XCTUnwrap(
+      Bundle.main.url(forResource: "GeorgeNarration-Provenance", withExtension: "json"))
+    let provenance = try XCTUnwrap(
+      JSONSerialization.jsonObject(with: Data(contentsOf: provenanceURL)) as? [String: Any])
+
+    let hash = SHA256.hash(data: try Data(contentsOf: url)).map { String(format: "%02x", $0) }
+      .joined()
+    XCTAssertEqual(url.lastPathComponent, "\(metadata.resource).\(metadata.fileExtension)")
+    XCTAssertEqual(metadata.sha256, hash)
+    XCTAssertEqual(provenance["outputSHA256"] as? String, hash)
+    XCTAssertEqual(provenance["voice"] as? String, "bm_george")
+    XCTAssertEqual((provenance["speed"] as? NSNumber)?.doubleValue, 0.86)
+
+    let audio = try AVAudioFile(forReading: url)
+    XCTAssertEqual(audio.processingFormat.channelCount, 1)
+    XCTAssertEqual(audio.processingFormat.sampleRate, 24_000)
+    XCTAssertEqual(audio.length, (provenance["frames"] as? NSNumber)?.int64Value)
+    XCTAssertEqual(metadata.duration, Double(audio.length) / audio.processingFormat.sampleRate)
+    XCTAssertEqual(prepared.session.estimatedDuration, 730)
+    XCTAssertLessThan(metadata.duration, prepared.session.estimatedDuration)
+    XCTAssertLessThan(prepared.session.estimatedDuration - metadata.duration, 5)
+  }
+
   func testRainCandidateAndProvenanceAreBundledAndDecodable() throws {
     let url = try XCTUnwrap(Bundle.main.url(forResource: "GentleRain", withExtension: "wav"))
     let provenanceURL = try XCTUnwrap(
@@ -70,6 +98,35 @@ final class PreparedCatalogTests: XCTestCase {
   func testLoadingBundleWithoutPreparedCatalogReportsMissingResource() {
     XCTAssertThrowsError(try PreparedCatalog.load(bundle: Bundle(for: Self.self))) {
       XCTAssertEqual($0 as? PreparedCatalogError, .missingBundledCatalog)
+    }
+  }
+
+  func testNarrationAssetLookupReportsAbsentMetadataAndMissingBundleFile() throws {
+    let withoutAsset = try preparedSession()
+    XCTAssertThrowsError(try withoutAsset.narrationURL()) {
+      XCTAssertEqual($0 as? PreparedCatalogError, .missingNarrationAsset("session"))
+    }
+
+    let withAsset = try preparedSession(overrides: ["narrationAsset": narrationAssetDocument()])
+    XCTAssertThrowsError(try withAsset.narrationURL(bundle: Bundle(for: Self.self))) {
+      XCTAssertEqual(
+        $0 as? PreparedCatalogError, .missingBundledNarration("Prepared-Narration"))
+    }
+  }
+
+  func testInvalidNarrationAssetMetadataIsRejected() throws {
+    let invalidAssets: [[String: Any]] = [
+      narrationAssetDocument(overrides: ["resource": "../Narration"]),
+      narrationAssetDocument(overrides: ["resource": "Narration.wav"]),
+      narrationAssetDocument(overrides: ["fileExtension": "m4a"]),
+      narrationAssetDocument(overrides: ["duration": 0.0]),
+      narrationAssetDocument(overrides: ["duration": 300.1]),
+      narrationAssetDocument(overrides: ["duration": 295.0]),
+      narrationAssetDocument(overrides: ["sha256": "not-a-sha"]),
+    ]
+    for asset in invalidAssets {
+      assertInvalidContent(
+        try catalogData(sessions: [sessionDocument(overrides: ["narrationAsset": asset])]))
     }
   }
 
@@ -379,6 +436,13 @@ final class PreparedCatalogTests: XCTestCase {
         "text": "A crankshaft converts a push into rotation.", "sourceIDs": ["mechanism-reference"],
       ],
     ]
+  }
+
+  private func narrationAssetDocument(overrides: [String: Any] = [:]) -> [String: Any] {
+    [
+      "resource": "Prepared-Narration", "fileExtension": "wav", "duration": 297.5,
+      "sha256": String(repeating: "a", count: 64),
+    ].merging(overrides) { _, replacement in replacement }
   }
 
   private func sourceDocuments() -> [[String: Any]] {

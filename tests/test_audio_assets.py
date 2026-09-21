@@ -151,6 +151,118 @@ class PreparedRainTests(unittest.TestCase):
             self.assertEqual(source.read_bytes(), b"source must remain untouched")
 
 
+class PreparedNarrationTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.provenance = json.loads(
+            (RESOURCES / "GeorgeNarration-Provenance.json").read_text(encoding="utf-8")
+        )
+        cls.asset = RESOURCES / cls.provenance["outputFile"]
+        catalog = json.loads(
+            (RESOURCES / "PreparedCatalog.json").read_text(encoding="utf-8")
+        )
+        cls.session = next(
+            session
+            for session in catalog["sessions"]
+            if session["id"] == cls.provenance["sessionID"]
+        )
+        with wave.open(str(cls.asset), "rb") as audio:
+            cls.parameters = audio.getparams()
+            cls.pcm_bytes = audio.readframes(audio.getnframes())
+        cls.pcm = array.array("h", cls.pcm_bytes)
+        if sys.byteorder != "little":
+            cls.pcm.byteswap()
+
+    def test_catalog_points_to_the_verified_bundled_asset(self):
+        metadata = self.session["narrationAsset"]
+        self.assertEqual(
+            self.asset.name, f'{metadata["resource"]}.{metadata["fileExtension"]}'
+        )
+        self.assertEqual(metadata["sha256"], self.provenance["outputSHA256"])
+        self.assertEqual(
+            hashlib.sha256(self.asset.read_bytes()).hexdigest(), metadata["sha256"]
+        )
+        self.assertEqual(self.asset.stat().st_size, self.provenance["outputBytes"])
+        self.assertEqual(metadata["duration"], self.provenance["durationSeconds"])
+        self.assertEqual(
+            self.session["estimatedDuration"],
+            math.ceil(metadata["duration"] / 5) * 5,
+        )
+
+    def test_provenance_matches_the_current_versioned_script(self):
+        narration = "\n\n".join(
+            paragraph["text"] for paragraph in self.session["paragraphs"]
+        )
+        self.assertEqual(self.provenance["sessionRevision"], self.session["revision"])
+        self.assertEqual(
+            self.provenance["narrationTextSHA256"],
+            hashlib.sha256(narration.encode("utf-8")).hexdigest(),
+        )
+        self.assertEqual(self.provenance["paragraphCount"], len(self.session["paragraphs"]))
+        self.assertEqual(
+            self.provenance["wordCount"],
+            sum(len(paragraph["text"].split()) for paragraph in self.session["paragraphs"]),
+        )
+        for source, prepared in zip(
+            self.session["paragraphs"], self.provenance["paragraphs"]
+        ):
+            self.assertEqual(
+                prepared["textSHA256"],
+                hashlib.sha256(source["text"].encode("utf-8")).hexdigest(),
+            )
+            self.assertEqual(
+                prepared["frames"], sum(chunk["frames"] for chunk in prepared["chunks"])
+            )
+
+    def test_wav_format_duration_and_levels_match_provenance(self):
+        self.assertEqual(self.parameters.comptype, "NONE")
+        self.assertEqual(self.parameters.nchannels, self.provenance["channels"])
+        self.assertEqual(self.parameters.sampwidth, 2)
+        self.assertEqual(self.parameters.framerate, self.provenance["sampleRate"])
+        self.assertEqual(self.parameters.nframes, self.provenance["frames"])
+        self.assertEqual(len(self.pcm), self.parameters.nframes)
+        self.assertAlmostEqual(
+            self.parameters.nframes / self.parameters.framerate,
+            self.provenance["durationSeconds"],
+        )
+        measured_rms = 20 * math.log10(
+            math.sqrt(
+                sum((sample / 32768) ** 2 for sample in self.pcm) / len(self.pcm)
+            )
+        )
+        measured_peak = 20 * math.log10(
+            max(abs(sample) for sample in self.pcm) / 32768
+        )
+        clipped = sum(sample in (-32768, 32767) for sample in self.pcm)
+        self.assertAlmostEqual(measured_rms, self.provenance["measuredRMSDBFS"], places=6)
+        self.assertAlmostEqual(measured_peak, self.provenance["measuredPeakDBFS"], places=6)
+        self.assertEqual(clipped, self.provenance["clippedSampleCount"])
+        self.assertEqual(clipped, 0)
+
+    def test_timing_is_only_model_audio_and_recorded_silence(self):
+        paragraph_frames = sum(item["frames"] for item in self.provenance["paragraphs"])
+        expected = (
+            paragraph_frames
+            + self.provenance["leadingFrames"]
+            + self.provenance["trailingFrames"]
+            + self.provenance["paragraphGapFrames"]
+            * (self.provenance["paragraphCount"] - 1)
+        )
+        self.assertEqual(expected, self.provenance["frames"])
+        lead = self.provenance["leadingFrames"] * 2
+        trail = self.provenance["trailingFrames"] * 2
+        self.assertFalse(any(self.pcm_bytes[:lead]))
+        self.assertFalse(any(self.pcm_bytes[-trail:]))
+
+    def test_pinned_george_model_direction_is_preserved(self):
+        self.assertEqual(self.provenance["engine"], "Kokoro-82M v1.0")
+        self.assertEqual(self.provenance["modelRepository"], "hexgrad/Kokoro-82M")
+        self.assertEqual(self.provenance["modelLicense"], "Apache-2.0")
+        self.assertEqual(self.provenance["voice"], "bm_george")
+        self.assertEqual(self.provenance["speed"], 0.86)
+        self.assertIn("No filtering", self.provenance["processing"])
+
+
 class NarrationMeasurementTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -232,10 +344,12 @@ class NarrationMeasurementTests(unittest.TestCase):
         pause_frames += full["frameCount"] - previous_end
         self.assertAlmostEqual(pause_frames / full["sampleRate"], full["addedPauseSeconds"])
 
-    def test_planning_estimate_rounds_up_the_complete_measured_duration(self):
+    def test_historical_aaron_estimate_remains_internally_consistent(self):
         full = self.measurements["full"]
-        self.assertEqual(full["configuredEstimateSeconds"], self.session["estimatedDuration"])
-        self.assertEqual(self.session["estimatedDuration"], math.ceil(full["durationSeconds"] / 5) * 5)
+        self.assertEqual(full["configuredEstimateSeconds"], 675)
+        self.assertEqual(
+            full["configuredEstimateSeconds"], math.ceil(full["durationSeconds"] / 5) * 5
+        )
 
 
 if __name__ == "__main__":

@@ -18,6 +18,13 @@ struct PronunciationNote: Decodable, Equatable, Sendable {
   let guidance: String
 }
 
+struct PreparedNarrationAsset: Decodable, Equatable, Sendable {
+  let resource: String
+  let fileExtension: String
+  let duration: TimeInterval
+  let sha256: String
+}
+
 struct PreparedSession: Equatable, Sendable {
   enum DetailLevel: String, Decodable, Sendable {
     case enthusiast
@@ -28,6 +35,7 @@ struct PreparedSession: Equatable, Sendable {
   let language: String
   let summary: String
   let durationEstimateBasis: String
+  let narrationAsset: PreparedNarrationAsset?
   let paragraphs: [NarrationParagraph]
   let sources: [ContentSource]
   let pronunciations: [PronunciationNote]
@@ -42,6 +50,7 @@ struct PreparedSession: Equatable, Sendable {
     language = content.language
     summary = content.summary
     durationEstimateBasis = content.durationEstimateBasis
+    narrationAsset = content.narrationAsset
     paragraphs = content.paragraphs
     sources = content.sources
     pronunciations = content.pronunciations
@@ -75,6 +84,28 @@ struct PreparedSession: Equatable, Sendable {
         narration.range(of: note.term, options: .caseInsensitive) != nil
       else { throw PreparedCatalogError.invalidContent("pronunciation: \(session.id)") }
     }
+    if let narrationAsset {
+      guard hasText(narrationAsset.resource), !narrationAsset.resource.contains("/"),
+        !narrationAsset.resource.contains("\\"), !narrationAsset.resource.contains("."),
+        narrationAsset.fileExtension == "wav", narrationAsset.duration > 0,
+        narrationAsset.duration <= session.estimatedDuration,
+        session.estimatedDuration - narrationAsset.duration < 5,
+        narrationAsset.sha256.count == 64,
+        narrationAsset.sha256.allSatisfy(\.isHexDigit)
+      else { throw PreparedCatalogError.invalidContent("narration asset: \(session.id)") }
+    }
+  }
+
+  func narrationURL(bundle: Bundle = .main) throws -> URL {
+    guard let narrationAsset else {
+      throw PreparedCatalogError.missingNarrationAsset(session.id)
+    }
+    guard
+      let url = bundle.url(
+        forResource: narrationAsset.resource,
+        withExtension: narrationAsset.fileExtension)
+    else { throw PreparedCatalogError.missingBundledNarration(narrationAsset.resource) }
+    return url
   }
 
   /// Offsets refer to `narration`, never a display string with headings or citations.
@@ -143,6 +174,8 @@ enum PreparedCatalogError: Error, Equatable {
   case unsupportedSchema(Int)
   case invalidContent(String)
   case missingBundledCatalog
+  case missingNarrationAsset(String)
+  case missingBundledNarration(String)
 }
 
 private func hasText(_ value: String) -> Bool {
@@ -175,6 +208,7 @@ private struct SessionDocument: Decodable {
   let language: String
   let summary: String
   let durationEstimateBasis: String
+  let narrationAsset: PreparedNarrationAsset?
   let paragraphs: [NarrationParagraph]
   let sources: [ContentSource]
   let pronunciations: [PronunciationNote]

@@ -105,9 +105,9 @@ The first prototype includes only Enthusiast-level content. Future “Simpler ne
 
 ## Audio and ambience
 
-The first version intends to keep narration local and reproduce the accepted Kokoro-82M George reference at model speed `0.86`, subject to a bounded target-iPhone feasibility check. Natural, human-sounding delivery takes priority over a numerically slow rate. Aim for a calm documentary or narrative essay: connected prose, natural punctuation and emphasis, space between ideas and paragraphs, careful technical pronunciation, gradual volume reduction in the drift phase, and no unnecessary pitch or consonant processing.
+The first version keeps narration local by preparing Kokoro-82M George audio at model speed `0.86` with each reviewed content revision, then bundling the verified file for AVFoundation playback. It does not synthesize during a nap or require a network. Natural, human-sounding delivery takes priority over a numerically slow rate. Aim for a calm documentary or narrative essay: connected prose, natural punctuation and emphasis, space between ideas and paragraphs, careful technical pronunciation, gradual volume reduction in the drift phase, and no unnecessary pitch or consonant processing.
 
-The owner accepted F provisionally on MacBook speakers on 2026-09-16, then found Aaron tuning and compact Samantha/Daniel artificial. Apple Premium voices improved pronunciation but retained automated cadence. On 2026-09-21 both evaluated Kokoro voices sounded much more human and natural; the owner preferred George's calm documentary quality and selected the spacious `0.86` cadence after a 408-word factual comparison. This selects the target sound, not an app dependency or proven iPhone runtime. See the [accepted narration reference](Narration-Reference.md#accepted-kokoro-george-direction-2026-09-21) and [D-023](Decision-Log.md#kokoro-narration-direction-2026-09-21).
+The owner accepted F provisionally on MacBook speakers on 2026-09-16, then found Aaron tuning and compact Samantha/Daniel artificial. Apple Premium voices improved pronunciation but retained automated cadence. On 2026-09-21 both evaluated Kokoro voices sounded much more human and natural; the owner preferred George's calm documentary quality and selected the spacious `0.86` cadence after a 408-word factual comparison. The complete prepared session now measures 727.625 seconds and is connected to the feasibility console; target-iPhone playback and complete-session listening remain acceptance checks. See the [accepted narration reference](Narration-Reference.md#accepted-kokoro-george-direction-2026-09-21), [D-023](Decision-Log.md#kokoro-narration-direction-2026-09-21), and [D-024](Decision-Log.md#prepared-kokoro-playback-2026-09-21).
 
 A voice selector remains deferred. George is the default direction. Any future alternative must be explicitly previewed and selected before Nap Plan approval, use an estimate measured for that voice and setting, and remain fixed for the active run.
 
@@ -119,7 +119,7 @@ A normal factual session initially targets approximately 12–15 minutes, but th
 
 The first version keeps listening history on the device and has no account or iCloud sync. History retains lightweight information including session and journey identity, date played, playback duration and completion, detail level, position in the journey tree, summary, sources, and available branches.
 
-Partially played content remains resumable. Future prepared narration may be deleted after successful playback while its history remains; content explicitly kept offline remains until the listener removes it. The first version keeps narration local, but the Kokoro feasibility slice must decide whether to retain generated audio or only scripts, model assets, and metadata.
+Partially played content remains resumable. Prepared narration may be deleted after successful playback while its history remains; content explicitly kept offline remains until the listener removes it. The curated first prototype retains reviewed scripts, prepared audio, provenance, and metadata, without storing model weights in the app.
 
 ## Alarm behavior
 
@@ -133,10 +133,10 @@ The wake alarm is the only intentional attention-demanding event during the nap.
 - Swift and SwiftUI.
 - SwiftData for local persistence.
 - AlarmKit for nap alarms.
-- AVFoundation for narration playback and background audio; AVSpeechSynthesizer remains the proven feasibility-spike baseline.
-- A bounded on-device Kokoro evaluation before selecting and packaging a third-party narration runtime or generated-audio workflow.
+- AVFoundation for prepared narration playback and background audio; AVSpeechSynthesizer remains historical feasibility evidence.
+- Kokoro generation during controlled content preparation, with versioned text, model, voice, settings, audio fingerprints, and measured duration recorded before bundling.
 - Appropriate Lock Screen media controls.
-- Native frameworks preferred; add a narrowly scoped third-party narration component only after it reproduces the accepted sound and passes device, license, size, power, and reliability checks.
+- Native app frameworks preferred. Reconsider a third-party live narration component only if catalog scale outweighs its model size, licensing, power, and reliability costs.
 - No backend, accounts, analytics, cloud sync, subscriptions, ads, or paid API dependencies in the first prototype.
 - No TestFlight or App Store work initially.
 
