@@ -230,9 +230,24 @@ Local files `Honkshool-05-Lee-Premium.wav` and `Honkshool-06-Karen-Premium.wav` 
 
 ### Next accent comparison
 
-The owner requested different accents before settling on a voice. Premium is an [Apple quality category](https://developer.apple.com/documentation/avfaudio/avspeechsynthesisvoicequality/premium), not evidence that all voices have the same articulation, phrasing, pronunciation, or duration. Compare American and British premium candidates with the already preferred Australian reference using the unchanged paragraph, natural timing, and matched overall level. The Mac voice picker offers Ava Premium (American) and Jamie Premium (British), but these must be confirmed as installed premium identifiers before any render. Their availability on the target iPhone must be checked separately.
+The owner requested different accents before settling on a voice. Premium is an [Apple quality category](https://developer.apple.com/documentation/avfaudio/avspeechsynthesisvoicequality/premium), not evidence that all voices have the same articulation, phrasing, pronunciation, or duration. Compare American and British premium candidates with the already preferred Australian reference using the unchanged paragraph, natural timing, and matched overall level. The owner downloaded Ava Premium (American) and Jamie Premium (British), and both now resolve as API quality 3 on the Mac. Their availability on the target iPhone must be checked separately.
 
-The earlier picker attempt downloaded Lee/Karen Premium and basic Jamie instead of the initially targeted Ava/Jamie Premium. The original system voice was restored to Samantha and verified. A later attempt isolated individual premium entries, but downloads did not become available through automation; the owner was asked to initiate the two downloads manually. No basic voice is substituted into the proposed accent comparison. The owner is now listening in desktop Codex, so the earlier pending iCloud transfer is no longer needed.
+The earlier picker attempt downloaded Lee/Karen Premium and basic Jamie instead of the initially targeted Ava/Jamie Premium. The original system voice was restored to Samantha and verified. A later attempt isolated individual premium entries, but downloads did not become available through automation; the owner was asked to initiate the two downloads manually. The owner then completed both requested downloads, resolving that blocker. No basic voice is substituted into the accent comparison. The owner is now listening in desktop Codex, so the earlier pending iCloud transfer is no longer needed.
+
+### Completed accent auditions
+
+The same whole closing paragraph now has two additional local auditions. They use rate 0.50, pitch 1, volume 1, and an explicit false assistive-technology preference, with exactly resolved quality-3 voices. Jamie is the API's display name, while its stable identifier contains `Malcolm`; these names refer to the same resolved premium asset and are not guessed substitutions.
+
+| Voice | Exact identifier | Locale | Raw / padded duration | Padded frames | WAV SHA-256 |
+| --- | --- | --- | --- | --- | --- |
+| Ava Premium | `com.apple.voice.premium.en-US.Ava` | en-US | 24.023673 / 24.523719 s | 540,748 | `e08ffced2d9d974b908930690b7e8d9a7dd1c5602367f7a2379b0f85b315845d` |
+| Jamie Premium | `com.apple.voice.premium.en-GB.Malcolm` | en-GB | 23.676644 / 24.176689 s | 533,096 | `8dc493cac126c0413683c1e4b1f64b7cf72385b68e0993f0dc112e3a19bc5704` |
+
+The files are `Honkshool-07-Ava-Premium.wav` and `Honkshool-08-Jamie-Premium.wav`. Both retain native mono 22,050 Hz audio and use the same 16-bit conversion and 5,513-frame end padding as Lee/Karen. Their constant gains are −5.538628 and −5.702682 dB; sample peaks are −8.221305 and −6.529867 dBFS. Raw CAF fingerprints are `a3f1a347a9a63ea14e81643e596791836e7e7ae2e34d4b820d4873b2d50aae07` (Ava) and `cf8227a808e4da0ed64f4fd36896fd34015386d3d653b7f034764940235c1196` (Jamie).
+
+Separate standard-library CAF/WAV parsing verifies catalog text identity, format/frame counts, hashes, exact PCM reconstruction from constant gain plus padding, no clipping, and RMS within 0.000001 dB of the same Aaron level reference. Lee/Karen, F, and the full-session master retain their prior hashes. Whole-paragraph completion uses the established delegate/nonzero-PCM/quiet-period guards. No system voice setting was changed for these renders, and no iCloud transfer was needed.
+
+These samples preserve each voice's native cadence; no duration matching or time stretching is applied. All four premium auditions last approximately 24 seconds at the same API rate, but similar duration does not establish identical phrasing or naturalness. Ava/Jamie listening feedback is pending. No voice has been chosen as the default, no full-session estimate has been changed, and no selector is implemented.
 
 ### Proposed selector boundary
 
