@@ -2,11 +2,11 @@
 
 ## Status and scope
 
-**Lee Premium and Karen Premium are the preferred source-voice direction as of 2026-09-21.** The owner reports that both sound substantially closer to a human narrator throughout the closing paragraph. Compact Samantha and Daniel were rejected for their overall artificial delivery, although Daniel improved some problem words. The owner requested comparison of other accents before choosing, and raised a possible voice selector. This is positive short-passage feedback, not a final voice, full-session, or iPhone synthesis acceptance. F remains a preserved historical reference. See the [premium comparison](#premium-voice-direction-and-accent-comparison-2026-09-21).
+**Kokoro-82M v1.0 voice `bm_george` at model speed `0.86` is the preferred narration and cadence reference as of 2026-09-21.** The owner found both Kokoro Heart and George much more human and natural than the Apple auditions, preferred George's calm documentary quality, and selected the more spacious of two slowed George comparisons. This resolves the listening direction under [D-007/D-023](Decision-Log.md#kokoro-narration-direction-2026-09-21). It does not yet approve an iPhone runtime, bundled model, full-session master, duration estimate, or rain mix.
 
-Natural, human-sounding delivery takes priority over slower syllables. Aim for an audiobook or narrative essay, retaining natural articulation and allowing space between ideas. F established the relaxed pacing direction. The latest feedback permits slightly quicker natural articulation, but speeding Aaron up has not resolved the texture. Preserve restful delivery and compare source voices before further consonant attenuation.
+Natural, human-sounding delivery takes priority over a numerically slow rate. Aim for a calm documentary or narrative essay: connected speech, clear technical pronunciation, natural emphasis, and space between ideas. The selected Kokoro setting slows the model's predicted durations before synthesis; it does not stretch a finished waveform or apply consonant processing.
 
-The historical F reference is a 97-word audition, not a complete factual session, an approved distribution asset, or a production playback implementation. [D-007](Decision-Log.md#narration-and-ambience-direction-2026-09-16) remains partly open. [D-001](Decision-Log.md#phase-0-closeout-accepted-decisions-2026-09-15) still selects direct AVSpeechSynthesizer speech for the initial prototype; accepting this processed reference does not select buffered playback.
+F, the Aaron full-session render, and all Apple premium comparisons remain historical references. D-001's direct AVSpeechSynthesizer spike proved important device behavior, but D-023 supersedes it as the production narration direction because AVSpeechSynthesizer does not produce the accepted George output. A separate on-device feasibility slice must validate a Kokoro implementation before app integration.
 
 ## Accepted passage
 
@@ -217,7 +217,7 @@ The text SHA-256 is `b8a4430c440833cb4b7175a6647e0c96a059cc13bf11ac9ccce12f941f1
 
 ### Listening outcome
 
-The owner reports that compact Daniel is less processed around the problem words but that both compact Daniel and Samantha sound more robotic and artificial throughout the whole sample. Neither is a replacement for the earlier reference. Subsequent **Lee Premium** and **Karen Premium** samples sound substantially closer to a human narrator throughout the passage. This shifts the preferred development direction from further processing of Aaron toward verified premium source voices.
+The owner reported that compact Daniel was less processed around the problem words but that both compact Daniel and Samantha sounded more robotic and artificial throughout the whole sample. Neither replaced the earlier reference. Subsequent **Lee Premium** and **Karen Premium** samples sounded substantially closer to a human narrator throughout the passage. At that stage, this shifted the development direction from further processing of Aaron toward verified premium source voices; the later Kokoro decision below supersedes it.
 
 Both premium samples use the same original closing paragraph and text hash recorded above, utterance rate 0.50, pitch 1, volume 1, and `prefersAssistiveTechnologySettings = false`. Each whole paragraph is synthesized once with an exact identifier and an explicit API quality-3 requirement; missing voices fail rather than silently falling back. No de-essing, spectral processing, time stretching, internal pause insertion, or rain is applied. A single constant gain matches whole-file RMS to the faster Aaron control, approximately −22.882914 dBFS. RMS matching does not guarantee equal perceived loudness.
 
@@ -247,7 +247,7 @@ The files are `Honkshool-07-Ava-Premium.wav` and `Honkshool-08-Jamie-Premium.wav
 
 Separate standard-library CAF/WAV parsing verifies catalog text identity, format/frame counts, hashes, exact PCM reconstruction from constant gain plus padding, no clipping, and RMS within 0.000001 dB of the same Aaron level reference. Lee/Karen, F, and the full-session master retain their prior hashes. Whole-paragraph completion uses the established delegate/nonzero-PCM/quiet-period guards. No system voice setting was changed for these renders, and no iCloud transfer was needed.
 
-These samples preserve each voice's native cadence; no duration matching or time stretching is applied. All four premium auditions last approximately 24 seconds at the same API rate, but similar duration does not establish identical phrasing or naturalness. Ava/Jamie listening feedback is pending. No voice has been chosen as the default, no full-session estimate has been changed, and no selector is implemented.
+These samples preserve each voice's native cadence; no duration matching or time stretching is applied. All four premium auditions last approximately 24 seconds at the same API rate, but similar duration does not establish identical phrasing or naturalness. At the end of this Apple-only comparison, Ava/Jamie listening and the default remained pending. The later Kokoro decision below resolves the preferred reference; the full-session estimate remains unchanged and no selector is implemented.
 
 ### Proposed selector boundary
 
@@ -255,12 +255,36 @@ A selector is technically feasible: the current feasibility controller already a
 
 For a subsequent product implementation, a small curated selector should show voice name/accent and a preview, distinguish installed voices from unavailable downloads, and save the listener's choice. Resolve and validate the exact voice before starting. A different voice can change narration duration, so regenerate and review the Nap Plan using an estimate measured for the selected voice/settings; retain D-004's fixed deadline. Freeze voice/settings for the active run and apply changes to a later plan, with no mid-nap prompt or silent lower-quality substitution. Actual completion and revision-specific partial progress remain authoritative.
 
-Short Mac auditions do not establish target-iPhone voice availability, technical pronunciation, or full-session comfort. A replacement requires a complete timing measurement before replacing the configured 675-second estimate. Direct speech remains the accepted initial runtime strategy under D-001. The exported Mac WAVs remain personal test artifacts; public distribution of recordings needs a separate review of applicable voice-license terms, rather than inferring redistribution rights from a free download.
+Short Mac auditions do not establish target-iPhone voice availability, technical pronunciation, or full-session comfort. A replacement requires a complete timing measurement before replacing the configured 675-second estimate. The exported Apple WAVs remain personal test artifacts; public distribution of recordings needs a separate review of applicable voice-license terms, rather than inferring redistribution rights from a free download.
+
+## Accepted Kokoro George direction, 2026-09-21
+
+### Listening outcome
+
+The owner heard the same unchanged closing paragraph through Kokoro-82M v1.0 voices Heart (`af_heart`) and George (`bm_george`) at model speed `1.0`. Both sounded markedly more human and natural than the earlier Apple voices. George was preferred because its calm British delivery evoked a nature-documentary narration style. Heart remains a liked alternative, not the default.
+
+The first three catalog paragraphs were then rendered with George at speed `1.0` as a longer 408-word technical-prose check. The owner found this output human and natural but slightly fast. Two otherwise matched versions used Kokoro's native duration control: `0.92` for a gently slower version and `0.86` for a more spacious version. The owner selected `0.86` for future work. This is a deliberate narration setting, not a mechanism for changing an approved plan mid-nap; the selected voice and speed must be fixed before a Nap Plan starts.
+
+### Reproducible evidence
+
+All Kokoro auditions use official `hexgrad/Kokoro-82M` v1.0 assets at repository revision `f3ff3571791e39611d31c381e3a41a3af07b4987`. The model SHA-256 is `496dba118d1a58f5f3db2efc88dbdc216e0483fc89fe6e47ee1f2c53f18ad1e4`; the George voice asset SHA-256 is `f1bc812213dc59774769e5c80004b13eeb79bd78130b11b2d7f934542dab811b`. The model and upstream inference code identify Apache 2.0 licensing: [model card](https://huggingface.co/hexgrad/Kokoro-82M) and [inference repository](https://github.com/hexgrad/kokoro). Running these local evaluations incurs no metered speech-service charge. A shipped app still needs the required license and notice handling plus review of the chosen iPhone implementation and all transitive components.
+
+| Audition | Input | Model speed | Duration | WAV SHA-256 |
+| --- | --- | ---: | ---: | --- |
+| Heart comparison | Closing paragraph, 74 words | `1.0` | 24.975 s | `176587c669d14f8f2008d38df14c29d8015591e1edad7b76e550425a967d1d92` |
+| George comparison | Closing paragraph, 74 words | `1.0` | 25.100 s | `4d4a2ce2c3fea0e37a12bbb3b4af97d26cda0c5446d71861d131939d74f91f50` |
+| George factual opening | First three paragraphs, 408 words | `1.0` | 141.000 s | `edcc4a7b1352dfc0e7f3fe3e475f3c46a0c81122e06b3d73193c97c5bd362cc6` |
+| George gently slower | Same 408 words | `0.92` | 148.050 s | `390d666904d10e5b0480cc736951f212356c8e7bae6aa46692b6b8114e010a6b` |
+| **George spacious — selected** | Same 408 words | **`0.86`** | **155.975 s** | `fa62df1623cf17f6261127cc1d51cbcb055f9fc9e01402b938e14ff2416cafa7` |
+
+The 408-word files contain one second between paragraphs and 0.25 seconds of silence at each end. Each output receives one constant whole-file gain for comparison. Model speed changes predicted phoneme durations during synthesis; no finished WAV is time-stretched. There is no filtering, de-essing, pitch shifting, resampling, compression, rain, or local word editing. Exact catalog text, model and voice hashes, generated chunk order, PCM construction, output hashes, levels, and absence of clipping passed local checks. Those checks do not independently transcribe the speech or establish naturalness; the owner's listening provides the preference evidence.
+
+Generated audio, model weights, the isolated Python environment, manifests, and scratch renderers remain local and outside Git. No app dependency, bundled model, generated narration, catalog estimate, or playback behavior changes in this documentation checkpoint.
 
 ## Remaining validation
 
-1. Compare premium English accents against the preferred Lee/Karen direction at an ordinary comfortable volume. Assess whole-passage naturalness, clarity, and comfort before choosing a default or implementing a curated selector. F remains a historical provisional reference.
-2. Enumerate voices available to the target iPhone app and verify supported direct-speech delivery against this reference. Do not silently substitute a lower-quality voice or assume that the Mac identifier is usable on iPhone.
-3. Check pronunciation of the prepared script's technical terms, naturalness over a full session, and duration on the intended iPhone playback path. A full Mac measurement is now recorded, but does not replace that check. Keep duration estimates configurable; the fixed wake deadline remains governed by D-004.
-4. Validate a proposed production voice with a short comparison against the preferred premium samples before adoption. If direct speech cannot meet the accepted sound, record the evidence and make an explicit runtime decision before adopting a different strategy.
-5. Audition the prepared CC0 gentle-rain candidate under D-008, then check the combination with narration, drift, and silence. F's voice-only approval does not establish a rain mix or asset license.
+1. Run a bounded target-iPhone Kokoro feasibility check before integrating a runtime: verify audio parity, app/model size, memory, thermal and battery effects, synthesis latency, locked-screen/background behavior, interruptions, fixed-deadline stopping, and required third-party notices.
+2. Render and listen to the complete prepared session with George at speed `0.86`; verify every technical term, longer-form calmness, chunk transitions, and total duration before replacing the configurable 675-second historical estimate.
+3. Decide whether narration should be generated ahead of playback or on device during preparation. Either approach must remain local for the first version, expose a reliable duration before Nap Plan approval, and never require a network or metered API during a nap.
+4. Audition the prepared CC0 gentle-rain candidate alone and with selected George narration, then check drift and silence transitions. The voice selection does not establish a rain mix or asset acceptance.
+5. Keep a voice selector deferred. George is the default direction; any later alternative must be explicitly previewed and selected before plan approval, with voice-specific timing and no mid-nap or silent fallback changes.

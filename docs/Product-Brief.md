@@ -105,9 +105,11 @@ The first prototype includes only Enthusiast-level content. Future “Simpler ne
 
 ## Audio and ambience
 
-The first version intends to use one carefully selected Apple on-device voice. Natural, human-sounding delivery takes priority over slowing individual syllables. Aim for an audiobook or narrative essay: connected prose, natural punctuation, space between ideas and paragraphs, careful technical pronunciation, gradual volume reduction in the drift phase, and minimal pitch manipulation. Preserve natural articulation and use pauses for breathing room; soften distracting sibilants only where needed, without making surrounding syllables sound processed.
+The first version intends to keep narration local and reproduce the accepted Kokoro-82M George reference at model speed `0.86`, subject to a bounded target-iPhone feasibility check. Natural, human-sounding delivery takes priority over a numerically slow rate. Aim for a calm documentary or narrative essay: connected prose, natural punctuation and emphasis, space between ideas and paragraphs, careful technical pronunciation, gradual volume reduction in the drift phase, and no unnecessary pitch or consonant processing.
 
-The owner accepted F as a provisional development reference on MacBook speakers on 2026-09-16. Later Aaron tuning and compact Samantha/Daniel auditions remained artificial. On 2026-09-21 the owner reported that Lee Premium and Karen Premium sounded substantially closer to a human narrator throughout the sample and requested other accents before choosing. This establishes a preferred source-voice direction, not final acceptance of a default or equivalent iPhone playback. A curated voice selector is a proposed follow-up; premium voices must still be compared individually. Any selector must resolve the voice and its timing estimate before plan approval and keep the active run's voice fixed. See the [narration reference](Narration-Reference.md#premium-voice-direction-and-accent-comparison-2026-09-21) and [D-007](Decision-Log.md#premium-voice-direction-2026-09-21).
+The owner accepted F provisionally on MacBook speakers on 2026-09-16, then found Aaron tuning and compact Samantha/Daniel artificial. Apple Premium voices improved pronunciation but retained automated cadence. On 2026-09-21 both evaluated Kokoro voices sounded much more human and natural; the owner preferred George's calm documentary quality and selected the spacious `0.86` cadence after a 408-word factual comparison. This selects the target sound, not an app dependency or proven iPhone runtime. See the [accepted narration reference](Narration-Reference.md#accepted-kokoro-george-direction-2026-09-21) and [D-023](Decision-Log.md#kokoro-narration-direction-2026-09-21).
+
+A voice selector remains deferred. George is the default direction. Any future alternative must be explicitly previewed and selected before Nap Plan approval, use an estimate measured for that voice and setting, and remain fixed for the active run.
 
 Ambience is independent of the subject. The approved direction is gentle, steady rain with consistent volume and texture, without thunder, sudden surges, or sharp drips. The first version requires a lawfully distributable offline asset with a seamless loop; silence remains a valid choice and fallback. A CC0 rain candidate now has documented provenance and objective loop/level checks in [Audio-Preparation.md](Audio-Preparation.md); listening comfort, final selection, and runtime integration remain pending under D-008.
 
@@ -117,7 +119,7 @@ A normal factual session initially targets approximately 12–15 minutes, but th
 
 The first version keeps listening history on the device and has no account or iCloud sync. History retains lightweight information including session and journey identity, date played, playback duration and completion, detail level, position in the journey tree, summary, sources, and available branches.
 
-Partially played content remains resumable. Future downloaded narration may be deleted after successful playback while its history remains; content explicitly kept offline remains until the listener removes it. Because the first version uses on-device speech, it may retain only scripts and metadata rather than generated audio files.
+Partially played content remains resumable. Future prepared narration may be deleted after successful playback while its history remains; content explicitly kept offline remains until the listener removes it. The first version keeps narration local, but the Kokoro feasibility slice must decide whether to retain generated audio or only scripts, model assets, and metadata.
 
 ## Alarm behavior
 
@@ -131,9 +133,10 @@ The wake alarm is the only intentional attention-demanding event during the nap.
 - Swift and SwiftUI.
 - SwiftData for local persistence.
 - AlarmKit for nap alarms.
-- AVFoundation and AVSpeechSynthesizer for narration and background audio.
+- AVFoundation for narration playback and background audio; AVSpeechSynthesizer remains the proven feasibility-spike baseline.
+- A bounded on-device Kokoro evaluation before selecting and packaging a third-party narration runtime or generated-audio workflow.
 - Appropriate Lock Screen media controls.
-- Native frameworks preferred over third-party dependencies.
+- Native frameworks preferred; add a narrowly scoped third-party narration component only after it reproduces the accepted sound and passes device, license, size, power, and reliability checks.
 - No backend, accounts, analytics, cloud sync, subscriptions, ads, or paid API dependencies in the first prototype.
 - No TestFlight or App Store work initially.
 

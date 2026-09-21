@@ -2,11 +2,19 @@
 
 ## Status, 2026-09-21
 
-The owner rejected compact Samantha/Daniel as artificial overall and reports that Lee Premium and Karen Premium sound substantially closer to a human narrator throughout the closing paragraph. These verified quality-3 sources, with no consonant processing, are the preferred development direction. American Ava Premium and British Jamie Premium auditions are now rendered and verified for comparison with the Australian references; listening feedback and the default choice remain pending. A possible curated selector remains a subsequent product decision. See the [premium-voice record](Narration-Reference.md#premium-voice-direction-and-accent-comparison-2026-09-21) for exact samples, settings, feedback, and validation.
+The accepted narration direction is now **Kokoro-82M v1.0 voice `bm_george` at model speed `0.86`**. The owner found both Kokoro Heart and George much more human and natural than the Apple auditions, preferred George's calm documentary character, and selected the more spacious of two native-duration comparisons. See the [accepted Kokoro reference](Narration-Reference.md#accepted-kokoro-george-direction-2026-09-21) for exact assets, settings, samples, fingerprints, and validation.
 
-[Audition F](Narration-Reference.md) and the full-session master remain unchanged historical references. The configurable 675-second estimate still describes the earlier full Mac render; it has not been calibrated to any of the premium voices. Final voice/full-session acceptance, target-iPhone synthesis, rain acceptance, and production integration remain open.
+[Audition F](Narration-Reference.md), the Apple premium comparisons, and the Aaron full-session master remain unchanged historical references. The configurable 675-second estimate still describes that earlier Mac render; the selected Kokoro voice has not yet rendered the complete session. Target-iPhone Kokoro feasibility, full-session pronunciation/timing, rain acceptance, and production integration remain open.
 
-The machine-readable [narration measurements](Audio-Preparation-Measurements.json) and [rain provenance](../Honkshool/Resources/GentleRain-Provenance.json) retain exact fingerprints, settings, and checks. Full narration audio and listening previews remain local, outside the repository. The rain candidate is [GentleRain.wav](../Honkshool/Resources/GentleRain.wav).
+The machine-readable [narration measurements](Audio-Preparation-Measurements.json) preserve the historical Apple work, and [rain provenance](../Honkshool/Resources/GentleRain-Provenance.json) retains the bundled ambience evidence. Kokoro model assets, manifests, scratch tools, full narration audio, and listening previews remain local outside the repository. The rain candidate is [GentleRain.wav](../Honkshool/Resources/GentleRain.wav).
+
+## Accepted Kokoro cadence evidence
+
+The selected comparison uses the unchanged first three paragraphs of **Turning Fuel Into Motion**, totaling 408 words. George at default model speed `1.0` measures 141.000 seconds with the established paragraph gaps and end padding. A gentle `0.92` comparison measures 148.050 seconds. The accepted `0.86` comparison measures 155.975 seconds and has WAV SHA-256 `fa62df1623cf17f6261127cc1d51cbcb055f9fc9e01402b938e14ff2416cafa7`.
+
+Kokoro predicts new phoneme durations for each speed. The accepted output is not a post-render time stretch. Preparation adds one second between the three paragraphs, 0.25 seconds at each end, and one constant gain over the assembled file. It adds no filtering, de-essing, pitch shift, resampling, compression, rain, or word-level edits. Exact catalog text, model revision, model/voice assets, chunk order, PCM construction, output hashes, levels, and absence of clipping passed. The owner's listening establishes the preferred sound; file checks do not independently transcribe the output or prove full-session comfort.
+
+This acceptance does not add Kokoro to the app. A later implementation must first validate an on-device path and decide whether to prepare audio before a nap or synthesize locally during preparation. Either approach must expose a reliable measured duration before Nap Plan approval and remain compatible with D-004's fixed deadline.
 
 ## Full narration audition
 
@@ -96,9 +104,9 @@ python3 scripts/prepare-rain.py \
 
 ## Remaining evidence
 
-1. Complete premium accent comparisons following the positive Lee/Karen feedback, then verify technical pronunciation, full-session comfort and timing, and target-iPhone synthesis for the chosen voice. Short auditions do not recalibrate the full-session estimate.
-2. Check the rain alone across repeated loop boundaries and alongside narration and drift. Accept or revise the short source, filtering, and level based on listening.
-3. Verify the exact available voices and intended playback behavior on iPhone, including headphones. Mac file preparation supplies no evidence of equivalent direct-speech output on that device.
+1. Validate an on-device Kokoro implementation on the target iPhone, including audio parity, packaging/notices, app/model size, latency, memory, thermals, battery, locked-screen/background behavior, and interruptions.
+2. Render and listen to the full session with George at model speed `0.86`; verify technical pronunciation, chunk boundaries, comfort, and measured duration before recalibrating the catalog estimate.
+3. Check the rain alone across repeated loop boundaries and alongside selected narration and drift. Accept or revise the short source, filtering, and level based on listening.
 4. Connect accepted content and ambience through the future playback adapter, enforcing the fixed deadline and recording actual partial progress and completion. Bundling a candidate does not make it available to the current runtime.
 
-[D-001](Decision-Log.md#phase-0-closeout-accepted-decisions-2026-09-15) still selects direct AVSpeechSynthesizer speech. A later move to prepared narration playback requires an explicit supported decision. [D-007 and D-008](Decision-Log.md#audio-preparation-evidence-2026-09-17) remain partly open, and silence remains the valid fallback.
+[D-023](Decision-Log.md#kokoro-narration-direction-2026-09-21) selects the preferred narration sound and reopens the production runtime boundary established by D-001. [D-008](Decision-Log.md#audio-preparation-evidence-2026-09-17) remains open, and silence remains the valid fallback.

@@ -4,8 +4,8 @@ Build Honkshool as a sequence of small, reviewable vertical slices, beginning wi
 
 ## Scope
 
-- In: an iPhone-first iOS 26 app using Swift, SwiftUI, SwiftData, AlarmKit, AVFoundation, and AVSpeechSynthesizer; a bundled automotive catalog; deterministic Nap Plans; background playback; a system alarm; local journey progress and history; and a ten-nap personal validation trial.
-- Out: backend services, accounts, analytics, cloud sync, subscriptions, ads, paid APIs, runtime AI generation, arbitrary internet research, multiple voices, App Store/TestFlight distribution, and the complete future content catalog.
+- In: an iPhone-first iOS 26 app using Swift, SwiftUI, SwiftData, AlarmKit, and AVFoundation; a bounded on-device Kokoro narration feasibility slice; a bundled automotive catalog; deterministic Nap Plans; background playback; a system alarm; local journey progress and history; and a ten-nap personal validation trial.
+- Out: backend services, accounts, analytics, cloud sync, subscriptions, ads, paid speech APIs, runtime factual-content generation, arbitrary internet research, multiple production voices, App Store/TestFlight distribution, and the complete future content catalog.
 
 ## Action items
 
@@ -13,7 +13,7 @@ Build Honkshool as a sequence of small, reviewable vertical slices, beginning wi
 - [x] Implement `codex/nap-plan-domain` with framework-independent journey, session, route, timing, completion, and history rules plus focused unit tests. Runtime execution and persistence remain in later branches.
 - [x] Build `codex/local-content-catalog` with a validated bundled catalog, one original citation-backed Enthusiast session from “How a Car Works,” source metadata, pronunciation guidance, configurable editorial estimates, and script-bound resume validation. Record F as the provisional narration reference.
 - [x] Prepare a full Mac narration audition and measure its duration; bundle a CC0 gentle-rain candidate with provenance and objective loop/level checks.
-- [ ] Complete Phase 2 listening acceptance and target-iPhone voice/timing verification. Connect accepted rain during runtime work; silence remains the available fallback until that integration.
+- [ ] Complete Phase 2 by validating a local Kokoro George `0.86` path on the target iPhone, rendering and accepting the complete session, and measuring its duration. Connect accepted rain during runtime work; silence remains the available fallback until that integration.
 - [ ] Build `feature/nap-plan-review` so a listener can continue or select local content, choose a duration or wake time, inspect the fixed route, select ambience or silence, and confirm the final alarm.
 - [ ] Build `feature/nap-playback-runtime` to execute the approved plan without mid-nap prompts, support background playback and appropriate media controls, transition after narration, and recover safely from expected audio interruptions.
 - [ ] Build `feature/alarm-and-history` to schedule and manage only Honkshool alarms, persist partial and completed playback locally with SwiftData, advance sessions only on completion, and expose resume and history views.
@@ -89,9 +89,9 @@ Implemented on `codex/nap-plan-domain` on 2026-09-15 and squash-merged through P
 
 The catalog slice is implemented on `codex/local-content-catalog` (2026-09-16): bundled original prose, paragraph-linked sources, summary, pronunciation guidance, validated stable identities/references, configurable estimates, planner integration, and script-aware resume checks. The feasibility console continues to use its separate spike script. See [Content-Catalog.md](Content-Catalog.md) and [Content-Review.md](Content-Review.md).
 
-The first full Mac audition measured 674.222 seconds on 2026-09-17, supporting the current configurable 675-second estimate. A CC0 rain candidate is bundled with provenance and objective checks. F and the full-session master remain preserved historical references. Subsequent Aaron tuning and compact voice comparisons did not meet the owner's naturalness preference; on 2026-09-21, Lee Premium and Karen Premium were reported to sound substantially closer to a human narrator throughout the sample. American Ava Premium and British Jamie Premium auditions are now rendered and verified against the same passage and overall level; owner listening feedback is pending. See [Audio-Preparation.md](Audio-Preparation.md) and the [premium-voice evidence](Narration-Reference.md#premium-voice-direction-and-accent-comparison-2026-09-21).
+The first full Mac audition measured 674.222 seconds on 2026-09-17, supporting the current configurable 675-second historical estimate. A CC0 rain candidate is bundled with provenance and objective checks. F, the full-session master, and the Apple voice comparisons remain preserved evidence. The Apple Premium voices improved pronunciation but retained automated cadence. On 2026-09-21 the owner found both evaluated Kokoro voices much more human and natural, preferred George's calm documentary quality, and selected George at model speed `0.86` after a 408-word factual comparison. See [Audio-Preparation.md](Audio-Preparation.md) and the [accepted Kokoro evidence](Narration-Reference.md#accepted-kokoro-george-direction-2026-09-21).
 
-A curated selector is a proposed later product slice, not part of the feasibility console or an assumption that all premium voices behave alike. It must resolve the selected voice before start, use a suitable measured estimate, and freeze voice/settings during the run. Full-session pronunciation/comfort and remeasurement, target-iPhone voice availability/direct-speech equivalence, and final voice selection remain open. No short audition has replaced the master or estimate. Rain acceptance and its runtime connection are also pending; silence remains available. Phase 2 exit criteria are not yet complete.
+George `0.86` is now the preferred narration reference; a curated selector is deferred. D-023 supersedes direct AVSpeechSynthesizer as the production sound direction while retaining the Phase 0 device evidence. No Kokoro dependency or model is in the app. A bounded iPhone feasibility slice must compare preparation-time versus on-device generation, validate licensing/notices and transitive components, and measure model/app size, latency, memory, thermals, battery, audio parity, background behavior, interruptions, and fixed-deadline stopping. The complete session must then be rendered, heard, and timed before replacing the 675-second estimate. Rain acceptance and runtime connection are also pending; silence remains available. Phase 2 exit criteria are not yet complete.
 
 ### Goal
 
@@ -101,7 +101,8 @@ Create enough lawful, reliable local content to evaluate the experience without 
 
 - Choose one representative “How a Car Works” session for the tracer bullet.
 - Research it from multiple reputable sources, cross-check factual claims, write an original calm script, and retain source citations.
-- Tune punctuation, paragraphs, pauses, vocabulary, and pronunciation for one selected Apple on-device voice at Enthusiast detail.
+- Tune punctuation, paragraphs, pauses, vocabulary, and pronunciation against the selected Kokoro George `0.86` reference at Enthusiast detail.
+- Validate the smallest reliable local iPhone path for that reference before adding a runtime dependency or prepared narration to the app.
 - Add one offline ambience option with documented provenance and silence as an always-available alternative.
 - Keep the catalog format capable of adding the remaining journey sessions and future per-journey detail levels without changing the playback contract.
 
