@@ -1,10 +1,10 @@
 # Audio preparation
 
-## Status, 2026-09-20
+## Status, 2026-09-21
 
-The first full-session Mac audition and bundled rain candidate are prepared, but narration quality remains unresolved. The owner liked the tempo/cadence and heard relative improvement from G/H; I's word-focused attenuation still sounded robotic. Unprocessed Aaron renders at rates 0.45 and 0.50 subsequently retained the problem across Mac and iPhone playback, with the faster version only slightly better. The next comparison changes the source voice using installed Samantha and Daniel. See the [source-voice investigation](Narration-Reference.md#source-voice-investigation-2026-09-20) for exact files, delivery evidence, and limits.
+The owner rejected compact Samantha/Daniel as artificial overall and reports that Lee Premium and Karen Premium sound substantially closer to a human narrator throughout the closing paragraph. These verified quality-3 sources, with no consonant processing, are the preferred development direction. Different English accents are the next comparison before choosing a default; a possible curated selector remains a subsequent product decision. See the [premium-voice record](Narration-Reference.md#premium-voice-direction-and-accent-comparison-2026-09-21) for exact samples, settings, feedback, and validation.
 
-[Audition F](Narration-Reference.md) remains the unchanged provisional reference accepted on MacBook speakers. No short follow-up has replaced the full-session master or its measured 675-second estimate. This preparation does not establish final listening acceptance, iPhone synthesis equivalence, or a production playback connection.
+[Audition F](Narration-Reference.md) and the full-session master remain unchanged historical references. The configurable 675-second estimate still describes the earlier full Mac render; it has not been calibrated to either premium voice. Final voice/full-session acceptance, target-iPhone synthesis, rain acceptance, and production integration remain open.
 
 The machine-readable [narration measurements](Audio-Preparation-Measurements.json) and [rain provenance](../Honkshool/Resources/GentleRain-Provenance.json) retain exact fingerprints, settings, and checks. Full narration audio and listening previews remain local, outside the repository. The rain candidate is [GentleRain.wav](../Honkshool/Resources/GentleRain.wav).
 
@@ -96,7 +96,7 @@ python3 scripts/prepare-rain.py \
 
 ## Remaining evidence
 
-1. Evaluate the source-voice comparison for naturalness while retaining restful delivery. Aaron remains noticeably robotic in the cross-device rate test; further local attenuation is not the next step. A successful short sample must still pass pronunciation and full-session comfort checks before adoption.
+1. Complete premium accent comparisons following the positive Lee/Karen feedback, then verify technical pronunciation, full-session comfort and timing, and target-iPhone synthesis for the chosen voice. Short auditions do not recalibrate the full-session estimate.
 2. Check the rain alone across repeated loop boundaries and alongside narration and drift. Accept or revise the short source, filtering, and level based on listening.
 3. Verify the exact available voices and intended playback behavior on iPhone, including headphones. Mac file preparation supplies no evidence of equivalent direct-speech output on that device.
 4. Connect accepted content and ambience through the future playback adapter, enforcing the fixed deadline and recording actual partial progress and completion. Bundling a candidate does not make it available to the current runtime.

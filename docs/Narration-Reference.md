@@ -2,11 +2,11 @@
 
 ## Status and scope
 
-**Audition F is the provisional development reference accepted on MacBook speakers on 2026-09-16.** Subsequent headphone listening exposed persistent robotic consonants. As of 2026-09-20, unprocessed Aaron comparisons also sound robotic when the same WAVs play on iPhone; the slightly faster version is only a small improvement. Final voice acceptance remains open. The [cross-device evidence below](#source-voice-investigation-2026-09-20) preserves the distinction between file playback and direct iPhone synthesis.
+**Lee Premium and Karen Premium are the preferred source-voice direction as of 2026-09-21.** The owner reports that both sound substantially closer to a human narrator throughout the closing paragraph. Compact Samantha and Daniel were rejected for their overall artificial delivery, although Daniel improved some problem words. The owner requested comparison of other accents before choosing, and raised a possible voice selector. This is positive short-passage feedback, not a final voice, full-session, or iPhone synthesis acceptance. F remains a preserved historical reference. See the [premium comparison](#premium-voice-direction-and-accent-comparison-2026-09-21).
 
 Natural, human-sounding delivery takes priority over slower syllables. Aim for an audiobook or narrative essay, retaining natural articulation and allowing space between ideas. F established the relaxed pacing direction. The latest feedback permits slightly quicker natural articulation, but speeding Aaron up has not resolved the texture. Preserve restful delivery and compare source voices before further consonant attenuation.
 
-This is a 97-word audition, not a complete factual session, an approved distribution asset, or a production playback implementation. [D-007](Decision-Log.md#narration-and-ambience-direction-2026-09-16) remains partly open. [D-001](Decision-Log.md#phase-0-closeout-accepted-decisions-2026-09-15) still selects direct AVSpeechSynthesizer speech for the initial prototype; accepting this processed reference does not select buffered playback.
+The historical F reference is a 97-word audition, not a complete factual session, an approved distribution asset, or a production playback implementation. [D-007](Decision-Log.md#narration-and-ambience-direction-2026-09-16) remains partly open. [D-001](Decision-Log.md#phase-0-closeout-accepted-decisions-2026-09-15) still selects direct AVSpeechSynthesizer speech for the initial prototype; accepting this processed reference does not select buffered playback.
 
 ## Accepted passage
 
@@ -213,10 +213,39 @@ Both WAVs preserve the native mono 22,050 Hz sample rate, with signed 16-bit PCM
 
 The text SHA-256 is `b8a4430c440833cb4b7175a6647e0c96a059cc13bf11ac9ccce12f941f18cd4e`. Raw CAF fingerprints are `daf0417f6476d1cae5d0fd01338ee057abea46f8c3093ad34bf09dbaa8ad4e5a` (Samantha) and `02ff212dcb93265a4b1a869b74971301ac86d98ca5a3bd7f3622f11acff67edd` (Daniel). The local render/export manifests and scratch tools preserve the exact procedure outside Git. Rendering uses the established completion callback, nonzero PCM, and quiet-period guard before sealing each file. Independent CAF/WAV parsing confirms exact frame counts, hashes, and sample-for-sample reconstruction from each source plus its constant gain and padding; neither candidate clips. RMS differs from the Aaron control by less than 0.000001 dB. Original F and the full-session master retain their recorded hashes. Listening must determine whether either changes the distracting texture. No candidate has replaced original F, the full-session master, catalog estimate, or app runtime.
 
+## Premium voice direction and accent comparison, 2026-09-21
+
+### Listening outcome
+
+The owner reports that compact Daniel is less processed around the problem words but that both compact Daniel and Samantha sound more robotic and artificial throughout the whole sample. Neither is a replacement for the earlier reference. Subsequent **Lee Premium** and **Karen Premium** samples sound substantially closer to a human narrator throughout the passage. This shifts the preferred development direction from further processing of Aaron toward verified premium source voices.
+
+Both premium samples use the same original closing paragraph and text hash recorded above, utterance rate 0.50, pitch 1, volume 1, and `prefersAssistiveTechnologySettings = false`. Each whole paragraph is synthesized once with an exact identifier and an explicit API quality-3 requirement; missing voices fail rather than silently falling back. No de-essing, spectral processing, time stretching, internal pause insertion, or rain is applied. A single constant gain matches whole-file RMS to the faster Aaron control, approximately −22.882914 dBFS. RMS matching does not guarantee equal perceived loudness.
+
+| Voice | Exact identifier | Locale | Raw / padded duration | WAV SHA-256 |
+| --- | --- | --- | --- | --- |
+| Lee Premium | `com.apple.voice.premium.en-AU.Lee` | en-AU | 23.317007 / 23.817052 s | `3581d60e28300bf5384b4d4d75a045fefa59b7cdc3ccc84972d1497c401cd950` |
+| Karen Premium | `com.apple.voice.premium.en-AU.Karen` | en-AU | 23.491293 / 23.991338 s | `cefd98c118fc98824a5051e20bd6b6ee6c12f0718a199b3a714fb683b477c5f1` |
+
+Local files `Honkshool-05-Lee-Premium.wav` and `Honkshool-06-Karen-Premium.wav` retain native mono 22,050 Hz audio, converted to signed 16-bit PCM with 5,513 silence frames at each end. Their frame counts are 525,166 and 529,009. Constant gains are −5.901224 and −6.060416 dB respectively; sample peaks are −8.668379 and −9.821749 dBFS. Separate standard-library CAF/WAV parsing and exact sample reconstruction passed, with no clipping and less than 0.000002 dB RMS difference from the reference. Original F and the full-session master retain their fingerprints. The local manifests and scratch tools preserve the procedure outside Git.
+
+### Next accent comparison
+
+The owner requested different accents before settling on a voice. Premium is an [Apple quality category](https://developer.apple.com/documentation/avfaudio/avspeechsynthesisvoicequality/premium), not evidence that all voices have the same articulation, phrasing, pronunciation, or duration. Compare American and British premium candidates with the already preferred Australian reference using the unchanged paragraph, natural timing, and matched overall level. The Mac voice picker offers Ava Premium (American) and Jamie Premium (British), but these must be confirmed as installed premium identifiers before any render. Their availability on the target iPhone must be checked separately.
+
+The earlier picker attempt downloaded Lee/Karen Premium and basic Jamie instead of the initially targeted Ava/Jamie Premium. The original system voice was restored to Samantha and verified. A later attempt isolated individual premium entries, but downloads did not become available through automation; the owner was asked to initiate the two downloads manually. No basic voice is substituted into the proposed accent comparison. The owner is now listening in desktop Codex, so the earlier pending iCloud transfer is no longer needed.
+
+### Proposed selector boundary
+
+A selector is technically feasible: the current feasibility controller already assigns an `AVSpeechSynthesisVoice`, although it currently resolves by language rather than a saved exact voice identity. The owner's suggestion was conditional on premium voices behaving alike, which these two positive samples do not establish. Compare accents first; no selector or production runtime change is implemented by this audition.
+
+For a subsequent product implementation, a small curated selector should show voice name/accent and a preview, distinguish installed voices from unavailable downloads, and save the listener's choice. Resolve and validate the exact voice before starting. A different voice can change narration duration, so regenerate and review the Nap Plan using an estimate measured for the selected voice/settings; retain D-004's fixed deadline. Freeze voice/settings for the active run and apply changes to a later plan, with no mid-nap prompt or silent lower-quality substitution. Actual completion and revision-specific partial progress remain authoritative.
+
+Short Mac auditions do not establish target-iPhone voice availability, technical pronunciation, or full-session comfort. A replacement requires a complete timing measurement before replacing the configured 675-second estimate. Direct speech remains the accepted initial runtime strategy under D-001. The exported Mac WAVs remain personal test artifacts; public distribution of recordings needs a separate review of applicable voice-license terms, rather than inferring redistribution rights from a free download.
+
 ## Remaining validation
 
-1. Compare source voices at an ordinary comfortable volume. The cross-device Aaron rate test remains unsatisfactory; evaluate naturalness and clarity before further full-session preparation. F remains a historical provisional reference, not final headphone acceptance.
+1. Compare premium English accents against the preferred Lee/Karen direction at an ordinary comfortable volume. Assess whole-passage naturalness, clarity, and comfort before choosing a default or implementing a curated selector. F remains a historical provisional reference.
 2. Enumerate voices available to the target iPhone app and verify supported direct-speech delivery against this reference. Do not silently substitute a lower-quality voice or assume that the Mac identifier is usable on iPhone.
 3. Check pronunciation of the prepared script's technical terms, naturalness over a full session, and duration on the intended iPhone playback path. A full Mac measurement is now recorded, but does not replace that check. Keep duration estimates configurable; the fixed wake deadline remains governed by D-004.
-4. Validate any proposed production voice or processing change with a short comparison before treating it as equivalent to F. If direct speech cannot meet the reference, record the evidence and make an explicit runtime decision before adopting a different strategy.
+4. Validate a proposed production voice with a short comparison against the preferred premium samples before adoption. If direct speech cannot meet the accepted sound, record the evidence and make an explicit runtime decision before adopting a different strategy.
 5. Audition the prepared CC0 gentle-rain candidate under D-008, then check the combination with narration, drift, and silence. F's voice-only approval does not establish a rain mix or asset license.

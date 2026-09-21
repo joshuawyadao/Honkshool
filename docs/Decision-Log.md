@@ -38,7 +38,7 @@ Resolved on 2026-09-15 from the corrected device runs: D-001, D-002, D-003, and 
 
 | ID | Question | What must be learned | Needed before |
 | --- | --- | --- | --- |
-| D-007 | Which Apple voice, locale, base rate, pause conventions, and pronunciation mechanism should be standardized? | Provisional F and preferred cadence are preserved. As of 2026-09-20, I and unprocessed Aaron rate comparisons remain robotic, including WAV playback on iPhone; faster delivery helps slightly. Compare distinct installed voices next. Final headphone/full-session acceptance, pronunciation, target-iPhone voice availability, and equivalent direct speech remain open. | Final narration settings and production playback integration |
+| D-007 | Which Apple voice, locale, base rate, pause conventions, and pronunciation mechanism should be standardized? | Lee/Karen Premium sound substantially more human to the owner (2026-09-21); compact Samantha/Daniel were rejected. Compare premium accents before choosing; a curated selector is proposed, not implemented or approved as an assumption that all premium voices behave alike. Full-session pronunciation/timing, target-iPhone availability and synthesis, and final selection remain open. | Final narration settings and production playback integration |
 | D-008 | Which ambience asset can lawfully be distributed offline? | Gentle-rain direction accepted 2026-09-16; alxl CC0 source, provenance, prepared loop, file size, and signal levels documented 2026-09-17 below. Still verify perceived loop quality, comfort, narration/drift interaction, user acceptance, and runtime integration. | Enabling the prepared ambience candidate in playback |
 
 ## Phase 0 evidence: first device run, 2026-09-08
@@ -118,11 +118,17 @@ This preparation extends the earlier evidence without superseding the owner's ac
 - **Bounded comparison:** Only Aaron is installed as an enhanced English voice family on the Mac. Prepare the unchanged closing paragraph with distinct installed Samantha and Daniel voices at rate 0.50, preserving native timing and applying constant level matching only. They are diagnostic options, not approved replacements or proven quality improvements. The [reference record](Narration-Reference.md#source-voice-investigation-2026-09-20) records settings and measurements. No voice download or user-facing voice selector follows from the comparison.
 - **Delivery and runtime boundary:** The owner received the exact Aaron WAVs through an explicitly authorized iCloud Drive transfer after Codex Mobile previews did not appear. This is evidence of file playback on the new phone, not of target-iPhone synthesis. D-001, original F, the full-session master, configurable estimate, and rain remain unchanged. Any accepted replacement voice needs full-session remeasurement and verification on the intended playback path.
 
+## Premium voice direction, 2026-09-21
+
+- **D-007 — Preferred source quality:** The owner rejects compact Samantha/Daniel for overall artificial delivery despite Daniel's relative improvement on specific words. Lee Premium and Karen Premium sound substantially closer to a human narrator throughout the same passage. Prefer verified premium source-voice auditions over continued processing of Aaron. Preserve F and all earlier feedback as history; no final production voice or full-session acceptance follows from this short comparison.
+- **Accents and selector:** The owner asks to compare other accents before settling, or consider a selector if premium voices behave alike. Uniform behavior is not established. Proceed with a small accent comparison first and retain a curated selector as a proposed follow-up. It would need exact installed voice validation, a pre-nap preview/selection, duration estimates appropriate to the selected voice, and settings fixed for the active run. This does not authorize silently replacing missing premium voices with compact ones or change D-004's deadline rules.
+- **Implementation boundary:** D-001's direct-speech strategy, app runtime, bundled script, full-session master, 675-second estimate, and rain are unchanged. See the [premium reference](Narration-Reference.md#premium-voice-direction-and-accent-comparison-2026-09-21) for fingerprints, validation, download limitations, and remaining iPhone/full-session checks. The owner returned to desktop Codex, ending the need for the pending mobile transfer.
+
 ## Deferred beyond the first prototype
 
 These are intentionally outside the first prototype and should not block the current roadmap:
 
-- Additional voices and a user-facing voice selector.
+- A user-facing voice selector remains a proposed follow-up after the premium accent comparison above; no selector is implemented or selected by an assumption of equal voice behavior.
 - Relaxed Overview and Technical content variants.
 - “Simpler next time” and “Go deeper next time” controls.
 - Download management and automatic audio-file cleanup.
