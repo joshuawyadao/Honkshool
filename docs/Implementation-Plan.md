@@ -1,25 +1,22 @@
 # Plan
 
-Record the successful fresh-boot iOS 27 simulator retry without erasing the earlier stalled attempt. Keep simulator evidence separate from the remaining physical-iPhone listening and real-alarm acceptance.
+Build a pre-play Nap Plan chooser and review flow on `codex/nap-plan-review`, rooted at content commit `8a23174de451e5c8f714af9ff71b1b7e7fbf7dc0`. Use the prepared catalog and pure planner with injected time and availability, then retain the reviewed value as the confirmed snapshot without starting playback.
 
 ## Scope
 
-- In: verify the completed result bundle, update `docs/Feasibility-Spike.md` and the Phase 2 status in `docs/Project-Implementation-Plan.md`, run repository checks, and save the current branch.
-- Out: app or test-harness changes without a reproducible defect, physical-iPhone playback or alarms, and claims about the cause of the earlier stall.
+- In: choose available prepared content, duration or exact wake time, available rest sound, and alarm preference; review the fixed deadline, complete route, transitions, shorter or empty-route fallback, post-narration sound, and alarm; confirm an immutable plan.
+- Out: production playback, real alarm scheduling, SwiftData history, rain-candidate acceptance, and changes to the feasibility console's test behavior.
 
 ## Action items
 
-- [x] Retry the full iOS 27.0 iPhone 18 Pro Max simulator suite after a clean boot and inspect the result bundle.
-- [x] Record the 134-test pass and preserve the earlier inconclusive attempt in `docs/Feasibility-Spike.md`.
-- [x] Update `docs/Project-Implementation-Plan.md` with the new simulator evidence while keeping the remaining device checks pending.
-- [x] Review documentation consistency, run `./scripts/verify-repository.sh`, and check the diff.
-- [x] Commit and push the documentation on `codex/local-content-catalog`.
+- [ ] Add a small Foundation-only review adapter and confirmation state around `NapPlanner`, with explicit clock, plan ID, catalog, and sound availability inputs; retain route and review metadata as snapshots.
+- [ ] Add the SwiftUI chooser and review screens, reachable from the existing console, with clear empty/error states, native time controls, complete ordered route, transition and fallback details, accessible labels, and honest confirmation messaging.
+- [ ] Extend focused unit tests for duration and exact-time requests, invalid and past deadlines, short windows, shorter alternatives, sound fallback, preapproved transitions, missing subsequent content, and snapshot immutability.
+- [ ] Add UI tests for choosing/reviewing duration and exact time, displaying fallback and alarm details, confirming the fixed plan, and accessibility identifiers and readable labels.
+- [ ] Update `README.md`, `docs/Project-Overview.md`, `docs/Nap-Planning-Domain.md`, `docs/Content-Catalog.md`, and `docs/Project-Implementation-Plan.md` with the actual review boundary and remaining runtime/device work. Keep the product brief and decision history unchanged because the accepted rules do not change.
+- [ ] Run targeted simulator tests, the full available simulator suite, `scripts/verify-repository.sh`, Swift formatting, and Debug/Release simulator builds; inspect the final diff and leave the physical iPhone and real alarms untouched.
+- [ ] Commit reviewable checkpoints and push `codex/nap-plan-review`; record the parent and final commits for moving only this branch's commits onto updated main after the content branch merges.
 
 ## Open questions
 
-- None. The retry passed, so there is no reproducible stall to minimize or fix. No executable behavior changed, and the existing 134-test suite is the relevant coverage; no test files need editing.
-
-## Results
-
-- Fresh-boot iOS 27.0 simulator retry: 134 passed, zero failed or skipped; no stall. The earlier run remains inconclusive and its cause is unknown.
-- Repository checks: 31 passed. Physical-iPhone listening and real-alarm checks remain pending.
+- None. The current bundled catalog supplies one prepared session and no accepted ambience; the UI will offer silence now and support injected available ambience and additional routes as the catalog grows.
