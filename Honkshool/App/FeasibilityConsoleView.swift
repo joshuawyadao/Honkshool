@@ -26,6 +26,17 @@ struct FeasibilityConsoleView: View {
     NavigationStack {
       ScrollView {
         VStack(spacing: 16) {
+          introductionCard
+          durationCard
+            .disabled(isStarting || alarm.isScheduling)
+          alarmCard
+            .disabled(isStarting || alarm.isScheduling)
+          playbackCard
+          NavigationLink("Audio event log") {
+            AudioEventLogView(audio: audio)
+          }
+          .buttonStyle(.bordered)
+          .accessibilityIdentifier("audioEventLog")
           NavigationLink {
             #if DEBUG
               NapPlanReviewView(clock: UITestFixtures.planReviewNow)
@@ -39,17 +50,6 @@ struct FeasibilityConsoleView: View {
           .buttonStyle(.borderedProminent)
           .controlSize(.large)
           .accessibilityIdentifier("openNapPlanReview")
-          introductionCard
-          durationCard
-            .disabled(isStarting || alarm.isScheduling)
-          alarmCard
-            .disabled(isStarting || alarm.isScheduling)
-          playbackCard
-          NavigationLink("Audio event log") {
-            AudioEventLogView(audio: audio)
-          }
-          .buttonStyle(.bordered)
-          .accessibilityIdentifier("audioEventLog")
         }
         .padding()
       }

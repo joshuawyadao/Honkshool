@@ -93,6 +93,7 @@ final class NapPlanReviewTests: XCTestCase {
       state.reviewed?.route.map(\.journeyTitle),
       ["How a Car Works", "How a Car Works", "How a Car Works", "Rally Engineering"])
     XCTAssertEqual(state.reviewed?.plan.transitions, [transition])
+    XCTAssertEqual(state.reviewed?.approvedTransitions, [transition])
     XCTAssertEqual(state.reviewed?.plan.routeEndReason, .contentUnavailable)
     XCTAssertEqual(state.reviewed?.plan.segments.last?.kind, .rest(.silence))
   }
@@ -123,6 +124,7 @@ final class NapPlanReviewTests: XCTestCase {
     XCTAssertEqual(state.confirmed?.plan.deadline, now.addingTimeInterval(2_000))
     XCTAssertEqual(state.confirmed?.plan.wakeAlarm, state.confirmed?.plan.deadline)
     XCTAssertEqual(state.confirmed?.plan.transitions, reviewed.plan.transitions)
+    XCTAssertEqual(state.confirmed?.approvedTransitions, reviewed.approvedTransitions)
     XCTAssertEqual(state.confirmed?.route, reviewed.route)
   }
 

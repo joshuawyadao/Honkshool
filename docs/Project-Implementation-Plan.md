@@ -120,6 +120,10 @@ Prove the exact habit Honkshool is intended to replace:
 
 > Open app → choose content → choose nap duration → review the Nap Plan → start resting.
 
+### Current status
+
+The pre-play portion is implemented on `codex/nap-plan-review`: the listener can choose prepared content and a duration or exact wake time, review the entire fixed route and fallback, request an alarm, and confirm an in-memory snapshot. The bundled catalog currently has one available session and no accepted ambience, so silence is the current rest sound. Confirmation does not start playback or schedule an alarm. Production playback, AlarmKit gating, SwiftData history, and the target-iPhone end-to-end checks remain future slices. The 2026-09-22 iOS 26.5 simulator run passed all 142 unit/UI tests; this is development evidence only.
+
 ### Minimum user flow
 
 1. Continue or choose the bundled automotive session.
