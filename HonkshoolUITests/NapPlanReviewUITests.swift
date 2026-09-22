@@ -81,6 +81,7 @@ final class NapPlanReviewUITests: XCTestCase {
     app.launch()
     let open = app.buttons["openNapPlanReview"]
     XCTAssertTrue(open.waitForExistence(timeout: 5))
+    scrollTo(open, in: app)
     open.tap()
     XCTAssertTrue(app.navigationBars["Nap Plan"].waitForExistence(timeout: 5))
     return app

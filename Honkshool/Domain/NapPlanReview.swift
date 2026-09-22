@@ -12,6 +12,7 @@ struct NapPlanReview: Equatable, Sendable {
   let requestedSound: RestSound
   let selectedWindow: NapWindow
   let selectedSession: SessionSelection
+  let approvedTransitions: [JourneyTransition]
   let route: [NapPlanReviewRouteItem]
 }
 
@@ -41,7 +42,8 @@ struct NapPlanReviewState {
     }
     reviewed = NapPlanReview(
       plan: plan, requestedSound: request.fallback, selectedWindow: request.window,
-      selectedSession: request.startingAt, route: route)
+      selectedSession: request.startingAt, approvedTransitions: request.approvedTransitions,
+      route: route)
   }
 
   mutating func clearReview() {

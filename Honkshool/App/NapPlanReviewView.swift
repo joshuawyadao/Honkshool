@@ -329,16 +329,14 @@ struct NapPlanReviewView: View {
       }
 
       card("Approved journey transitions", systemImage: "arrow.triangle.branch") {
-        let approvalSources = approvedNextJourney.keys.sorted()
-        if approvalSources.isEmpty {
+        let approvals = review.approvedTransitions.sorted { $0.from < $1.from }
+        if approvals.isEmpty {
           Text("None")
         } else {
-          ForEach(approvalSources, id: \.self) { from in
-            if let to = approvedNextJourney[from] {
-              let fromTitle = catalog?.planningCatalog.journeys[from]?.title ?? from
-              let toTitle = catalog?.planningCatalog.journeys[to]?.title ?? to
-              Text("\(fromTitle) → \(toTitle)")
-            }
+          ForEach(approvals, id: \.from) { approval in
+            let fromTitle = catalog?.planningCatalog.journeys[approval.from]?.title ?? approval.from
+            let toTitle = catalog?.planningCatalog.journeys[approval.to]?.title ?? approval.to
+            Text("\(fromTitle) → \(toTitle)")
           }
         }
         if !review.plan.transitions.isEmpty {
