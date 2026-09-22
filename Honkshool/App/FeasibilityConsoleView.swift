@@ -26,6 +26,19 @@ struct FeasibilityConsoleView: View {
     NavigationStack {
       ScrollView {
         VStack(spacing: 16) {
+          NavigationLink {
+            #if DEBUG
+              NapPlanReviewView(clock: UITestFixtures.planReviewNow)
+            #else
+              NapPlanReviewView()
+            #endif
+          } label: {
+            Label("Choose and review a Nap Plan", systemImage: "checklist")
+              .frame(maxWidth: .infinity)
+          }
+          .buttonStyle(.borderedProminent)
+          .controlSize(.large)
+          .accessibilityIdentifier("openNapPlanReview")
           introductionCard
           durationCard
             .disabled(isStarting || alarm.isScheduling)

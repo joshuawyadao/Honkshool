@@ -1,6 +1,6 @@
 # Nap-planning domain
 
-The Foundation-only types in `Honkshool/Domain/NapContent.swift`, `NapPlan.swift`, and `NapPlayback.swift` implement Phase 1. They have no SwiftUI, SwiftData, AVFoundation, or AlarmKit dependencies. The feasibility console still uses its existing spike services; it does not execute these plans.
+The Foundation-only types in `Honkshool/Domain/NapContent.swift`, `NapPlan.swift`, `NapPlanReview.swift`, and `NapPlayback.swift` implement planning and pre-play review. They have no SwiftUI, SwiftData, AVFoundation, or AlarmKit dependencies. The feasibility console still uses its existing spike services; it does not execute reviewed plans.
 
 ## Inputs and identity
 
@@ -25,6 +25,8 @@ Allocation is deterministic:
 6. When content ends, is missing, or does not fit, use drift followed by the selected ambience or silence through the deadline. Unavailable ambience resolves to silence. Short windows remain valid even when narration is empty.
 
 `route`, `transitions`, session metadata, and the nominal timeline are value snapshots. Later request, catalog, or history changes cannot alter them. The route freezes when the plan is created, which is stronger than freezing only after start. Changed pre-nap choices require a new plan for review.
+
+`NapPlanReviewState.review` receives an explicit plan ID, request, start/now dates, catalog, and available ambience IDs. It stores the returned `NapPlan` plus the selected inputs, requested sound, and journey-title snapshots for the full ordered route. A failed review clears any stale unconfirmed review. `confirm` retains that exact value; it does not ask the clock or catalog to plan again, and later review attempts cannot replace the confirmed value. The SwiftUI screen uses this state but has no playback or AlarmKit adapter. Its confirmation means only that the route was approved for a future run, not that a run or alarm exists.
 
 ## Actual playback and deadlines
 
@@ -58,4 +60,4 @@ Journey progress consists of actually completed session IDs in that journey. `ne
 
 Validation on 2026-09-15 used Xcode 27.0 and iPhone 17 Pro / iOS 26.5 Simulator: 45 focused domain tests passed, the full unit/UI suite passed 103 tests with no failures or skips, and all 12 repository checks passed. Foundation-only compilation, strict formatting lint for new Swift files, and the Release simulator build also passed. Xcode reported one internal thread-priority (QoS) warning during the full suite; this did not fail validation. CI runs on pull requests or manual dispatch, so pushing this branch alone does not trigger CI.
 
-The prepared-content catalog now supplies the citation-backed session. Remaining work starts with full-session voice/duration calibration and a lawful gentle-rain asset, then plan-review UI, production playback/deadline adapters, and SwiftData history. Domain success does not establish runtime cutoff or alarm reliability. This branch requires no phone installation or new physical-device acceptance because it does not change those adapters.
+The prepared-content catalog now supplies the citation-backed session, and a separate UI can choose and review it. Remaining work includes target-iPhone full-session listening, rain acceptance, production playback/deadline and AlarmKit adapters, and SwiftData history. Domain and review success do not establish runtime cutoff or alarm reliability. This review branch requires no phone installation or new physical-device acceptance because it does not change those adapters.
