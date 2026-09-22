@@ -35,6 +35,10 @@
 		F10000000000000000000005 /* GentleRain-Provenance.json in Resources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000005 /* GentleRain-Provenance.json */; };
 		F10000000000000000000006 /* Turning-Fuel-Into-Motion-George.wav in Resources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000006 /* Turning-Fuel-Into-Motion-George.wav */; };
 		F10000000000000000000007 /* GeorgeNarration-Provenance.json in Resources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000007 /* GeorgeNarration-Provenance.json */; };
+		110000000000000000000001 /* NapPlanReview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000001 /* NapPlanReview.swift */; };
+		110000000000000000000002 /* NapPlanReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000002 /* NapPlanReviewView.swift */; };
+		110000000000000000000003 /* NapPlanReviewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000003 /* NapPlanReviewTests.swift */; };
+		110000000000000000000004 /* NapPlanReviewUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000004 /* NapPlanReviewUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -109,6 +113,10 @@
 		F20000000000000000000005 /* GentleRain-Provenance.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "GentleRain-Provenance.json"; sourceTree = "<group>"; };
 		F20000000000000000000006 /* Turning-Fuel-Into-Motion-George.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "Turning-Fuel-Into-Motion-George.wav"; sourceTree = "<group>"; };
 		F20000000000000000000007 /* GeorgeNarration-Provenance.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "GeorgeNarration-Provenance.json"; sourceTree = "<group>"; };
+		120000000000000000000001 /* NapPlanReview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlanReview.swift; sourceTree = "<group>"; };
+		120000000000000000000002 /* NapPlanReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlanReviewView.swift; sourceTree = "<group>"; };
+		120000000000000000000003 /* NapPlanReviewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlanReviewTests.swift; sourceTree = "<group>"; };
+		120000000000000000000004 /* NapPlanReviewUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolUITests/NapPlanReviewUITests.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,6 +179,7 @@
 			children = (
 				A20000000000000000000001 /* HonkshoolApp.swift */,
 				A20000000000000000000002 /* FeasibilityConsoleView.swift */,
+				120000000000000000000002 /* NapPlanReviewView.swift */,
 				C00000000000000000000002 /* UITestFixtures.swift */,
 			);
 			path = App;
@@ -190,6 +199,7 @@
 			children = (
 				E20000000000000000000003 /* NapPlayback.swift */,
 				E20000000000000000000002 /* NapPlan.swift */,
+				120000000000000000000001 /* NapPlanReview.swift */,
 				E20000000000000000000001 /* NapContent.swift */,
 				A20000000000000000000003 /* SpikeModels.swift */,
 			);
@@ -211,6 +221,7 @@
 				E20000000000000000000005 /* NapPlaybackTests.swift */,
 				F20000000000000000000002 /* PreparedCatalogTests.swift */,
 				E20000000000000000000004 /* NapPlannerTests.swift */,
+				120000000000000000000003 /* NapPlanReviewTests.swift */,
 				A20000000000000000000008 /* SpikeModelsTests.swift */,
 			);
 			path = HonkshoolTests;
@@ -258,6 +269,7 @@
 				B0000000000000000000000C /* Info.plist */,
 				D00000000000000000000005 /* AlarmLockScreenLayoutTests.swift */,
 				B0000000000000000000000D /* FeasibilityUITests.swift */,
+				120000000000000000000004 /* NapPlanReviewUITests.swift */,
 			);
 			name = "Alarm Activity and UI Tests";
 			sourceTree = "<group>";
@@ -420,6 +432,8 @@
 			files = (
 				E10000000000000000000003 /* NapPlayback.swift in Sources */,
 				E10000000000000000000002 /* NapPlan.swift in Sources */,
+				110000000000000000000001 /* NapPlanReview.swift in Sources */,
+				110000000000000000000002 /* NapPlanReviewView.swift in Sources */,
 				E10000000000000000000001 /* NapContent.swift in Sources */,
 				A10000000000000000000001 /* HonkshoolApp.swift in Sources */,
 				A10000000000000000000002 /* FeasibilityConsoleView.swift in Sources */,
@@ -440,6 +454,7 @@
 				E10000000000000000000005 /* NapPlaybackTests.swift in Sources */,
 				F10000000000000000000002 /* PreparedCatalogTests.swift in Sources */,
 				E10000000000000000000004 /* NapPlannerTests.swift in Sources */,
+				110000000000000000000003 /* NapPlanReviewTests.swift in Sources */,
 				D00000000000000000000002 /* AlarmLockScreenLayout.swift in Sources */,
 				D00000000000000000000003 /* AlarmLockScreenLayoutTests.swift in Sources */,
 				A10000000000000000000007 /* SpikeModelsTests.swift in Sources */,
@@ -461,6 +476,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B00000000000000000000004 /* FeasibilityUITests.swift in Sources */,
+				110000000000000000000004 /* NapPlanReviewUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
