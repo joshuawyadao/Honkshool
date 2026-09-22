@@ -139,11 +139,13 @@ Using Xcode 26.6, the iOS 26.5 SDK, and the installed iOS 26.5 simulator/platfor
 
 The prepared-narration slice adds bundled-asset/catalog checks and injected controller tests for loading, pause/resume, natural completion, stale callbacks, invalid deadlines, narration cutoff, and ambience cutoff. On 2026-09-21, all 31 repository verification tests and all 134 iOS simulator tests passed with zero failures or skips. Strict Swift formatting, `git diff --check`, and unsigned Release builds for both the generic simulator and generic physical-device target also passed. A current physical iPhone was unavailable during implementation, so the earlier AVSpeechSynthesizer device evidence must not be presented as proof of the new AVAudioPlayer asset path.
 
+On 2026-09-22, all 31 repository checks passed again and the complete iOS 26.5 iPhone 17 Pro simulator suite passed 134 tests with zero failures or skips. A separate complete-suite attempt on the iOS 27.0 iPhone 18 Pro Max simulator stopped making progress during Xcode's test-session cleanup; it produced no final result bundle and was interrupted after about ten minutes. That attempt is inconclusive, not a reported test pass or assertion failure. The two focused physical iOS 27.0 UI tests and the owner's Lock Screen report are recorded in the manual acceptance section below.
+
 Xcode prepared support symbols for the connected iPhone 14 Pro running iOS 26.6.1, selected it as the run destination, registered it for the active Personal Team, and completed a device build. After Developer Mode and explicit developer-profile trust were enabled on the phone, the signed app installed and launched successfully. The owner subsequently exercised the chat checklist and reported the results below. Unannotated checklist steps are treated as user-reported passes; the original results remain recorded separately from the repaired-device results.
 
 ## Physical-device test matrix
 
-Use the iPhone 14 Pro running iOS 26.6.1 as the first baseline. Repeat critical acceptance checks on the replacement iPhone when available. Do not record serial numbers, UDIDs, personal alarm schedules, or private diagnostics in the public repository.
+The iPhone 14 Pro running iOS 26.6.1 is the historical first baseline. The current acceptance target is the iPhone 18 Pro Max running iOS 27.0. Do not record serial numbers, UDIDs, personal alarm schedules, or private diagnostics in the public repository.
 
 Results below are the owner's report from the original build on iPhone 14 Pro / iOS 26.6.1. They are distinct from automated regression results and have not been silently changed to passes after code fixes.
 
@@ -215,14 +217,18 @@ The PR review safeguards were validated on 2026-09-15 with Xcode 27.0 against th
 
 ## Minimal physical-device acceptance
 
-The original AlarmKit and direct-speech milestone was completed on 2026-09-15. The new prepared-audio path requires one focused device pass because the app now uses AVAudioPlayer and a 33 MB bundled file instead of AVSpeechSynthesizer:
+The original AlarmKit and direct-speech milestone was completed on 2026-09-15. Prepared George audio uses AVAudioPlayer and a 34.9 MB bundled file instead of AVSpeechSynthesizer. On 2026-09-22, the app installed and launched on the iPhone 18 Pro Max running iOS 27.0. Two focused UI tests passed there with fake AlarmKit fixtures: in-app pause/resume/Stop and alarm-enabled scrolling/Stop behavior. Those tests neither requested alarm permission nor scheduled a real alarm. The owner separately reported that George continued while locked and that Lock Screen play/pause worked. This is a user-reported pass for those controls, not for the checks below.
 
-1. Start the George session with an alarm and lock the phone; confirm narration continues and the Lock Screen offers working pause/resume/Stop with seek controls disabled.
-2. Pause and resume once in app and once from the Lock Screen, then trigger Siri or another interruption and resume manually.
-3. Disconnect headphones during narration; confirm playback pauses instead of moving to the speaker.
-4. Use a short wake deadline; confirm narration stops at that deadline without speeding up and the alarm time does not move.
-5. Start a window longer than narration with ambience enabled; after natural completion, confirm the transition occurs and ambience stops at the fixed deadline.
-6. Listen to representative opening, middle, and closing passages for parity with the accepted George reference. Complete-session pronunciation and comfort may be evaluated separately because they require about 12 minutes.
+### Manual checks to do later on iPhone 18 Pro Max / iOS 27.0
+
+Do these when a quiet listening period is available, using the feasibility console's **Rest window**, **Require a wake alarm**, and **Transition to generated ambience** controls. Record pass/fail and a short observation using the fields below; leave any unperformed item pending.
+
+- [x] **Locked playback and Lock Screen play/pause:** Owner reported on 2026-09-22 that George kept playing when locked and followed Lock Screen play/pause. The focused device UI tests independently covered in-app pause/resume/Stop, but did not test the locked screen.
+- [ ] **Controls, interruption, and route loss:** With **Require a wake alarm** off, start a 20-minute window. While George narrates, confirm Lock Screen Stop ends audio and seek/skip remain noninteractive. Trigger Siri and confirm playback pauses until manually resumed. Disconnect AirPods and confirm audio pauses rather than moving to the speaker. Stop the run afterward.
+- [ ] **Fixed deadline and real alarm:** With **Require a wake alarm** on, choose a custom 5-minute window and start the test. Lock the phone; confirm George stops at the displayed **Run wake** time without speeding up, and the real alarm fires at the scheduled time. Record the observed times and dismiss or cancel the alarm when finished.
+- [ ] **Natural completion and ambience:** With the alarm off, choose a custom 15-minute window and enable **Transition to generated ambience**. Let the complete 727.625-second George session play; confirm ambience begins only after natural completion and stops at the fixed **Run wake** time. Listen to the opening, middle, and ending for calmness and pronunciation against the accepted George reference.
+
+Controller tests cover natural completion into silence; a second full-session device listen is not part of this focused manual pass.
 
 The earlier physical confirmation is retained as historical evidence, not represented as a test of prepared playback. A separate real-call check remains optional. No model inference, download, thermal, or synthesis-latency test is needed for this architecture because the phone only decodes a bundled PCM file.
 
