@@ -4,7 +4,7 @@
 
 The accepted narration direction is now **Kokoro-82M v1.0 voice `bm_george` at model speed `0.86`**. The owner found both Kokoro Heart and George much more human and natural than the Apple auditions, preferred George's calm documentary character, and selected the more spacious of two native-duration comparisons. See the [accepted Kokoro reference](Narration-Reference.md#accepted-kokoro-george-direction-2026-09-21) for exact assets, settings, samples, fingerprints, and validation.
 
-[Audition F](Narration-Reference.md), the Apple premium comparisons, and the Aaron full-session master remain unchanged historical references. The complete Kokoro George session is now bundled as lossless PCM and connected to the feasibility console. It measures 727.625 seconds, and the configurable planning estimate is 730 seconds. Physical-iPhone playback, full-session pronunciation/comfort, rain acceptance, and production Nap Plan/history integration remain open.
+[Audition F](Narration-Reference.md), the Apple premium comparisons, and the Aaron full-session master remain unchanged historical references. The complete Kokoro George session is now bundled as lossless PCM and connected to the feasibility console. It measures 727.625 seconds, and the configurable planning estimate is 730 seconds. Target-iPhone route and alarm checks, full-session subjective pronunciation/comfort, rain acceptance, and production Nap Plan/history integration remain open.
 
 The machine-readable [narration measurements](Audio-Preparation-Measurements.json) preserve the historical Apple work. [George narration provenance](../Honkshool/Resources/GeorgeNarration-Provenance.json) identifies the bundled [prepared narration](../Honkshool/Resources/Turning-Fuel-Into-Motion-George.wav), and [rain provenance](../Honkshool/Resources/GentleRain-Provenance.json) retains the ambience evidence. Kokoro model weights and the isolated preparation environment remain outside the repository; the app contains the prepared session rather than a model runtime. The rain candidate is [GentleRain.wav](../Honkshool/Resources/GentleRain.wav).
 
@@ -40,6 +40,10 @@ python3 scripts/prepare-kokoro-narration.py \
 ```
 
 The cache root must contain `model-assets.json` and the matching local Hugging Face files. The script operates offline, rejects asset hash or text/chunk mismatches, and writes the WAV plus provenance. The shipped model checkpoint is 327,212,226 bytes, while this single lossless prepared session is 34,926,044 bytes. For the curated first prototype, prepared audio therefore avoids a large model and third-party inference runtime while preserving exact sound and duration. The open-source [Kokoro Swift port](https://github.com/mlalma/kokoro-ios) remains relevant if later catalog scale justifies live synthesis; its own documentation requires applications to supply model and voice files.
+
+### Short local review reel
+
+Run `python3 scripts/make-george-review-reel.py` from the repository root to create an ignored 86.125-second WAV in `outputs/`. It copies the first complete synthesis chunk of the opening and middle paragraphs and the complete ending paragraph from the verified bundled file, with the existing one-second paragraph gap between sections. The script checks the source SHA-256 and WAV format; it does not resynthesize, speed up, filter, or change the selected voice. This lets the owner judge representative pronunciation and cadence without sitting through the full session. It cannot prove that every word in the remaining audio is comfortable.
 
 ## Historical Aaron full narration audition
 
@@ -129,8 +133,8 @@ python3 scripts/prepare-rain.py \
 
 ## Remaining evidence
 
-1. Install the prepared-audio build on the target iPhone and verify audio parity, locked-screen/background playback, pause/resume, interruption recovery, route loss, natural completion, and fixed-deadline stopping. Simulator and generic-device builds do not replace this check.
-2. Listen to the complete George `0.86` session and verify every technical term, longer-form calmness, and chunk transitions. The construction and timing checks do not prove spoken-word accuracy or comfort.
+1. The prepared-audio build has installed and launched on the target iPhone; the owner reported locked playback and Lock Screen play/pause working. Complete the brief Lock Screen Stop, Siri, AirPods-removal, and one-minute real-alarm checks in [Feasibility-Spike.md](Feasibility-Spike.md#manual-checks-to-do-later-on-iphone-18-pro-max--ios-270). Simulator and generic-device builds do not replace this iOS behavior.
+2. The full bundled file passes identity, timing, and frame-integrity checks. The iOS simulator also reads every frame through AVFoundation and exercises actual AVAudioPlayer tail completion into ambience before an injected fixed cutoff. Listen to the 86-second review reel for representative voice comfort. Complete-session subjective pronunciation and long-form calmness remain unverified until natural use; automated signal checks cannot establish them.
 3. Check the rain alone across repeated loop boundaries and alongside selected narration and drift. Accept or revise the short source, filtering, and level based on listening.
 4. Connect the prepared adapter to the production Nap Plan and persistence flow so actual partial positions and genuine completion update history correctly. The feasibility console does not persist listening progress.
 

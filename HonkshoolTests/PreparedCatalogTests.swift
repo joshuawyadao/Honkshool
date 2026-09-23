@@ -31,6 +31,17 @@ final class PreparedCatalogTests: XCTestCase {
     XCTAssertEqual(prepared.session.estimatedDuration, 730)
     XCTAssertLessThan(metadata.duration, prepared.session.estimatedDuration)
     XCTAssertLessThan(prepared.session.estimatedDuration - metadata.duration, 5)
+
+    let buffer = try XCTUnwrap(
+      AVAudioPCMBuffer(pcmFormat: audio.processingFormat, frameCapacity: 8_192))
+    var decodedFrames: AVAudioFramePosition = 0
+    while decodedFrames < audio.length {
+      let remaining = AVAudioFrameCount(audio.length - decodedFrames)
+      try audio.read(into: buffer, frameCount: min(buffer.frameCapacity, remaining))
+      XCTAssertGreaterThan(buffer.frameLength, 0)
+      decodedFrames += AVAudioFramePosition(buffer.frameLength)
+    }
+    XCTAssertEqual(decodedFrames, audio.length)
   }
 
   func testRainCandidateAndProvenanceAreBundledAndDecodable() throws {

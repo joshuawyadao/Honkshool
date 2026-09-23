@@ -42,6 +42,11 @@ final class PreparedNarrationPlayer: NSObject, PreparedNarrationPlaying {
   func play() -> Bool { player.play() }
   func pause() { player.pause() }
   func stop() { player.stop() }
+
+  #if DEBUG
+    /// Lets a focused test exercise the bundled file's real completion callback promptly.
+    func seekForTesting(to time: TimeInterval) { player.currentTime = time }
+  #endif
 }
 
 extension PreparedNarrationPlayer: AVAudioPlayerDelegate {

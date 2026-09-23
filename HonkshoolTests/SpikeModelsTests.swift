@@ -366,6 +366,44 @@ final class PlaybackRegressionTests: XCTestCase {
     XCTAssertTrue(audio.statusMessage.contains("wake deadline"))
   }
 
+  func testBundledGeorgeTailNaturallyTransitionsToAmbienceBeforeDeadline() async throws {
+    let catalog = try PreparedCatalog.load()
+    let prepared = try XCTUnwrap(catalog.sessions["turning-fuel-into-motion"])
+    let url = try prepared.narrationURL()
+    var deadlineAction: (@MainActor () -> Void)?
+    var realPlayer: PreparedNarrationPlayer?
+    let audio = AudioSpikeController(
+      preparedNarrationPlayerFactory: { url in
+        let player = try PreparedNarrationPlayer(url: url)
+        player.seekForTesting(to: player.duration - 1.25)
+        realPlayer = player
+        return player
+      },
+      deadlineScheduler: { _, action in
+        deadlineAction = action
+        return {}
+      }
+    )
+    defer { audio.stop() }
+
+    audio.startPreparedNarration(
+      url: url, title: prepared.session.title, transitionToAmbience: true,
+      wakeDeadline: .now.addingTimeInterval(60))
+    XCTAssertEqual(audio.phase, .narrating)
+    let player = try XCTUnwrap(realPlayer)
+    XCTAssertGreaterThan(player.currentTime, player.duration - 2)
+
+    for _ in 0..<80 where audio.phase != .ambience {
+      try await Task.sleep(for: .milliseconds(100))
+    }
+    XCTAssertEqual(audio.phase, .ambience)
+    XCTAssertTrue(audio.eventLog.contains { $0.message.contains("ambience") })
+
+    try XCTUnwrap(deadlineAction)()
+    XCTAssertEqual(audio.phase, .stopped)
+    XCTAssertTrue(audio.statusMessage.contains("wake deadline"))
+  }
+
   func testStoppedPreparedNarrationIgnoresCapturedStaleCompletion() throws {
     let first = FakePreparedNarrationPlayer()
     let second = FakePreparedNarrationPlayer()
