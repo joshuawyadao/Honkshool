@@ -1074,3 +1074,69 @@ final class AlarmRegressionTests: XCTestCase {
     XCTAssertEqual(HonkshoolAlarmMetadata.snoozeSeconds, 9 * 60)
   }
 }
+
+@MainActor
+final class RealAlarmCutoffDeviceTests: XCTestCase {
+  func testRealAlarmAlertsAsPreparedNarrationStopsAtWakeDeadline() async throws {
+    guard ProcessInfo.processInfo.environment["HONKSHOOL_REAL_ALARM_TEST"] == "1" else {
+      throw XCTSkip("Opt in with TEST_RUNNER_HONKSHOOL_REAL_ALARM_TEST=1 on a physical iPhone.")
+    }
+    #if targetEnvironment(simulator)
+      throw XCTSkip("A simulator alarm cannot establish physical-iPhone delivery.")
+    #else
+      let system = AppleAlarmSystem()
+      guard system.authorization == .authorized else {
+        throw XCTSkip("Authorize Honkshool alarms on the iPhone before this device test.")
+      }
+
+      let catalog = try PreparedCatalog.load()
+      let prepared = try XCTUnwrap(catalog.sessions["turning-fuel-into-motion"])
+      let deadline = Date.now.addingTimeInterval(75)
+      let alarmID = UUID()
+      try await system.schedule(id: alarmID, at: deadline)
+      let audio = AudioSpikeController()
+      defer {
+        audio.stop()
+        do {
+          try system.cancel(id: alarmID)
+        } catch {
+          try? AlarmManager.shared.stop(id: alarmID)
+          if (try? system.alarms().contains(where: { $0.id == alarmID })) ?? true {
+            XCTFail("The test alarm could not be cleaned up: \(error)")
+          }
+        }
+      }
+
+      audio.startPreparedNarration(
+        url: try prepared.narrationURL(), title: prepared.session.title,
+        transitionToAmbience: false, wakeDeadline: deadline)
+      guard audio.phase == .narrating else {
+        XCTFail("Prepared narration did not start: \(audio.statusMessage)")
+        return
+      }
+
+      var alertObservedAt: Date?
+      var stopObservedAt: Date?
+      while Date.now < deadline.addingTimeInterval(7) {
+        let observedAt = Date.now
+        if stopObservedAt == nil && audio.phase == .stopped {
+          stopObservedAt = observedAt
+        }
+        if alertObservedAt == nil,
+          let alarm = try system.alarms().first(where: { $0.id == alarmID }),
+          alarm.state == .alerting
+        {
+          alertObservedAt = observedAt
+        }
+        if alertObservedAt != nil && stopObservedAt != nil { break }
+        try await Task.sleep(for: .milliseconds(200))
+      }
+
+      let alert = try XCTUnwrap(alertObservedAt, "AlarmKit never reported the real alarm alerting.")
+      let stopped = try XCTUnwrap(stopObservedAt, "Prepared narration did not stop at wake.")
+      XCTAssertLessThanOrEqual(abs(alert.timeIntervalSince(deadline)), 5)
+      XCTAssertLessThanOrEqual(abs(stopped.timeIntervalSince(deadline)), 3)
+      XCTAssertTrue(audio.statusMessage.contains("wake deadline"))
+    #endif
+  }
+}

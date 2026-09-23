@@ -227,10 +227,23 @@ Only brief physical and listening checks remain. Record pass/fail and a short ob
 
 - [x] **Locked playback and Lock Screen play/pause:** Owner reported on 2026-09-22 that George kept playing when locked and followed Lock Screen play/pause. The focused device UI tests independently covered in-app pause/resume/Stop, but did not test the locked screen.
 - [ ] **Quick controls and route check (about two active minutes):** With **Require a wake alarm** off, start a 20-minute window while wearing AirPods; do not wait for the window to end. Confirm Lock Screen seek/skip cannot be used. Invoke Siri and verify narration pauses until manually resumed. Disconnect AirPods and verify audio pauses rather than moving to the speaker. Reconnect and use Lock Screen Stop to end audio.
-- [ ] **Real alarm delivery (one minute):** If needed, tap **Authorize**, then tap **60-second test** without starting narration. Lock the phone, confirm the real alarm fires about a minute later, and dismiss or cancel it. Automated tests cover deadline stopping and alarm scheduling logic separately, but cannot establish a real iOS 27 alarm alert.
+- [ ] **Real alarm delivery and narration cutoff:** An opt-in physical-iPhone XCTest now schedules a real AlarmKit alarm and starts the bundled George audio with the same 75-second deadline. It polls for AlarmKit's `alerting` state and verifies narration stops within three seconds of the planned wake, then attempts to cancel its own alarm. Run it when the phone is connected and Honkshool already has AlarmKit authorization; it has not yet passed on the target iPhone. A brief human observation is still needed if audible ringing or the locked-screen presentation must be accepted.
 - [ ] **Brief voice check (86 seconds, when convenient):** Listen to the opening, middle, and ending in the local review reel made by `python3 scripts/make-george-review-reel.py`; report any distracting pronunciation or cadence. The reel copies unchanged chunks of the bundled audio. Full-session subjective comfort remains unassessed until natural use; no 12-minute attentive listen is required for this technical follow-up.
 
-The former five-minute combined deadline run and 15-minute attentive playback run are no longer interactive checklist items. The automated checks cover their app-controlled timing and transition rules; they do not certify a simultaneous real alarm and narration cutoff or every spoken word's subjective quality. Controller tests also cover natural completion into silence.
+The former five-minute combined deadline run and 15-minute attentive playback run are no longer interactive checklist items. The simulator checks cover app-controlled timing and transition rules; simultaneous real alarm and narration cutoff remains unverified until the opt-in iPhone test passes. No automated check certifies every spoken word's subjective quality. Controller tests also cover natural completion into silence.
+
+To run the gated real-alarm check on a connected iPhone after authorizing Honkshool alarms, use:
+
+```sh
+TEST_RUNNER_HONKSHOOL_REAL_ALARM_TEST=1 xcodebuild \
+  -project Honkshool.xcodeproj -scheme Honkshool \
+  -destination 'platform=iOS,id=<connected-device-id>' \
+  -parallel-testing-enabled NO -collect-test-diagnostics never \
+  -only-testing:HonkshoolTests/RealAlarmCutoffDeviceTests test
+```
+
+The environment prefix passes the opt-in flag to the XCTest runner. The test skips in normal runs and on simulators, never requests authorization, and uses a unique alarm ID so it does not replace the console's tracked alarm. It can verify AlarmKit state and playback timing, but it cannot assess how loud the alarm sounds to a person or whether the full narration remains soothing. The owner may judge complete-session comfort during a normal nap rather than a dedicated test listen.
+If the test runner is interrupted during the alert, dismiss the one-time Honkshool alarm on the phone.
 
 On 2026-09-23, the full iOS 27 simulator suite passed 135 tests, but Xcode spent several minutes collecting optional `simctl diagnose` data after tests had finished. The local test script now disables verbose diagnostics by default to avoid that cleanup delay; CI opts back into failure diagnostics with `HONKSHOOL_TEST_DIAGNOSTICS=on-failure`. The result bundle and ordinary failure summary remain available locally.
 
