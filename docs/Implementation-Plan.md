@@ -1,28 +1,21 @@
 # Plan
 
-Reduce the owner's long manual acceptance run by testing the complete prepared asset and real-player completion quickly on a simulator, then provide brief representative listening samples. Keep real iPhone alarm and audio-route behavior clearly separate from simulated evidence.
+Add an opt-in, real-iPhone integration check for the remaining simultaneous AlarmKit alert and prepared-narration cutoff. Keep subjective full-session comfort separate: no automated signal or transcript check can certify that a listener finds the narration calming.
 
 ## Scope
 
-- In: focused AVFoundation tests for the bundled George file, an ignored short review reel, a shorter device checklist, updated validation notes and roadmap, and branch validation/save.
-- Out: changing the narration, altering production timing, scheduling a real alarm on the owner's phone, and claiming subjective approval of audio the owner has not heard.
+- In: a gated device test using the bundled George audio and real AlarmKit, safe alarm cleanup, documentation of what it proves, validation, and branch save.
+- Out: changing production playback behavior, treating a simulator alarm as physical-device evidence, and marking subjective listening comfort accepted.
 
 ## Action items
 
-- [x] Map existing deadline, transition, interruption, route-loss, asset, and alarm test coverage in the code and `docs/Feasibility-Spike.md`.
-- [x] Extend `HonkshoolTests/PreparedCatalogTests.swift` to read every George PCM frame through AVFoundation, and add a fast real-player tail-completion/ambience/deadline test in `HonkshoolTests/SpikeModelsTests.swift`.
-- [x] Add a small standard-library reel generator under `scripts/` and generate a short opening/middle/ending review WAV from the unchanged bundled source into ignored `outputs/` for optional listening.
-- [x] Update `README.md`, `docs/Decision-Log.md`, `docs/Feasibility-Spike.md`, `docs/Audio-Preparation.md`, and `docs/Project-Implementation-Plan.md` to distinguish automated technical evidence from brief remaining iPhone and subjective checks.
-- [x] Run focused tests, the complete available iOS simulator suite, repository checks, formatting, and relevant build validation; inspect the diff. Check that local Xcode test cleanup does not wait on optional simulator diagnostics.
-- [x] Commit and push the branch with `$save-branch`, leaving the review reel as an ignored local artifact.
+- [x] Inspect current AlarmKit, playback, and test seams; confirm the target iPhone's availability.
+- [ ] Add an opt-in device test that schedules a short real alarm, starts prepared narration at the same deadline, observes AlarmKit alerting and narration stop, and always cleans up its alarm.
+- [ ] Keep the test skipped in ordinary simulator and CI runs; require explicit opt-in and existing AlarmKit authorization on a connected iPhone.
+- [ ] Update `docs/Feasibility-Spike.md` and the durable roadmap to describe the automated device check and its physical/subjective limits.
+- [ ] Run focused simulator validation, repository checks, formatting, a Release build, and the broader simulator suite; run the real-device check only if the iPhone becomes available.
+- [ ] Commit and push the existing content-catalog branch, reporting any device validation still pending.
 
 ## Open questions
 
-- None. The user's time constraint is resolved by making technical playback checks unattended and reducing subjective review to short samples. Actual system alarm delivery and AirPods/Siri behavior still require limited physical-device observation.
-
-## Validation
-
-- Two focused AVFoundation tests passed on the iOS 27 simulator, then the full suite passed 135 tests with no failures or skips. The local test-script rerun exited cleanly in about 4.5 minutes after disabling Xcode's optional post-test simulator diagnostics. CI retains failure diagnostics.
-- The 31 repository checks, strict Swift formatting, Python syntax check, shell syntax check, diff whitespace check, and unsigned Release simulator build passed.
-- The ignored review reel is 86.125 seconds and uses unchanged PCM from paragraphs 1, 7, and 13 of the verified bundled George narration.
-- Remaining physical evidence: brief AirPods/Siri/Lock Screen checks, one-minute real-alarm delivery, and representative voice listening. Complete-session subjective comfort and simultaneous real-alarm/narration cutoff remain unverified.
+- None. The iPhone currently appears offline in Xcode, so device execution may remain pending; implementation and simulator validation can proceed.
