@@ -24,5 +24,6 @@ Add an opt-in, real-iPhone integration check for the remaining simultaneous Alar
 
 - The opt-in test was discovered and safely skipped on the iOS 27 simulator. The full simulator suite passed 135 tests with zero failures and one intended device-only skip.
 - The physical-iOS test bundle compiled before the phone reconnected. The opt-in test subsequently passed on iPhone 18 Pro Max / iOS 27.0: one pass, zero failures, zero skips. It observed AlarmKit `alerting` and wake-deadline narration stop inside the asserted timing tolerances, then cleaned up its alarm.
+- The owner reported hearing the alarm ring as expected and finding the short opening narration clear and natural. This is brief device-listening evidence, not complete-session comfort.
 - Repository checks passed 31 tests; strict Swift formatting, an unsigned Release simulator build, and diff whitespace checks passed.
 - Full-session subjective comfort has no reliable automated pass/fail test and remains pending for a normal listening session.
