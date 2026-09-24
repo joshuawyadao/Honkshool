@@ -1,30 +1,22 @@
 # Plan
 
-Prepare PR #4 for merge by closing the reviewed fixed-deadline edge case in the prepared-audio controller, then validate the branch and complete the PR review cycle. Keep the feasibility console's existing scope and the accepted local audio assets.
+Move the completed pre-play Nap Plan review slice from its original content-branch base onto the squash-merged `main` tip. Preserve the reviewed behavior, tests, and documentation while keeping the merged content branch and original review worktree intact.
 
 ## Scope
 
-- In: deadline checks across player setup, start, natural completion, and resume; accurate Now Playing elapsed time on pause; alarm guidance on catalog failure; focused regression tests; canonical docs; branch save and PR readiness.
-- Out: production Nap Plan playback/history integration, new audio assets, subjective listening acceptance, and merging the PR.
+- In: transplant review-only changes from `8a23174de451e5c8f714af9ff71b1b7e7fbf7dc0..codex/nap-plan-review` onto `39bd2a260417419dc436c5a66e99fc31369dc50d`; reconcile documentation with merged content; validate, push, and open a review PR when ready.
+- Out: production playback, real alarm scheduling, SwiftData history, rain acceptance, physical-iPhone testing, and merging the PR.
 
 ## Action items
 
-- [x] Inspect the controller's deadline lifecycle, the affected XCTest fixtures, and the existing feasibility documentation.
-- [x] Inject a clock into the controller and prevent prepared audio from starting or resuming after its fixed wake deadline, including when setup takes time or the scheduled callback is delayed.
-- [x] Add focused tests for setup latency, an expired deadline before play, a delayed cutoff during pause/resume, and natural completion after wake.
-- [x] Update Now Playing elapsed time on prepared-audio pause and interruption, and tell the user when a pre-scheduled alarm survives catalog loading failure; cover both behaviors.
-- [x] Correct README's console integration status.
-- [x] Update `docs/Feasibility-Spike.md` to describe the controller guard, its scheduling limits, and the iOS 27 diagnostics cleanup stall.
-- [x] Run focused and full simulator tests, repository checks, Swift formatting, and a Release build; inspect the PR diff for other actionable concerns.
-- [ ] Commit and push the fix, address actionable Codex/CI feedback, and mark PR #4 ready only when review and checks pass.
+- [x] Verify the clean original checkout, the merged `origin/main` tip, the original parent commit, the three review-only commits, and the existing isolated review worktree.
+- [x] Checkpoint this transplant plan on `codex/nap-plan-review-main` in its isolated worktree.
+- [ ] Cherry-pick the review-only plan, implementation, and transition commits in order; resolve any conflicts using merged `main` as the content baseline and retain the current task plan.
+- [ ] Inspect the transplanted app, domain, tests, README, and canonical docs for stale content-branch assumptions; update `docs/Project-Implementation-Plan.md` and other affected docs to describe the actual review boundary.
+- [ ] Verify that the existing focused unit and UI tests still cover timing input, invalid deadlines, short and missing content, fallback sound, transitions, immutable confirmation, and accessibility; change tests only if the transplant changes executable behavior.
+- [ ] Run targeted review tests, the full simulator suite, repository checks, strict Swift formatting, Foundation typecheck, Debug and Release simulator builds, and a diff review. Keep physical-device and real-alarm checks with the owner.
+- [ ] Push the validated branch, then open the PR and complete the review and CI cycle without merging it.
 
 ## Open questions
 
-- None.
-
-## Validation
-
-- Focused iOS 27 simulator run: 29 passed, zero failed. The earlier direct invocation stalled inside Xcode's optional simulator-diagnostics cleanup; the clean retry with diagnostics disabled passed.
-- Full iOS 27 simulator suite: 141 passed, zero failed, one intentionally skipped real-device test.
-- Repository verification: 31 passed. Strict Swift formatting, unsigned Release simulator build, and diff whitespace check passed.
-- Read-only Apple-platform and Brooks review found the fixed-deadline edge case; Codex review also found stale pause metadata, missing active-alarm guidance, and outdated README status. All four have implementation fixes; GitHub CI and final review readiness remain pending.
+- None. The existing review slice is complete; this task changes its ancestry and reconciles merge-era documentation, with code changes only if validation exposes a defect.
