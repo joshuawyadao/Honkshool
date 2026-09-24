@@ -15,6 +15,7 @@ final class NapPlanReviewUITests: XCTestCase {
     scrollTo(route, in: app)
     XCTAssertTrue(route.label.contains("Turning Fuel Into Motion"))
     XCTAssertFalse(app.descendants(matching: .any)["napPlanRouteItem-1"].exists)
+    XCTAssertTrue(app.staticTexts["napPlanPlannedStart"].label.contains("Planned rest start"))
     XCTAssertTrue(app.staticTexts["napPlanDeadline"].label.contains("Fixed wake deadline"))
     XCTAssertEqual(app.staticTexts["napPlanAlarmChoice"].label, "Wake alarm, Requested at deadline")
     XCTAssertEqual(app.staticTexts["napPlanPostNarrationSound"].label, "After narration, Silence")
@@ -28,6 +29,7 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertTrue(confirmation.waitForExistence(timeout: 5))
     XCTAssertTrue(confirmation.label.contains("Playback has not started"))
     XCTAssertTrue(confirmation.label.contains("no wake alarm has been scheduled"))
+    XCTAssertTrue(app.staticTexts["napPlanConfirmedStart"].label.contains("Planned rest start"))
     XCTAssertFalse(app.buttons["reviewNapPlan"].exists)
     XCTAssertTrue(
       app.staticTexts["napPlanConfirmedDeadline"].label.contains(
@@ -80,6 +82,49 @@ final class NapPlanReviewUITests: XCTestCase {
     let review = app.buttons["reviewNapPlan"]
     scrollTo(review, in: app)
     XCTAssertFalse(review.isEnabled)
+  }
+
+  func testStaleDurationRefreshesDeadlineBeforeConfirmation() {
+    let app = launchReview(additionalEnvironment: [
+      "HONKSHOOL_UI_TEST_PLAN_CONFIRM_OFFSET": "180"
+    ])
+    let review = app.buttons["reviewNapPlan"]
+    scrollTo(review, in: app)
+    review.tap()
+    let firstDeadline = app.staticTexts["napPlanDeadline"].label
+
+    let confirm = app.buttons["confirmNapPlan"]
+    scrollTo(confirm, in: app)
+    confirm.tap()
+    XCTAssertFalse(app.staticTexts["napPlanConfirmation"].exists)
+    XCTAssertTrue(app.staticTexts["napPlanError"].label.contains("updated deadline"))
+    let refreshedDeadline = app.staticTexts["napPlanDeadline"].label
+    XCTAssertNotEqual(refreshedDeadline, firstDeadline)
+
+    scrollTo(confirm, in: app)
+    confirm.tap()
+    XCTAssertTrue(app.staticTexts["napPlanConfirmation"].waitForExistence(timeout: 5))
+    XCTAssertTrue(
+      app.staticTexts["napPlanConfirmedDeadline"].label.contains(
+        refreshedDeadline.replacingOccurrences(of: "Fixed wake deadline, ", with: "")))
+  }
+
+  func testExpiredExactWakeTimeCannotBeConfirmed() {
+    let app = launchReview(additionalEnvironment: [
+      "HONKSHOOL_UI_TEST_PLAN_CONFIRM_OFFSET": "1800"
+    ])
+    let exact = app.switches["napPlanUseExactWakeTime"]
+    scrollTo(exact, in: app)
+    exact.tap()
+    let review = app.buttons["reviewNapPlan"]
+    scrollTo(review, in: app)
+    review.tap()
+    let confirm = app.buttons["confirmNapPlan"]
+    scrollTo(confirm, in: app)
+    confirm.tap()
+    XCTAssertFalse(app.staticTexts["napPlanConfirmation"].exists)
+    XCTAssertTrue(
+      app.staticTexts["napPlanError"].label.contains("Choose a wake time later"))
   }
 
   private func launchReview(additionalEnvironment: [String: String] = [:]) -> XCUIApplication {

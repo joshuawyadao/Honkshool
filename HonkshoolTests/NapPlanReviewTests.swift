@@ -108,7 +108,7 @@ final class NapPlanReviewTests: XCTestCase {
     try state.review(
       id: "fixed", request: request, startingAt: now, now: now, catalog: catalog)
     let reviewed = try XCTUnwrap(state.reviewed)
-    state.confirm()
+    try state.confirm(at: now)
     request = NapRequest(window: .duration(30), startingAt: selection("short"))
     XCTAssertThrowsError(
       try state.review(
@@ -126,6 +126,90 @@ final class NapPlanReviewTests: XCTestCase {
     XCTAssertEqual(state.confirmed?.plan.transitions, reviewed.plan.transitions)
     XCTAssertEqual(state.confirmed?.approvedTransitions, reviewed.approvedTransitions)
     XCTAssertEqual(state.confirmed?.route, reviewed.route)
+  }
+
+  func testStaleAndExpiredReviewsRequireRenewedApproval() throws {
+    let catalog = try makeCatalog()
+    var state = NapPlanReviewState()
+    let duration = NapRequest(window: .duration(1_000), startingAt: selection("first"))
+    let plannedStart = now.addingTimeInterval(60)
+    try state.review(
+      id: "first", request: duration, startingAt: plannedStart, now: now, catalog: catalog)
+    let original = try XCTUnwrap(state.reviewed)
+    XCTAssertEqual(original.reviewedAt, now)
+
+    XCTAssertThrowsError(try state.confirm(at: now.addingTimeInterval(-1))) {
+      XCTAssertEqual($0 as? NapPlanReviewError, .staleReview)
+    }
+
+    XCTAssertThrowsError(try state.confirm(at: plannedStart.addingTimeInterval(1))) {
+      XCTAssertEqual($0 as? NapPlanReviewError, .staleReview)
+    }
+    XCTAssertNil(state.confirmed)
+    XCTAssertEqual(state.reviewed, original)
+
+    let refreshedAt = plannedStart.addingTimeInterval(1)
+    let refreshedStart = refreshedAt.addingTimeInterval(60)
+    try state.review(
+      id: "refreshed", request: duration, startingAt: refreshedStart, now: refreshedAt,
+      catalog: catalog)
+    XCTAssertEqual(
+      state.reviewed?.plan.deadline,
+      original.plan.deadline.addingTimeInterval(refreshedStart.timeIntervalSince(plannedStart)))
+    try state.confirm(at: refreshedAt)
+    XCTAssertEqual(state.confirmed, state.reviewed)
+
+    var exactState = NapPlanReviewState()
+    let wake = now.addingTimeInterval(300)
+    try exactState.review(
+      id: "exact", request: NapRequest(window: .wakeTime(wake), startingAt: selection("first")),
+      startingAt: plannedStart, now: now, catalog: catalog)
+    XCTAssertThrowsError(try exactState.confirm(at: plannedStart.addingTimeInterval(1))) {
+      XCTAssertEqual($0 as? NapPlanReviewError, .staleReview)
+    }
+    XCTAssertThrowsError(try exactState.confirm(at: wake)) {
+      XCTAssertEqual($0 as? NapPlanReviewError, .deadlineReached)
+    }
+    XCTAssertNil(exactState.confirmed)
+  }
+
+  func testTightRouteKeepsFullWindowOnlyUntilPlannedStart() throws {
+    let catalog = try makeCatalog()
+    var state = NapPlanReviewState()
+    let plannedStart = now.addingTimeInterval(60)
+    try state.review(
+      id: "tight", request: NapRequest(window: .duration(180), startingAt: selection("short")),
+      startingAt: plannedStart, now: now, catalog: catalog)
+    let reviewed = try XCTUnwrap(state.reviewed)
+    XCTAssertEqual(reviewed.route.map(\.planned.session.id), ["short"])
+    XCTAssertEqual(reviewed.plan.deadline, plannedStart.addingTimeInterval(180))
+
+    XCTAssertThrowsError(try state.confirm(at: plannedStart.addingTimeInterval(1))) {
+      XCTAssertEqual($0 as? NapPlanReviewError, .staleReview)
+    }
+    XCTAssertNil(state.confirmed)
+    try state.confirm(at: plannedStart)
+    XCTAssertEqual(state.confirmed, reviewed)
+  }
+
+  func testExactWakeSoonAfterReviewKeepsAReviewWindowAndFixedDeadline() throws {
+    let catalog = try makeCatalog()
+    let wake = now.addingTimeInterval(30)
+    let plannedStart = NapPlanReviewView.plannedStart(for: .wakeTime(wake), reviewedAt: now)
+    XCTAssertEqual(plannedStart, now.addingTimeInterval(15))
+    XCTAssertEqual(
+      NapPlanReviewView.plannedStart(for: .duration(30), reviewedAt: now),
+      now.addingTimeInterval(60))
+
+    var state = NapPlanReviewState()
+    try state.review(
+      id: "short-exact",
+      request: NapRequest(window: .wakeTime(wake), startingAt: selection("short")),
+      startingAt: plannedStart, now: now, catalog: catalog)
+    XCTAssertEqual(state.reviewed?.plan.deadline, wake)
+    XCTAssertTrue(try XCTUnwrap(state.reviewed).route.isEmpty)
+    try state.confirm(at: now.addingTimeInterval(14))
+    XCTAssertEqual(state.confirmed?.plan.deadline, wake)
   }
 
   func testReviewCatalogExcludesNarrationWithoutAnAvailableBundledFile() throws {

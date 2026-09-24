@@ -41,6 +41,7 @@ struct FeasibilityConsoleView: View {
             #if DEBUG
               NapPlanReviewView(
                 clock: UITestFixtures.planReviewNow,
+                confirmationClock: UITestFixtures.planReviewConfirmationNow,
                 isNarrationAvailable: UITestFixtures.planReviewNarrationAvailable)
             #else
               NapPlanReviewView()

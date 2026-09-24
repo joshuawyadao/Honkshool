@@ -2,7 +2,9 @@ import SwiftUI
 
 /// Pre-play planning only. Neither confirmation nor this view starts audio or schedules an alarm.
 struct NapPlanReviewView: View {
+  private static let plannedStartLead: TimeInterval = 60
   private let clock: () -> Date
+  private let confirmationClock: () -> Date
   private let makeID: () -> String
   private let loadCatalog: () throws -> PreparedCatalog
   private let isNarrationAvailable: (PreparedSession) -> Bool
@@ -24,6 +26,7 @@ struct NapPlanReviewView: View {
 
   init(
     clock: @escaping () -> Date = { .now },
+    confirmationClock: (() -> Date)? = nil,
     makeID: @escaping () -> String = { UUID().uuidString },
     loadCatalog: @escaping () throws -> PreparedCatalog = { try .load() },
     isNarrationAvailable: @escaping (PreparedSession) -> Bool = {
@@ -32,6 +35,7 @@ struct NapPlanReviewView: View {
     availableAmbienceIDs: Set<String> = []
   ) {
     self.clock = clock
+    self.confirmationClock = confirmationClock ?? clock
     self.makeID = makeID
     self.loadCatalog = loadCatalog
     self.isNarrationAvailable = isNarrationAvailable
@@ -250,15 +254,17 @@ struct NapPlanReviewView: View {
   }
 
   private func review(
-    _ catalog: PreparedCatalog, reviewCatalog: NapCatalog, options: [SessionOption]
+    _ catalog: PreparedCatalog, reviewCatalog: NapCatalog, options: [SessionOption],
+    at reviewTime: Date? = nil
   ) {
     guard options.indices.contains(selectionIndex) else { return }
     let selected = options[selectionIndex]
-    let now = clock()
+    let now = reviewTime ?? clock()
     let window: NapWindow =
       usesExactWakeTime
       ? .wakeTime(exactWakeTime)
       : .duration(TimeInterval(durationMinutes * 60))
+    let plannedStart = Self.plannedStart(for: window, reviewedAt: now)
     let alternatives = options.indices.filter { shorterIndices.contains($0) }.map {
       SessionSelection(journeyID: options[$0].journey.id, sessionID: options[$0].session.id)
     }
@@ -276,7 +282,7 @@ struct NapPlanReviewView: View {
     )
     do {
       try reviewState.review(
-        id: makeID(), request: request, startingAt: now, now: now,
+        id: makeID(), request: request, startingAt: plannedStart, now: now,
         catalog: reviewCatalog, availableAmbienceIDs: availableAmbienceIDs
       )
       reviewError = nil
@@ -289,8 +295,12 @@ struct NapPlanReviewView: View {
   private func reviewContent(_ review: NapPlanReview) -> some View {
     Group {
       card("Review before confirming", systemImage: "checklist") {
+        LabeledContent("Planned rest start") {
+          Text(review.plan.start.formatted(date: .abbreviated, time: .standard))
+        }
+        .accessibilityIdentifier("napPlanPlannedStart")
         LabeledContent("Fixed wake deadline") {
-          Text(review.plan.deadline.formatted(date: .abbreviated, time: .shortened))
+          Text(review.plan.deadline.formatted(date: .abbreviated, time: .standard))
         }
         .accessibilityIdentifier("napPlanDeadline")
         LabeledContent(
@@ -359,14 +369,35 @@ struct NapPlanReviewView: View {
       }
 
       Text(
-        "Confirmation saves this reviewed choice in memory for this screen. Playback and alarm scheduling are not connected yet."
+        "Confirm by the planned rest start. Short exact wake windows allow less review time. If the start passes, the deadline and route will refresh for another review. Playback and alarm scheduling are not connected yet."
       )
       .font(.footnote)
       .foregroundStyle(.secondary)
-      Button("Confirm reviewed plan") { reviewState.confirm() }
+      Button("Confirm reviewed plan") { confirm() }
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
         .accessibilityIdentifier("confirmNapPlan")
+    }
+  }
+
+  private func confirm() {
+    let now = confirmationClock()
+    do {
+      try reviewState.confirm(at: now)
+      reviewError = nil
+    } catch {
+      guard let catalog, let reviewCatalog else {
+        reviewState.clearReview()
+        reviewError = "The reviewed plan is no longer available. Review your choices again."
+        return
+      }
+      review(
+        catalog, reviewCatalog: reviewCatalog,
+        options: sessionOptions(in: catalog, reviewCatalog: reviewCatalog), at: now)
+      if reviewState.reviewed != nil {
+        reviewError =
+          "Time passed since review. Check the updated deadline and route, then confirm again."
+      }
     }
   }
 
@@ -376,8 +407,12 @@ struct NapPlanReviewView: View {
         "Your reviewed plan is confirmed for this screen. Playback has not started, and no wake alarm has been scheduled."
       )
       .accessibilityIdentifier("napPlanConfirmation")
+      LabeledContent("Planned rest start") {
+        Text(confirmed.plan.start.formatted(date: .abbreviated, time: .standard))
+      }
+      .accessibilityIdentifier("napPlanConfirmedStart")
       LabeledContent("Fixed wake deadline") {
-        Text(confirmed.plan.deadline.formatted(date: .abbreviated, time: .shortened))
+        Text(confirmed.plan.deadline.formatted(date: .abbreviated, time: .standard))
       }
       .accessibilityIdentifier("napPlanConfirmedDeadline")
       LabeledContent("Approved narration", value: "\(confirmed.route.count) session(s)")
@@ -401,6 +436,17 @@ struct NapPlanReviewView: View {
   private func invalidateReview() {
     reviewState.clearReview()
     reviewError = nil
+  }
+
+  static func plannedStart(for window: NapWindow, reviewedAt now: Date) -> Date {
+    let lead: TimeInterval
+    switch window {
+    case .duration:
+      lead = plannedStartLead
+    case .wakeTime(let wake):
+      lead = min(plannedStartLead, max(0, wake.timeIntervalSince(now) / 2))
+    }
+    return now.addingTimeInterval(lead)
   }
 
   private func soundName(_ sound: RestSound) -> String {

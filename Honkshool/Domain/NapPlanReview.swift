@@ -9,6 +9,7 @@ struct NapPlanReviewRouteItem: Equatable, Sendable {
 /// Everything the listener approves before a future playback adapter can start a run.
 struct NapPlanReview: Equatable, Sendable {
   let plan: NapPlan
+  let reviewedAt: Date
   let requestedSound: RestSound
   let selectedWindow: NapWindow
   let selectedSession: SessionSelection
@@ -18,6 +19,8 @@ struct NapPlanReview: Equatable, Sendable {
 
 enum NapPlanReviewError: Error, Equatable {
   case alreadyConfirmed
+  case staleReview
+  case deadlineReached
 }
 
 /// Keeps the confirmed review as a value snapshot. Editing choices creates a new review;
@@ -41,7 +44,7 @@ struct NapPlanReviewState {
         journeyTitle: catalog.journeys[planned.journeyID]?.title ?? planned.journeyID)
     }
     reviewed = NapPlanReview(
-      plan: plan, requestedSound: request.fallback, selectedWindow: request.window,
+      plan: plan, reviewedAt: now, requestedSound: request.fallback, selectedWindow: request.window,
       selectedSession: request.startingAt, approvedTransitions: request.approvedTransitions,
       route: route)
   }
@@ -51,8 +54,14 @@ struct NapPlanReviewState {
     reviewed = nil
   }
 
-  mutating func confirm() {
+  mutating func confirm(at now: Date) throws {
     guard confirmed == nil, let reviewed else { return }
+    guard now.timeIntervalSinceReferenceDate.isFinite, now < reviewed.plan.deadline else {
+      throw NapPlanReviewError.deadlineReached
+    }
+    guard now >= reviewed.reviewedAt, now <= reviewed.plan.start else {
+      throw NapPlanReviewError.staleReview
+    }
     confirmed = reviewed
   }
 }
