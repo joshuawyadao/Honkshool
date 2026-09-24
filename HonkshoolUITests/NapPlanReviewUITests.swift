@@ -27,8 +27,9 @@ final class NapPlanReviewUITests: XCTestCase {
     confirm.tap()
     let confirmation = app.staticTexts["napPlanConfirmation"]
     XCTAssertTrue(confirmation.waitForExistence(timeout: 5))
-    XCTAssertTrue(confirmation.label.contains("Playback has not started"))
-    XCTAssertTrue(confirmation.label.contains("no wake alarm has been scheduled"))
+    XCTAssertTrue(confirmation.label.contains("approved route and fixed deadline"))
+    XCTAssertTrue(app.staticTexts["napRunAlarmGate"].exists)
+    XCTAssertFalse(app.buttons["startNapRun"].exists)
     XCTAssertTrue(app.staticTexts["napPlanConfirmedStart"].label.contains("Planned rest start"))
     XCTAssertFalse(app.buttons["reviewNapPlan"].exists)
     XCTAssertTrue(
@@ -53,6 +54,16 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertEqual(app.staticTexts["napPlanAlarmChoice"].label, "Wake alarm, Not requested")
     XCTAssertEqual(app.staticTexts["napPlanPostNarrationSound"].label, "After narration, Silence")
     XCTAssertTrue(app.staticTexts["napPlanRouteEnd"].label.contains("does not fit"))
+
+    let confirm = app.buttons["confirmNapPlan"]
+    scrollTo(confirm, in: app)
+    confirm.tap()
+    let start = app.buttons["startNapRun"]
+    scrollTo(start, in: app)
+    XCTAssertTrue(start.isEnabled)
+    start.tap()
+    XCTAssertTrue(app.staticTexts["napRunStatus"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["napRunStatus"].label.contains("Keep Honkshool open"))
   }
 
   func testExactWakeTimeAndAccessibilityLabelsAreAvailable() {

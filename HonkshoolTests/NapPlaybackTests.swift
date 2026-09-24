@@ -40,6 +40,13 @@ final class NapPlaybackTests: XCTestCase {
       session: session(id), utf16Offset: offset, estimatedRemainingDuration: remaining)
   }
 
+  private func audioPoint(
+    _ id: String = "one", offset: TimeInterval, remaining: TimeInterval = 20
+  ) throws -> ResumePoint {
+    try ResumePoint(
+      session: session(id), audioOffset: offset, estimatedRemainingDuration: remaining)
+  }
+
   func testEarlyCompletionAdvancesOnlyWithinApprovedRouteAndFillsRemainingRest() throws {
     let approved = try plan()
     var playback = try NapPlayback(plan: approved, runID: "early")
@@ -116,6 +123,58 @@ final class NapPlaybackTests: XCTestCase {
         startedAt: at(120), endedAt: at(120), playedDuration: 0, outcome: .completed
       )
     ) { XCTAssertEqual($0 as? NapDomainError, .playbackEnded) }
+  }
+
+  func testLateStopRetainsActualEndAndVerifiedDeadlineCheckpoint() throws {
+    var playback = try NapPlayback(plan: plan(), runID: "late-partial")
+    let resume = try audioPoint(offset: 18, remaining: 22)
+    let record = try playback.recordSession(
+      startedAt: at(10), endedAt: at(123), playedDuration: 108,
+      outcome: .partial(reason: .deadlineMissed, resumePoint: resume),
+      checkpointCapturedAt: at(119))
+    XCTAssertEqual(record.endedAt, at(123))
+    XCTAssertEqual(record.checkpointCapturedAt, at(119))
+    XCTAssertEqual(record.playedDuration, 108)
+    XCTAssertEqual(record.outcome, .partial(reason: .deadlineMissed, resumePoint: resume))
+    XCTAssertNil(try playback.nextSession(at: at(123)))
+    var history = ListeningHistory()
+    try history.append(record)
+    XCTAssertEqual(history.resumeSelection(for: record.id)?.resumePoint, resume)
+  }
+
+  func testLateStopRejectsMissingLateOrInconsistentCheckpointEvidence() throws {
+    var playback = try NapPlayback(plan: plan(), runID: "late-invalid")
+    let resume = try point()
+    let invalidEvidence: [(Date?, TimeInterval)] = [
+      (nil, 100), (at(121), 100), (at(9), 0),
+      (Date(timeIntervalSince1970: .nan), 0), (at(119), 110),
+    ]
+    for (captured, played) in invalidEvidence {
+      XCTAssertThrowsError(
+        try playback.recordSession(
+          startedAt: at(10), endedAt: at(123), playedDuration: played,
+          outcome: .partial(reason: .deadlineMissed, resumePoint: resume),
+          checkpointCapturedAt: captured)
+      ) { XCTAssertEqual($0 as? NapDomainError, .invalidPlaybackTime) }
+    }
+    for outcome in [
+      PlaybackOutcome.completed,
+      .partial(reason: .stopped, resumePoint: resume),
+      .partial(reason: .deadlineReached, resumePoint: resume),
+    ] {
+      XCTAssertThrowsError(
+        try playback.recordSession(
+          startedAt: at(10), endedAt: at(123), playedDuration: 100,
+          outcome: outcome, checkpointCapturedAt: at(119))
+      ) { XCTAssertEqual($0 as? NapDomainError, .deadlineExceeded) }
+    }
+    XCTAssertThrowsError(
+      try playback.recordSession(
+        startedAt: at(10), endedAt: at(120), playedDuration: 100,
+        outcome: .partial(reason: .deadlineMissed, resumePoint: resume),
+        checkpointCapturedAt: at(119))
+    ) { XCTAssertEqual($0 as? NapDomainError, .invalidPlaybackTime) }
+    XCTAssertTrue(playback.records.isEmpty)
   }
 
   func testActualCompletionExactlyAtDeadlineCountsEvenWhenEstimateWasShorter() throws {
@@ -214,6 +273,39 @@ final class NapPlaybackTests: XCTestCase {
       ) {
         XCTAssertEqual($0 as? NapDomainError, .invalidResumePoint)
       }
+    }
+    XCTAssertTrue(playback.records.isEmpty)
+  }
+
+  func testAudioCheckpointPlansAndRecordsForwardAudioPosition() throws {
+    let original = try audioPoint(offset: 12, remaining: 18)
+    let selection = SessionSelection(journeyID: "a", sessionID: "one", resumePoint: original)
+    let approved = try plan(duration: 38, startingAt: selection)
+    XCTAssertEqual(approved.route.first?.resumePoint?.audioOffset, 12)
+    XCTAssertNil(approved.route.first?.resumePoint?.utf16Offset)
+    XCTAssertEqual(approved.route.first?.estimatedEnd, at(28))
+
+    var playback = try NapPlayback(plan: approved, runID: "audio-resume")
+    let record = try playback.recordSession(
+      startedAt: at(10), endedAt: at(20), playedDuration: 10,
+      outcome: .partial(
+        reason: .stopped, resumePoint: audioPoint(offset: 22, remaining: 8)))
+    XCTAssertEqual(record.resumePoint?.audioOffset, 22)
+    var history = ListeningHistory()
+    try history.append(record)
+    XCTAssertEqual(history.resumeSelection(for: record.id)?.resumePoint?.audioOffset, 22)
+  }
+
+  func testResumedAudioRejectsBackwardsAndMixedPositionKinds() throws {
+    let selection = SessionSelection(
+      journeyID: "a", sessionID: "one", resumePoint: try audioPoint(offset: 12))
+    var playback = try NapPlayback(plan: plan(startingAt: selection), runID: "audio-invalid")
+    for resume in [try audioPoint(offset: 11.9), try point(offset: 100)] {
+      XCTAssertThrowsError(
+        try playback.recordSession(
+          startedAt: at(10), endedAt: at(20), playedDuration: 10,
+          outcome: .partial(reason: .stopped, resumePoint: resume))
+      ) { XCTAssertEqual($0 as? NapDomainError, .invalidResumePoint) }
     }
     XCTAssertTrue(playback.records.isEmpty)
   }

@@ -108,14 +108,22 @@ struct PreparedSession: Equatable, Sendable {
     return url
   }
 
+  /// Prepared audio checkpoints use the exact render duration, not the editorial
+  /// session estimate. A point at the end has no audio left to resume.
+  func validateAudioResumePoint(_ point: ResumePoint) throws {
+    guard point.matches(session), let audioOffset = point.audioOffset,
+      let narrationAsset, audioOffset < narrationAsset.duration
+    else { throw NapDomainError.invalidResumePoint }
+  }
+
   /// Offsets refer to `narration`, never a display string with headings or citations.
   /// A checkpoint must start at an intact Character before the end of this revision.
   func narration(resumingAt point: ResumePoint) throws -> String {
-    guard point.matches(session), point.utf16Offset >= 0,
-      point.utf16Offset < narration.utf16.count
+    guard point.matches(session), let utf16Offset = point.utf16Offset,
+      utf16Offset < narration.utf16.count
     else { throw NapDomainError.invalidResumePoint }
     let utf16Index = narration.utf16.index(
-      narration.utf16.startIndex, offsetBy: point.utf16Offset)
+      narration.utf16.startIndex, offsetBy: utf16Offset)
     guard let index = String.Index(utf16Index, within: narration),
       narration.indices.contains(index)
     else { throw NapDomainError.invalidResumePoint }

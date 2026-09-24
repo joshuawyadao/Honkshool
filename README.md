@@ -6,7 +6,7 @@
 
 Honkshool is an early-stage iPhone app for calm, uninterrupted factual narration during naps and bedtime. Its primary purpose is helping the listener relax and fall asleep; exposure to interesting information is secondary.
 
-> **Project status:** Feasibility spike plus a pre-play Nap Plan review screen; there is no supported release. The experimental console plays the bundled prepared session to measure narration, background audio, and AlarmKit behavior. A separate screen uses the planning domain and prepared catalog to choose, review, and confirm a fixed plan. Confirmation does not start playback, schedule an alarm, or save history.
+> **Project status:** Feasibility spike plus an early Nap Plan playback flow; there is no supported release. The experimental console remains separate. The Nap Plan screen can choose and confirm a fixed route, then start an alarm-free run of bundled narration at its approved start, transition to silence, and stop at its fixed deadline. Keep the app foregrounded until narration begins; then the phone can be locked. Runs retain playback evidence in memory only. Alarm-requested plans are blocked until production scheduling is connected; local history and rain playback are still pending.
 
 The intended flow is simple:
 
@@ -85,7 +85,7 @@ GitHub secret scanning, push protection, Dependabot security updates, and privat
 1. Completed feasibility validation on the target iPhone: narration, background audio, tested interruptions, Lock Screen controls, AlarmKit, and the larger-text snooze layout (2026-09-15). Squash-merged through PR #2 as `45dcc71`; this remains an experimental console.
 2. Implemented and tested the framework-independent Nap Plan, journey, progress, and history rules, squash-merged through PR #3 as `c5025ad`; see the [domain contract](docs/Nap-Planning-Domain.md). Fixed deadlines and short-window fallback follow approved D-004/D-009.
 3. Added a [bundled content catalog](docs/Content-Catalog.md) with an original citation-backed automotive session, source metadata, pronunciation guidance, and a complete prepared Kokoro George `0.86` narration. The lossless 727.625-second asset now plays through the feasibility console with pause/resume, interruption handling, Lock Screen metadata, and fixed-deadline stopping; the planner uses a configurable 730-second estimate. [Audio preparation](docs/Audio-Preparation.md) records exact provenance. Automated full-file decoding, natural-end playback, and a real iPhone AlarmKit/cutoff check have passed. Brief route/control checks, full-session subjective listening acceptance, rain acceptance, and production plan/history integration remain open.
-4. The pre-play choose → review slice is implemented. Connect the approved snapshot to production playback, alarm scheduling, and history in later branches.
+4. The choose → review screen now connects alarm-free confirmed plans to prepared narration, manual controls, silent rest, and a fixed cutoff. Production alarm scheduling, saved history, and target-iPhone acceptance remain the next integration work.
 5. Extend the local journey experience only as needed for an approximately ten-nap personal validation trial.
 
 See the [living project implementation plan](docs/Project-Implementation-Plan.md) for acceptance criteria and branch sequence. Questions that gate a phase are recorded in the [decision log](docs/Decision-Log.md), not left implicit in code.
