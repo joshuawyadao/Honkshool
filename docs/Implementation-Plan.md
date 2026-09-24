@@ -23,3 +23,8 @@ Connect a confirmed Nap Plan to a production playback run using the bundled prep
 - Full iOS simulator suite: 170 passed, 0 failed, 1 intentionally skipped device-only test.
 - Public repository verification: 31 passed. Strict Swift formatting and unsigned Release simulator build passed.
 - Apple-platform review found no remaining code blocker in the foreground-start or late-cutoff paths. Locked-screen playback, route changes, and interruption recovery on the target iPhone remain manual acceptance work.
+
+## PR feedback
+- [x] Preserve a verified pre-deadline checkpoint when Stop is pressed after a delayed deadline callback.
+- [ ] Allow a fresh confirmed plan to start after a previous run reached a terminal phase.
+- [ ] Keep the UI test review clock valid across calendar time.

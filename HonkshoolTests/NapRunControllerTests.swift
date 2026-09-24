@@ -242,6 +242,31 @@ final class NapRunControllerTests: XCTestCase {
     XCTAssertFalse(try XCTUnwrap(run.records.first).isCompleted)
   }
 
+  func testOverdueStopRetainsVerifiedCheckpointAndActualStopTime() throws {
+    let catalog = try PreparedCatalog.load()
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let player = RunFakePlayer()
+    let run = controller(clock: clock, scheduler: scheduler, player: player)
+    let approved = try review(catalog: catalog, now: clock.now)
+    try run.start(review: approved, catalog: catalog)
+    scheduler.advance(to: approved.plan.start)
+    player.currentTime = 500
+    scheduler.advance(to: approved.plan.deadline.addingTimeInterval(-10))
+    clock.now = approved.plan.deadline.addingTimeInterval(2)
+
+    run.stop()
+
+    let record = try XCTUnwrap(run.records.first)
+    XCTAssertEqual(run.phase, .finished)
+    XCTAssertEqual(record.endedAt, clock.now)
+    XCTAssertEqual(record.checkpointCapturedAt, approved.plan.deadline.addingTimeInterval(-10))
+    XCTAssertEqual(record.resumePoint?.audioOffset, 500)
+    XCTAssertEqual(
+      record.outcome,
+      .partial(reason: .deadlineMissed, resumePoint: try XCTUnwrap(record.resumePoint)))
+  }
+
   func testAudioActivationFailureNeverClaimsPlayback() throws {
     let catalog = try PreparedCatalog.load()
     let clock = RunTestClock()

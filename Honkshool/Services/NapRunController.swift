@@ -252,6 +252,10 @@ final class NapRunController: NSObject, ObservableObject {
 
   func stop() {
     guard let token = activeToken else { return }
+    if let playback, clock() >= playback.plan.deadline {
+      reachDeadline(token: token)
+      return
+    }
     recordPartialIfPossible(reason: .stopped, token: token)
     clearRun()
     phase = .stopped
