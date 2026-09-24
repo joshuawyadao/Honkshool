@@ -2,7 +2,7 @@
 
 `Honkshool/Content/PreparedCatalog.swift` loads the app-bundled `Honkshool/Resources/PreparedCatalog.json`. It uses Foundation only and makes no network requests. This is the prepared-content boundary between authored narration and the existing [nap-planning domain](Nap-Planning-Domain.md).
 
-The catalog currently contains **How a Car Works → Turning Fuel Into Motion** at Enthusiast detail. The script is original, with paragraph-linked references and a configurable duration estimate informed by a Mac development render. [Content-Review.md](Content-Review.md) records factual review and estimation evidence. The existing feasibility console continues to use `SampleContent`; the new catalog has no production playback or persistence connection yet.
+The catalog currently contains **How a Car Works → Turning Fuel Into Motion** at Enthusiast detail. The script is original, with paragraph-linked references and a configurable duration estimate informed by the complete prepared render. [Content-Review.md](Content-Review.md) records factual review and estimation evidence. The Nap Plan review screen offers only sessions whose narration file resolves in the app bundle; unavailable sessions also end a reviewed route before playback. The feasibility console plays the bundled narration through its separate spike flow; there is no production plan playback or persistence connection yet.
 
 ## Loading and planning
 

@@ -11,10 +11,10 @@ Build Honkshool as a sequence of small, reviewable vertical slices, beginning wi
 
 - [x] Resolve or explicitly defer the Phase 0 decision gates and run `spike/audio-and-alarm-feasibility` to establish narration, background audio, interruptions, Lock Screen controls, and AlarmKit feasibility on the target iPhone.
 - [x] Implement `codex/nap-plan-domain` with framework-independent journey, session, route, timing, completion, and history rules plus focused unit tests. Runtime execution and persistence remain in later branches.
-- [x] Build `codex/local-content-catalog` with a validated bundled catalog, one original citation-backed Enthusiast session from “How a Car Works,” source metadata, pronunciation guidance, configurable editorial estimates, and script-bound resume validation. Record F as the provisional narration reference.
+- [x] Build the validated bundled catalog, one original citation-backed Enthusiast session from “How a Car Works,” source metadata, pronunciation guidance, configurable editorial estimates, and script-bound resume validation. This work was squash-merged through PR #4 as `39bd2a2`.
 - [x] Prepare a full Mac narration audition and measure its duration; bundle a CC0 gentle-rain candidate with provenance and objective loop/level checks.
 - [ ] Complete Phase 2 by validating the bundled Kokoro George `0.86` playback path on the target iPhone and accepting the complete 727.625-second session. Preparation, provenance, catalog timing, app playback, and automated deadline coverage are complete. On iPhone 18 Pro Max / iOS 27.0, the signed app launched, two focused fixture UI tests passed, and the owner reported locked playback and Lock Screen play/pause working. The remaining [manual device checks](Feasibility-Spike.md#manual-checks-to-do-later-on-iphone-18-pro-max--ios-270) are pending. Connect accepted rain during runtime work; silence remains the available fallback until that integration.
-- [ ] Build `feature/nap-plan-review` so a listener can continue or select local content, choose a duration or wake time, inspect the fixed route, select ambience or silence, and confirm the final alarm.
+- [x] Build `codex/nap-plan-review-main` so a listener can select locally playable prepared content, choose a duration or wake time, inspect and confirm the fixed route, and choose from currently available rest sounds and alarm preference. The current catalog has one session and silence; confirmation is pre-play only. Continue-from-history and accepted rain remain for later work.
 - [ ] Build `feature/nap-playback-runtime` to execute the approved plan without mid-nap prompts, support background playback and appropriate media controls, transition after narration, and recover safely from expected audio interruptions.
 - [ ] Build `feature/alarm-and-history` to schedule and manage only Honkshool alarms, persist partial and completed playback locally with SwiftData, advance sessions only on completion, and expose resume and history views.
 - [ ] Build `feature/journey-branches` to finish the initial journey flow, preselect any recommended cross-journey route before playback, and preserve replay, restart, and alternate-branch history.
@@ -87,7 +87,7 @@ Implemented on `codex/nap-plan-domain` on 2026-09-15 and squash-merged through P
 
 ### Current status
 
-The catalog slice is implemented on `codex/local-content-catalog` (2026-09-16): bundled original prose, paragraph-linked sources, summary, pronunciation guidance, validated stable identities/references, configurable estimates, planner integration, and script-aware resume checks. The feasibility console continues to use its separate spike script. See [Content-Catalog.md](Content-Catalog.md) and [Content-Review.md](Content-Review.md).
+The catalog slice was squash-merged through PR #4 as `39bd2a2`: bundled original prose, paragraph-linked sources, summary, pronunciation guidance, validated stable identities/references, configurable estimates, planner integration, and script-aware resume checks. The feasibility console plays the prepared audio through its separate spike flow. See [Content-Catalog.md](Content-Catalog.md) and [Content-Review.md](Content-Review.md).
 
 The first full Mac audition measured 674.222 seconds on 2026-09-17 and remains historical Apple-voice evidence. A CC0 rain candidate is bundled with provenance and objective checks. F, the Aaron full-session master, and the Apple voice comparisons remain preserved evidence. The Apple Premium voices improved pronunciation but retained automated cadence. On 2026-09-21 the owner found both evaluated Kokoro voices much more human and natural, preferred George's calm documentary quality, and selected George at model speed `0.86` after a 408-word factual comparison. See [Audio-Preparation.md](Audio-Preparation.md) and the [accepted Kokoro evidence](Narration-Reference.md#accepted-kokoro-george-direction-2026-09-21).
 
@@ -119,6 +119,10 @@ Create enough lawful, reliable local content to evaluate the experience without 
 Prove the exact habit Honkshool is intended to replace:
 
 > Open app → choose content → choose nap duration → review the Nap Plan → start resting.
+
+### Current status
+
+The pre-play portion is implemented on `codex/nap-plan-review-main`: the listener can choose locally playable prepared content and a duration or exact wake time, review the entire fixed route and fallback, request an alarm, and confirm an in-memory snapshot. Sessions without resolvable bundled narration are excluded from the picker and reviewed route. Review shows a planned start and fixed wake deadline to the second; duration is measured from a start one minute ahead, while short exact wake windows receive a shorter review interval. Confirmation after the planned start refreshes the route and deadline for another explicit approval, and a past exact wake time cannot be confirmed. The bundled catalog currently has one available session and no accepted ambience, so silence is the current rest sound. Confirmation does not start playback or schedule an alarm. A later playback adapter must honor the approved start or request renewed review. Production playback, AlarmKit gating, SwiftData history, and the target-iPhone end-to-end checks remain future slices. The 2026-09-23 iOS 26.5 simulator suite passes 156 tests with one intentionally skipped device-only test, including deterministic short-window and stale-confirmation coverage. This is development evidence only.
 
 ### Minimum user flow
 

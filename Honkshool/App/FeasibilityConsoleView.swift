@@ -37,6 +37,22 @@ struct FeasibilityConsoleView: View {
           }
           .buttonStyle(.bordered)
           .accessibilityIdentifier("audioEventLog")
+          NavigationLink {
+            #if DEBUG
+              NapPlanReviewView(
+                clock: UITestFixtures.planReviewNow,
+                confirmationClock: UITestFixtures.planReviewConfirmationNow,
+                isNarrationAvailable: UITestFixtures.planReviewNarrationAvailable)
+            #else
+              NapPlanReviewView()
+            #endif
+          } label: {
+            Label("Choose and review a Nap Plan", systemImage: "checklist")
+              .frame(maxWidth: .infinity)
+          }
+          .buttonStyle(.borderedProminent)
+          .controlSize(.large)
+          .accessibilityIdentifier("openNapPlanReview")
         }
         .padding()
       }

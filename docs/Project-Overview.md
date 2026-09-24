@@ -2,7 +2,7 @@
 
 ## Current state
 
-Honkshool is an iPhone-first project for calm, uninterrupted factual narration during naps and bedtime. The repository now contains an experimental iOS 26 feasibility console for audio and alarm testing and a separate Foundation-only nap-planning domain and validated bundled content catalog, in addition to the product definition, delivery roadmap, decision history, contribution and security policies, and automated repository checks. It does not contain a supported release or the intended product UI.
+Honkshool is an iPhone-first project for calm, uninterrupted factual narration during naps and bedtime. The repository contains an experimental iOS 26 feasibility console for audio and alarm testing, a separate pre-play Nap Plan chooser/review screen, a Foundation-only planning domain, and a validated bundled content catalog. It does not contain a supported release or the complete choose → play → alarm → history product flow.
 
 The primary outcome is relaxation and rest. Interesting factual exposure is secondary, and the product must not claim subconscious learning, guaranteed retention, therapy, or treatment of insomnia or another medical condition.
 
@@ -37,7 +37,7 @@ Phase 1 was squash-merged through PR #3 as `c5025ad` after `codex/nap-plan-domai
 
 The prepared-content catalog now contains one original citation-backed automotive session, immutable metadata, pronunciation guidance, and an exact prepared-narration reference. The loader connects it to the planner, validates revision-specific script resume positions, and resolves the bundled audio without introducing AVFoundation into the domain layer. Kokoro George at model speed `0.86` is the selected narration and cadence direction.
 
-The complete 1,829-word George render measures 727.625 seconds, with a 730-second planning estimate and exact provenance. The feasibility console plays the 33 MB lossless asset locally, supports existing background/interruption controls, and stops narration or following ambience at the captured deadline. A softened CC0 window-rain candidate is also bundled with provenance and loop/level checks. See [Audio-Preparation.md](Audio-Preparation.md). Next is target-iPhone playback and complete-session listening acceptance. D-007's narration direction is resolved through D-023 and D-024; D-008 still needs rain acceptance. Silence remains available, and rain is not yet connected to the planner or runtime. Plan-review UI and SwiftData progress/history follow; the prepared adapter does not yet persist partial positions or completion.
+The complete 1,829-word George render measures 727.625 seconds, with a 730-second planning estimate and exact provenance. The feasibility console plays the 33 MB lossless asset locally, supports existing background/interruption controls, and stops narration or following ambience at the captured deadline. A softened CC0 window-rain candidate is also bundled with provenance and loop/level checks. See [Audio-Preparation.md](Audio-Preparation.md). The Nap Plan screen chooses bundled content and a rest window, then displays and confirms the planner's fixed deadline, complete route, sound fallback, and optional alarm. It offers silence until rain is accepted; its confirmation does not execute the plan. Next work includes target-iPhone listening acceptance, production playback and alarm connection, and SwiftData history. The prepared adapter does not yet persist partial positions or completion.
 
 ## Working agreement
 

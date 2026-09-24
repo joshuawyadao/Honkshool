@@ -1,6 +1,6 @@
 # Nap-planning domain
 
-The Foundation-only types in `Honkshool/Domain/NapContent.swift`, `NapPlan.swift`, and `NapPlayback.swift` implement Phase 1. They have no SwiftUI, SwiftData, AVFoundation, or AlarmKit dependencies. The feasibility console still uses its existing spike services; it does not execute these plans.
+The Foundation-only types in `Honkshool/Domain/NapContent.swift`, `NapPlan.swift`, `NapPlanReview.swift`, and `NapPlayback.swift` implement planning and pre-play review. They have no SwiftUI, SwiftData, AVFoundation, or AlarmKit dependencies. The feasibility console still uses its existing spike services; it does not execute reviewed plans.
 
 ## Inputs and identity
 
@@ -9,7 +9,7 @@ The Foundation-only types in `Honkshool/Domain/NapContent.swift`, `NapPlan.swift
 - `NapRequest` selects a starting session, optional resume point, duration or exact wake time, settling/drift durations, ambience or silence, and alarm preference. The caller supplies `now`, planned start, plan ID, content availability, and available ambience IDs. The planner reads no clock, preferences, random source, or network.
 - Starting a new journey or restarting selects its first session. Replaying selects the desired session with no resume point. Continuing uses history's next incomplete session or an explicitly chosen partial record. These choices never mutate history.
 
-The [prepared-content catalog](Content-Catalog.md) now adds original scripts, citations, detail metadata, pronunciation guidance, and editorial estimate provenance around these unchanged domain types. Audio/ambience asset preparation remains open. `PreparedCatalog.planningCatalog` supplies the timing and listening identities to the planner.
+The [prepared-content catalog](Content-Catalog.md) now adds original scripts, citations, detail metadata, pronunciation guidance, and editorial estimate provenance around these unchanged domain types. Prepared narration is bundled; rain acceptance and runtime integration remain open. `PreparedCatalog.planningCatalog` supplies the timing and listening identities to the planner.
 
 ## Planning and review
 
@@ -25,6 +25,10 @@ Allocation is deterministic:
 6. When content ends, is missing, or does not fit, use drift followed by the selected ambience or silence through the deadline. Unavailable ambience resolves to silence. Short windows remain valid even when narration is empty.
 
 `route`, `transitions`, session metadata, and the nominal timeline are value snapshots. Later request, catalog, or history changes cannot alter them. The route freezes when the plan is created, which is stronger than freezing only after start. Changed pre-nap choices require a new plan for review.
+
+`NapPlanReviewState.review` receives an explicit plan ID, request, start/now dates, catalog, and available ambience IDs. It stores the returned `NapPlan` plus the review time, selected inputs, requested sound, preapproved transitions, and journey-title snapshots for the full ordered route. The screen plans a rest start 60 seconds after review for duration mode. For an exact wake time less than two minutes away, the planned start falls halfway between review and wake; otherwise it is 60 seconds ahead. The screen shows the planned start and fixed wake deadline with seconds. Duration mode measures the entire selected window from that planned start; exact wake mode keeps the chosen absolute deadline. A failed review clears any stale unconfirmed review. `confirm(at:)` requires an injected confirmation time from review time through the planned start and before the deadline; it retains the exact reviewed value without replanning. If the clock moves backward or the start has passed, the SwiftUI screen generates a new review and requires the listener to inspect and confirm the updated deadline and route. A past exact wake time instead requires a new selection. Later review attempts cannot replace a confirmed value. This screen has no playback or AlarmKit adapter; confirmation means only that the route was approved for a future run, not that a run or alarm exists. A future playback adapter must start at the approved planned start or request a fresh review if that start has passed; it cannot silently execute an outdated route.
+
+The screen derives a review catalog from bundled sessions with a resolvable narration file. This keeps unavailable audio out of both the content picker and later sessions on the proposed route. The availability predicate is injected for deterministic tests; normal app use checks the app bundle.
 
 ## Actual playback and deadlines
 
@@ -58,4 +62,6 @@ Journey progress consists of actually completed session IDs in that journey. `ne
 
 Validation on 2026-09-15 used Xcode 27.0 and iPhone 17 Pro / iOS 26.5 Simulator: 45 focused domain tests passed, the full unit/UI suite passed 103 tests with no failures or skips, and all 12 repository checks passed. Foundation-only compilation, strict formatting lint for new Swift files, and the Release simulator build also passed. Xcode reported one internal thread-priority (QoS) warning during the full suite; this did not fail validation. CI runs on pull requests or manual dispatch, so pushing this branch alone does not trigger CI.
 
-The prepared-content catalog now supplies the citation-backed session. Remaining work starts with full-session voice/duration calibration and a lawful gentle-rain asset, then plan-review UI, production playback/deadline adapters, and SwiftData history. Domain success does not establish runtime cutoff or alarm reliability. This branch requires no phone installation or new physical-device acceptance because it does not change those adapters.
+The 2026-09-22 review slice adds five `NapPlanReviewTests` and three `NapPlanReviewUITests`. On the 2026-09-23 main-based branch, availability filtering adds one test at each level. The focused iOS 26.5 review run passed all ten tests; the full suite passed 151 tests with one intentionally skipped device-only test, and 31 repository checks passed. These tests verify the approval snapshot, displayed route, and exclusion of unavailable narration; they do not establish real playback or AlarmKit behavior for confirmed plans.
+
+The prepared-content catalog now supplies the citation-backed session, and a separate UI can choose and review it. Remaining work includes target-iPhone full-session listening, rain acceptance, production playback/deadline and AlarmKit adapters, and SwiftData history. Domain and review success do not establish runtime cutoff or alarm reliability. This review branch requires no phone installation or new physical-device acceptance because it does not change those adapters.
