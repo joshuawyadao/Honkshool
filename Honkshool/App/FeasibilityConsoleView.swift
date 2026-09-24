@@ -28,7 +28,7 @@ struct FeasibilityConsoleView: View {
       ScrollView {
         VStack(spacing: 16) {
           introductionCard
-          if napRun.hasActiveRun {
+          if napRun.phase != .idle {
             napRunCard
           }
           durationCard
@@ -115,7 +115,7 @@ struct FeasibilityConsoleView: View {
   }
 
   private var napRunCard: some View {
-    SpikeCard(title: "Nap Plan in progress", systemImage: "waveform") {
+    SpikeCard(title: "Nap Plan", systemImage: "waveform") {
       VStack(alignment: .leading, spacing: 12) {
         Text(napRun.statusMessage)
           .accessibilityIdentifier("activeNapRunStatus")
@@ -127,8 +127,14 @@ struct FeasibilityConsoleView: View {
             Button("Resume narration") { napRun.resume() }
               .accessibilityIdentifier("parentResumeNapRun")
           }
-          Button("Stop playback", role: .destructive) { napRun.stop() }
-            .accessibilityIdentifier("parentStopNapRun")
+          if napRun.hasActiveRun {
+            Button("Stop playback", role: .destructive) { napRun.stop() }
+              .accessibilityIdentifier("parentStopNapRun")
+          }
+        }
+        if !napRun.records.isEmpty {
+          Text("Completed sessions in this run: \(napRun.records.filter(\.isCompleted).count)")
+            .accessibilityIdentifier("parentNapRunCompletionCount")
         }
       }
     }
