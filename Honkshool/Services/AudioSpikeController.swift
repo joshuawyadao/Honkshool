@@ -81,8 +81,10 @@ final class AudioSpikeController: NSObject, ObservableObject {
   private let preparedNarrationPlayerFactory: @MainActor (URL) throws -> PreparedNarrationPlaying
   private var preparedNarrationPlayer: PreparedNarrationPlaying?
   private let deadlineScheduler: PlaybackDeadlineScheduler
+  private let clock: @MainActor () -> Date
   private var cancelDeadline: (@MainActor () -> Void)?
   private var activeRunID: UUID?
+  private var preparedWakeDeadline: Date?
   private let ambienceEngine: AVAudioEngine
   private let activateAudioSession: @MainActor () throws -> Void
   private let ambiencePlayer: AVAudioPlayerNode
@@ -113,6 +115,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
     preparedNarrationPlayerFactory:
       @escaping @MainActor (URL) throws ->
       PreparedNarrationPlaying = { try PreparedNarrationPlayer(url: $0) },
+    clock: @escaping @MainActor () -> Date = { .now },
     deadlineScheduler: @escaping PlaybackDeadlineScheduler = { delay, action in
       let task = Task { @MainActor in
         do {
@@ -137,6 +140,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
     self.ambienceEngine = ambienceEngine
     self.ambiencePlayer = ambiencePlayer
     self.preparedNarrationPlayerFactory = preparedNarrationPlayerFactory
+    self.clock = clock
     self.deadlineScheduler = deadlineScheduler
     self.activateAudioSession = activateAudioSession
     #if DEBUG
@@ -202,10 +206,9 @@ final class AudioSpikeController: NSObject, ObservableObject {
     url: URL,
     title: String,
     transitionToAmbience: Bool,
-    wakeDeadline: Date,
-    now: Date = .now
+    wakeDeadline: Date
   ) {
-    guard wakeDeadline > now else {
+    guard wakeDeadline > clock() else {
       fail("Prepared narration requires a future wake deadline.")
       return
     }
@@ -233,6 +236,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
       }
       let runID = UUID()
       activeRunID = runID
+      preparedWakeDeadline = wakeDeadline
       preparedNarrationPlayer = player
       player.onCompletion = { [weak self] in
         self?.preparedNarrationDidFinish(runID: runID)
@@ -241,16 +245,24 @@ final class AudioSpikeController: NSObject, ObservableObject {
         guard self?.activeRunID == runID else { return }
         self?.fail("Prepared narration failed: \(reason)")
       }
-      cancelDeadline = deadlineScheduler(wakeDeadline.timeIntervalSince(now)) { [weak self] in
+      let remaining = wakeDeadline.timeIntervalSince(clock())
+      guard remaining > 0 else {
+        stopAtWakeDeadline(runID: runID)
+        return
+      }
+      cancelDeadline = deadlineScheduler(remaining) { [weak self] in
         self?.stopAtWakeDeadline(runID: runID)
       }
+      guard !stopIfPreparedWakeDeadlinePassed() else { return }
       guard player.play() else {
         fail("The prepared George narration could not start playback.")
         return
       }
 
+      guard !stopIfPreparedWakeDeadlinePassed() else { return }
+
       phase = .narrating
-      narrationStartedAt = now
+      narrationStartedAt = clock()
       statusMessage = "George narration is playing. Lock the screen to test background audio."
       appendEvent("Started bundled Kokoro George narration")
       updateNowPlaying(
@@ -282,6 +294,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
 
   func resume() {
     guard canResume else { return }
+    guard !stopIfPreparedWakeDeadlinePassed() else { return }
     if pauseRequested && !speechSynthesizer.isPaused {
       resumeAfterPause = true
       statusMessage = "Waiting for narration to reach a pause boundary."
@@ -296,6 +309,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
 
     do {
       try configureExclusiveAudioSession()
+      guard !stopIfPreparedWakeDeadlinePassed() else { return }
       if let preparedNarrationPlayer {
         guard preparedNarrationPlayer.play() else {
           fail("Prepared narration could not resume; start a new test.")
@@ -333,11 +347,6 @@ final class AudioSpikeController: NSObject, ObservableObject {
     }
 
     appendEvent("Resumed explicitly")
-    if let preparedNarrationPlayer {
-      var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
-      info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = preparedNarrationPlayer.currentTime
-      MPNowPlayingInfoCenter.default().nowPlayingInfo = info
-    }
     updateNowPlayingPlaybackRate(1)
   }
 
@@ -367,6 +376,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
   }
 
   private func startAmbience() {
+    guard !stopIfPreparedWakeDeadlinePassed() else { return }
     do {
       try configureExclusiveAudioSession()
 
@@ -394,6 +404,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
         try ambienceEngine.start()
       }
 
+      guard !stopIfPreparedWakeDeadlinePassed() else { return }
       ambiencePlayer.volume = 0.12
       ambiencePlayer.scheduleBuffer(
         ambienceBuffer,
@@ -447,6 +458,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
     cancelDeadline?()
     cancelDeadline = nil
     activeRunID = nil
+    preparedWakeDeadline = nil
     activeUtterance = nil
     preparedNarrationPlayer?.onCompletion = nil
     preparedNarrationPlayer?.onFailure = nil
@@ -658,6 +670,9 @@ final class AudioSpikeController: NSObject, ObservableObject {
 
   private func updateNowPlayingPlaybackRate(_ playbackRate: Float) {
     var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
+    if let preparedNarrationPlayer {
+      info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = preparedNarrationPlayer.currentTime
+    }
     info[MPNowPlayingInfoPropertyPlaybackRate] = playbackRate
     MPNowPlayingInfoCenter.default().nowPlayingInfo = info
   }
@@ -677,6 +692,7 @@ final class AudioSpikeController: NSObject, ObservableObject {
 
   private func preparedNarrationDidFinish(runID: UUID) {
     guard activeRunID == runID, preparedNarrationPlayer != nil else { return }
+    guard !stopIfPreparedWakeDeadlinePassed() else { return }
     preparedNarrationPlayer?.onCompletion = nil
     preparedNarrationPlayer?.onFailure = nil
     preparedNarrationPlayer = nil
@@ -689,6 +705,14 @@ final class AudioSpikeController: NSObject, ObservableObject {
     phase = .stopped
     statusMessage = "The planned wake deadline arrived. Honkshool audio stopped."
     appendEvent("Stopped all audio at the fixed wake deadline")
+  }
+
+  private func stopIfPreparedWakeDeadlinePassed() -> Bool {
+    guard let preparedWakeDeadline, let activeRunID, clock() >= preparedWakeDeadline else {
+      return false
+    }
+    stopAtWakeDeadline(runID: activeRunID)
+    return true
   }
 
   private func completeNarration(source: String) {

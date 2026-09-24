@@ -72,6 +72,13 @@ enum SpikePreferences {
       throw UITestFixtureError.requestedFailure
     }
 
+    static func failPreparedCatalogLoadIfRequested() throws {
+      guard isEnabled,
+        ProcessInfo.processInfo.environment["HONKSHOOL_UI_TEST_CATALOG_FAILURE"] == "1"
+      else { return }
+      throw UITestFixtureError.requestedFailure
+    }
+
     private static var scenario: UITestAlarmScenario? {
       guard let rawValue = ProcessInfo.processInfo.environment[alarmScenarioEnvironmentKey]
       else { return nil }

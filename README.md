@@ -6,7 +6,7 @@
 
 Honkshool is an early-stage iPhone app for calm, uninterrupted factual narration during naps and bedtime. Its primary purpose is helping the listener relax and fall asleep; exposure to interesting information is secondary.
 
-> **Project status:** Feasibility spike. An experimental iOS test app now exists, but there is no supported release. The console measures physical-device narration, background audio, and AlarmKit behavior. A separate, tested nap-planning domain models plans and listening history. A bundled prepared-content catalog supplies an original sourced session to that domain; neither is connected to the console or persisted yet.
+> **Project status:** Feasibility spike. An experimental iOS test app now exists, but there is no supported release. The console measures physical-device narration, background audio, and AlarmKit behavior using a bundled prepared session from the local content catalog. A separate, tested nap-planning domain models plans and listening history; its plan review, playback progress, and persistence are not connected to the console yet.
 
 The intended flow is simple:
 

@@ -46,6 +46,19 @@ final class FeasibilityUITests: XCTestCase {
     }
   }
 
+  func testCatalogFailureWarnsWhenScheduledAlarmRemainsActive() {
+    let app = launch(alarm: .authorized, failCatalogLoading: true)
+    let start = app.buttons["startTest"]
+    scrollTo(start, in: app)
+    start.tap()
+
+    assertAlert(in: app, contains: "Prepared George narration is unavailable")
+    assertAlert(in: app, contains: "wake alarm remains active")
+    app.alerts.buttons["OK"].tap()
+    assertLabel(app.staticTexts["alarmStatus"], equals: "Alarm status, Scheduled")
+    XCTAssertTrue(app.staticTexts["runMessage"].label.contains("wake alarm remains active"))
+  }
+
   func testSchedulingLocksRunOptionsUntilAlarmIsReady() {
     let app = launch(alarm: .delayedSchedule)
     let start = app.buttons["startTest"]
@@ -250,7 +263,8 @@ final class FeasibilityUITests: XCTestCase {
   }
 
   private func launch(
-    alarm: AlarmScenario, reset: Bool = true, failAudioActivation: Bool = false
+    alarm: AlarmScenario, reset: Bool = true, failAudioActivation: Bool = false,
+    failCatalogLoading: Bool = false
   ) -> XCUIApplication {
     let app = XCUIApplication()
     app.launchArguments = ["-ui-testing"]
@@ -259,6 +273,7 @@ final class FeasibilityUITests: XCTestCase {
       "HONKSHOOL_UI_TEST_AUDIO": "1",
       "HONKSHOOL_UI_TEST_RESET": reset ? "1" : "0",
       "HONKSHOOL_UI_TEST_AUDIO_FAILURE": failAudioActivation ? "1" : "0",
+      "HONKSHOOL_UI_TEST_CATALOG_FAILURE": failCatalogLoading ? "1" : "0",
     ]
     app.launch()
     return app

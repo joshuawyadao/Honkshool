@@ -211,11 +211,15 @@ private final class FakePreparedNarrationPlayer: PreparedNarrationPlaying {
   var duration: TimeInterval = 727.625
   var canPrepare = true
   var canPlay = true
+  var onPrepare: (() -> Void)?
   private(set) var playCount = 0
   private(set) var pauseCount = 0
   private(set) var stopCount = 0
 
-  func prepareToPlay() -> Bool { canPrepare }
+  func prepareToPlay() -> Bool {
+    onPrepare?()
+    return canPrepare
+  }
   func play() -> Bool {
     playCount += 1
     isPlaying = canPlay
@@ -257,6 +261,7 @@ final class PlaybackRegressionTests: XCTestCase {
     var activations = 0
     let audio = AudioSpikeController(
       preparedNarrationPlayerFactory: { _ in player },
+      clock: { now },
       deadlineScheduler: { delay, action in
         scheduledDelay = delay
         deadlineAction = action
@@ -268,7 +273,7 @@ final class PlaybackRegressionTests: XCTestCase {
 
     audio.startPreparedNarration(
       url: URL(fileURLWithPath: "/prepared.wav"), title: "Prepared",
-      transitionToAmbience: false, wakeDeadline: now.addingTimeInterval(90), now: now)
+      transitionToAmbience: false, wakeDeadline: now.addingTimeInterval(90))
 
     XCTAssertEqual(audio.phase, .narrating)
     XCTAssertEqual(player.playCount, 1)
@@ -279,9 +284,14 @@ final class PlaybackRegressionTests: XCTestCase {
         as? TimeInterval,
       player.duration)
 
+    player.currentTime = 42
     audio.pause()
     XCTAssertEqual(audio.phase, .paused)
     XCTAssertEqual(player.pauseCount, 1)
+    XCTAssertEqual(
+      MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime]
+        as? TimeInterval,
+      42)
     audio.resume()
     XCTAssertEqual(audio.phase, .narrating)
     XCTAssertEqual(player.playCount, 2)
@@ -295,6 +305,32 @@ final class PlaybackRegressionTests: XCTestCase {
     XCTAssertNil(MPNowPlayingInfoCenter.default().nowPlayingInfo)
   }
 
+  func testPreparedNarrationInterruptionPublishesPausedElapsedTime() async throws {
+    let player = FakePreparedNarrationPlayer()
+    let audio = AudioSpikeController(
+      preparedNarrationPlayerFactory: { _ in player },
+      deadlineScheduler: { _, _ in {} },
+      activateAudioSession: {}
+    )
+    defer { audio.stop() }
+    audio.startPreparedNarration(
+      url: URL(fileURLWithPath: "/prepared.wav"), title: "Prepared",
+      transitionToAmbience: false, wakeDeadline: .now.addingTimeInterval(90))
+    player.currentTime = 53
+
+    NotificationCenter.default.post(
+      name: AVAudioSession.interruptionNotification, object: nil,
+      userInfo: [AVAudioSessionInterruptionTypeKey: AVAudioSession.InterruptionType.began.rawValue]
+    )
+    await wait(for: .interrupted, in: audio)
+
+    XCTAssertEqual(player.pauseCount, 1)
+    XCTAssertEqual(
+      MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime]
+        as? TimeInterval,
+      53)
+  }
+
   func testPreparedNarrationRejectsPastDeadlineBeforeLoadingPlayer() {
     let now = Date(timeIntervalSince1970: 1_000)
     var factoryCalls = 0
@@ -303,17 +339,113 @@ final class PlaybackRegressionTests: XCTestCase {
         factoryCalls += 1
         return FakePreparedNarrationPlayer()
       },
+      clock: { now },
       activateAudioSession: {}
     )
     defer { audio.stop() }
 
     audio.startPreparedNarration(
       url: URL(fileURLWithPath: "/prepared.wav"), title: "Prepared",
-      transitionToAmbience: false, wakeDeadline: now, now: now)
+      transitionToAmbience: false, wakeDeadline: now)
 
     XCTAssertEqual(audio.phase, .failed)
     XCTAssertEqual(factoryCalls, 0)
     XCTAssertTrue(audio.statusMessage.contains("future wake deadline"))
+  }
+
+  func testPreparedNarrationSchedulesRemainingTimeAfterSlowSetup() {
+    let player = FakePreparedNarrationPlayer()
+    var currentTime = Date(timeIntervalSince1970: 1_000)
+    player.onPrepare = { currentTime.addTimeInterval(10) }
+    var scheduledDelay: TimeInterval?
+    let audio = AudioSpikeController(
+      preparedNarrationPlayerFactory: { _ in player },
+      clock: { currentTime },
+      deadlineScheduler: { delay, _ in
+        scheduledDelay = delay
+        return {}
+      },
+      activateAudioSession: {}
+    )
+    defer { audio.stop() }
+
+    audio.startPreparedNarration(
+      url: URL(fileURLWithPath: "/prepared.wav"), title: "Prepared",
+      transitionToAmbience: false,
+      wakeDeadline: currentTime.addingTimeInterval(90))
+
+    XCTAssertEqual(audio.phase, .narrating)
+    XCTAssertEqual(player.playCount, 1)
+    XCTAssertEqual(scheduledDelay, 80)
+  }
+
+  func testPreparedNarrationDoesNotStartIfSetupPassesWakeDeadline() {
+    let player = FakePreparedNarrationPlayer()
+    var currentTime = Date(timeIntervalSince1970: 1_000)
+    player.onPrepare = { currentTime.addTimeInterval(91) }
+    let audio = AudioSpikeController(
+      preparedNarrationPlayerFactory: { _ in player },
+      clock: { currentTime },
+      activateAudioSession: {}
+    )
+    defer { audio.stop() }
+
+    audio.startPreparedNarration(
+      url: URL(fileURLWithPath: "/prepared.wav"), title: "Prepared",
+      transitionToAmbience: false,
+      wakeDeadline: currentTime.addingTimeInterval(90))
+
+    XCTAssertEqual(audio.phase, .stopped)
+    XCTAssertEqual(player.playCount, 0)
+    XCTAssertTrue(audio.statusMessage.contains("wake deadline"))
+  }
+
+  func testPausedPreparedNarrationCannotResumeAfterWakeDeadline() {
+    let player = FakePreparedNarrationPlayer()
+    var currentTime = Date(timeIntervalSince1970: 1_000)
+    let audio = AudioSpikeController(
+      preparedNarrationPlayerFactory: { _ in player },
+      clock: { currentTime },
+      deadlineScheduler: { _, _ in {} },
+      activateAudioSession: {}
+    )
+    defer { audio.stop() }
+
+    audio.startPreparedNarration(
+      url: URL(fileURLWithPath: "/prepared.wav"), title: "Prepared",
+      transitionToAmbience: false,
+      wakeDeadline: currentTime.addingTimeInterval(90))
+    audio.pause()
+    currentTime.addTimeInterval(91)
+    audio.resume()
+
+    XCTAssertEqual(audio.phase, .stopped)
+    XCTAssertEqual(player.playCount, 1)
+    XCTAssertTrue(audio.statusMessage.contains("wake deadline"))
+  }
+
+  func testPreparedNarrationEndingAfterWakeDeadlineIsStoppedInsteadOfCompleted() throws {
+    let player = FakePreparedNarrationPlayer()
+    var currentTime = Date(timeIntervalSince1970: 1_000)
+    let audio = AudioSpikeController(
+      preparedNarrationPlayerFactory: { _ in player },
+      clock: { currentTime },
+      deadlineScheduler: { _, _ in {} },
+      activateAudioSession: {}
+    )
+    defer { audio.stop() }
+
+    audio.startPreparedNarration(
+      url: URL(fileURLWithPath: "/prepared.wav"), title: "Prepared",
+      transitionToAmbience: false,
+      wakeDeadline: currentTime.addingTimeInterval(90))
+    let completion = try XCTUnwrap(player.onCompletion)
+    currentTime.addTimeInterval(91)
+    completion()
+
+    XCTAssertEqual(audio.phase, .stopped)
+    XCTAssertTrue(audio.statusMessage.contains("wake deadline"))
+    XCTAssertFalse(audio.eventLog.contains { $0.message.contains("Prepared narration completed") })
   }
 
   func testPreparedNarrationCompletionTransitionsOnceAndCancelsDeadline() throws {

@@ -370,6 +370,9 @@ struct FeasibilityConsoleView: View {
     ) {
     case .ready:
       do {
+        #if DEBUG
+          try UITestFixtures.failPreparedCatalogLoadIfRequested()
+        #endif
         let catalog = try PreparedCatalog.load()
         guard let prepared = catalog.sessions["turning-fuel-into-motion"] else {
           throw PreparedCatalogError.invalidContent("turning-fuel-into-motion")
@@ -382,6 +385,9 @@ struct FeasibilityConsoleView: View {
         )
       } catch {
         runMessage = "Prepared George narration is unavailable: \(error.localizedDescription)"
+        if alarm.hasTrackedAlarm {
+          runMessage += " The wake alarm remains active; cancel it separately if no longer needed."
+        }
         blockedReason = runMessage
         return
       }
