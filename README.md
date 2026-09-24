@@ -55,7 +55,7 @@ On a Mac with Xcode 26 and an installed iOS 26 simulator, run the complete unit 
 
 The script defaults to the latest iPhone 17 Pro simulator. Set `HONKSHOOL_TEST_DESTINATION` to any compatible Xcode destination when needed. Pull requests run the same suite on a read-only GitHub-hosted macOS 26 runner in addition to the portable repository checks.
 
-UI tests use debug-only simulated alarm states, deterministic speech, and isolated preferences that leave real alarm tracking and saved defaults untouched. They never request real AlarmKit permission, schedule a system alarm, or replace the physical-device acceptance evidence described in the feasibility guide.
+UI tests use debug-only simulated alarm states, deterministic speech, and isolated preferences that leave real alarm tracking and saved defaults untouched. They never request real AlarmKit permission or schedule a system alarm. A separately gated physical-device test checks actual AlarmKit alerting and narration cutoff; see the feasibility guide.
 
 ## Start contributing
 
@@ -84,7 +84,7 @@ GitHub secret scanning, push protection, Dependabot security updates, and privat
 
 1. Completed feasibility validation on the target iPhone: narration, background audio, tested interruptions, Lock Screen controls, AlarmKit, and the larger-text snooze layout (2026-09-15). Squash-merged through PR #2 as `45dcc71`; this remains an experimental console.
 2. Implemented and tested the framework-independent Nap Plan, journey, progress, and history rules, squash-merged through PR #3 as `c5025ad`; see the [domain contract](docs/Nap-Planning-Domain.md). Fixed deadlines and short-window fallback follow approved D-004/D-009.
-3. Added a [bundled content catalog](docs/Content-Catalog.md) with an original citation-backed automotive session, source metadata, pronunciation guidance, and a complete prepared Kokoro George `0.86` narration. The lossless 727.625-second asset now plays through the feasibility console with pause/resume, interruption handling, Lock Screen metadata, and fixed-deadline stopping; the planner uses a configurable 730-second estimate. [Audio preparation](docs/Audio-Preparation.md) records exact provenance. Automated full-file decoding and natural-end playback checks reduce the remaining iPhone work to brief route/control and real-alarm checks. Full-session subjective listening acceptance, rain acceptance, and production plan/history integration remain open.
+3. Added a [bundled content catalog](docs/Content-Catalog.md) with an original citation-backed automotive session, source metadata, pronunciation guidance, and a complete prepared Kokoro George `0.86` narration. The lossless 727.625-second asset now plays through the feasibility console with pause/resume, interruption handling, Lock Screen metadata, and fixed-deadline stopping; the planner uses a configurable 730-second estimate. [Audio preparation](docs/Audio-Preparation.md) records exact provenance. Automated full-file decoding, natural-end playback, and a real iPhone AlarmKit/cutoff check have passed. Brief route/control checks, full-session subjective listening acceptance, rain acceptance, and production plan/history integration remain open.
 4. Build the choose → review → play → alarm → history tracer bullet.
 5. Extend the local journey experience only as needed for an approximately ten-nap personal validation trial.
 
