@@ -26,5 +26,5 @@ Connect a confirmed Nap Plan to a production playback run using the bundled prep
 
 ## PR feedback
 - [x] Preserve a verified pre-deadline checkpoint when Stop is pressed after a delayed deadline callback.
-- [ ] Allow a fresh confirmed plan to start after a previous run reached a terminal phase.
+- [x] Allow a fresh confirmed plan to start after a previous run reached a terminal phase without clearing prior in-memory evidence during review.
 - [ ] Keep the UI test review clock valid across calendar time.

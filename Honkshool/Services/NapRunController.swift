@@ -94,6 +94,7 @@ final class NapRunController: NSObject, ObservableObject {
   @Published private(set) var statusMessage = "Ready to start a reviewed plan."
   @Published private(set) var records: [PlaybackRecord] = []
   @Published private(set) var latestVerifiedCheckpoint: NapRunCheckpoint?
+  @Published private(set) var lastRunPlanID: String?
 
   private struct PreparedRouteItem {
     let planned: PlannedSession
@@ -201,6 +202,7 @@ final class NapRunController: NSObject, ObservableObject {
     let nextPlayback = try NapPlayback(plan: review.plan, runID: UUID().uuidString)
     route = preparedRoute
     playback = nextPlayback
+    lastRunPlanID = review.plan.id
     records = []
     latestVerifiedCheckpoint = nil
     let token = UUID()
@@ -272,6 +274,7 @@ final class NapRunController: NSObject, ObservableObject {
     guard !hasActiveRun else { return }
     records = []
     latestVerifiedCheckpoint = nil
+    lastRunPlanID = nil
     phase = .idle
     statusMessage = "Ready to start a reviewed plan."
   }

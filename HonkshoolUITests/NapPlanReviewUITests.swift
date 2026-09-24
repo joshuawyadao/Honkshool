@@ -73,6 +73,24 @@ final class NapPlanReviewUITests: XCTestCase {
     stop.tap()
     XCTAssertTrue(parentStatus.label.contains("Playback stopped"))
     XCTAssertFalse(app.buttons["parentStopNapRun"].exists)
+
+    let reopen = app.buttons["openNapPlanReview"]
+    scrollTo(reopen, in: app)
+    reopen.tap()
+    let anotherDuration = app.buttons["napPlanDuration"]
+    scrollTo(anotherDuration, in: app)
+    anotherDuration.tap()
+    app.buttons["5 minutes"].tap()
+    let anotherAlarm = app.switches["napPlanAlarm"]
+    scrollTo(anotherAlarm, in: app)
+    anotherAlarm.tap()
+    let anotherReview = app.buttons["reviewNapPlan"]
+    scrollTo(anotherReview, in: app)
+    anotherReview.tap()
+    let anotherConfirm = app.buttons["confirmNapPlan"]
+    scrollTo(anotherConfirm, in: app)
+    anotherConfirm.tap()
+    XCTAssertTrue(app.buttons["startNapRun"].waitForExistence(timeout: 5))
   }
 
   func testExactWakeTimeAndAccessibilityLabelsAreAvailable() {

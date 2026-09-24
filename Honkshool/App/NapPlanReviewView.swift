@@ -441,7 +441,7 @@ struct NapPlanReviewView: View {
         }
         Button("Stop playback", role: .destructive) { run.stop() }
           .accessibilityIdentifier("stopNapRun")
-      } else if run.phase == .idle && runError == nil {
+      } else if run.lastRunPlanID != confirmed.plan.id && runError == nil {
         if confirmed.plan.wakeAlarm == nil {
           Text(
             "This run has no wake alarm. Keep Honkshool open until narration begins, then you can lock the phone. Set another alarm if you need one."
