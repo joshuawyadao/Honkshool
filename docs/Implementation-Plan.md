@@ -13,7 +13,7 @@ Connect a confirmed Nap Plan to a production playback run using the bundled prep
 - [x] Connect the confirmed review screen to a clear Start resting action and run controls/status, including visible terminal status after leaving the review, and a path to review again after a missed start or alarm gate; keep the feasibility console independent.
 - [x] Add coordinator unit tests for start/alarm gates, route and deadline behavior, pause/interruption/stop evidence, stale callbacks, and failure paths; update critical review UI tests for the new action and messaging.
 - [x] Run focused tests, the full simulator suite, repository verification, Swift formatting, and an unsigned Release simulator build; inspect the diff for timing and audio ownership risks. Record device-only checks as pending.
-- [ ] Update `README.md`, `docs/Project-Implementation-Plan.md`, `docs/Project-Overview.md`, `docs/Nap-Planning-Domain.md`, and `docs/Content-Catalog.md` to describe the implemented boundary, then commit, push, and open a PR for review.
+- [x] Update `README.md`, `docs/Project-Implementation-Plan.md`, `docs/Project-Overview.md`, `docs/Nap-Planning-Domain.md`, and `docs/Content-Catalog.md` to describe the implemented boundary, then commit, push, and open [PR #6](https://github.com/joshuawyadao/Honkshool/pull/6) for review.
 
 ## Open questions
 - None. The approved D-021 alarm gate keeps alarm-requested runs unavailable until the production scheduling slice, and prepared audio positions provide truthful partial checkpoints without script-time alignment.
@@ -27,4 +27,4 @@ Connect a confirmed Nap Plan to a production playback run using the bundled prep
 ## PR feedback
 - [x] Preserve a verified pre-deadline checkpoint when Stop is pressed after a delayed deadline callback.
 - [x] Allow a fresh confirmed plan to start after a previous run reached a terminal phase without clearing prior in-memory evidence during review.
-- [ ] Keep the UI test review clock valid across calendar time.
+- [x] Keep the UI test review clock valid across calendar time by fixing each launch's review instant relative to wall time.

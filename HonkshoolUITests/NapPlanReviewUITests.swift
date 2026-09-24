@@ -172,7 +172,9 @@ final class NapPlanReviewUITests: XCTestCase {
       "HONKSHOOL_UI_TEST_ALARM": "authorized",
       "HONKSHOOL_UI_TEST_AUDIO": "1",
       "HONKSHOOL_UI_TEST_RESET": "1",
-      "HONKSHOOL_UI_TEST_PLAN_NOW": "1800000000",
+      // The run controller uses wall time; keep each test's fixed review instant in the future.
+      "HONKSHOOL_UI_TEST_PLAN_NOW": String(
+        Date.now.addingTimeInterval(24 * 60 * 60).timeIntervalSince1970),
     ]
     app.launchEnvironment.merge(additionalEnvironment) { _, new in new }
     app.launch()
