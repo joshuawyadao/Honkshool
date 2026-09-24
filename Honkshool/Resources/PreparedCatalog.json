@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 1,
+  "journeys": [
+    {
+      "id": "how-a-car-works",
+      "title": "How a Car Works",
+      "sessionIDs": [
+        "turning-fuel-into-motion"
+      ],
+      "nextJourneyIDs": []
+    }
+  ],
+  "sessions": [
+    {
+      "id": "turning-fuel-into-motion",
+      "revision": "1",
+      "title": "Turning Fuel Into Motion",
+      "detailLevel": "enthusiast",
+      "language": "en-US",
+      "summary": "A calm account of how a common four-stroke petrol engine turns combustion pressure into rotation, how that rotation reaches the wheels, and how valves, coolant, and oil support the movement.",
+      "estimatedDuration": 730,
+      "durationEstimateBasis": "The complete prepared Kokoro-82M v1.0 bm_george render at native model speed 0.86 measures 727.625 seconds with one-second paragraph gaps and 250 ms end padding; rounded up to the next five-second increment, 730 seconds. The estimate remains configurable and is not a completion condition.",
+      "narrationAsset": {
+        "resource": "Turning-Fuel-Into-Motion-George",
+        "fileExtension": "wav",
+        "duration": 727.625,
+        "sha256": "7117b18ce10e45844b6eba29936370131290baf30131b71cf2b01d5999847f37"
+      },
+      "sources": [
+        {
+          "id": "doe-engine-basics",
+          "title": "Internal Combustion Engine Basics",
+          "publisher": "U.S. Department of Energy",
+          "url": "https://www.energy.gov/cmei/vehicles/articles/internal-combustion-engine-basics"
+        },
+        {
+          "id": "nasa-mechanical-operation",
+          "title": "Engine Mechanical Operation",
+          "publisher": "NASA Glenn Research Center",
+          "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/engine-mechanical-operation/"
+        },
+        {
+          "id": "nasa-bore-stroke",
+          "title": "Bore and Stroke",
+          "publisher": "NASA Glenn Research Center",
+          "url": "https://www.grc.nasa.gov/WWW/K-12/BGP/stroke.html"
+        },
+        {
+          "id": "honda-valve-operation",
+          "title": "B16A: Honda’s Innovative Engine with VTEC World-First Variable Valve Timing and Lift Technology",
+          "publisher": "Honda Motor Co., Ltd.",
+          "url": "https://global.honda/en/tech/engine/car/B16A_integra_vtec/"
+        },
+        {
+          "id": "denso-radiators",
+          "title": "Cooling Radiators",
+          "publisher": "DENSO Europe",
+          "url": "https://www.denso-am.eu/products/ac-engine-cooling/cooling-radiators"
+        },
+        {
+          "id": "honda-engine-oil",
+          "title": "How to Choose the Right Engine Oil",
+          "publisher": "Honda Motor Co., Ltd.",
+          "url": "https://global.honda/en/motorcycle-aftersales/plusone/202504.html"
+        },
+        {
+          "id": "nasa-engine-parts",
+          "title": "Engine Parts",
+          "publisher": "NASA Glenn Research Center",
+          "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/engine-parts/"
+        },
+        {
+          "id": "bosch-injection",
+          "title": "Gasoline Direct Injection",
+          "publisher": "Bosch Mobility",
+          "url": "https://www.bosch-mobility.com/en/solutions/powertrain/gasoline/gasoline-direct-injection/"
+        },
+        {
+          "id": "openstax-torque",
+          "title": "6.3 Rotational Motion",
+          "publisher": "OpenStax, Rice University",
+          "url": "https://openstax.org/books/physics/pages/6-3-rotational-motion"
+        },
+        {
+          "id": "pgcc-gears",
+          "title": "25.6: Gears",
+          "publisher": "Prince George’s Community College course on Physics LibreTexts",
+          "url": "https://phys.libretexts.org/Courses/Prince_Georges_Community_College/General_Physics_I:_Classical_Mechanics/25:_Simple_Machines/25.06:_Gears"
+        },
+        {
+          "id": "ford-powertrain",
+          "title": "Powertrain Components & Remanufactured Products: Product Information 2017",
+          "publisher": "Ford Motor Company",
+          "url": "https://parts.ford.com/content/dam/ford-parts/wcdocs/2017%20-%20PTF200%20-%20Reman%20Engines%20%26%20Transmissions.pdf"
+        },
+        {
+          "id": "bosch-port-injection",
+          "title": "Fuel Injector (PFI)",
+          "publisher": "Bosch Mobility",
+          "url": "https://www.bosch-mobility.com/en/solutions/valves/fuel-injector-manifold/"
+        }
+      ],
+      "pronunciations": [
+        {
+          "term": "petrol",
+          "guidance": "PET-ruhl; the everyday British-English word for gasoline."
+        },
+        {
+          "term": "crankshaft",
+          "guidance": "KRANK-shaft; keep the compound word connected."
+        },
+        {
+          "term": "camshafts",
+          "guidance": "KAM-shafts; do not separate into spoken letters."
+        },
+        {
+          "term": "torque",
+          "guidance": "tork; one syllable."
+        },
+        {
+          "term": "viscosity",
+          "guidance": "vis-KOSS-ih-tee; stress the second syllable."
+        },
+        {
+          "term": "differential",
+          "guidance": "dif-uh-REN-shuhl; stress REN."
+        }
+      ],
+      "paragraphs": [
+        {
+          "text": "Imagine a simple drawing of a car, with its body made transparent and the engine resting quietly in view. There is no need to take the whole drawing in at once. For now, the picture can be small: one cylinder, one piston, and a curved shaft beneath them. We can move through that picture a little at a time, following one ordinary four-stroke petrol engine. The details belong to a familiar kind of car, rather than to every engine ever built. The scene can stay as uncomplicated as a pencil sketch, with each part appearing only when it has a place in the story.",
+          "sourceIDs": []
+        },
+        {
+          "text": "The engine begins with energy carried in its fuel. Inside a cylinder, fuel and air take part in combustion, releasing some of that energy as heat. The hot gases exert pressure on a piston, a moving part fitted inside the cylinder. As the gases expand, they push the piston along its path. The engine's mechanical parts turn that movement into rotation, and the car's powertrain carries the rotation toward the wheels. Only part of the energy released becomes useful mechanical work. For the moment, though, we can follow that useful part, from the pressure of the gas to the movement of metal. The piston does not travel away from the engine. It moves back and forth within the same small space, returning over familiar ground while the shaft it drives continues to turn. That change from a repeated straight movement to rotation is the central shape of this story.",
+          "sourceIDs": [
+            "doe-engine-basics"
+          ]
+        },
+        {
+          "text": "The cylinder gives the piston a path, and the crankshaft gives that path a repeating rhythm. During one turn of the crankshaft, the piston travels from one end of its movement to the other and then returns. Each one-way journey is called a stroke. The distance of that journey is also called the stroke, while the width across the inside of the cylinder is its bore. Together, bore and stroke describe the space swept by the piston. Add that swept space across all the cylinders, and the result is the engine's displacement. A larger displacement means a larger total swept volume, rather than a different kind of motion. In a four-stroke engine, the complete operating sequence takes four of those one-way movements, or two turns of the crankshaft. The piston can therefore pass through the same position while doing a different job on the next turn. Its location alone does not tell the entire story.",
+          "sourceIDs": [
+            "nasa-bore-stroke"
+          ]
+        },
+        {
+          "text": "Before the mixture can burn, the engine must bring air and fuel together. Modern petrol engines have more than one way to do this. Some use port injection, supplying fuel before the air enters the cylinder. Others use direct injection, where an injector meters a fine spray of fuel into the combustion chamber itself. Some engines use both arrangements, choosing how to supply the fuel according to operating conditions. These details change the preparation of the mixture, but there is still air, fuel, and an ignition spark. An electronic control unit coordinates the fuel delivery and ignition with the engine's other systems. The spark plug provides the spark that starts combustion. It is a small event placed within a much larger sequence, like a cue that arrives at its appointed place. We can leave the particular injection arrangement in the background and return to the steady movement of the piston.",
+          "sourceIDs": [
+            "bosch-injection",
+            "bosch-port-injection"
+          ]
+        },
+        {
+          "text": "On the intake stroke, the piston moves away from the cylinder head as the intake passage admits the fresh charge. Next comes compression. The piston returns, reducing the space available to the trapped gases and raising their pressure. Near the end of compression, a spark starts combustion. The resulting hot, high-pressure gas pushes on the piston during the power stroke. A connecting rod carries this force to the crankshaft, turning the piston's back-and-forth movement into rotation. The final stroke is exhaust, when the piston returns toward the head and moves spent gases out through the exhaust passage. Then the sequence begins again. Intake, compression, power, and exhaust describe four different parts of one continuous movement. The power stroke contributes work that helps carry the mechanism through the other strokes as well. A cylinder is not receiving a fresh push from combustion throughout the whole cycle; there are intervals for bringing gases in, preparing them, and moving them out.",
+          "sourceIDs": [
+            "nasa-mechanical-operation"
+          ]
+        },
+        {
+          "text": "The passages into and out of the cylinder are controlled by valves. A valve opens to provide a route for gas and closes to seal that route. In the conventional arrangement we are picturing, rotating camshafts coordinate those movements. Each cam has a shaped lobe that lifts a valve through the mechanism between them. The shape of the lobe influences when the valve opens and how long it stays open, while its height influences how far the valve moves. Real valve timing is more fluid than four perfectly separate boxes on a diagram. Opening and closing can extend beyond the simple boundaries of a stroke, and there can be an interval when intake and exhaust valves are both open. Some engines also change their valve operation for different conditions. The four-stroke picture remains a useful outline, with these smaller adjustments taking place inside it. The valves let the engine manage the flow around the piston's repeated movement.",
+          "sourceIDs": [
+            "honda-valve-operation"
+          ]
+        },
+        {
+          "text": "Now the drawing can widen from one cylinder to several. Their pistons connect to a common crankshaft, but their combustion events occur at different points in the sequence. A defined firing order arranges those contributions. While one cylinder is delivering a power stroke, another can be occupied with a different part of its cycle. The shared shaft gathers these individual movements into one rotating assembly. A flywheel attached to the crankshaft also helps smooth the motion between the separate contributions. It is a rotating mass that makes the sequence less abrupt, rather than another source of combustion. From outside, the engine can seem like a single object carrying out a single task. Within it, that task is distributed among parts that return to the same positions over and over. There is a quiet order to the drawing: several cylinders, a shared shaft, and a sequence that continues around them.",
+          "sourceIDs": [
+            "nasa-engine-parts"
+          ]
+        },
+        {
+          "text": "There is a useful word for the turning effect of a force: torque. It describes how a push or pull tends to rotate something about an axis. The place where the force acts matters as well as its size. A door offers a familiar picture. A push near its outer edge has a greater turning effect than the same push very close to the hinge, provided the direction is comparable. The hinge is the axis in that picture. In a rotating mechanism, force and distance from the axis have the same relationship. Torque is therefore different from a description of how fast something is already turning. It concerns the turning action being applied. We do not need a number to hold that distinction. One idea is the pace of rotation; the other is the effect of the force that acts around the axis.",
+          "sourceIDs": [
+            "openstax-torque"
+          ]
+        },
+        {
+          "text": "Gears allow a mechanism to exchange rotational speed for turning effort. Picture a small gear driving a larger one. The small gear must make more turns for each turn of the larger gear, and the larger gear can deliver more torque. Reverse that relationship, and the output can turn faster with less torque. In an ideal mechanism, the exchange preserves the work being transferred; the gears do not create an extra supply of energy. A bicycle offers a gentle version of the same idea. Changing the combination of front and rear sprockets changes how many pedal turns correspond to a turn of the rear wheel and how much effort is needed at the pedals. The mechanism offers a choice of relationships between its input and output. That is the useful idea to carry back to the car: the engine's rotational pace and the turning effort delivered farther along the drivetrain can be connected in different proportions.",
+          "sourceIDs": [
+            "pgcc-gears"
+          ]
+        },
+        {
+          "text": "The transmission provides the next part of that path toward the wheels. In a conventional automatic transmission, a torque converter passes the engine's rotary motion into the transmission, and internal shafts, gears, and clutches establish the selected relationship at the output. From there, motion continues through the differential to the driven wheels. These names mark stages along the route, without requiring every part to be drawn in detail. We can picture the engine at one end and the road wheels at the other, with a sequence of connected components carrying rotation between them. What began as movement inside a cylinder has become an organised path through the car. The engine does its work locally, within its own housing, while the transmission and the components beyond it make that work available at the wheels. The drawing has grown, but the original small movement is still part of the picture.",
+          "sourceIDs": [
+            "ford-powertrain"
+          ]
+        },
+        {
+          "text": "Alongside that path of motion, another path carries heat. In the liquid-cooled engine we are picturing, circulating coolant absorbs heat from the engine and carries it to a radiator. The radiator transfers that heat to air passing through it. When the car is moving, its motion supplies airflow; when the car is stationary, a cooling fan can help move air through the radiator. Cooling is not an attempt to make the working engine as cold as possible. Its purpose is to help maintain a suitable operating temperature. It is a supporting process that continues alongside the movement of the pistons and shaft. The drawing can show it as a separate, gentle circuit, carrying heat away while the mechanical parts carry work onward. Motion and heat share the same engine, but they have different routes through and beyond it.",
+          "sourceIDs": [
+            "denso-radiators"
+          ]
+        },
+        {
+          "text": "Oil has another supporting role among the moving parts. A film of oil helps lubricate surfaces that slide against one another, limiting direct contact between the metal surfaces. It also contributes to cooling, carrying away some of the heat associated with friction. These are related jobs: the oil belongs both to the story of movement and to the story of heat. Its behaviour depends partly on viscosity, the property we often describe as how thick or resistant to flow a fluid feels. In an engine, that property affects the oil film as conditions change. There is no need to choose an oil or think about a maintenance task here. It is enough to leave a small space for this quieter part of the picture, a fluid supporting the movement of solid parts. The visible pieces of the mechanism have companions that are less obvious in a simple drawing.",
+          "sourceIDs": [
+            "honda-engine-oil"
+          ]
+        },
+        {
+          "text": "We can leave the drawing there, with its details in place and no need to keep looking at every one. Perhaps only the first pencil outline remains clear; perhaps the whole image has already become a little distant. Either way, there is nothing to finish examining. The picture can rest on the page, complete enough for this moment. The names can settle into the background, and the space around them can become quiet again.",
+          "sourceIDs": []
+        }
+      ]
+    }
+  ]
+}

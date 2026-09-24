@@ -2,7 +2,7 @@
 
 ## Current state
 
-Honkshool is an iPhone-first project for calm, uninterrupted factual narration during naps and bedtime. The repository now contains an experimental iOS 26 feasibility console for audio and alarm testing and a separate Foundation-only nap-planning domain, in addition to the product definition, delivery roadmap, decision history, contribution and security policies, and automated repository checks. It does not contain a supported release or the intended product UI.
+Honkshool is an iPhone-first project for calm, uninterrupted factual narration during naps and bedtime. The repository now contains an experimental iOS 26 feasibility console for audio and alarm testing and a separate Foundation-only nap-planning domain and validated bundled content catalog, in addition to the product definition, delivery roadmap, decision history, contribution and security policies, and automated repository checks. It does not contain a supported release or the intended product UI.
 
 The primary outcome is relaxation and rest. Interesting factual exposure is secondary, and the product must not claim subconscious learning, guaranteed retention, therapy, or treatment of insomnia or another medical condition.
 
@@ -12,6 +12,8 @@ The primary outcome is relaxation and rest. Interesting factual exposure is seco
 - [Project implementation plan](Project-Implementation-Plan.md): durable phased delivery sequence, branch-sized milestones, acceptance criteria, test strategy, and validation goal.
 - [Decision log](Decision-Log.md): accepted, pending, and deferred product and technical decisions.
 - [Nap-planning domain](Nap-Planning-Domain.md): immutable plans, timing, playback outcomes, resume/history rules, and the future adapter contract.
+- [Content catalog](Content-Catalog.md): prepared session loading, citations, estimates, resume boundaries, and remaining audio work.
+- [Narration reference](Narration-Reference.md): provisional F acceptance, reproducible audition details, and remaining listening checks.
 - [Feasibility spike guide](Feasibility-Spike.md): Xcode setup, current implementation boundary, and the physical-device evidence checklist.
 - [Issue #1](https://github.com/joshuawyadao/Honkshool/issues/1): original public product-definition milestone.
 
@@ -31,9 +33,11 @@ This flow intentionally excludes backend services, accounts, analytics, cloud sy
 
 Phase 0 feasibility is complete as of 2026-09-15, squash-merged through PR #2 as `45dcc71`. Physical audio/alarm checks passed, including Lock Screen controls, Siri interruption, headphone loss, relaunch reconciliation, and the full nine-minute snooze re-ring. The owner confirmed that the repaired snoozed card fits at the existing larger text setting. Automated layout coverage extends through the first accessibility text size, not every accessibility size.
 
-Phase 1 is implemented on `codex/nap-plan-domain`: stable content identity, immutable routes, fixed deadlines, configurable settling/drift and fallback, completion-based progress, and partial/resumable listening history, with focused unit tests. D-004 and D-009 are accepted in the decision log. The console remains unchanged and the new core has no runtime or persistence connection.
+Phase 1 was squash-merged through PR #3 as `c5025ad` after `codex/nap-plan-domain`: stable content identity, immutable routes, fixed deadlines, configurable settling/drift and fallback, completion-based progress, and partial/resumable listening history, with focused unit tests. D-004 and D-009 are accepted in the decision log. The console remains unchanged and the new core has no runtime or persistence connection.
 
-Next is the prepared-content branch: one original citation-backed automotive session, measured narration estimates, and one lawful offline ambience asset. D-007 (voice/pacing) and D-008 (ambience provenance) remain open for that work; plan review, runtime cutoff enforcement, and SwiftData history follow.
+The prepared-content catalog now contains one original citation-backed automotive session, immutable metadata, pronunciation guidance, and an exact prepared-narration reference. The loader connects it to the planner, validates revision-specific script resume positions, and resolves the bundled audio without introducing AVFoundation into the domain layer. Kokoro George at model speed `0.86` is the selected narration and cadence direction.
+
+The complete 1,829-word George render measures 727.625 seconds, with a 730-second planning estimate and exact provenance. The feasibility console plays the 33 MB lossless asset locally, supports existing background/interruption controls, and stops narration or following ambience at the captured deadline. A softened CC0 window-rain candidate is also bundled with provenance and loop/level checks. See [Audio-Preparation.md](Audio-Preparation.md). Next is target-iPhone playback and complete-session listening acceptance. D-007's narration direction is resolved through D-023 and D-024; D-008 still needs rain acceptance. Silence remains available, and rain is not yet connected to the planner or runtime. Plan-review UI and SwiftData progress/history follow; the prepared adapter does not yet persist partial positions or completion.
 
 ## Working agreement
 

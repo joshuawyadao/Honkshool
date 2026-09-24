@@ -1,0 +1,535 @@
+{
+  "recordedDate": "2026-09-17",
+  "scope": "Mac-only local development audition; target iPhone and listening acceptance unverified",
+  "renderer": {
+    "paragraphs": [
+      {
+        "channelCount": 1,
+        "durationSeconds": 34.336,
+        "fileName": "paragraph-001.caf",
+        "frameCount": 1648128,
+        "index": 0,
+        "sampleRate": 48000,
+        "textSHA256": "fc826e7cd52483b43f7b9f86eff102708e02bd7b6619dfa41d3b746db963bb1b",
+        "textUTF16Count": 563
+      },
+      {
+        "channelCount": 1,
+        "durationSeconds": 53.45066666666666,
+        "fileName": "paragraph-002.caf",
+        "frameCount": 2565632,
+        "index": 1,
+        "sampleRate": 48000,
+        "textSHA256": "82b4d5926ad9bfb007cd5dcffe7a797716546f3bcb1c61550d43b3b8ca5e70ea",
+        "textUTF16Count": 865
+      },
+      {
+        "channelCount": 1,
+        "durationSeconds": 54.336,
+        "fileName": "paragraph-003.caf",
+        "frameCount": 2608128,
+        "index": 2,
+        "sampleRate": 48000,
+        "textSHA256": "264f94b233727d5bd62a43c6611a5c7094547ec4dfc9dc769028eaa066922c09",
+        "textUTF16Count": 902
+      },
+      {
+        "channelCount": 1,
+        "durationSeconds": 54.67733333333333,
+        "fileName": "paragraph-004.caf",
+        "frameCount": 2624512,
+        "index": 3,
+        "sampleRate": 48000,
+        "textSHA256": "132dfe7d6838fbe87683ab9eca47a513aa16cb7ce8846aa22a1e58b89a49afe2",
+        "textUTF16Count": 910
+      },
+      {
+        "channelCount": 1,
+        "durationSeconds": 61.62133333333333,
+        "fileName": "paragraph-005.caf",
+        "frameCount": 2957824,
+        "index": 4,
+        "sampleRate": 48000,
+        "textSHA256": "4b07b42e9c1841081ce021d0e48c3fe2c32c887ac7d76fa7983a7322f8fc76b4",
+        "textUTF16Count": 1008
+      },
+      {
+        "channelCount": 1,
+        "durationSeconds": 58.64533333333333,
+        "fileName": "paragraph-006.caf",
+        "frameCount": 2814976,
+        "index": 5,
+        "sampleRate": 48000,
+        "textSHA256": "be376716177d826661408aa485117dd698ca3fcc953c63b85cc5a017d0e07ea4",
+        "textUTF16Count": 941
+      },
+      {
+        "channelCount": 1,
+        "durationSeconds": 57.984,
+        "fileName": "paragraph-007.caf",
+        "frameCount": 2783232,
+        "index": 6,
+        "sampleRate": 48000,
+        "textSHA256": "d57d929a357f8dbd59a5c65dd0f79382ebd8840be7961181ed7a6b343ce4befb",
+        "textUTF16Count": 915
+      },
+      {
+        "channelCount": 1,
+        "durationSeconds": 50.101333333333336,
+        "fileName": "paragraph-008.caf",
+        "frameCount": 2404864,
+        "index": 7,
+        "sampleRate": 48000,
+        "textSHA256": "7fe1a5e3678c1119cdc31b86217643e5c62ae085719f66f3eca6bcb30922ebc0",
+        "textUTF16Count": 780
+      },
+      {
+        "channelCount": 1,
+        "durationSeconds": 56.064,
+        "fileName": "paragraph-009.caf",
+        "frameCount": 2691072,
+        "index": 8,
+        "sampleRate": 48000,
+        "textSHA256": "8f9ebc791929cf32708e2d078f71e291fbac581f0d5a77d0eb9ff0725fff2171",
+        "textUTF16Count": 910
+      },
+      {
+        "channelCount": 1,
+        "durationSeconds": 54.432,
+        "fileName": "paragraph-010.caf",
+        "frameCount": 2612736,
+        "index": 9,
+        "sampleRate": 48000,
+        "textSHA256": "3c879f95ffa49d532522c299dd10a596ff12fe5d33752332bf976fedb04aa3d7",
+        "textUTF16Count": 915
+      },
+      {
+        "channelCount": 1,
+        "durationSeconds": 49.94133333333333,
+        "fileName": "paragraph-011.caf",
+        "frameCount": 2397184,
+        "index": 10,
+        "sampleRate": 48000,
+        "textSHA256": "637ac968e8064b1c655f2d0b51ae05b3136421881e8844e4f82fe6fea484caed",
+        "textUTF16Count": 821
+      },
+      {
+        "channelCount": 1,
+        "durationSeconds": 51.296,
+        "fileName": "paragraph-012.caf",
+        "frameCount": 2462208,
+        "index": 11,
+        "sampleRate": 48000,
+        "textSHA256": "d02b6ac39edb0b8076a09b6a84210e8cebd07b47a067f8b5dfb0cd26b767f994",
+        "textUTF16Count": 848
+      },
+      {
+        "channelCount": 1,
+        "durationSeconds": 24.586666666666666,
+        "fileName": "paragraph-013.caf",
+        "frameCount": 1180160,
+        "index": 12,
+        "sampleRate": 48000,
+        "textSHA256": "b8a4430c440833cb4b7175a6647e0c96a059cc13bf11ac9ccce12f941f18cd4e",
+        "textUTF16Count": 422
+      }
+    ],
+    "revision": "1",
+    "schemaVersion": 1,
+    "scriptSHA256": "7e44406d9d07d90463ffcceb977be64cbb43cbd6fe50524e769b3ce34af56f52",
+    "scriptUTF16Count": 10824,
+    "sessionID": "turning-fuel-into-motion",
+    "voice": {
+      "identifier": "com.apple.siri.natural.Aaron",
+      "name": "Voice 1",
+      "pitchMultiplier": 1,
+      "quality": 2,
+      "rate": 0.45,
+      "volume": 1
+    }
+  },
+  "full": {
+    "durationSeconds": 674.222,
+    "frameCount": 32362656,
+    "sampleRate": 48000,
+    "rmsDBFS": -23.28106015743748,
+    "peakDBFS": -4.9140712365790185,
+    "fileBytes": 64725356,
+    "SHA256": "805555e9040a7465c8e48adc7710aa2801343a46257619ef457b434f69407a4e",
+    "addedPauseSeconds": 12.75,
+    "baseGainDB": -4.06,
+    "paragraphSpans": [
+      {
+        "paragraphIndex": 0,
+        "startFrame": 12000,
+        "endFrame": 1660128
+      },
+      {
+        "paragraphIndex": 1,
+        "startFrame": 1708128,
+        "endFrame": 4273760
+      },
+      {
+        "paragraphIndex": 2,
+        "startFrame": 4321760,
+        "endFrame": 6929888
+      },
+      {
+        "paragraphIndex": 3,
+        "startFrame": 6977888,
+        "endFrame": 9602400
+      },
+      {
+        "paragraphIndex": 4,
+        "startFrame": 9650400,
+        "endFrame": 12608224
+      },
+      {
+        "paragraphIndex": 5,
+        "startFrame": 12656224,
+        "endFrame": 15471200
+      },
+      {
+        "paragraphIndex": 6,
+        "startFrame": 15519200,
+        "endFrame": 18302432
+      },
+      {
+        "paragraphIndex": 7,
+        "startFrame": 18350432,
+        "endFrame": 20755296
+      },
+      {
+        "paragraphIndex": 8,
+        "startFrame": 20803296,
+        "endFrame": 23494368
+      },
+      {
+        "paragraphIndex": 9,
+        "startFrame": 23542368,
+        "endFrame": 26155104
+      },
+      {
+        "paragraphIndex": 10,
+        "startFrame": 26203104,
+        "endFrame": 28600288
+      },
+      {
+        "paragraphIndex": 11,
+        "startFrame": 28648288,
+        "endFrame": 31110496
+      },
+      {
+        "paragraphIndex": 12,
+        "startFrame": 31158496,
+        "endFrame": 32338656
+      }
+    ],
+    "previewDurationSeconds": 89.53666666666666,
+    "processedRegionCount": 671,
+    "unchangedBaseFramesPercent": 92.67965361093641,
+    "configuredEstimateSeconds": 675
+  },
+  "processing": "Existing E spectral processor plus F narrow mask, independently per whole paragraph; fixed -4.06 dB gain before processing; 0.25s head, 1s between paragraphs, 0.5s tail; no stretching or pitch shift",
+  "paragraphValidation": [
+    {
+      "index": 0,
+      "rawCAF_SHA256": "8618ab608ab53b393d6c59fabd42c8fb302e654a2688ded41f1fa01a80128e9c",
+      "outputSHA256": "fa02aedfdf7d781e779700e248df84d9bf2066078b066749f8edd3da0758e3be",
+      "validation": {
+        "duration_seconds": 34.336,
+        "frame_count": 1648128,
+        "sample_rate": 48000,
+        "event_count": 30,
+        "mask_support_seconds": 2.00875,
+        "original_C_frames_preserved_outside_events": 1551708,
+        "percent_outside_events_bit_identical_to_C": 94.15,
+        "full_softening_cores_bit_identical_to_E": true,
+        "all_pause_frames_preserved": 0,
+        "correlation_peak_lag_samples": 0,
+        "source_rms_dbfs": -22.8185,
+        "output_rms_dbfs": -22.8672,
+        "core_high_band_change_db": -5.4025,
+        "body_100_to_3500_hz_change_db": -0.0,
+        "no_clipping": true,
+        "export_readback_matches": true
+      }
+    },
+    {
+      "index": 1,
+      "rawCAF_SHA256": "a4011df787e37d8064a839e56af2236e4be498907be31a6480a10b211b56efd4",
+      "outputSHA256": "b7dd802b93bbee3ebe25dfce9e09c0663e5c63a01dc80ec057fb40d9abc2ee84",
+      "validation": {
+        "duration_seconds": 53.45066666666666,
+        "frame_count": 2565632,
+        "sample_rate": 48000,
+        "event_count": 52,
+        "mask_support_seconds": 3.64283,
+        "original_C_frames_preserved_outside_events": 2390776,
+        "percent_outside_events_bit_identical_to_C": 93.185,
+        "full_softening_cores_bit_identical_to_E": true,
+        "all_pause_frames_preserved": 0,
+        "correlation_peak_lag_samples": 0,
+        "source_rms_dbfs": -23.2573,
+        "output_rms_dbfs": -23.319,
+        "core_high_band_change_db": -5.3929,
+        "body_100_to_3500_hz_change_db": 0.0,
+        "no_clipping": true,
+        "export_readback_matches": true
+      }
+    },
+    {
+      "index": 2,
+      "rawCAF_SHA256": "b4c259444a2d733b2de370dee51c575e1a608ad423b9d9aca6701a4be8746fbc",
+      "outputSHA256": "3e1c592f5bcc148de4284378d963c92ac5e84c518d56bbc9dc3892b94bee6b74",
+      "validation": {
+        "duration_seconds": 54.336,
+        "frame_count": 2608128,
+        "sample_rate": 48000,
+        "event_count": 60,
+        "mask_support_seconds": 4.4125,
+        "original_C_frames_preserved_outside_events": 2396328,
+        "percent_outside_events_bit_identical_to_C": 91.879,
+        "full_softening_cores_bit_identical_to_E": true,
+        "all_pause_frames_preserved": 0,
+        "correlation_peak_lag_samples": 0,
+        "source_rms_dbfs": -23.1892,
+        "output_rms_dbfs": -23.269,
+        "core_high_band_change_db": -5.4126,
+        "body_100_to_3500_hz_change_db": 0.0,
+        "no_clipping": true,
+        "export_readback_matches": true
+      }
+    },
+    {
+      "index": 3,
+      "rawCAF_SHA256": "9dc87f3400963a3b958179537674b83ab0f0c4e85dfdee78b53680363b02df9f",
+      "outputSHA256": "5b33f1006f67b633a0fb4b7fbb7dc524a39539ac93dafe2844f529af26935129",
+      "validation": {
+        "duration_seconds": 54.67733333333333,
+        "frame_count": 2624512,
+        "sample_rate": 48000,
+        "event_count": 52,
+        "mask_support_seconds": 3.85283,
+        "original_C_frames_preserved_outside_events": 2439576,
+        "percent_outside_events_bit_identical_to_C": 92.954,
+        "full_softening_cores_bit_identical_to_E": true,
+        "all_pause_frames_preserved": 0,
+        "correlation_peak_lag_samples": 0,
+        "source_rms_dbfs": -23.1331,
+        "output_rms_dbfs": -23.1923,
+        "core_high_band_change_db": -5.3286,
+        "body_100_to_3500_hz_change_db": -0.0,
+        "no_clipping": true,
+        "export_readback_matches": true
+      }
+    },
+    {
+      "index": 4,
+      "rawCAF_SHA256": "893a570d5a17e0ff65618cd835bcb931c4b858c80bda44203c5bfc842512829c",
+      "outputSHA256": "abf4d9162835e89eaf745d745c2cbc53b95026f871e372ba9dc301a984a1d94c",
+      "validation": {
+        "duration_seconds": 61.62133333333333,
+        "frame_count": 2957824,
+        "sample_rate": 48000,
+        "event_count": 74,
+        "mask_support_seconds": 4.63192,
+        "original_C_frames_preserved_outside_events": 2735492,
+        "percent_outside_events_bit_identical_to_C": 92.483,
+        "full_softening_cores_bit_identical_to_E": true,
+        "all_pause_frames_preserved": 0,
+        "correlation_peak_lag_samples": 0,
+        "source_rms_dbfs": -23.4255,
+        "output_rms_dbfs": -23.5036,
+        "core_high_band_change_db": -5.4094,
+        "body_100_to_3500_hz_change_db": 0.0,
+        "no_clipping": true,
+        "export_readback_matches": true
+      }
+    },
+    {
+      "index": 5,
+      "rawCAF_SHA256": "8b6e9d4722c3073186f8e8f304c2de692f2b8e96111add103d8fdd6ec9ae5cdc",
+      "outputSHA256": "87c09b6971b8fc0a0a460201b3066f0ec8cac68a485fc6e279e615bebd943237",
+      "validation": {
+        "duration_seconds": 58.64533333333333,
+        "frame_count": 2814976,
+        "sample_rate": 48000,
+        "event_count": 68,
+        "mask_support_seconds": 4.70217,
+        "original_C_frames_preserved_outside_events": 2589272,
+        "percent_outside_events_bit_identical_to_C": 91.982,
+        "full_softening_cores_bit_identical_to_E": true,
+        "all_pause_frames_preserved": 0,
+        "correlation_peak_lag_samples": 0,
+        "source_rms_dbfs": -23.0233,
+        "output_rms_dbfs": -23.0833,
+        "core_high_band_change_db": -5.3685,
+        "body_100_to_3500_hz_change_db": -0.0,
+        "no_clipping": true,
+        "export_readback_matches": true
+      }
+    },
+    {
+      "index": 6,
+      "rawCAF_SHA256": "aec3be25ba5d862b8613a6a401184e35cd4abadb93b04e6896be4c296a495ec8",
+      "outputSHA256": "56f60486c07eafab68b065d9b60e5f2e0438a66a9f9fa197ebbbc7c7abc84c15",
+      "validation": {
+        "duration_seconds": 57.984,
+        "frame_count": 2783232,
+        "sample_rate": 48000,
+        "event_count": 61,
+        "mask_support_seconds": 5.36746,
+        "original_C_frames_preserved_outside_events": 2525594,
+        "percent_outside_events_bit_identical_to_C": 90.743,
+        "full_softening_cores_bit_identical_to_E": true,
+        "all_pause_frames_preserved": 0,
+        "correlation_peak_lag_samples": 0,
+        "source_rms_dbfs": -23.1091,
+        "output_rms_dbfs": -23.1921,
+        "core_high_band_change_db": -5.4829,
+        "body_100_to_3500_hz_change_db": 0.0,
+        "no_clipping": true,
+        "export_readback_matches": true
+      }
+    },
+    {
+      "index": 7,
+      "rawCAF_SHA256": "10d72bfe10b47db80c72920aa596f5365ec47c6b047b4a78bd437cad8141fcbb",
+      "outputSHA256": "b1b36e270b17ccaab33a2180e67dca4b4bea8e7a3d8f641165217fa40bd963e1",
+      "validation": {
+        "duration_seconds": 50.101333333333336,
+        "frame_count": 2404864,
+        "sample_rate": 48000,
+        "event_count": 55,
+        "mask_support_seconds": 4.24271,
+        "original_C_frames_preserved_outside_events": 2201214,
+        "percent_outside_events_bit_identical_to_C": 91.532,
+        "full_softening_cores_bit_identical_to_E": true,
+        "all_pause_frames_preserved": 0,
+        "correlation_peak_lag_samples": 0,
+        "source_rms_dbfs": -23.4287,
+        "output_rms_dbfs": -23.51,
+        "core_high_band_change_db": -5.476,
+        "body_100_to_3500_hz_change_db": -0.0,
+        "no_clipping": true,
+        "export_readback_matches": true
+      }
+    },
+    {
+      "index": 8,
+      "rawCAF_SHA256": "0f5c417cb41a878bdc85c6045996ba4202efe763b029f62ad8a51e9797ab0ce5",
+      "outputSHA256": "879eef87ef7d754355757d781b69c29750da49d124ff5194e420c6d7d371f1a7",
+      "validation": {
+        "duration_seconds": 56.064,
+        "frame_count": 2691072,
+        "sample_rate": 48000,
+        "event_count": 42,
+        "mask_support_seconds": 3.01825,
+        "original_C_frames_preserved_outside_events": 2546196,
+        "percent_outside_events_bit_identical_to_C": 94.616,
+        "full_softening_cores_bit_identical_to_E": true,
+        "all_pause_frames_preserved": 0,
+        "correlation_peak_lag_samples": 0,
+        "source_rms_dbfs": -22.8881,
+        "output_rms_dbfs": -22.9317,
+        "core_high_band_change_db": -5.2399,
+        "body_100_to_3500_hz_change_db": -0.0,
+        "no_clipping": true,
+        "export_readback_matches": true
+      }
+    },
+    {
+      "index": 9,
+      "rawCAF_SHA256": "305e96bd6609f3315cbde4def30b7675d1c7cc5ea877a848491992db46e871db",
+      "outputSHA256": "73f1713c17a5f6471ef97e4c8a501a0fd8645316b5d83bffc59f870cdf9e1634",
+      "validation": {
+        "duration_seconds": 54.432,
+        "frame_count": 2612736,
+        "sample_rate": 48000,
+        "event_count": 43,
+        "mask_support_seconds": 2.86821,
+        "original_C_frames_preserved_outside_events": 2475062,
+        "percent_outside_events_bit_identical_to_C": 94.731,
+        "full_softening_cores_bit_identical_to_E": true,
+        "all_pause_frames_preserved": 0,
+        "correlation_peak_lag_samples": 0,
+        "source_rms_dbfs": -23.4183,
+        "output_rms_dbfs": -23.461,
+        "core_high_band_change_db": -5.3895,
+        "body_100_to_3500_hz_change_db": -0.0,
+        "no_clipping": true,
+        "export_readback_matches": true
+      }
+    },
+    {
+      "index": 10,
+      "rawCAF_SHA256": "c5ccd88af24e8e7735ee9d8b741d959d0bcc002219673e5d292164529b23f781",
+      "outputSHA256": "66a475202e5c1d03a6a1df91037eac34ef2403f356ec32ee093ce290c208df5b",
+      "validation": {
+        "duration_seconds": 49.94133333333333,
+        "frame_count": 2397184,
+        "sample_rate": 48000,
+        "event_count": 48,
+        "mask_support_seconds": 3.178,
+        "original_C_frames_preserved_outside_events": 2244640,
+        "percent_outside_events_bit_identical_to_C": 93.637,
+        "full_softening_cores_bit_identical_to_E": true,
+        "all_pause_frames_preserved": 0,
+        "correlation_peak_lag_samples": 0,
+        "source_rms_dbfs": -23.001,
+        "output_rms_dbfs": -23.062,
+        "core_high_band_change_db": -5.381,
+        "body_100_to_3500_hz_change_db": -0.0,
+        "no_clipping": true,
+        "export_readback_matches": true
+      }
+    },
+    {
+      "index": 11,
+      "rawCAF_SHA256": "208311c076a9a8fe0389e075ed26a5a47527ec381783ebc6d745f63d9bed26fb",
+      "outputSHA256": "0d0237220c8b7f503b9211640a91995fea7629aeac49e2165b9a82b761089f76",
+      "validation": {
+        "duration_seconds": 51.296,
+        "frame_count": 2462208,
+        "sample_rate": 48000,
+        "event_count": 61,
+        "mask_support_seconds": 4.92246,
+        "original_C_frames_preserved_outside_events": 2225930,
+        "percent_outside_events_bit_identical_to_C": 90.404,
+        "full_softening_cores_bit_identical_to_E": true,
+        "all_pause_frames_preserved": 0,
+        "correlation_peak_lag_samples": 0,
+        "source_rms_dbfs": -22.937,
+        "output_rms_dbfs": -23.0162,
+        "core_high_band_change_db": -5.3625,
+        "body_100_to_3500_hz_change_db": 0.0,
+        "no_clipping": true,
+        "export_readback_matches": true
+      }
+    },
+    {
+      "index": 12,
+      "rawCAF_SHA256": "b2141529606f4e1bb4f9644c5848b0eb7baa3662619c794b03fa96c704f1edd6",
+      "outputSHA256": "f988159ff1d06432f730607f8cec46330765409ffc59ca6ff6d835b73118bc11",
+      "validation": {
+        "duration_seconds": 24.586666666666666,
+        "frame_count": 1180160,
+        "sample_rate": 48000,
+        "event_count": 25,
+        "mask_support_seconds": 1.57396,
+        "original_C_frames_preserved_outside_events": 1104610,
+        "percent_outside_events_bit_identical_to_C": 93.598,
+        "full_softening_cores_bit_identical_to_E": true,
+        "all_pause_frames_preserved": 0,
+        "correlation_peak_lag_samples": 0,
+        "source_rms_dbfs": -22.8944,
+        "output_rms_dbfs": -22.9539,
+        "core_high_band_change_db": -5.3564,
+        "body_100_to_3500_hz_change_db": -0.0,
+        "no_clipping": true,
+        "export_readback_matches": true
+      }
+    }
+  ]
+}

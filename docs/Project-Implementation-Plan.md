@@ -4,14 +4,16 @@ Build Honkshool as a sequence of small, reviewable vertical slices, beginning wi
 
 ## Scope
 
-- In: an iPhone-first iOS 26 app using Swift, SwiftUI, SwiftData, AlarmKit, AVFoundation, and AVSpeechSynthesizer; a bundled automotive catalog; deterministic Nap Plans; background playback; a system alarm; local journey progress and history; and a ten-nap personal validation trial.
-- Out: backend services, accounts, analytics, cloud sync, subscriptions, ads, paid APIs, runtime AI generation, arbitrary internet research, multiple voices, App Store/TestFlight distribution, and the complete future content catalog.
+- In: an iPhone-first iOS 26 app using Swift, SwiftUI, SwiftData, AlarmKit, and AVFoundation; prepared local Kokoro narration for the curated catalog; deterministic Nap Plans; background playback; a system alarm; local journey progress and history; and a ten-nap personal validation trial.
+- Out: backend services, accounts, analytics, cloud sync, subscriptions, ads, paid speech APIs, runtime factual-content generation, arbitrary internet research, multiple production voices, App Store/TestFlight distribution, and the complete future content catalog.
 
 ## Action items
 
 - [x] Resolve or explicitly defer the Phase 0 decision gates and run `spike/audio-and-alarm-feasibility` to establish narration, background audio, interruptions, Lock Screen controls, and AlarmKit feasibility on the target iPhone.
 - [x] Implement `codex/nap-plan-domain` with framework-independent journey, session, route, timing, completion, and history rules plus focused unit tests. Runtime execution and persistence remain in later branches.
-- [ ] Build `feature/local-content-catalog` with one citation-backed Enthusiast session from “How a Car Works,” source metadata, pronunciations, duration estimates, and one lawful offline ambience asset.
+- [x] Build `codex/local-content-catalog` with a validated bundled catalog, one original citation-backed Enthusiast session from “How a Car Works,” source metadata, pronunciation guidance, configurable editorial estimates, and script-bound resume validation. Record F as the provisional narration reference.
+- [x] Prepare a full Mac narration audition and measure its duration; bundle a CC0 gentle-rain candidate with provenance and objective loop/level checks.
+- [ ] Complete Phase 2 by validating the bundled Kokoro George `0.86` playback path on the target iPhone and accepting the complete 727.625-second session. Preparation, provenance, catalog timing, app playback, and automated deadline coverage are complete. On iPhone 18 Pro Max / iOS 27.0, the signed app launched, two focused fixture UI tests passed, and the owner reported locked playback and Lock Screen play/pause working. The remaining [manual device checks](Feasibility-Spike.md#manual-checks-to-do-later-on-iphone-18-pro-max--ios-270) are pending. Connect accepted rain during runtime work; silence remains the available fallback until that integration.
 - [ ] Build `feature/nap-plan-review` so a listener can continue or select local content, choose a duration or wake time, inspect the fixed route, select ambience or silence, and confirm the final alarm.
 - [ ] Build `feature/nap-playback-runtime` to execute the approved plan without mid-nap prompts, support background playback and appropriate media controls, transition after narration, and recover safely from expected audio interruptions.
 - [ ] Build `feature/alarm-and-history` to schedule and manage only Honkshool alarms, persist partial and completed playback locally with SwiftData, advance sessions only on completion, and expose resume and history views.
@@ -64,7 +66,7 @@ Represent content and assemble a deterministic Nap Plan without coupling the rul
 
 ### Current status
 
-Implemented on `codex/nap-plan-domain` on 2026-09-15. The Foundation-only core snapshots deterministic plans, explicit approved routes and shorter alternatives, timing/fallback segments, and optional alarm deadlines. Pure playback outcomes retain partial checkpoints and advance progress only on actual completion; append-only history preserves replay, restart, and alternate paths. See [Nap-Planning-Domain.md](Nap-Planning-Domain.md) for allocation policy and the future adapter contract. This branch does not connect the domain to the feasibility console or provide persistence. The next branch is prepared local content.
+Implemented on `codex/nap-plan-domain` on 2026-09-15 and squash-merged through PR #3 as `c5025ad`. The Foundation-only core snapshots deterministic plans, explicit approved routes and shorter alternatives, timing/fallback segments, and optional alarm deadlines. Pure playback outcomes retain partial checkpoints and advance progress only on actual completion; append-only history preserves replay, restart, and alternate paths. See [Nap-Planning-Domain.md](Nap-Planning-Domain.md) for allocation policy and the future adapter contract. This branch does not connect the domain to the feasibility console or provide persistence. Prepared local content follows below.
 
 ### Core concepts
 
@@ -83,6 +85,14 @@ Implemented on `codex/nap-plan-domain` on 2026-09-15. The Foundation-only core s
 
 ## Phase 2: prepared content
 
+### Current status
+
+The catalog slice is implemented on `codex/local-content-catalog` (2026-09-16): bundled original prose, paragraph-linked sources, summary, pronunciation guidance, validated stable identities/references, configurable estimates, planner integration, and script-aware resume checks. The feasibility console continues to use its separate spike script. See [Content-Catalog.md](Content-Catalog.md) and [Content-Review.md](Content-Review.md).
+
+The first full Mac audition measured 674.222 seconds on 2026-09-17 and remains historical Apple-voice evidence. A CC0 rain candidate is bundled with provenance and objective checks. F, the Aaron full-session master, and the Apple voice comparisons remain preserved evidence. The Apple Premium voices improved pronunciation but retained automated cadence. On 2026-09-21 the owner found both evaluated Kokoro voices much more human and natural, preferred George's calm documentary quality, and selected George at model speed `0.86` after a 408-word factual comparison. See [Audio-Preparation.md](Audio-Preparation.md) and the [accepted Kokoro evidence](Narration-Reference.md#accepted-kokoro-george-direction-2026-09-21).
+
+George `0.86` is now the preferred narration reference; a curated selector is deferred. D-023 supersedes direct AVSpeechSynthesizer as the production sound direction while retaining the Phase 0 device evidence. D-024 selects preparation-time generation for the curated prototype: the app bundles a verified 34,926,044-byte PCM session rather than the 327,212,226-byte model and a live inference runtime. The asset measures 727.625 seconds, the current estimate is 730 seconds, and the feasibility console plays it with fixed-deadline stopping and no Apple fallback. The prepared-audio app installed and launched on iPhone 18 Pro Max / iOS 27.0 on 2026-09-22. Two focused fixture UI tests passed on that phone, and the owner reported locked playback and Lock Screen play/pause working. The full iOS 27.0 simulator suite passes 135 tests with one intentionally skipped device-only test, including checks that read every George PCM frame through AVFoundation and observe real AVAudioPlayer tail completion into ambience and fixed-deadline stopping without a 15-minute wait. An opt-in real-device XCTest passed on iPhone 18 Pro Max / iOS 27.0: AlarmKit reported alerting within five seconds of a shared 75-second wake deadline, and George narration stopped within three seconds with the wake-deadline status. The owner also reported hearing the alarm ring as expected and finding the short opening narration clear and natural. Brief target-iPhone interruption/route checks, later-passage listening, rain acceptance, and production Nap Plan/history connection remain pending. Complete-session subjective comfort and locked-screen alarm presentation remain unverified, so Phase 2 exit criteria are not yet complete.
+
 ### Goal
 
 Create enough lawful, reliable local content to evaluate the experience without a backend or runtime generation.
@@ -91,7 +101,8 @@ Create enough lawful, reliable local content to evaluate the experience without 
 
 - Choose one representative “How a Car Works” session for the tracer bullet.
 - Research it from multiple reputable sources, cross-check factual claims, write an original calm script, and retain source citations.
-- Tune punctuation, paragraphs, pauses, vocabulary, and pronunciation for one selected Apple on-device voice at Enthusiast detail.
+- Tune punctuation, paragraphs, pauses, vocabulary, and pronunciation against the selected Kokoro George `0.86` reference at Enthusiast detail.
+- Prepare and validate exact local narration assets before adding them to the app; keep live inference outside the curated prototype unless catalog scale justifies it.
 - Add one offline ambience option with documented provenance and silence as an always-available alternative.
 - Keep the catalog format capable of adding the remaining journey sessions and future per-journey detail levels without changing the playback contract.
 

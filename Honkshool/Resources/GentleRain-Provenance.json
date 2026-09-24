@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "gentle-rain-window",
+  "fileName": "GentleRain.wav",
+  "status": "prepared-candidate-awaiting-listening",
+  "creator": "alxl",
+  "originalTitle": "Rain on Window Loop",
+  "sourcePage": "https://opengameart.org/content/rain-on-window-loop",
+  "sourceDownload": "https://opengameart.org/sites/default/files/rain_on_window_loop.wav",
+  "sourceRetrieved": "2026-09-17",
+  "license": "CC0-1.0",
+  "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "originalSHA256": "97b9405025e5ed7ed8a58d24dd7146d06e925519b1f718efda94bb85dcd1a61a",
+  "preparedSHA256": "060a5183311a297c7370607d50902f054240b280dde54e00a278e90e692438c5",
+  "processing": [
+    "Downmix stereo to mono by arithmetic mean",
+    "One-second equal-power tail/head crossfade; loop length shortened by one second",
+    "100 Hz high-pass Butterworth biquad",
+    "Two cascaded 3800 Hz low-pass Butterworth biquads",
+    "Three loop passes per filter to settle periodic filter state",
+    "Constant whole-file gain targets -33 dBFS RMS, capped at -15 dBFS sample peak",
+    "Round to mono 44100 Hz signed 16-bit PCM WAV; no embedded source metadata"
+  ],
+  "validation": {
+    "durationSeconds": 9.86625850340136,
+    "frameCount": 435102,
+    "sampleRate": 44100,
+    "channelCount": 1,
+    "bitsPerSample": 16,
+    "fileBytes": 870248,
+    "rmsDBFS": -33.00026406757421,
+    "peakDBFS": -18.320071184688842,
+    "halfSecondRMSRangeDB": 1.9855873724147841,
+    "loopSeamStep": 0.001190185546875,
+    "maximumAdjacentStep": 0.023651123046875,
+    "clippedSamples": 0
+  },
+  "limitations": [
+    "Signal checks do not establish absence of distracting drips or subjective comfort",
+    "The original is a short medium-rain recording, softened for this candidate",
+    "Runtime availability and user acceptance are not inferred from resource packaging"
+  ]
+}

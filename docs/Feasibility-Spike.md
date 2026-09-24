@@ -6,7 +6,7 @@ This spike tests the riskiest Honkshool assumptions before they become productio
 
 The current candidate implementation exercises:
 
-- direct on-device narration with AVSpeechSynthesizer;
+- prepared offline Kokoro George narration with AVAudioPlayer, while retaining direct AVSpeechSynthesizer as historical regression coverage;
 - an exclusive AVAudioSession playback category;
 - locked-screen background audio capability;
 - a transition to generated neutral noise or silence;
@@ -15,9 +15,18 @@ The current candidate implementation exercises:
 - AlarmKit authorization, fixed-date scheduling, cancellation, system stop, and a nine-minute countdown-style snooze;
 - snooze countdown presentation on the Lock Screen and Dynamic Island, plus current alarm state on foreground return;
 - strict blocking with a visible explanation when an alarm-enabled run is not authorized or cannot be scheduled; and
-- recommended, custom, exact-wake-time, and reusable-default rest timing.
+- recommended, custom, exact-wake-time, and reusable-default rest timing; and
+- a captured deadline that stops prepared narration or following ambience without changing the system alarm.
 
-The generated noise exists only to test the transition and background audio path. It is not the lawful ambience asset intended for the prototype catalog. The short “Turning Fuel Into Motion” script is likewise provisional and has not passed the future content-research pipeline.
+The generated noise exists only to test the transition and background audio path. It is not the lawful ambience asset intended for the prototype catalog. Narration now uses the complete reviewed **Turning Fuel Into Motion** session, prepared with Kokoro George at model speed `0.86`. The app bundles the verified PCM file and its provenance rather than the model or a live synthesis runtime.
+
+## Prepared narration slice, 2026-09-21
+
+The catalog resolves `Turning-Fuel-Into-Motion-George.wav` by resource name and records its exact 727.625-second duration and SHA-256. Start visibly fails if catalog or audio loading fails; there is no Apple-voice fallback. AVAudioPlayer exposes pause/resume and completion while the existing controller owns the exclusive audio session, route and interruption policy, remote commands, Now Playing metadata, ambience/silence transition, and Stop behavior.
+
+The run captures its planned wake deadline before playback. An injected clock lets the controller schedule only the time remaining after audio setup and refuse playback if setup has already passed wake. It also checks the deadline before resume and natural-completion transitions in case the scheduled callback is delayed. The scheduler stops either prepared narration or subsequent ambience at the fixed date when the app can execute; iOS scheduling may still deliver a callback late while the process is suspended. Stop and replacement invalidate the run identity and deadline task before touching AVFoundation, so a late completion callback cannot start ambience for an old run. This console records events but does not persist partial position or mark sessions complete; the production Nap Plan/history adapter must use the domain completion rules later.
+
+The complete asset is 34,926,044 bytes versus 327,212,226 bytes for the pinned model checkpoint alone. Preparation-time generation is the selected prototype architecture under D-024. It preserves exact audio and duration, avoids inference latency and power use during a nap, and requires no network. See [Audio-Preparation.md](Audio-Preparation.md) for fingerprints and reproduction steps.
 
 ## Local setup
 
@@ -128,11 +137,15 @@ Using Xcode 26.6, the iOS 26.5 SDK, and the installed iOS 26.5 simulator/platfor
 - the same nine deterministic UI tests pass on the connected iPhone 14 Pro running iOS 26.6.2, using fixtures that do not request permission or create a real alarm; and
 - all 12 repository verification tests, strict Swift formatting checks, the unsigned Release simulator build, and `git diff --check` pass.
 
+The prepared-narration slice adds bundled-asset/catalog checks and injected controller tests for loading, pause/resume, natural completion, stale callbacks, invalid deadlines, narration cutoff, and ambience cutoff. On 2026-09-21, all 31 repository verification tests and all 134 iOS simulator tests passed with zero failures or skips. Strict Swift formatting, `git diff --check`, and unsigned Release builds for both the generic simulator and generic physical-device target also passed. A current physical iPhone was unavailable during implementation, so the earlier AVSpeechSynthesizer device evidence must not be presented as proof of the new AVAudioPlayer asset path.
+
+On 2026-09-22, all 31 repository checks passed again and the complete iOS 26.5 iPhone 17 Pro simulator suite passed 134 tests with zero failures or skips. A separate complete-suite attempt on the iOS 27.0 iPhone 18 Pro Max simulator stopped making progress during Xcode's test-session cleanup; it produced no final result bundle and was interrupted after about ten minutes. That attempt remains inconclusive, not a reported assertion failure. After shutting down the other simulator and freshly booting the same iOS 27.0 destination, the full suite passed 134 tests with zero failures or skips using the same test script and derived-data path. The stall did not recur, so its cause is unknown; the successful retry is evidence for the iOS 27.0 simulator, not proof of real locked audio or alarm behavior. The two focused physical iOS 27.0 UI tests and the owner's Lock Screen report are recorded in the manual acceptance section below.
+
 Xcode prepared support symbols for the connected iPhone 14 Pro running iOS 26.6.1, selected it as the run destination, registered it for the active Personal Team, and completed a device build. After Developer Mode and explicit developer-profile trust were enabled on the phone, the signed app installed and launched successfully. The owner subsequently exercised the chat checklist and reported the results below. Unannotated checklist steps are treated as user-reported passes; the original results remain recorded separately from the repaired-device results.
 
 ## Physical-device test matrix
 
-Use the iPhone 14 Pro running iOS 26.6.1 as the first baseline. Repeat critical acceptance checks on the replacement iPhone when available. Do not record serial numbers, UDIDs, personal alarm schedules, or private diagnostics in the public repository.
+The iPhone 14 Pro running iOS 26.6.1 is the historical first baseline. The current acceptance target is the iPhone 18 Pro Max running iOS 27.0. Do not record serial numbers, UDIDs, personal alarm schedules, or private diagnostics in the public repository.
 
 Results below are the owner's report from the original build on iPhone 14 Pro / iOS 26.6.1. They are distinct from automated regression results and have not been silently changed to passes after code fixes.
 
@@ -196,7 +209,7 @@ Run the complete automated app and UI suite on an installed simulator:
 
 The script prints a fresh result-bundle path for every run and prints failed assertions from that bundle while preserving Xcode's failure exit code. The final local PR-repair run passed 55 tests (42 unit/controller/service/layout and 13 UI); repository checks and Release compilation also passed. Raw device diagnostics and result bundles remain local, not committed.
 
-Set `HONKSHOOL_TEST_DESTINATION` when the default latest iPhone 17 Pro simulator is unavailable. Pull requests run the same command on GitHub's macOS 26 runner. Debug-only launch fixtures exercise not-determined, denied, authorized, scheduling-failed, snoozed, paused, alerting, and unavailable alarm states without showing a system permission prompt or creating an alarm. Deterministic speech makes Stop and pause/resume tests fast. These substitutes verify Honkshool logic and UI only; they do not prove that iOS delivers audio or alarms while locked.
+Set `HONKSHOOL_TEST_DESTINATION` when the default latest iPhone 17 Pro simulator is unavailable. Pull requests run the same command on GitHub's macOS 26 runner. Debug-only launch fixtures exercise not-determined, denied, authorized, scheduling-failed, snoozed, paused, alerting, and unavailable alarm states without showing a system permission prompt or creating an alarm. UI tests start the bundled prepared file and exercise Stop and pause/resume without waiting for natural completion. These substitutes verify Honkshool logic and UI only; they do not prove that iOS delivers audio or alarms while locked.
 
 UI-test launches use a dedicated preferences suite for fake alarm identity and saved duration, shared by the fixture setup, alarm service, and duration UI. Ordinary launches and Release builds retain standard preferences. This prevents a simulator or physical-device test from overwriting the real app's tracked alarm or saved default. A storage-isolation regression supplements the existing saved-duration relaunch UI test.
 
@@ -204,9 +217,40 @@ The PR review safeguards were validated on 2026-09-15 with Xcode 27.0 against th
 
 ## Minimal physical-device acceptance
 
-All requested checks for this feasibility milestone are complete. On 2026-09-15, after installation of the compact Live Activity repair, the owner confirmed that the snoozed Lock Screen card fits correctly at the existing larger text setting with standard Display Zoom. No additional manual test is required for this documentation-only closeout.
+The original AlarmKit and direct-speech milestone was completed on 2026-09-15. Prepared George audio uses AVAudioPlayer and a 34.9 MB bundled file instead of AVSpeechSynthesizer. On 2026-09-22, the app installed and launched on the iPhone 18 Pro Max running iOS 27.0. Two focused UI tests passed there with fake AlarmKit fixtures: in-app pause/resume/Stop and alarm-enabled scrolling/Stop behavior. Those tests neither requested alarm permission nor scheduled a real alarm. The owner separately reported that George continued while locked and that Lock Screen play/pause worked. This is a user-reported pass for those controls, not for the checks below.
 
-Subsequent PR review changed audio edge-case handling and reflowed the deadline row after reproducing the CI-specific larger-text overflow. The earlier physical confirmation is retained as historical evidence, not represented as a test of these later commits. On the next device installation, repeat only affected checks: a quick snoozed-card glance and explicit interruption/resume; a separate real-call check remains outside the completed evidence.
+### Manual checks to do later on iPhone 18 Pro Max / iOS 27.0
+
+The time-consuming technical checks can run unattended. Simulator tests verify every bundled George PCM frame can be read by AVFoundation, and a real AVAudioPlayer reaches the file's natural ending, starts generated ambience, and stops it when the injected fixed deadline fires. Existing tests cover interruption and route-loss policy, disabled seek, alarm gating, and deadline math. A separate opt-in physical-device test now covers real AlarmKit alerting alongside narration cutoff. None of these checks proves headphone routing or whether the voice feels comfortable to a listener.
+
+Only brief physical and listening checks remain. Record pass/fail and a short observation using the fields below; leave any unperformed item pending.
+
+- [x] **Locked playback and Lock Screen play/pause:** Owner reported on 2026-09-22 that George kept playing when locked and followed Lock Screen play/pause. The focused device UI tests independently covered in-app pause/resume/Stop, but did not test the locked screen.
+- [ ] **Quick controls and route check (about two active minutes):** With **Require a wake alarm** off, start a 20-minute window while wearing AirPods; do not wait for the window to end. Confirm Lock Screen seek/skip cannot be used. Invoke Siri and verify narration pauses until manually resumed. Disconnect AirPods and verify audio pauses rather than moving to the speaker. Reconnect and use Lock Screen Stop to end audio.
+- [x] **Real alarm state and narration cutoff:** On 2026-09-23, the opt-in XCTest passed on iPhone 18 Pro Max / iOS 27.0: one pass, zero failures, zero skips. It scheduled a real AlarmKit alarm and started the bundled George audio with the same 75-second deadline. AlarmKit entered `alerting` within five seconds of wake, prepared narration stopped within three seconds, and the status identified the wake deadline. The test cleaned up its alarm. The owner separately reported that the alarm rang as expected. Locked-screen presentation was not reported.
+- [x] **Brief opening voice check:** During that short device run, the owner reported that George narration sounded clear and natural. This covers the beginning of the bundled session, not its middle or ending.
+- [ ] **Longer-form voice comfort:** The optional 86-second opening/middle/ending reel made by `python3 scripts/make-george-review-reel.py` can expose representative later passages. Full-session subjective comfort remains unassessed until natural use; no 12-minute attentive listen is required for this technical follow-up.
+
+The former five-minute combined deadline run and 15-minute attentive playback run are no longer interactive checklist items. Simulator checks cover app-controlled timing and transition rules, and the opt-in iPhone test has now verified simultaneous AlarmKit alerting and narration cutoff. No automated check certifies every spoken word's subjective quality. Controller tests also cover natural completion into silence.
+
+To run the gated real-alarm check on a connected iPhone after authorizing Honkshool alarms, use:
+
+```sh
+TEST_RUNNER_HONKSHOOL_REAL_ALARM_TEST=1 xcodebuild \
+  -project Honkshool.xcodeproj -scheme Honkshool \
+  -destination 'platform=iOS,id=<connected-device-id>' \
+  -parallel-testing-enabled NO -collect-test-diagnostics never \
+  -only-testing:HonkshoolTests/RealAlarmCutoffDeviceTests test
+```
+
+The environment prefix passes the opt-in flag to the XCTest runner. The test skips in normal runs and on simulators, never requests authorization, and uses a unique alarm ID so it does not replace the console's tracked alarm. It can verify AlarmKit state and playback timing, but it cannot assess how loud the alarm sounds to a person or whether the full narration remains soothing. The owner may judge complete-session comfort during a normal nap rather than a dedicated test listen.
+If the test runner is interrupted during the alert, dismiss the one-time Honkshool alarm on the phone.
+
+On 2026-09-23, the full iOS 27 simulator suite passed 135 tests, but Xcode spent several minutes collecting optional `simctl diagnose` data after tests had finished. A later focused invocation that omitted `-collect-test-diagnostics never` stalled during cleanup; a process sample showed Xcode waiting inside `XCTHRunDestinationAllocator.collectSimulatorDiagnostics`, with no active test runner. After stopping that invocation and rebooting the iOS 27 simulator, the same focused tests passed 29/29 in 34 seconds with diagnostics disabled. This identifies the blocking cleanup operation, though not why Xcode entered it on that run. The local test script disables verbose diagnostics by default; CI opts back into failure diagnostics with `HONKSHOOL_TEST_DIAGNOSTICS=on-failure`. The result bundle and ordinary failure summary remain available locally.
+
+PR #4's deadline and Now Playing follow-up passed 141 iOS 27 simulator tests with zero failures and one intentionally skipped real-device test, plus 31 repository checks, strict Swift formatting, and an unsigned Release simulator build. The focused controller and catalog-failure UI run passed 29 tests. The prepared-audio controller now subtracts setup time from the wake interval and checks the fixed deadline before start, resume, and natural-completion transitions; this does not guarantee a suspended iOS process will execute a timer at the exact wall-clock instant.
+
+The earlier physical confirmation is retained as historical evidence, not represented as a test of prepared playback. A separate real-call check remains optional. No model inference, download, thermal, or synthesis-latency test is needed for this architecture because the phone only decodes a bundled PCM file.
 
 Authorization messaging, scheduling failure, in-app Stop and pause/resume, active-alarm scrolling, event-log navigation, snooze/paused/ringing/unavailable presentation, cancellation routing, reusable duration persistence, exact-time control availability, and the Live Activity’s large-text height are automated. The renderer cannot reproduce Apple’s system-hosted card exactly; the owner’s visual confirmation is separate physical-device evidence. Repeat affected physical checks when audio/alarm behavior or the target device/OS changes. A separate real-call check, numerical narration-duration measurements, and accessibility sizes beyond the first accessibility setting are not covered by this closeout.
 
@@ -220,4 +264,4 @@ For each test, record only:
 - whether the screen was locked and the app foregrounded, backgrounded, or terminated; and
 - a concise behavior note or reproducible failure.
 
-Phase 0 is complete: the [decision log](Decision-Log.md) accepts D-001, D-002, D-003, and D-005 and explicitly defers D-004 with a safe fallback. The next milestone is the nap-planning core after this branch is reviewed and merged; this console is not a supported product release.
+Phase 0 and the framework-independent Nap Plan core are complete. D-023 selects the George sound and D-024 connects a prepared version to this console. The next milestone is focused device acceptance followed by production plan-review, playback-progress, and history integration; this console is not a supported product release.

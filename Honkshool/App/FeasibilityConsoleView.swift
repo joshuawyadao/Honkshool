@@ -87,7 +87,7 @@ struct FeasibilityConsoleView: View {
         Text(SampleContent.sessionTitle)
           .font(.title3.weight(.semibold))
         Text(
-          "This short provisional script tests system behavior. It is not the final researched session."
+          "The complete prepared session uses Kokoro George at the accepted calm-documentary cadence."
         )
         .font(.subheadline)
         .foregroundStyle(.secondary)
@@ -304,7 +304,7 @@ struct FeasibilityConsoleView: View {
         .buttonStyle(.bordered)
 
         Text(
-          "Starting activates an exclusive playback session, so existing music or podcasts should stop. Skipping and seeking are disabled; iOS may still display their controls."
+          "Starting plays the bundled George narration and activates an exclusive playback session, so existing music or podcasts should stop. Skipping and seeking are disabled; iOS may still display their controls."
         )
         .font(.footnote)
         .foregroundStyle(.secondary)
@@ -369,11 +369,28 @@ struct FeasibilityConsoleView: View {
       now: .now
     ) {
     case .ready:
-      audio.startNarration(
-        script: SampleContent.narration,
-        title: SampleContent.sessionTitle,
-        transitionToAmbience: runAmbienceEnabled
-      )
+      do {
+        #if DEBUG
+          try UITestFixtures.failPreparedCatalogLoadIfRequested()
+        #endif
+        let catalog = try PreparedCatalog.load()
+        guard let prepared = catalog.sessions["turning-fuel-into-motion"] else {
+          throw PreparedCatalogError.invalidContent("turning-fuel-into-motion")
+        }
+        audio.startPreparedNarration(
+          url: try prepared.narrationURL(),
+          title: prepared.session.title,
+          transitionToAmbience: runAmbienceEnabled,
+          wakeDeadline: plannedWakeDate
+        )
+      } catch {
+        runMessage = "Prepared George narration is unavailable: \(error.localizedDescription)"
+        if alarm.hasTrackedAlarm {
+          runMessage += " The wake alarm remains active; cancel it separately if no longer needed."
+        }
+        blockedReason = runMessage
+        return
+      }
       guard audio.phase == .narrating else {
         runMessage = "Playback did not start. \(audio.statusMessage)"
         if alarm.hasTrackedAlarm {
