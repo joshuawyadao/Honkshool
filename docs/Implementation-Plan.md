@@ -1,29 +1,21 @@
 # Plan
 
-Add an opt-in, real-iPhone integration check for the remaining simultaneous AlarmKit alert and prepared-narration cutoff. Keep subjective full-session comfort separate: no automated signal or transcript check can certify that a listener finds the narration calming.
+Prepare PR #4 for merge by closing the reviewed fixed-deadline edge case in the prepared-audio controller, then validate the branch and complete the PR review cycle. Keep the feasibility console's existing scope and the accepted local audio assets.
 
 ## Scope
 
-- In: a gated device test using the bundled George audio and real AlarmKit, safe alarm cleanup, documentation of what it proves, validation, and branch save.
-- Out: changing production playback behavior, treating a simulator alarm as physical-device evidence, and marking subjective listening comfort accepted.
+- In: deadline checks across player setup, start, natural completion, and resume; focused regression tests; the canonical feasibility note; branch save and PR readiness.
+- Out: production Nap Plan playback/history integration, new audio assets, subjective listening acceptance, and merging the PR.
 
 ## Action items
 
-- [x] Inspect current AlarmKit, playback, and test seams; confirm the target iPhone's availability.
-- [x] Add an opt-in device test that schedules a short real alarm, starts prepared narration at the same deadline, observes AlarmKit alerting and narration stop, and attempts alarm cleanup on every normal test exit.
-- [x] Keep the test skipped in ordinary simulator and CI runs; require explicit opt-in and existing AlarmKit authorization on a connected iPhone.
-- [x] Update `docs/Feasibility-Spike.md` and the durable roadmap to describe the automated device check and its physical/subjective limits.
-- [x] Run focused simulator validation, repository checks, formatting, a Release build, and the broader simulator suite; run the real-device check only if the iPhone becomes available.
-- [x] Commit and push the existing content-catalog branch, reporting any device validation still pending.
+- [ ] Inspect the controller's deadline lifecycle, the affected XCTest fixtures, and the existing feasibility documentation.
+- [ ] Inject a clock into the controller and prevent prepared audio from starting or resuming after its fixed wake deadline, including when setup takes time or the scheduled callback is delayed.
+- [ ] Add focused tests for setup latency, an expired deadline before play, a delayed cutoff during pause/resume, and natural completion after wake.
+- [ ] Update `docs/Feasibility-Spike.md` to describe the controller guard and its scheduling limits.
+- [ ] Run focused and full simulator tests, repository checks, Swift formatting, and a Release build; inspect the PR diff for other actionable concerns.
+- [ ] Commit and push the fix, address actionable Codex/CI feedback, and mark PR #4 ready only when review and checks pass.
 
 ## Open questions
 
-- None. The iPhone was offline during implementation, then reconnected for the opt-in physical test.
-
-## Validation
-
-- The opt-in test was discovered and safely skipped on the iOS 27 simulator. The full simulator suite passed 135 tests with zero failures and one intended device-only skip.
-- The physical-iOS test bundle compiled before the phone reconnected. The opt-in test subsequently passed on iPhone 18 Pro Max / iOS 27.0: one pass, zero failures, zero skips. It observed AlarmKit `alerting` and wake-deadline narration stop inside the asserted timing tolerances, then cleaned up its alarm.
-- The owner reported hearing the alarm ring as expected and finding the short opening narration clear and natural. This is brief device-listening evidence, not complete-session comfort.
-- Repository checks passed 31 tests; strict Swift formatting, an unsigned Release simulator build, and diff whitespace checks passed.
-- Full-session subjective comfort has no reliable automated pass/fail test and remains pending for a normal listening session.
+- None.
