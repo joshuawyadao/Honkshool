@@ -460,11 +460,13 @@ struct NapPlanReviewView: View {
         Label(run.statusMessage, systemImage: "info.circle")
           .accessibilityIdentifier("napRunStatus")
       }
-      if !run.records.isEmpty {
+      if run.lastRunPlanID == confirmed.plan.id && !run.records.isEmpty {
         Text("Completed sessions in this run: \(run.records.filter(\.isCompleted).count)")
           .accessibilityIdentifier("napRunCompletionCount")
       }
-      if run.latestVerifiedCheckpoint != nil || !run.records.isEmpty {
+      if run.lastRunPlanID == confirmed.plan.id
+        && (run.latestVerifiedCheckpoint != nil || !run.records.isEmpty)
+      {
         Text("Playback evidence is in memory until local history is connected.")
           .font(.footnote)
           .foregroundStyle(.secondary)
