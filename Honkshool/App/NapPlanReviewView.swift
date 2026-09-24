@@ -5,9 +5,11 @@ struct NapPlanReviewView: View {
   private let clock: () -> Date
   private let makeID: () -> String
   private let loadCatalog: () throws -> PreparedCatalog
+  private let isNarrationAvailable: (PreparedSession) -> Bool
   private let availableAmbienceIDs: Set<String>
 
   @State private var catalog: PreparedCatalog?
+  @State private var reviewCatalog: NapCatalog?
   @State private var loadError: String?
   @State private var selectionIndex = 0
   @State private var durationMinutes = 20
@@ -24,11 +26,15 @@ struct NapPlanReviewView: View {
     clock: @escaping () -> Date = { .now },
     makeID: @escaping () -> String = { UUID().uuidString },
     loadCatalog: @escaping () throws -> PreparedCatalog = { try .load() },
+    isNarrationAvailable: @escaping (PreparedSession) -> Bool = {
+      (try? $0.narrationURL()) != nil
+    },
     availableAmbienceIDs: Set<String> = []
   ) {
     self.clock = clock
     self.makeID = makeID
     self.loadCatalog = loadCatalog
+    self.isNarrationAvailable = isNarrationAvailable
     self.availableAmbienceIDs = availableAmbienceIDs
     let suggestedWake = clock().addingTimeInterval(20 * 60)
     _exactWakeTime = State(
@@ -49,11 +55,11 @@ struct NapPlanReviewView: View {
             "Content unavailable", systemImage: "book.closed", description: Text(loadError)
           )
           .accessibilityIdentifier("napPlanCatalogError")
-        } else if let catalog {
+        } else if let catalog, let reviewCatalog {
           if let confirmed = reviewState.confirmed {
             confirmedContent(confirmed)
           } else {
-            choices(catalog)
+            choices(catalog, reviewCatalog: reviewCatalog)
             if let review = reviewState.reviewed {
               reviewContent(review)
             }
@@ -70,15 +76,17 @@ struct NapPlanReviewView: View {
     .task {
       guard catalog == nil && loadError == nil else { return }
       do {
-        catalog = try loadCatalog()
+        let loaded = try loadCatalog()
+        reviewCatalog = try loaded.reviewCatalog(isNarrationAvailable: isNarrationAvailable)
+        catalog = loaded
       } catch {
         loadError = "The prepared catalog could not be loaded. \(error.localizedDescription)"
       }
     }
   }
 
-  private func choices(_ catalog: PreparedCatalog) -> some View {
-    let options = sessionOptions(in: catalog)
+  private func choices(_ catalog: PreparedCatalog, reviewCatalog: NapCatalog) -> some View {
+    let options = sessionOptions(in: catalog, reviewCatalog: reviewCatalog)
     return Group {
       card("Available content", systemImage: "book") {
         if options.isEmpty {
@@ -222,11 +230,13 @@ struct NapPlanReviewView: View {
           .foregroundStyle(.red)
           .accessibilityIdentifier("napPlanError")
       }
-      Button("Review Nap Plan") { review(catalog, options: options) }
-        .buttonStyle(.borderedProminent)
-        .controlSize(.large)
-        .disabled(options.isEmpty)
-        .accessibilityIdentifier("reviewNapPlan")
+      Button("Review Nap Plan") {
+        review(catalog, reviewCatalog: reviewCatalog, options: options)
+      }
+      .buttonStyle(.borderedProminent)
+      .controlSize(.large)
+      .disabled(options.isEmpty)
+      .accessibilityIdentifier("reviewNapPlan")
     }
     .onChange(of: selectionIndex) { _, _ in
       shorterIndices.removeAll()
@@ -239,7 +249,9 @@ struct NapPlanReviewView: View {
     .onChange(of: alarmEnabled) { _, _ in invalidateReview() }
   }
 
-  private func review(_ catalog: PreparedCatalog, options: [SessionOption]) {
+  private func review(
+    _ catalog: PreparedCatalog, reviewCatalog: NapCatalog, options: [SessionOption]
+  ) {
     guard options.indices.contains(selectionIndex) else { return }
     let selected = options[selectionIndex]
     let now = clock()
@@ -265,7 +277,7 @@ struct NapPlanReviewView: View {
     do {
       try reviewState.review(
         id: makeID(), request: request, startingAt: now, now: now,
-        catalog: catalog.planningCatalog, availableAmbienceIDs: availableAmbienceIDs
+        catalog: reviewCatalog, availableAmbienceIDs: availableAmbienceIDs
       )
       reviewError = nil
     } catch {
@@ -375,10 +387,13 @@ struct NapPlanReviewView: View {
     }
   }
 
-  private func sessionOptions(in catalog: PreparedCatalog) -> [SessionOption] {
+  private func sessionOptions(
+    in catalog: PreparedCatalog, reviewCatalog: NapCatalog
+  ) -> [SessionOption] {
     catalog.journeys.flatMap { journey in
       journey.sessionIDs.compactMap { id in
-        catalog.sessions[id].map { SessionOption(journey: journey, session: $0.session) }
+        guard reviewCatalog.sessions[id] != nil else { return nil }
+        return catalog.sessions[id].map { SessionOption(journey: journey, session: $0.session) }
       }
     }
   }

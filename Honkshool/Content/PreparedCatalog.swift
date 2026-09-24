@@ -168,6 +168,13 @@ struct PreparedCatalog: Equatable, Sendable {
     }
     return try PreparedCatalog(data: Data(contentsOf: url))
   }
+
+  /// Keep journey order and identities, but let unavailable audio end a reviewed route.
+  func reviewCatalog(isNarrationAvailable: (PreparedSession) -> Bool) throws -> NapCatalog {
+    try NapCatalog(
+      journeys: journeys,
+      sessions: sessions.values.filter(isNarrationAvailable).map(\.session))
+  }
 }
 
 enum PreparedCatalogError: Error, Equatable {

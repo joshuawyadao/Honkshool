@@ -9,7 +9,7 @@ The Foundation-only types in `Honkshool/Domain/NapContent.swift`, `NapPlan.swift
 - `NapRequest` selects a starting session, optional resume point, duration or exact wake time, settling/drift durations, ambience or silence, and alarm preference. The caller supplies `now`, planned start, plan ID, content availability, and available ambience IDs. The planner reads no clock, preferences, random source, or network.
 - Starting a new journey or restarting selects its first session. Replaying selects the desired session with no resume point. Continuing uses history's next incomplete session or an explicitly chosen partial record. These choices never mutate history.
 
-The [prepared-content catalog](Content-Catalog.md) now adds original scripts, citations, detail metadata, pronunciation guidance, and editorial estimate provenance around these unchanged domain types. Audio/ambience asset preparation remains open. `PreparedCatalog.planningCatalog` supplies the timing and listening identities to the planner.
+The [prepared-content catalog](Content-Catalog.md) now adds original scripts, citations, detail metadata, pronunciation guidance, and editorial estimate provenance around these unchanged domain types. Prepared narration is bundled; rain acceptance and runtime integration remain open. `PreparedCatalog.planningCatalog` supplies the timing and listening identities to the planner.
 
 ## Planning and review
 
@@ -27,6 +27,8 @@ Allocation is deterministic:
 `route`, `transitions`, session metadata, and the nominal timeline are value snapshots. Later request, catalog, or history changes cannot alter them. The route freezes when the plan is created, which is stronger than freezing only after start. Changed pre-nap choices require a new plan for review.
 
 `NapPlanReviewState.review` receives an explicit plan ID, request, start/now dates, catalog, and available ambience IDs. It stores the returned `NapPlan` plus the selected inputs, requested sound, preapproved transitions, and journey-title snapshots for the full ordered route. A failed review clears any stale unconfirmed review. `confirm` retains that exact value; it does not ask the clock or catalog to plan again, and later review attempts cannot replace the confirmed value. The SwiftUI screen uses this state but has no playback or AlarmKit adapter. Its confirmation means only that the route was approved for a future run, not that a run or alarm exists.
+
+The screen derives a review catalog from bundled sessions with a resolvable narration file. This keeps unavailable audio out of both the content picker and later sessions on the proposed route. The availability predicate is injected for deterministic tests; normal app use checks the app bundle.
 
 ## Actual playback and deadlines
 
@@ -60,6 +62,6 @@ Journey progress consists of actually completed session IDs in that journey. `ne
 
 Validation on 2026-09-15 used Xcode 27.0 and iPhone 17 Pro / iOS 26.5 Simulator: 45 focused domain tests passed, the full unit/UI suite passed 103 tests with no failures or skips, and all 12 repository checks passed. Foundation-only compilation, strict formatting lint for new Swift files, and the Release simulator build also passed. Xcode reported one internal thread-priority (QoS) warning during the full suite; this did not fail validation. CI runs on pull requests or manual dispatch, so pushing this branch alone does not trigger CI.
 
-The 2026-09-22 review slice adds five `NapPlanReviewTests` and three `NapPlanReviewUITests`. The full iOS 26.5 simulator suite passed 142 tests with no failures or skips, and 31 repository checks passed. A separate targeted iOS 27.0 run passed all five review unit tests and all three review UI tests. These tests verify the approval snapshot and displayed route; they do not establish real playback or AlarmKit behavior for confirmed plans.
+The 2026-09-22 review slice adds five `NapPlanReviewTests` and three `NapPlanReviewUITests`. On the 2026-09-23 main-based branch, availability filtering adds one test at each level. The focused iOS 26.5 review run passed all ten tests; the full suite passed 151 tests with one intentionally skipped device-only test, and 31 repository checks passed. These tests verify the approval snapshot, displayed route, and exclusion of unavailable narration; they do not establish real playback or AlarmKit behavior for confirmed plans.
 
 The prepared-content catalog now supplies the citation-backed session, and a separate UI can choose and review it. Remaining work includes target-iPhone full-session listening, rain acceptance, production playback/deadline and AlarmKit adapters, and SwiftData history. Domain and review success do not establish runtime cutoff or alarm reliability. This review branch requires no phone installation or new physical-device acceptance because it does not change those adapters.

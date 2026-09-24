@@ -69,7 +69,20 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertTrue(app.buttons["confirmNapPlan"].isEnabled)
   }
 
-  private func launchReview() -> XCUIApplication {
+  func testUnavailableNarrationIsNotOfferedForReview() {
+    let app = launchReview(additionalEnvironment: [
+      "HONKSHOOL_UI_TEST_PLAN_CONTENT_UNAVAILABLE": "1"
+    ])
+    XCTAssertTrue(
+      app.staticTexts["No prepared sessions are available for planning."]
+        .waitForExistence(timeout: 5))
+    XCTAssertFalse(app.buttons["napPlanContent"].exists)
+    let review = app.buttons["reviewNapPlan"]
+    scrollTo(review, in: app)
+    XCTAssertFalse(review.isEnabled)
+  }
+
+  private func launchReview(additionalEnvironment: [String: String] = [:]) -> XCUIApplication {
     let app = XCUIApplication()
     app.launchArguments = ["-ui-testing"]
     app.launchEnvironment = [
@@ -78,6 +91,7 @@ final class NapPlanReviewUITests: XCTestCase {
       "HONKSHOOL_UI_TEST_RESET": "1",
       "HONKSHOOL_UI_TEST_PLAN_NOW": "1800000000",
     ]
+    app.launchEnvironment.merge(additionalEnvironment) { _, new in new }
     app.launch()
     let open = app.buttons["openNapPlanReview"]
     XCTAssertTrue(open.waitForExistence(timeout: 5))

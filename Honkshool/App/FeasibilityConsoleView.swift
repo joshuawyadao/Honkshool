@@ -39,7 +39,9 @@ struct FeasibilityConsoleView: View {
           .accessibilityIdentifier("audioEventLog")
           NavigationLink {
             #if DEBUG
-              NapPlanReviewView(clock: UITestFixtures.planReviewNow)
+              NapPlanReviewView(
+                clock: UITestFixtures.planReviewNow,
+                isNarrationAvailable: UITestFixtures.planReviewNarrationAvailable)
             #else
               NapPlanReviewView()
             #endif

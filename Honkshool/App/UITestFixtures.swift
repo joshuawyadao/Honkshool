@@ -31,6 +31,7 @@ enum SpikePreferences {
     static let deterministicAudioEnvironmentKey = "HONKSHOOL_UI_TEST_AUDIO"
     static let resetEnvironmentKey = "HONKSHOOL_UI_TEST_RESET"
     static let planNowEnvironmentKey = "HONKSHOOL_UI_TEST_PLAN_NOW"
+    static let planContentUnavailableEnvironmentKey = "HONKSHOOL_UI_TEST_PLAN_CONTENT_UNAVAILABLE"
 
     private static let alarmID = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
     private static let storedAlarmIDKey = "feasibilityAlarmID"
@@ -46,6 +47,13 @@ enum SpikePreferences {
         let timestamp = TimeInterval(raw), timestamp.isFinite
       else { return .now }
       return Date(timeIntervalSince1970: timestamp)
+    }
+
+    static func planReviewNarrationAvailable(_ session: PreparedSession) -> Bool {
+      guard isEnabled,
+        ProcessInfo.processInfo.environment[planContentUnavailableEnvironmentKey] == "1"
+      else { return (try? session.narrationURL()) != nil }
+      return false
     }
 
     static func preparePersistentState(defaults: UserDefaults? = nil) {

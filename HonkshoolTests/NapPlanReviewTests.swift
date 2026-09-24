@@ -128,6 +128,27 @@ final class NapPlanReviewTests: XCTestCase {
     XCTAssertEqual(state.confirmed?.route, reviewed.route)
   }
 
+  func testReviewCatalogExcludesNarrationWithoutAnAvailableBundledFile() throws {
+    let prepared = try PreparedCatalog.load()
+    let selected = try XCTUnwrap(prepared.journeys.first?.sessionIDs.first)
+    let available = try prepared.reviewCatalog {
+      (try? $0.narrationURL()) != nil
+    }
+    XCTAssertNotNil(available.sessions[selected])
+
+    let unavailable = try prepared.reviewCatalog { _ in false }
+    XCTAssertNil(unavailable.sessions[selected])
+    let plan = try NapPlanner.makePlan(
+      id: "unavailable-audio",
+      request: NapRequest(
+        window: .duration(1_000),
+        startingAt: SessionSelection(
+          journeyID: try XCTUnwrap(prepared.journeys.first?.id), sessionID: selected)),
+      startingAt: now, now: now, catalog: unavailable)
+    XCTAssertTrue(plan.route.isEmpty)
+    XCTAssertEqual(plan.routeEndReason, .contentUnavailable)
+  }
+
   private func selection(_ id: String) -> SessionSelection {
     SessionSelection(journeyID: id == "rally-one" ? "rally" : "cars", sessionID: id)
   }
