@@ -37,6 +37,11 @@ protocol AlarmSystem {
 @MainActor
 final class AppleAlarmSystem: AlarmSystem {
   private let manager = AlarmManager.shared
+  private let source: String
+
+  init(source: String = "feasibility-spike") {
+    self.source = source
+  }
 
   var authorization: AlarmAuthorizationSnapshot {
     Self.snapshot(manager.authorizationState)
@@ -100,7 +105,7 @@ final class AppleAlarmSystem: AlarmSystem {
       schedule: .fixed(date),
       attributes: AlarmAttributes(
         presentation: presentation,
-        metadata: HonkshoolAlarmMetadata(source: "feasibility-spike"),
+        metadata: HonkshoolAlarmMetadata(source: source),
         tintColor: .indigo
       ),
       sound: .default

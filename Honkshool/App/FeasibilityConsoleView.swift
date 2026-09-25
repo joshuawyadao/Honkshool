@@ -5,6 +5,7 @@ struct FeasibilityConsoleView: View {
   @StateObject private var audio = AudioSpikeController()
   @StateObject private var alarm = AlarmSpikeService()
   @StateObject private var napRun = NapRunController()
+  @StateObject private var napAlarm = NapPlanAlarmService()
 
   @AppStorage("preferredRestMinutes", store: SpikePreferences.defaults)
   private var preferredRestMinutes = RestDurationPolicy.initialSavedMinutes
@@ -31,6 +32,9 @@ struct FeasibilityConsoleView: View {
           if napRun.phase != .idle {
             napRunCard
           }
+          if napAlarm.hasTrackedAlarm {
+            napPlanAlarmCard
+          }
           durationCard
             .disabled(isStarting || alarm.isScheduling || napRun.hasActiveRun)
           alarmCard
@@ -46,6 +50,7 @@ struct FeasibilityConsoleView: View {
             #if DEBUG
               NapPlanReviewView(
                 run: napRun,
+                alarm: napAlarm,
                 canStart: {
                   (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
                     && !alarm.hasTrackedAlarm
@@ -56,6 +61,7 @@ struct FeasibilityConsoleView: View {
             #else
               NapPlanReviewView(
                 run: napRun,
+                alarm: napAlarm,
                 canStart: {
                   (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
                     && !alarm.hasTrackedAlarm
@@ -86,9 +92,11 @@ struct FeasibilityConsoleView: View {
         Text(blockedReason ?? "")
       }
       .task { await alarm.observeUpdates() }
+      .task { await napAlarm.observeUpdates() }
       .task(id: scenePhase) {
         guard scenePhase == .active else { return }
         alarm.refresh()
+        napAlarm.refresh()
       }
       .onChange(of: scenePhase) { _, next in
         napRun.scenePhaseChanged(isActive: next == .active)
@@ -97,9 +105,14 @@ struct FeasibilityConsoleView: View {
         guard scenePhase == .active && alarm.needsCountdownReconciliation else { return }
         await alarm.reconcileCountdown()
       }
+      .task(id: scenePhase == .active && napAlarm.needsCountdownReconciliation) {
+        guard scenePhase == .active && napAlarm.needsCountdownReconciliation else { return }
+        await napAlarm.reconcileCountdown()
+      }
       .onAppear {
         napRun.scenePhaseChanged(isActive: scenePhase == .active)
         alarm.refresh()
+        napAlarm.refresh()
         guard !loadedPreferences else { return }
         loadedPreferences = true
         selectedMinutes = RestDurationPolicy.normalized(
@@ -135,6 +148,25 @@ struct FeasibilityConsoleView: View {
         if !napRun.records.isEmpty {
           Text("Completed sessions in this run: \(napRun.records.filter(\.isCompleted).count)")
             .accessibilityIdentifier("parentNapRunCompletionCount")
+        }
+      }
+    }
+  }
+
+  private var napPlanAlarmCard: some View {
+    SpikeCard(title: "Nap Plan wake alarm", systemImage: "alarm") {
+      VStack(alignment: .leading, spacing: 10) {
+        Text(napAlarm.statusMessage)
+          .accessibilityIdentifier("parentNapPlanAlarmStatus")
+        if let nextAlert = napAlarm.alarmStatus.nextAlertDate {
+          wakeTimeRow("Next system alert", date: nextAlert)
+        }
+        if !napRun.hasActiveRun && napAlarm.canCancelTrackedAlarm {
+          Button("Cancel Nap Plan wake alarm", role: .destructive) {
+            _ = napAlarm.cancel()
+          }
+          .disabled(napAlarm.isScheduling)
+          .accessibilityIdentifier("parentCancelNapPlanAlarm")
         }
       }
     }
@@ -392,6 +424,10 @@ struct FeasibilityConsoleView: View {
 
   private func startRun() async {
     guard !isStarting && audio.canStartNewRun else { return }
+    guard !napAlarm.hasTrackedAlarm else {
+      blockedReason = "Cancel the tracked Nap Plan wake alarm before starting a feasibility test."
+      return
+    }
     isStarting = true
     defer { isStarting = false }
     let runAlarmEnabled = alarmEnabled

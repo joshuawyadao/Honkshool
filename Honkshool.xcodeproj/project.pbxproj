@@ -41,6 +41,8 @@
 		110000000000000000000004 /* NapPlanReviewUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000004 /* NapPlanReviewUITests.swift */; };
 		130000000000000000000001 /* NapRunController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140000000000000000000001 /* NapRunController.swift */; };
 		130000000000000000000002 /* NapRunControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140000000000000000000002 /* NapRunControllerTests.swift */; };
+		150000000000000000000001 /* NapPlanAlarmService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160000000000000000000001 /* NapPlanAlarmService.swift */; };
+		150000000000000000000002 /* NapPlanAlarmServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160000000000000000000002 /* NapPlanAlarmServiceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -121,6 +123,8 @@
 		120000000000000000000004 /* NapPlanReviewUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolUITests/NapPlanReviewUITests.swift; sourceTree = SOURCE_ROOT; };
 		140000000000000000000001 /* NapRunController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapRunController.swift; sourceTree = "<group>"; };
 		140000000000000000000002 /* NapRunControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapRunControllerTests.swift; sourceTree = "<group>"; };
+		160000000000000000000001 /* NapPlanAlarmService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlanAlarmService.swift; sourceTree = "<group>"; };
+		160000000000000000000002 /* NapPlanAlarmServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlanAlarmServiceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -215,6 +219,7 @@
 			children = (
 				A20000000000000000000005 /* AudioSpikeController.swift */,
 				A20000000000000000000006 /* AlarmSpikeService.swift */,
+				160000000000000000000001 /* NapPlanAlarmService.swift */,
 				140000000000000000000001 /* NapRunController.swift */,
 			);
 			path = Services;
@@ -224,6 +229,7 @@
 			isa = PBXGroup;
 			children = (
 				140000000000000000000002 /* NapRunControllerTests.swift */,
+				160000000000000000000002 /* NapPlanAlarmServiceTests.swift */,
 				E20000000000000000000005 /* NapPlaybackTests.swift */,
 				F20000000000000000000002 /* PreparedCatalogTests.swift */,
 				E20000000000000000000004 /* NapPlannerTests.swift */,
@@ -448,6 +454,7 @@
 				F10000000000000000000001 /* PreparedCatalog.swift in Sources */,
 				A10000000000000000000005 /* AudioSpikeController.swift in Sources */,
 				A10000000000000000000006 /* AlarmSpikeService.swift in Sources */,
+				150000000000000000000001 /* NapPlanAlarmService.swift in Sources */,
 				130000000000000000000001 /* NapRunController.swift in Sources */,
 				B00000000000000000000001 /* HonkshoolAlarmMetadata.swift in Sources */,
 				C00000000000000000000001 /* UITestFixtures.swift in Sources */,
@@ -466,6 +473,7 @@
 				D00000000000000000000003 /* AlarmLockScreenLayoutTests.swift in Sources */,
 				A10000000000000000000007 /* SpikeModelsTests.swift in Sources */,
 				130000000000000000000002 /* NapRunControllerTests.swift in Sources */,
+				150000000000000000000002 /* NapPlanAlarmServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
