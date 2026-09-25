@@ -355,6 +355,61 @@ final class PreparedCatalogTests: XCTestCase {
     }
   }
 
+  func testAudioResumeUsesExactAssetDurationAndCannotBecomeScriptPosition() throws {
+    let prepared = try preparedSession(overrides: ["narrationAsset": narrationAssetDocument()])
+    let point = try ResumePoint(
+      session: prepared.session, audioOffset: 297.49, estimatedRemainingDuration: 1)
+    XCTAssertEqual(point.audioOffset, 297.49)
+    XCTAssertNil(point.utf16Offset)
+    XCTAssertNoThrow(try prepared.validateAudioResumePoint(point))
+    XCTAssertThrowsError(try prepared.narration(resumingAt: point)) {
+      XCTAssertEqual($0 as? NapDomainError, .invalidResumePoint)
+    }
+    for offset in [297.5, 299.0] {
+      let invalid = try ResumePoint(
+        session: prepared.session, audioOffset: offset, estimatedRemainingDuration: 1)
+      XCTAssertThrowsError(try prepared.validateAudioResumePoint(invalid)) {
+        XCTAssertEqual($0 as? NapDomainError, .invalidResumePoint)
+      }
+    }
+  }
+
+  func testAudioResumeRejectsInvalidPositionAndRevision() throws {
+    let prepared = try preparedSession(overrides: ["narrationAsset": narrationAssetDocument()])
+    for offset in [TimeInterval.nan, .infinity, -.infinity, -0.1] {
+      XCTAssertThrowsError(
+        try ResumePoint(
+          session: prepared.session, audioOffset: offset, estimatedRemainingDuration: 1)
+      ) { XCTAssertEqual($0 as? NapDomainError, .invalidResumePoint) }
+    }
+    for duration in [TimeInterval.nan, .infinity, 0, -1] {
+      XCTAssertThrowsError(
+        try ResumePoint(
+          session: prepared.session, audioOffset: 1, estimatedRemainingDuration: duration)
+      ) { XCTAssertEqual($0 as? NapDomainError, .invalidDuration) }
+    }
+    let revised = try Session(
+      id: prepared.session.id, revision: "r2", title: "Revised", estimatedDuration: 300)
+    let wrongRevision = try ResumePoint(
+      session: revised, audioOffset: 1, estimatedRemainingDuration: 1)
+    XCTAssertThrowsError(try prepared.validateAudioResumePoint(wrongRevision)) {
+      XCTAssertEqual($0 as? NapDomainError, .invalidResumePoint)
+    }
+    let wrongSession = try Session(
+      id: "other", revision: prepared.session.revision, title: "Other", estimatedDuration: 300)
+    let wrongIdentity = try ResumePoint(
+      session: wrongSession, audioOffset: 1, estimatedRemainingDuration: 1)
+    XCTAssertThrowsError(try prepared.validateAudioResumePoint(wrongIdentity)) {
+      XCTAssertEqual($0 as? NapDomainError, .invalidResumePoint)
+    }
+    let withoutAsset = try preparedSession()
+    let validPoint = try ResumePoint(
+      session: withoutAsset.session, audioOffset: 1, estimatedRemainingDuration: 1)
+    XCTAssertThrowsError(try withoutAsset.validateAudioResumePoint(validPoint)) {
+      XCTAssertEqual($0 as? NapDomainError, .invalidResumePoint)
+    }
+  }
+
   func testBundledSessionPlansAnExactFitWithInjectedTimeAndIdentity() throws {
     let catalog = try PreparedCatalog.load()
     let prepared = try XCTUnwrap(catalog.sessions["turning-fuel-into-motion"])

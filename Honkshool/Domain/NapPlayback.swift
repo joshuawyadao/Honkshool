@@ -4,6 +4,8 @@ enum PartialPlaybackReason: Equatable, Sendable {
   case stopped
   case interrupted
   case deadlineReached
+  /// Playback stopped after the deadline; the position was captured earlier.
+  case deadlineMissed
 }
 
 enum PlaybackOutcome: Equatable, Sendable {
@@ -23,19 +25,22 @@ struct PlaybackRecord: Equatable, Sendable {
   let plannedSession: PlannedSession
   let startedAt: Date
   let endedAt: Date
+  /// Evidence time for a late stop. This must be at or before the deadline.
+  let checkpointCapturedAt: Date?
   /// Active playback only; time paused must not be counted as played.
   let playedDuration: TimeInterval
   let outcome: PlaybackOutcome
 
   fileprivate init(
     id: ID, planID: String, plannedSession: PlannedSession, startedAt: Date, endedAt: Date,
-    playedDuration: TimeInterval, outcome: PlaybackOutcome
+    checkpointCapturedAt: Date?, playedDuration: TimeInterval, outcome: PlaybackOutcome
   ) {
     self.id = id
     self.planID = planID
     self.plannedSession = plannedSession
     self.startedAt = startedAt
     self.endedAt = endedAt
+    self.checkpointCapturedAt = checkpointCapturedAt
     self.playedDuration = playedDuration
     self.outcome = outcome
   }
@@ -80,29 +85,44 @@ struct NapPlayback: Equatable, Sendable {
 
   @discardableResult
   mutating func recordSession(
-    startedAt: Date, endedAt: Date, playedDuration: TimeInterval, outcome: PlaybackOutcome
+    startedAt: Date, endedAt: Date, playedDuration: TimeInterval, outcome: PlaybackOutcome,
+    checkpointCapturedAt: Date? = nil
   ) throws -> PlaybackRecord {
     guard !endedPartially, records.count < plan.route.count else {
       throw NapDomainError.playbackEnded
     }
-    let precision =
-      max(
-        startedAt.timeIntervalSinceReferenceDate.ulp, endedAt.timeIntervalSinceReferenceDate.ulp)
-      * 2
     guard startedAt.timeIntervalSinceReferenceDate.isFinite,
       endedAt.timeIntervalSinceReferenceDate.isFinite,
       startedAt >= (records.last?.endedAt ?? plan.narrationStart), endedAt >= startedAt,
-      startedAt < plan.deadline, playedDuration.isFinite, playedDuration >= 0,
-      playedDuration <= endedAt.timeIntervalSince(startedAt) + precision
+      startedAt < plan.deadline, playedDuration.isFinite, playedDuration >= 0
     else { throw NapDomainError.invalidPlaybackTime }
-    // Never infer a deadline checkpoint by clamping a late callback's position.
-    // Report the actual cutoff evidence instead; callback delivery time is not event time.
-    guard endedAt <= plan.deadline else { throw NapDomainError.deadlineExceeded }
+    if endedAt > plan.deadline {
+      guard case .partial(reason: .deadlineMissed, resumePoint: _) = outcome else {
+        throw NapDomainError.deadlineExceeded
+      }
+      guard let checkpointCapturedAt,
+        checkpointCapturedAt.timeIntervalSinceReferenceDate.isFinite,
+        checkpointCapturedAt >= startedAt, checkpointCapturedAt <= plan.deadline
+      else { throw NapDomainError.invalidPlaybackTime }
+    } else {
+      guard checkpointCapturedAt == nil else { throw NapDomainError.invalidPlaybackTime }
+      if case .partial(reason: .deadlineMissed, resumePoint: _) = outcome {
+        throw NapDomainError.invalidPlaybackTime
+      }
+    }
+    let evidenceEnd = checkpointCapturedAt ?? endedAt
+    let precision =
+      max(
+        startedAt.timeIntervalSinceReferenceDate.ulp,
+        evidenceEnd.timeIntervalSinceReferenceDate.ulp) * 2
+    guard playedDuration <= evidenceEnd.timeIntervalSince(startedAt) + precision else {
+      throw NapDomainError.invalidPlaybackTime
+    }
     let plannedSession = plan.route[records.count]
     var acceptedOutcome = outcome
     if case .partial(let reason, let resume) = outcome {
       guard resume.matches(plannedSession.session),
-        resume.utf16Offset >= (plannedSession.resumePoint?.utf16Offset ?? 0)
+        plannedSession.resumePoint.map({ resume.isAtOrAfter($0) }) ?? true
       else { throw NapDomainError.invalidResumePoint }
       guard reason != .deadlineReached || endedAt == plan.deadline else {
         throw NapDomainError.invalidPlaybackTime
@@ -114,7 +134,8 @@ struct NapPlayback: Equatable, Sendable {
     let record = PlaybackRecord(
       id: .init(runID: runID, routeIndex: records.count), planID: plan.id,
       plannedSession: plannedSession, startedAt: startedAt, endedAt: endedAt,
-      playedDuration: playedDuration, outcome: acceptedOutcome)
+      checkpointCapturedAt: checkpointCapturedAt, playedDuration: playedDuration,
+      outcome: acceptedOutcome)
     records.append(record)
     endedPartially = !record.isCompleted
     return record

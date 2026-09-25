@@ -57,13 +57,28 @@ struct NapCatalog: Equatable, Sendable {
   }
 }
 
-/// A script position, never elapsed seconds. The adapter supplies the position and
-/// remaining estimate for this exact revision; no speech speed is inferred here.
+/// A revision-bound position in either a script or prepared audio. Callers must never
+/// derive one kind of position from the other.
 struct ResumePoint: Equatable, Sendable {
+  private enum Position: Equatable, Sendable {
+    case script(utf16Offset: Int)
+    case audio(seconds: TimeInterval)
+  }
+
   let sessionID: Session.ID
   let revision: String
-  let utf16Offset: Int
+  private let position: Position
   let estimatedRemainingDuration: TimeInterval
+
+  var utf16Offset: Int? {
+    if case .script(let offset) = position { return offset }
+    return nil
+  }
+
+  var audioOffset: TimeInterval? {
+    if case .audio(let seconds) = position { return seconds }
+    return nil
+  }
 
   init(session: Session, utf16Offset: Int, estimatedRemainingDuration: TimeInterval) throws {
     guard utf16Offset >= 0 else { throw NapDomainError.invalidResumePoint }
@@ -72,12 +87,35 @@ struct ResumePoint: Equatable, Sendable {
     }
     self.sessionID = session.id
     self.revision = session.revision
-    self.utf16Offset = utf16Offset
+    self.position = .script(utf16Offset: utf16Offset)
+    self.estimatedRemainingDuration = estimatedRemainingDuration
+  }
+
+  init(session: Session, audioOffset: TimeInterval, estimatedRemainingDuration: TimeInterval) throws
+  {
+    guard audioOffset.isFinite, audioOffset >= 0 else {
+      throw NapDomainError.invalidResumePoint
+    }
+    guard estimatedRemainingDuration.isFinite, estimatedRemainingDuration > 0 else {
+      throw NapDomainError.invalidDuration
+    }
+    self.sessionID = session.id
+    self.revision = session.revision
+    self.position = .audio(seconds: audioOffset)
     self.estimatedRemainingDuration = estimatedRemainingDuration
   }
 
   func matches(_ session: Session) -> Bool {
     sessionID == session.id && revision == session.revision
+  }
+
+  /// A resumed run must keep its position kind and cannot move backwards.
+  func isAtOrAfter(_ earlier: ResumePoint) -> Bool {
+    switch (position, earlier.position) {
+    case (.script(let current), .script(let previous)): return current >= previous
+    case (.audio(let current), .audio(let previous)): return current >= previous
+    default: return false
+    }
   }
 }
 

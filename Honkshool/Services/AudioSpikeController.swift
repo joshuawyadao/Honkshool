@@ -549,8 +549,10 @@ final class AudioSpikeController: NSObject, ObservableObject {
     case .began:
       interruptionIsActive = true
       resumeAfterPause = false
-      MPRemoteCommandCenter.shared().playCommand.isEnabled = false
-      MPRemoteCommandCenter.shared().togglePlayPauseCommand.isEnabled = false
+      if handlesRemoteMedia {
+        MPRemoteCommandCenter.shared().playCommand.isEnabled = false
+        MPRemoteCommandCenter.shared().togglePlayPauseCommand.isEnabled = false
+      }
       guard phase == .narrating || phase == .ambience || phase == .paused else { return }
       if speechSynthesizer.isSpeaking {
         _ = requestNarrationPause()
@@ -567,8 +569,10 @@ final class AudioSpikeController: NSObject, ObservableObject {
       updateNowPlayingPlaybackRate(0)
     case .ended:
       interruptionIsActive = false
-      MPRemoteCommandCenter.shared().playCommand.isEnabled = true
-      MPRemoteCommandCenter.shared().togglePlayPauseCommand.isEnabled = true
+      if handlesRemoteMedia {
+        MPRemoteCommandCenter.shared().playCommand.isEnabled = true
+        MPRemoteCommandCenter.shared().togglePlayPauseCommand.isEnabled = true
+      }
       guard phase == .interrupted else { return }
       let rawOptions = notification.userInfo?[AVAudioSessionInterruptionOptionKey] as? UInt ?? 0
       let options = AVAudioSession.InterruptionOptions(rawValue: rawOptions)
@@ -641,11 +645,18 @@ final class AudioSpikeController: NSObject, ObservableObject {
     for (command, action) in actions {
       command.isEnabled = true
       let token = command.addTarget { [weak self] _ in
-        guard let self else { return .commandFailed }
+        guard let self, self.handlesRemoteMedia else { return .commandFailed }
         Task { @MainActor in action(self) }
         return .success
       }
       remoteCommandTokens.append((command, token))
+    }
+  }
+
+  private var handlesRemoteMedia: Bool {
+    switch phase {
+    case .narrating, .paused, .ambience, .interrupted: true
+    default: false
     }
   }
 

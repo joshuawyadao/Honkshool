@@ -4,6 +4,7 @@ struct FeasibilityConsoleView: View {
   @Environment(\.scenePhase) private var scenePhase
   @StateObject private var audio = AudioSpikeController()
   @StateObject private var alarm = AlarmSpikeService()
+  @StateObject private var napRun = NapRunController()
 
   @AppStorage("preferredRestMinutes", store: SpikePreferences.defaults)
   private var preferredRestMinutes = RestDurationPolicy.initialSavedMinutes
@@ -27,11 +28,15 @@ struct FeasibilityConsoleView: View {
       ScrollView {
         VStack(spacing: 16) {
           introductionCard
+          if napRun.phase != .idle {
+            napRunCard
+          }
           durationCard
-            .disabled(isStarting || alarm.isScheduling)
+            .disabled(isStarting || alarm.isScheduling || napRun.hasActiveRun)
           alarmCard
-            .disabled(isStarting || alarm.isScheduling)
+            .disabled(isStarting || alarm.isScheduling || napRun.hasActiveRun)
           playbackCard
+            .disabled(napRun.hasActiveRun)
           NavigationLink("Audio event log") {
             AudioEventLogView(audio: audio)
           }
@@ -40,11 +45,21 @@ struct FeasibilityConsoleView: View {
           NavigationLink {
             #if DEBUG
               NapPlanReviewView(
+                run: napRun,
+                canStart: {
+                  (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
+                    && !alarm.hasTrackedAlarm
+                },
                 clock: UITestFixtures.planReviewNow,
                 confirmationClock: UITestFixtures.planReviewConfirmationNow,
                 isNarrationAvailable: UITestFixtures.planReviewNarrationAvailable)
             #else
-              NapPlanReviewView()
+              NapPlanReviewView(
+                run: napRun,
+                canStart: {
+                  (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
+                    && !alarm.hasTrackedAlarm
+                })
             #endif
           } label: {
             Label("Choose and review a Nap Plan", systemImage: "checklist")
@@ -53,6 +68,7 @@ struct FeasibilityConsoleView: View {
           .buttonStyle(.borderedProminent)
           .controlSize(.large)
           .accessibilityIdentifier("openNapPlanReview")
+          .disabled(napRun.hasActiveRun)
         }
         .padding()
       }
@@ -74,11 +90,15 @@ struct FeasibilityConsoleView: View {
         guard scenePhase == .active else { return }
         alarm.refresh()
       }
+      .onChange(of: scenePhase) { _, next in
+        napRun.scenePhaseChanged(isActive: next == .active)
+      }
       .task(id: scenePhase == .active && alarm.needsCountdownReconciliation) {
         guard scenePhase == .active && alarm.needsCountdownReconciliation else { return }
         await alarm.reconcileCountdown()
       }
       .onAppear {
+        napRun.scenePhaseChanged(isActive: scenePhase == .active)
         alarm.refresh()
         guard !loadedPreferences else { return }
         loadedPreferences = true
@@ -90,6 +110,32 @@ struct FeasibilityConsoleView: View {
           startingAt: .now,
           minutes: selectedMinutes
         )
+      }
+    }
+  }
+
+  private var napRunCard: some View {
+    SpikeCard(title: "Nap Plan", systemImage: "waveform") {
+      VStack(alignment: .leading, spacing: 12) {
+        Text(napRun.statusMessage)
+          .accessibilityIdentifier("activeNapRunStatus")
+        HStack {
+          if napRun.phase == .narrating {
+            Button("Pause narration") { napRun.pause() }
+              .accessibilityIdentifier("parentPauseNapRun")
+          } else if napRun.phase == .paused || napRun.phase == .interrupted {
+            Button("Resume narration") { napRun.resume() }
+              .accessibilityIdentifier("parentResumeNapRun")
+          }
+          if napRun.hasActiveRun {
+            Button("Stop playback", role: .destructive) { napRun.stop() }
+              .accessibilityIdentifier("parentStopNapRun")
+          }
+        }
+        if !napRun.records.isEmpty {
+          Text("Completed sessions in this run: \(napRun.records.filter(\.isCompleted).count)")
+            .accessibilityIdentifier("parentNapRunCompletionCount")
+        }
       }
     }
   }

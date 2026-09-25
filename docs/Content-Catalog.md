@@ -2,7 +2,7 @@
 
 `Honkshool/Content/PreparedCatalog.swift` loads the app-bundled `Honkshool/Resources/PreparedCatalog.json`. It uses Foundation only and makes no network requests. This is the prepared-content boundary between authored narration and the existing [nap-planning domain](Nap-Planning-Domain.md).
 
-The catalog currently contains **How a Car Works → Turning Fuel Into Motion** at Enthusiast detail. The script is original, with paragraph-linked references and a configurable duration estimate informed by the complete prepared render. [Content-Review.md](Content-Review.md) records factual review and estimation evidence. The Nap Plan review screen offers only sessions whose narration file resolves in the app bundle; unavailable sessions also end a reviewed route before playback. The feasibility console plays the bundled narration through its separate spike flow; there is no production plan playback or persistence connection yet.
+The catalog currently contains **How a Car Works → Turning Fuel Into Motion** at Enthusiast detail. The script is original, with paragraph-linked references and a configurable duration estimate informed by the complete prepared render. [Content-Review.md](Content-Review.md) records factual review and estimation evidence. The Nap Plan review screen offers only sessions whose narration file resolves in the app bundle; unavailable sessions also end a reviewed route before playback. An alarm-free confirmed plan now resolves and plays the exact approved prepared file through the production run controller. The feasibility console keeps its separate spike flow; persistent history is not connected yet.
 
 ## Loading and planning
 
@@ -35,7 +35,7 @@ These structural checks do not prove factual accuracy, authorship, licensing, so
 
 `narration(resumingAt:)` checks the checkpoint's session ID and revision against the prepared session, then returns the exact script suffix at its UTF-16 offset. The offset must lie before the end of the script at a complete Swift `Character` boundary. Negative/out-of-range offsets, end-of-script checkpoints, mismatched revisions, and offsets inside surrogate pairs or combined characters are rejected. End-of-script playback belongs to completion handling, not an invented remaining segment.
 
-The future runtime must still capture actual speech progress and remaining-duration estimates. Character validation is not a claim that any arbitrary character is an ideal spoken restart point. The adapter owns word/utterance boundary selection and any mapping introduced by speech transformations.
+Prepared audio checkpoints use an exact playback time in seconds, bound to the session revision. `validateAudioResumePoint(_:)` rejects positions at or beyond the verified render duration; the runtime uses the remaining file duration as its estimate. It never derives a UTF-16 script position from audio time. Character validation is not a claim that any arbitrary character is an ideal spoken restart point. A future direct-speech adapter would still own word/utterance boundary selection and any mapping introduced by speech transformations.
 
 Keep IDs stable across editorial updates. Change `revision` whenever narration text or its resume positions change, including paragraph ordering or punctuation. A new script revision must not reuse old offsets. Changing a planning estimate or display-only source metadata need not change the spoken revision. Replay, restart, and alternate branches still append history under the existing domain contract.
 

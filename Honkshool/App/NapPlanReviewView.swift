@@ -1,8 +1,10 @@
 import SwiftUI
 
-/// Pre-play planning only. Neither confirmation nor this view starts audio or schedules an alarm.
+/// Review remains immutable; a separate controller executes the confirmed snapshot on request.
 struct NapPlanReviewView: View {
   private static let plannedStartLead: TimeInterval = 60
+  @ObservedObject private var run: NapRunController
+  private let canStart: () -> Bool
   private let clock: () -> Date
   private let confirmationClock: () -> Date
   private let makeID: () -> String
@@ -23,8 +25,11 @@ struct NapPlanReviewView: View {
   @State private var approvedNextJourney: [Journey.ID: Journey.ID] = [:]
   @State private var reviewState = NapPlanReviewState()
   @State private var reviewError: String?
+  @State private var runError: String?
 
   init(
+    run: NapRunController,
+    canStart: @escaping () -> Bool = { true },
     clock: @escaping () -> Date = { .now },
     confirmationClock: (() -> Date)? = nil,
     makeID: @escaping () -> String = { UUID().uuidString },
@@ -34,6 +39,8 @@ struct NapPlanReviewView: View {
     },
     availableAmbienceIDs: Set<String> = []
   ) {
+    self.run = run
+    self.canStart = canStart
     self.clock = clock
     self.confirmationClock = confirmationClock ?? clock
     self.makeID = makeID
@@ -156,7 +163,7 @@ struct NapPlanReviewView: View {
         Toggle("Request a wake alarm", isOn: $alarmEnabled)
           .accessibilityIdentifier("napPlanAlarm")
         Text(
-          "This review does not schedule an alarm. Playback and alarm setup are not connected yet."
+          "Alarm-requested plans can be reviewed, but cannot start until wake alarm scheduling is connected."
         )
         .font(.footnote)
         .foregroundStyle(.secondary)
@@ -369,7 +376,7 @@ struct NapPlanReviewView: View {
       }
 
       Text(
-        "Confirm by the planned rest start. Short exact wake windows allow less review time. If the start passes, the deadline and route will refresh for another review. Playback and alarm scheduling are not connected yet."
+        "Confirm by the planned rest start. Short exact wake windows allow less review time. If the start passes, the deadline and route will refresh for another review. Starting an alarm-free plan plays the approved local route."
       )
       .font(.footnote)
       .foregroundStyle(.secondary)
@@ -403,10 +410,8 @@ struct NapPlanReviewView: View {
 
   private func confirmedContent(_ confirmed: NapPlanReview) -> some View {
     card("Plan confirmed", systemImage: "checkmark.circle") {
-      Text(
-        "Your reviewed plan is confirmed for this screen. Playback has not started, and no wake alarm has been scheduled."
-      )
-      .accessibilityIdentifier("napPlanConfirmation")
+      Text("Your approved route and fixed deadline are ready for a start request.")
+        .accessibilityIdentifier("napPlanConfirmation")
       LabeledContent("Planned rest start") {
         Text(confirmed.plan.start.formatted(date: .abbreviated, time: .standard))
       }
@@ -419,6 +424,91 @@ struct NapPlanReviewView: View {
       LabeledContent(
         "Wake alarm",
         value: confirmed.plan.wakeAlarm == nil ? "Not requested" : "Requested, not scheduled")
+      if let runError {
+        Label(runError, systemImage: "exclamationmark.circle")
+          .foregroundStyle(.red)
+          .accessibilityIdentifier("napRunError")
+      }
+      if run.hasActiveRun {
+        Label(run.statusMessage, systemImage: "waveform")
+          .accessibilityIdentifier("napRunStatus")
+        if run.phase == .narrating {
+          Button("Pause narration") { run.pause() }
+            .accessibilityIdentifier("pauseNapRun")
+        } else if run.phase == .paused || run.phase == .interrupted {
+          Button("Resume narration") { run.resume() }
+            .accessibilityIdentifier("resumeNapRun")
+        }
+        Button("Stop playback", role: .destructive) { run.stop() }
+          .accessibilityIdentifier("stopNapRun")
+      } else if run.lastRunPlanID != confirmed.plan.id && runError == nil {
+        if confirmed.plan.wakeAlarm == nil {
+          Text(
+            "This run has no wake alarm. Keep Honkshool open until narration begins, then you can lock the phone. Set another alarm if you need one."
+          )
+          .font(.footnote)
+          .foregroundStyle(.secondary)
+          Button("Start resting") { startConfirmed(confirmed) }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .accessibilityIdentifier("startNapRun")
+        } else {
+          Text("The requested wake alarm has not been scheduled, so this plan cannot start.")
+            .accessibilityIdentifier("napRunAlarmGate")
+        }
+      } else if run.phase != .idle {
+        Label(run.statusMessage, systemImage: "info.circle")
+          .accessibilityIdentifier("napRunStatus")
+      }
+      if run.lastRunPlanID == confirmed.plan.id && !run.records.isEmpty {
+        Text("Completed sessions in this run: \(run.records.filter(\.isCompleted).count)")
+          .accessibilityIdentifier("napRunCompletionCount")
+      }
+      if run.lastRunPlanID == confirmed.plan.id
+        && (run.latestVerifiedCheckpoint != nil || !run.records.isEmpty)
+      {
+        Text("Playback evidence is in memory until local history is connected.")
+          .font(.footnote)
+          .foregroundStyle(.secondary)
+      }
+      if !run.hasActiveRun {
+        Button("Review another plan") {
+          run.resetPresentation()
+          reviewState = NapPlanReviewState()
+          reviewError = nil
+          runError = nil
+        }
+        .accessibilityIdentifier("reviewAnotherNapPlan")
+      }
+    }
+  }
+
+  private func startConfirmed(_ confirmed: NapPlanReview) {
+    guard canStart() else {
+      runError = "Stop the feasibility audio and cancel its test alarm before starting a Nap Plan."
+      return
+    }
+    guard let catalog else {
+      runError = "The prepared catalog is unavailable. Review a new plan."
+      return
+    }
+    do {
+      try run.start(review: confirmed, catalog: catalog)
+      runError = nil
+    } catch let error as NapRunError {
+      runError =
+        switch error {
+        case .staleStart: "The approved start passed. Review a new Nap Plan."
+        case .alarmUnavailable:
+          "The requested wake alarm cannot be scheduled yet. Review again without an alarm."
+        case .ambienceUnavailable: "The approved rest sound is unavailable. Review a new plan."
+        case .contentUnavailable: "The approved narration is unavailable. Review a new plan."
+        case .invalidCheckpoint: "The approved audio checkpoint is unavailable. Review a new plan."
+        case .audioUnavailable: "Audio could not start. Review a new plan after checking output."
+        case .alreadyRunning: "A Nap Plan is already running."
+        }
+    } catch {
+      runError = "The Nap Plan could not start: \(error.localizedDescription)"
     }
   }
 
