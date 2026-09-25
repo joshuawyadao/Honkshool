@@ -13,6 +13,7 @@ Connect alarm-requested confirmed Nap Plans to production AlarmKit while preserv
 - [x] Add unit tests for authorization, successful fixed-deadline scheduling, verification failure, uncertain outcomes, relaunch, cancellation, stale starts, alarm-free regression, and Stop retaining the alarm; update critical UI tests using isolated alarm fixtures.
 - [x] Run focused iOS tests, the full simulator suite, repository verification, Swift formatting, and a Release simulator build; inspect timing and alarm ownership edges and record physical-device checks that require the owner's iPhone.
 - [x] Update `README.md`, `docs/Nap-Planning-Domain.md`, `docs/Project-Implementation-Plan.md`, `docs/Project-Overview.md`, and the physical-device guide to describe the production boundary and remaining acceptance work.
+- [ ] Give the hosted iOS suite enough time to finish: the first PR run was still launching simulator tests when the 20-minute job limit cancelled it. Increase the CI limit, then verify the replacement run reaches a terminal passing result.
 - [ ] Commit the implementation in reviewable checkpoints, push `codex/nap-plan-alarmkit`, open the PR, request Codex review, run Brooks review, and shepherd CI and feedback until merge-ready or a concrete blocker remains.
 
 ## Open questions
@@ -22,4 +23,5 @@ Connect alarm-requested confirmed Nap Plans to production AlarmKit while preserv
 - Focused simulator integration: 29 passed, 0 failed on iPhone 17e / iOS 26.5 on an intermediate snapshot. The complete suite below validates the final simulator code. The final device-test cleanup edit passed a signed physical-device build.
 - Opt-in iPhone 18 Pro Max / iOS 27.0 production alarm and audio-cutoff test: 1 passed, 0 failed or skipped. It verified real alerting within five seconds and production audio cutoff within three seconds of the fixed deadline. Locked-screen interaction remains manual acceptance work.
 - Repository verification: 31 passed. Strict Swift formatting, Xcode project lint, and unsigned Release simulator build passed.
-- Complete iPhone 17e / iOS 26.5 simulator suite: 186 passed, 0 failed, 2 intentionally skipped physical-device tests. PR CI/review remain in progress.
+- Complete iPhone 17e / iOS 26.5 simulator suite: 186 passed, 0 failed, 2 intentionally skipped physical-device tests. PR CI rerun remains in progress; Codex and Brooks review are complete.
+- PR #7 review: Codex and Brooks found no actionable issues. The first hosted iOS run was cancelled by the 20-minute job timeout while `xcodebuild` continued launching simulator tests; Repository Verify passed.

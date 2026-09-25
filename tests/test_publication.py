@@ -194,7 +194,7 @@ class PublicRepositoryTests(unittest.TestCase):
 
         self.assertIn("runs-on: macos-26", workflow)
         self.assertIn("./scripts/test-ios.sh", workflow)
-        self.assertIn("timeout-minutes: 20", workflow)
+        self.assertIn("timeout-minutes: 40", workflow)
         self.assertIn("xcodebuild -quiet", test_script)
         self.assertIn("-parallel-testing-enabled NO", test_script)
         self.assertIn("HONKSHOOL_TEST_DESTINATION", test_script)
