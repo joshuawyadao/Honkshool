@@ -410,6 +410,24 @@ final class PreparedCatalogTests: XCTestCase {
     }
   }
 
+  func testAudioResumeRejectsReplacedRenderWithUnchangedSessionRevision() throws {
+    let catalog = try PreparedCatalog.load()
+    let prepared = try XCTUnwrap(catalog.sessions.values.first)
+    let asset = try XCTUnwrap(prepared.narrationAsset)
+    let valid = try ResumePoint(
+      session: prepared.session, audioOffset: 120,
+      estimatedRemainingDuration: asset.duration - 120, audioAssetSHA256: asset.sha256)
+    XCTAssertNoThrow(try prepared.validateAudioResumePoint(valid))
+    let replaced = try ResumePoint(
+      session: prepared.session, audioOffset: 120,
+      estimatedRemainingDuration: asset.duration - 120,
+      audioAssetSHA256: String(repeating: "0", count: 64))
+    XCTAssertThrowsError(try prepared.validateAudioResumePoint(replaced)) {
+      XCTAssertEqual($0 as? NapDomainError, .invalidResumePoint)
+    }
+    XCTAssertFalse(replaced.isAtOrAfter(valid))
+  }
+
   func testBundledSessionPlansAnExactFitWithInjectedTimeAndIdentity() throws {
     let catalog = try PreparedCatalog.load()
     let prepared = try XCTUnwrap(catalog.sessions["turning-fuel-into-motion"])

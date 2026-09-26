@@ -5,6 +5,8 @@ struct NapPlanReviewView: View {
   private static let plannedStartLead: TimeInterval = 60
   @ObservedObject private var run: NapRunController
   @ObservedObject private var alarm: NapPlanAlarmService
+  @ObservedObject private var historyStore: ListeningHistoryStore
+  private let initialSelection: SessionSelection?
   private let canStart: () -> Bool
   private let clock: () -> Date
   private let confirmationClock: () -> Date
@@ -17,6 +19,8 @@ struct NapPlanReviewView: View {
   @State private var reviewCatalog: NapCatalog?
   @State private var loadError: String?
   @State private var selectionIndex = 0
+  @State private var selectedResumePoint: ResumePoint?
+  @State private var seedError: String?
   @State private var durationMinutes = 20
   @State private var usesExactWakeTime = false
   @State private var exactWakeTime: Date
@@ -33,6 +37,8 @@ struct NapPlanReviewView: View {
   init(
     run: NapRunController,
     alarm: NapPlanAlarmService,
+    historyStore: ListeningHistoryStore,
+    startingAt initialSelection: SessionSelection? = nil,
     canStart: @escaping () -> Bool = { true },
     clock: @escaping () -> Date = { .now },
     confirmationClock: (() -> Date)? = nil,
@@ -45,6 +51,8 @@ struct NapPlanReviewView: View {
   ) {
     self.run = run
     self.alarm = alarm
+    self.historyStore = historyStore
+    self.initialSelection = initialSelection
     self.canStart = canStart
     self.clock = clock
     self.confirmationClock = confirmationClock ?? clock
@@ -61,6 +69,13 @@ struct NapPlanReviewView: View {
   var body: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 20) {
+        if let error = historyStore.errorMessage {
+          Label(error, systemImage: "exclamationmark.triangle")
+            .foregroundStyle(.red)
+            .accessibilityIdentifier("napHistorySaveError")
+          Button("Retry saving") { historyStore.retrySave() }
+            .accessibilityIdentifier("retryNapHistorySave")
+        }
         Text(
           "Choose what you would like to hear, then review the entire route and fixed wake deadline before confirming."
         )
@@ -95,8 +110,30 @@ struct NapPlanReviewView: View {
       guard catalog == nil && loadError == nil else { return }
       do {
         let loaded = try loadCatalog()
-        reviewCatalog = try loaded.reviewCatalog(isNarrationAvailable: isNarrationAvailable)
+        let playable = try loaded.reviewCatalog(isNarrationAvailable: isNarrationAvailable)
+        reviewCatalog = playable
         catalog = loaded
+        if let initialSelection {
+          let options = sessionOptions(in: loaded, reviewCatalog: playable)
+          if let index = options.firstIndex(where: {
+            $0.journey.id == initialSelection.journeyID
+              && $0.session.id == initialSelection.sessionID
+          }) {
+            selectionIndex = index
+            if let point = initialSelection.resumePoint {
+              let prepared = loaded.sessions[initialSelection.sessionID]
+              if let prepared, (try? prepared.validateAudioResumePoint(point)) != nil {
+                selectedResumePoint = point
+              } else {
+                seedError =
+                  "The saved position no longer matches available audio. Choose current content and review a new plan."
+              }
+            }
+          } else {
+            seedError =
+              "The requested session is no longer prepared or its audio is unavailable. Choose current content and review a new plan."
+          }
+        }
       } catch {
         loadError = "The prepared catalog could not be loaded. \(error.localizedDescription)"
       }
@@ -109,14 +146,53 @@ struct NapPlanReviewView: View {
       card("Available content", systemImage: "book") {
         if options.isEmpty {
           Text("No prepared sessions are available for planning.")
+          if let seedError {
+            Label(seedError, systemImage: "exclamationmark.circle")
+              .foregroundStyle(.red)
+              .accessibilityIdentifier("napPlanSeedError")
+          }
         } else {
-          Picker("Start with", selection: $selectionIndex) {
+          Picker(
+            "Start with",
+            selection: Binding(
+              get: { selectionIndex },
+              set: { index in
+                selectionIndex = index
+                selectedResumePoint = nil
+                seedError = nil
+                shorterIndices.removeAll()
+                invalidateReview()
+              }
+            )
+          ) {
             ForEach(options.indices, id: \.self) { index in
               Text("\(options[index].journey.title) · \(options[index].session.title)")
                 .tag(index)
             }
           }
           .accessibilityIdentifier("napPlanContent")
+          if let seedError {
+            Label(seedError, systemImage: "exclamationmark.circle")
+              .foregroundStyle(.red)
+              .accessibilityIdentifier("napPlanSeedError")
+            Button("Start current session from beginning") {
+              selectedResumePoint = nil
+              self.seedError = nil
+              invalidateReview()
+            }
+            .accessibilityIdentifier("napPlanClearSeedError")
+          }
+          if let selectedResumePoint {
+            Text(
+              "Resume at \(ListeningHistoryView.position(selectedResumePoint)); about \(ListeningHistoryView.duration(selectedResumePoint.estimatedRemainingDuration)) of narration remains."
+            )
+            .accessibilityIdentifier("napPlanResumePosition")
+            Button("Start this session over") {
+              self.selectedResumePoint = nil
+              invalidateReview()
+            }
+            .accessibilityIdentifier("napPlanStartOver")
+          }
           Text(
             "Only prepared content can be selected. The plan never searches for new content during rest."
           )
@@ -179,7 +255,9 @@ struct NapPlanReviewView: View {
       if let selected = options.indices.contains(selectionIndex) ? options[selectionIndex] : nil {
         let shorter = options.indices.filter {
           $0 != selectionIndex
-            && options[$0].session.estimatedDuration < selected.session.estimatedDuration
+            && options[$0].session.estimatedDuration
+              < (selectedResumePoint?.estimatedRemainingDuration
+                ?? selected.session.estimatedDuration)
         }
         card("Shorter options", systemImage: "text.line.first.and.arrowtriangle.forward") {
           if shorter.isEmpty {
@@ -253,12 +331,8 @@ struct NapPlanReviewView: View {
       }
       .buttonStyle(.borderedProminent)
       .controlSize(.large)
-      .disabled(options.isEmpty)
+      .disabled(options.isEmpty || seedError != nil)
       .accessibilityIdentifier("reviewNapPlan")
-    }
-    .onChange(of: selectionIndex) { _, _ in
-      shorterIndices.removeAll()
-      invalidateReview()
     }
     .onChange(of: durationMinutes) { _, _ in invalidateReview() }
     .onChange(of: usesExactWakeTime) { _, _ in invalidateReview() }
@@ -288,7 +362,9 @@ struct NapPlanReviewView: View {
     }
     let request = NapRequest(
       window: window,
-      startingAt: SessionSelection(journeyID: selected.journey.id, sessionID: selected.session.id),
+      startingAt: SessionSelection(
+        journeyID: selected.journey.id, sessionID: selected.session.id,
+        resumePoint: selectedResumePoint),
       shorterAlternatives: alternatives,
       approvedTransitions: transitions,
       fallback: selectedSoundID.map(RestSound.ambience(id:)) ?? .silence,
@@ -309,6 +385,12 @@ struct NapPlanReviewView: View {
   private func reviewContent(_ review: NapPlanReview) -> some View {
     Group {
       card("Review before confirming", systemImage: "checklist") {
+        if let point = review.route.first?.planned.resumePoint {
+          Text(
+            "Narration resumes at \(ListeningHistoryView.position(point)); about \(ListeningHistoryView.duration(point.estimatedRemainingDuration)) remains."
+          )
+          .accessibilityIdentifier("napPlanReviewedResume")
+        }
         LabeledContent("Planned rest start") {
           Text(review.plan.start.formatted(date: .abbreviated, time: .standard))
         }
@@ -484,13 +566,6 @@ struct NapPlanReviewView: View {
       if run.lastRunPlanID == confirmed.plan.id && !run.records.isEmpty {
         Text("Completed sessions in this run: \(run.records.filter(\.isCompleted).count)")
           .accessibilityIdentifier("napRunCompletionCount")
-      }
-      if run.lastRunPlanID == confirmed.plan.id
-        && (run.latestVerifiedCheckpoint != nil || !run.records.isEmpty)
-      {
-        Text("Playback evidence is in memory until local history is connected.")
-          .font(.footnote)
-          .foregroundStyle(.secondary)
       }
       if !run.hasActiveRun {
         if alarm.hasTrackedAlarm {

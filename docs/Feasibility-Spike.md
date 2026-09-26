@@ -272,6 +272,12 @@ On the target iPhone with a signed build, clear any older tracked Nap Plan alarm
 
 Authorization messaging, scheduling failure, in-app Stop and pause/resume, active-alarm scrolling, event-log navigation, snooze/paused/ringing/unavailable presentation, cancellation routing, reusable duration persistence, exact-time control availability, and the Live Activity’s large-text height are automated. The renderer cannot reproduce Apple’s system-hosted card exactly; the owner’s visual confirmation is separate physical-device evidence. Repeat affected physical checks when audio/alarm behavior or the target device/OS changes. A separate real-call check, numerical narration-duration measurements, and accessibility sizes beyond the first accessibility setting are not covered by this closeout.
 
+## Local history acceptance
+
+From the separate Nap Plan flow, play part of the prepared session, stop, and open Listening History. Check its partial position and played duration. Relaunch the app, choose Resume, and verify a fresh review shows the saved position and the new fixed deadline; audio must not start until explicitly approved and started. Complete the resumed narration and confirm the earlier attempt remains while journey progress advances only once.
+
+For unexpected-exit recovery, terminate during narration after a checkpoint has been saved, then reopen. The entry should say **Last verified checkpoint**, preserve the captured position, and never claim the run completed or stopped at that time. Alarm tracking is independent: stopping or reopening playback must not silently cancel or replace a tracked wake alarm. Local automated tests cover disk reopen, recovery, retry failures, and the history-to-review flow; those results do not establish physical locked-screen reliability. Record physical results only after performing these checks.
+
 ## Recording results
 
 For each test, record only:
