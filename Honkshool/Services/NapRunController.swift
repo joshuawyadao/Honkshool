@@ -108,6 +108,7 @@ final class NapRunController: NSObject, ObservableObject {
   private let activateAudioSession: @MainActor () throws -> Void
   private let deactivateAudioSession: @MainActor () -> Void
   private let manageRemoteCommands: Bool
+  private let history: (any NapHistoryRecording)?
   private var route: [PreparedRouteItem] = []
   private var playback: NapPlayback?
   private var player: NapRunAudioPlaying?
@@ -159,7 +160,8 @@ final class NapRunController: NSObject, ObservableObject {
         false, options: .notifyOthersOnDeactivation)
     },
     observeSystemEvents: Bool = true,
-    manageRemoteCommands: Bool = true
+    manageRemoteCommands: Bool = true,
+    history: (any NapHistoryRecording)? = nil
   ) {
     self.playerFactory = playerFactory
     self.clock = clock
@@ -167,6 +169,7 @@ final class NapRunController: NSObject, ObservableObject {
     self.activateAudioSession = activateAudioSession
     self.deactivateAudioSession = deactivateAudioSession
     self.manageRemoteCommands = manageRemoteCommands
+    self.history = history
     super.init()
     if observeSystemEvents { installAudioObservers() }
   }
@@ -249,6 +252,7 @@ final class NapRunController: NSObject, ObservableObject {
   func pause() {
     guard phase == .narrating, let player else { return }
     player.pause()
+    if let token = activeToken { captureCheckpoint(token: token) }
     phase = .paused
     statusMessage = "Paused. Resume explicitly when ready."
     updateNowPlayingRate(0)
@@ -294,8 +298,13 @@ final class NapRunController: NSObject, ObservableObject {
 
   func scenePhaseChanged(isActive: Bool) {
     appIsForeground = isActive
-    guard !isActive, waitingForNarration, let token = activeToken else { return }
-    fail("The app left the foreground before narration began. Review a new Nap Plan.", token: token)
+    guard !isActive, let token = activeToken else { return }
+    if waitingForNarration {
+      fail(
+        "The app left the foreground before narration began. Review a new Nap Plan.", token: token)
+    } else {
+      captureCheckpoint(token: token)
+    }
   }
 
   func resetPresentation() {
@@ -449,6 +458,7 @@ final class NapRunController: NSObject, ObservableObject {
         startedAt: started, endedAt: now, playedDuration: played, outcome: .completed)
       self.playback = updated
       records.append(record)
+      history?.save(record, isCheckpoint: false)
       latestVerifiedCheckpoint = nil
       releasePlayer()
       startNextSession(token: token)
@@ -513,7 +523,8 @@ final class NapRunController: NSObject, ObservableObject {
       let planned = route[playback.records.count].planned
       let point = try ResumePoint(
         session: planned.session, audioOffset: offset,
-        estimatedRemainingDuration: player.duration - offset)
+        estimatedRemainingDuration: player.duration - offset,
+        audioAssetSHA256: route[playback.records.count].prepared.narrationAsset?.sha256)
       let played = min(max(0, offset - currentSessionOffset), now.timeIntervalSince(started))
       var updated = playback
       let record = try updated.recordSession(
@@ -521,6 +532,7 @@ final class NapRunController: NSObject, ObservableObject {
         outcome: .partial(reason: reason, resumePoint: point))
       self.playback = updated
       records.append(record)
+      history?.save(record, isCheckpoint: false)
       latestVerifiedCheckpoint = NapRunCheckpoint(
         capturedAt: now, resumePoint: point, playedDuration: played)
     } catch {
@@ -543,6 +555,7 @@ final class NapRunController: NSObject, ObservableObject {
         checkpointCapturedAt: checkpoint.capturedAt)
       self.playback = updated
       records.append(record)
+      history?.save(record, isCheckpoint: false)
     } catch {
       statusMessage = "The late cutoff could not be recorded from its earlier checkpoint."
     }
@@ -568,11 +581,22 @@ final class NapRunController: NSObject, ObservableObject {
     let planned = route[playback.records.count].planned
     if let point = try? ResumePoint(
       session: planned.session, audioOffset: offset,
-      estimatedRemainingDuration: player.duration - offset)
+      estimatedRemainingDuration: player.duration - offset,
+      audioAssetSHA256: route[playback.records.count].prepared.narrationAsset?.sha256)
     {
       latestVerifiedCheckpoint = NapRunCheckpoint(
         capturedAt: now, resumePoint: point,
         playedDuration: min(max(0, offset - currentSessionOffset), now.timeIntervalSince(started)))
+      // A copied domain run validates this evidence without ending the live run.
+      // On relaunch it remains a checkpoint at this instant, never a guessed stop time.
+      var snapshot = playback
+      if let record = try? snapshot.recordSession(
+        startedAt: started, endedAt: now,
+        playedDuration: min(max(0, offset - currentSessionOffset), now.timeIntervalSince(started)),
+        outcome: .partial(reason: .interrupted, resumePoint: point))
+      {
+        history?.save(record, isCheckpoint: true)
+      }
     }
     cancelCheckpoint?()
     cancelCheckpoint = scheduler(min(5, playback.plan.deadline.timeIntervalSince(now))) {
@@ -650,6 +674,7 @@ final class NapRunController: NSObject, ObservableObject {
       }
       guard phase == .narrating || phase == .paused else { return }
       player?.pause()
+      if let token = activeToken { captureCheckpoint(token: token) }
       phase = .interrupted
       statusMessage = "Audio was interrupted. Resume manually when ready."
       updateNowPlayingRate(0)
@@ -673,6 +698,7 @@ final class NapRunController: NSObject, ObservableObject {
       phase == .narrating || phase == .paused
     else { return }
     player?.pause()
+    if let token = activeToken { captureCheckpoint(token: token) }
     phase = .interrupted
     statusMessage = "Audio output disconnected. Resume manually after choosing an output."
     updateNowPlayingRate(0)

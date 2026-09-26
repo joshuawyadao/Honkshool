@@ -45,6 +45,55 @@ struct PlaybackRecord: Equatable, Sendable {
     self.outcome = outcome
   }
 
+  /// Validate persisted identity, position, and timing before restoring historical evidence.
+  /// The original plan is intentionally not reconstructed from historical content.
+  init(
+    restoringID id: ID, planID: String, plannedSession: PlannedSession, startedAt: Date,
+    endedAt: Date, checkpointCapturedAt: Date?, playedDuration: TimeInterval,
+    outcome: PlaybackOutcome
+  ) throws {
+    guard !id.runID.isEmpty, id.routeIndex >= 0, !planID.isEmpty,
+      !plannedSession.journeyID.isEmpty,
+      plannedSession.estimatedStart.timeIntervalSinceReferenceDate.isFinite,
+      plannedSession.estimatedEnd.timeIntervalSinceReferenceDate.isFinite,
+      plannedSession.estimatedEnd > plannedSession.estimatedStart,
+      startedAt.timeIntervalSinceReferenceDate.isFinite,
+      endedAt.timeIntervalSinceReferenceDate.isFinite,
+      endedAt >= startedAt, playedDuration.isFinite, playedDuration >= 0
+    else { throw NapDomainError.invalidPlaybackTime }
+    if let resume = plannedSession.resumePoint {
+      guard resume.matches(plannedSession.session) else { throw NapDomainError.invalidResumePoint }
+    }
+    switch outcome {
+    case .completed:
+      guard checkpointCapturedAt == nil else { throw NapDomainError.invalidPlaybackTime }
+    case .partial(let reason, let point):
+      guard point.matches(plannedSession.session),
+        plannedSession.resumePoint.map({ point.isAtOrAfter($0) }) ?? true
+      else { throw NapDomainError.invalidResumePoint }
+      if reason == .deadlineMissed {
+        guard let checkpointCapturedAt,
+          checkpointCapturedAt.timeIntervalSinceReferenceDate.isFinite,
+          checkpointCapturedAt >= startedAt, checkpointCapturedAt <= endedAt
+        else { throw NapDomainError.invalidPlaybackTime }
+      } else {
+        guard checkpointCapturedAt == nil else { throw NapDomainError.invalidPlaybackTime }
+      }
+    }
+    let evidenceEnd = checkpointCapturedAt ?? endedAt
+    let precision =
+      max(
+        startedAt.timeIntervalSinceReferenceDate.ulp,
+        evidenceEnd.timeIntervalSinceReferenceDate.ulp) * 2
+    guard playedDuration <= evidenceEnd.timeIntervalSince(startedAt) + precision else {
+      throw NapDomainError.invalidPlaybackTime
+    }
+    self.init(
+      id: id, planID: planID, plannedSession: plannedSession, startedAt: startedAt,
+      endedAt: endedAt, checkpointCapturedAt: checkpointCapturedAt,
+      playedDuration: playedDuration, outcome: outcome)
+  }
+
   var isCompleted: Bool { outcome == .completed }
 
   var resumePoint: ResumePoint? {

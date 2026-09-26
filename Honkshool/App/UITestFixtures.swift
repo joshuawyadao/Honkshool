@@ -33,6 +33,7 @@ enum SpikePreferences {
     static let planNowEnvironmentKey = "HONKSHOOL_UI_TEST_PLAN_NOW"
     static let planConfirmOffsetEnvironmentKey = "HONKSHOOL_UI_TEST_PLAN_CONFIRM_OFFSET"
     static let planContentUnavailableEnvironmentKey = "HONKSHOOL_UI_TEST_PLAN_CONTENT_UNAVAILABLE"
+    static let seedHistoryEnvironmentKey = "HONKSHOOL_UI_TEST_SEED_HISTORY"
 
     private static let alarmID = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
     private static let storedAlarmIDKey = "feasibilityAlarmID"
@@ -69,6 +70,7 @@ enum SpikePreferences {
       guard isEnabled else { return }
       let defaults = defaults ?? SpikePreferences.defaults
       if ProcessInfo.processInfo.environment[resetEnvironmentKey] == "1" {
+        try? FileManager.default.removeItem(at: historyDirectoryURL)
         defaults.removeObject(forKey: storedAlarmIDKey)
         defaults.removeObject(forKey: storedAlarmDateKey)
         defaults.removeObject(forKey: "napPlanAlarmReceipt")
@@ -78,6 +80,48 @@ enum SpikePreferences {
       guard scenario?.startsWithTrackedAlarm == true else { return }
       defaults.set(alarmID.uuidString, forKey: storedAlarmIDKey)
       defaults.set(Date.now.timeIntervalSince1970, forKey: storedAlarmDateKey)
+    }
+
+    static func makeHistoryStore() -> ListeningHistoryStore {
+      guard isEnabled else { return ListeningHistoryStore() }
+      let store = ListeningHistoryStore(
+        storeURL: historyDirectoryURL.appendingPathComponent("history.sqlite"))
+      if ProcessInfo.processInfo.environment[seedHistoryEnvironmentKey] == "1",
+        store.entries.isEmpty
+      {
+        do {
+          let catalog = try PreparedCatalog.load()
+          guard let journey = catalog.journeys.first,
+            let sessionID = journey.sessionIDs.first,
+            let prepared = catalog.sessions[sessionID],
+            let asset = prepared.narrationAsset
+          else { return store }
+          let point = try ResumePoint(
+            session: prepared.session, audioOffset: 120,
+            estimatedRemainingDuration: asset.duration - 120,
+            audioAssetSHA256: asset.sha256)
+          let end = Date.now.addingTimeInterval(-60)
+          let planned = PlannedSession(
+            journeyID: journey.id, session: prepared.session, resumePoint: nil,
+            estimatedStart: end.addingTimeInterval(-120),
+            estimatedEnd: end.addingTimeInterval(prepared.session.estimatedDuration - 120))
+          let record = try PlaybackRecord(
+            restoringID: .init(runID: "ui-test-seed", routeIndex: 0),
+            planID: "ui-test-seed-plan", plannedSession: planned,
+            startedAt: end.addingTimeInterval(-120), endedAt: end,
+            checkpointCapturedAt: nil, playedDuration: 120,
+            outcome: .partial(reason: .stopped, resumePoint: point))
+          store.save(record, isCheckpoint: true)
+        } catch {
+          assertionFailure("UI history seed failed: \(error)")
+        }
+      }
+      return store
+    }
+
+    private static var historyDirectoryURL: URL {
+      FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        .appendingPathComponent("Honkshool-UITests-ListeningHistory", isDirectory: true)
     }
 
     static func makeAlarmSystem() -> (any AlarmSystem)? {

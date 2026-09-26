@@ -57,6 +57,9 @@ xcuserdata/
 *.sqlite
 *.sqlite3
 *.db
+*.store
+*.store-shm
+*.store-wal
 *.log
 *.tmp
 *.temp

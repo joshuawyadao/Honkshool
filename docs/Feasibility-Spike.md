@@ -24,7 +24,7 @@ The generated noise exists only to test the transition and background audio path
 
 The catalog resolves `Turning-Fuel-Into-Motion-George.wav` by resource name and records its exact 727.625-second duration and SHA-256. Start visibly fails if catalog or audio loading fails; there is no Apple-voice fallback. AVAudioPlayer exposes pause/resume and completion while the existing controller owns the exclusive audio session, route and interruption policy, remote commands, Now Playing metadata, ambience/silence transition, and Stop behavior.
 
-The run captures its planned wake deadline before playback. An injected clock lets the controller schedule only the time remaining after audio setup and refuse playback if setup has already passed wake. It also checks the deadline before resume and natural-completion transitions in case the scheduled callback is delayed. The scheduler stops either prepared narration or subsequent ambience at the fixed date when the app can execute; iOS scheduling may still deliver a callback late while the process is suspended. Stop and replacement invalidate the run identity and deadline task before touching AVFoundation, so a late completion callback cannot start ambience for an old run. This console records events but does not persist partial position or mark sessions complete; the production Nap Plan/history adapter must use the domain completion rules later.
+The run captures its planned wake deadline before playback. An injected clock lets the controller schedule only the time remaining after audio setup and refuse playback if setup has already passed wake. It also checks the deadline before resume and natural-completion transitions in case the scheduled callback is delayed. The scheduler stops either prepared narration or subsequent ambience at the fixed date when the app can execute; iOS scheduling may still deliver a callback late while the process is suspended. Stop and replacement invalidate the run identity and deadline task before touching AVFoundation, so a late completion callback cannot start ambience for an old run. This console records events but does not persist partial position or mark sessions complete; the separate production Nap Plan/history adapter now persists playback according to the domain completion rules.
 
 The complete asset is 34,926,044 bytes versus 327,212,226 bytes for the pinned model checkpoint alone. Preparation-time generation is the selected prototype architecture under D-024. It preserves exact audio and duration, avoids inference latency and power use during a nap, and requires no network. See [Audio-Preparation.md](Audio-Preparation.md) for fingerprints and reproduction steps.
 
@@ -272,6 +272,12 @@ On the target iPhone with a signed build, clear any older tracked Nap Plan alarm
 
 Authorization messaging, scheduling failure, in-app Stop and pause/resume, active-alarm scrolling, event-log navigation, snooze/paused/ringing/unavailable presentation, cancellation routing, reusable duration persistence, exact-time control availability, and the Live Activity’s large-text height are automated. The renderer cannot reproduce Apple’s system-hosted card exactly; the owner’s visual confirmation is separate physical-device evidence. Repeat affected physical checks when audio/alarm behavior or the target device/OS changes. A separate real-call check, numerical narration-duration measurements, and accessibility sizes beyond the first accessibility setting are not covered by this closeout.
 
+## Local history acceptance
+
+From the separate Nap Plan flow, play part of the prepared session, stop, and open Listening History. Check its partial position and played duration. Relaunch the app, choose Resume, and verify a fresh review shows the saved position and the new fixed deadline; audio must not start until explicitly approved and started. Complete the resumed narration and confirm the earlier attempt remains while journey progress advances only once.
+
+For unexpected-exit recovery, terminate during narration after a checkpoint has been saved, then reopen. The entry should say **Last verified checkpoint**, preserve the captured position, and never claim the run completed or stopped at that time. Alarm tracking is independent: stopping or reopening playback must not silently cancel or replace a tracked wake alarm. Local automated tests cover disk reopen, recovery, retry failures, and the history-to-review flow; those results do not establish physical locked-screen reliability. Record physical results only after performing these checks.
+
 ## Recording results
 
 For each test, record only:
@@ -282,4 +288,4 @@ For each test, record only:
 - whether the screen was locked and the app foregrounded, backgrounded, or terminated; and
 - a concise behavior note or reproducible failure.
 
-Phase 0 and the framework-independent Nap Plan core are complete. D-023 selects the George sound and D-024 connects a prepared version to this console. The next milestone is focused device acceptance followed by production plan-review, playback-progress, and history integration; this console is not a supported product release.
+Phase 0 and the framework-independent Nap Plan core are complete. D-023 selects the George sound and D-024 connects a prepared version to this console. Production plan review, playback progress, and local history are now integrated in the separate Nap Plan flow. Focused device acceptance and personal nap validation remain; this console is not a supported product release.
