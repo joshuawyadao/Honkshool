@@ -12,7 +12,7 @@ Persist verified Nap Plan playback locally and expose history, Continue, Resume,
 - [x] Connect runtime completion, partial outcomes, and periodic/pause checkpoints to storage; preserve the fixed deadline and separately owned alarm, and recover uncertain exits as partial evidence without inferring a stop time or completion.
 - [x] Add chronological history and Continue/Resume/Replay entry points that validate current prepared content and seed a fresh Nap Plan review; expose completion-based progress without rewriting prior attempts.
 - [x] Add persistence reopen/round-trip, checkpoint recovery, idempotency, stale-revision, storage-failure, runtime, and critical history-to-review UI coverage with isolated test stores.
-- [ ] Run targeted simulator tests, the full iOS suite, repository verification, strict Swift formatting, project lint, and an unsigned Release build; review timing, storage, and privacy boundaries.
+- [x] Run targeted simulator tests, the full iOS suite, repository verification, strict Swift formatting, project lint, and an unsigned Release build; review timing, storage, and privacy boundaries.
 - [x] Update README.md, docs/Nap-Planning-Domain.md, docs/Project-Implementation-Plan.md, docs/Project-Overview.md, and docs/Feasibility-Spike.md with storage, recovery, user flow, and remaining device acceptance.
 - [ ] Save coherent local checkpoints, push codex/local-history, open a PR, request Codex review, run Brooks review, and address actionable feedback/CI until merge-ready or a concrete blocker remains.
 
@@ -25,3 +25,7 @@ Persist verified Nap Plan playback locally and expose history, Continue, Resume,
 
 - Focused simulator suite: 53 passed, no failures on iPhone 17e / iOS 26.5; added a final storage-failure runtime regression for the full run. New history UI suite passed. Repository checks: 31 passed. Strict formatting and project lint passed.
 - Correctness review: no blocker; corrected Continue wording to describe resuming the current session. Additional checks bind saved audio positions to the prepared render fingerprint and distinguish unavailable history/content from completed journeys.
+
+- Final local validation: 204 passed, 0 failed, 2 intentionally skipped physical-device tests on iPhone 17e / iOS 26.5; 31 repository checks passed; strict Swift formatting, project lint, and unsigned Release simulator build passed. XCTest emitted internal QoS warnings in existing spike tests without failures.
+- Safety checkpoints: ac06c6b (resolved plan), fa6dd43 (history implementation, tests, and docs). Added SwiftData store/sidecar ignore patterns before publication.
+- PR review/check outcomes will be tracked in the live PR and the final task report; this committed plan records the local implementation and validation baseline.
