@@ -71,6 +71,7 @@ enum SpikePreferences {
       if ProcessInfo.processInfo.environment[resetEnvironmentKey] == "1" {
         defaults.removeObject(forKey: storedAlarmIDKey)
         defaults.removeObject(forKey: storedAlarmDateKey)
+        defaults.removeObject(forKey: "napPlanAlarmReceipt")
         defaults.set(RestDurationPolicy.initialSavedMinutes, forKey: "preferredRestMinutes")
       }
 

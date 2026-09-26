@@ -28,13 +28,62 @@ final class NapPlanReviewUITests: XCTestCase {
     let confirmation = app.staticTexts["napPlanConfirmation"]
     XCTAssertTrue(confirmation.waitForExistence(timeout: 5))
     XCTAssertTrue(confirmation.label.contains("approved route and fixed deadline"))
-    XCTAssertTrue(app.staticTexts["napRunAlarmGate"].exists)
-    XCTAssertFalse(app.buttons["startNapRun"].exists)
+    XCTAssertTrue(app.buttons["startNapRun"].exists)
     XCTAssertTrue(app.staticTexts["napPlanConfirmedStart"].label.contains("Planned rest start"))
     XCTAssertFalse(app.buttons["reviewNapPlan"].exists)
     XCTAssertTrue(
       app.staticTexts["napPlanConfirmedDeadline"].label.contains(
         deadline.replacingOccurrences(of: "Fixed wake deadline, ", with: "")))
+  }
+
+  func testAlarmRequestedSchedulesBeforeRunAndSurvivesPlaybackStop() {
+    let app = launchReview()
+    let review = app.buttons["reviewNapPlan"]
+    scrollTo(review, in: app)
+    review.tap()
+    let confirm = app.buttons["confirmNapPlan"]
+    scrollTo(confirm, in: app)
+    confirm.tap()
+
+    let start = app.buttons["startNapRun"]
+    scrollTo(start, in: app)
+    start.tap()
+    XCTAssertTrue(app.staticTexts["napRunStatus"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["napRunStatus"].label.contains("Keep Honkshool open"))
+    app.navigationBars["Nap Plan"].buttons.element(boundBy: 0).tap()
+
+    let alarmStatus = app.staticTexts["parentNapPlanAlarmStatus"]
+    scrollTo(alarmStatus, in: app)
+    XCTAssertTrue(alarmStatus.label.contains("scheduled"))
+    XCTAssertFalse(app.buttons["parentCancelNapPlanAlarm"].exists)
+
+    let stop = app.buttons["parentStopNapRun"]
+    scrollTo(stop, in: app)
+    stop.tap()
+    XCTAssertTrue(
+      app.staticTexts["activeNapRunStatus"].label.contains("wake alarm was not cancelled"))
+    let cancel = app.buttons["parentCancelNapPlanAlarm"]
+    scrollTo(cancel, in: app)
+    cancel.tap()
+    XCTAssertFalse(app.buttons["parentCancelNapPlanAlarm"].exists)
+  }
+
+  func testAlarmDenialBlocksRequestedRunWithoutAudio() {
+    let app = launchReview(additionalEnvironment: [
+      "HONKSHOOL_UI_TEST_ALARM": "denied"
+    ])
+    let review = app.buttons["reviewNapPlan"]
+    scrollTo(review, in: app)
+    review.tap()
+    let confirm = app.buttons["confirmNapPlan"]
+    scrollTo(confirm, in: app)
+    confirm.tap()
+    let start = app.buttons["startNapRun"]
+    scrollTo(start, in: app)
+    start.tap()
+    XCTAssertTrue(app.staticTexts["napRunError"].waitForExistence(timeout: 5))
+    XCTAssertFalse(app.staticTexts["napRunStatus"].exists)
+    XCTAssertFalse(app.buttons["cancelNapPlanAlarm"].exists)
   }
 
   func testShortWindowReviewsSilenceOnlyAndNoAlarm() {

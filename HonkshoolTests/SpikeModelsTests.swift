@@ -11,7 +11,10 @@ final class SpikeModelsTests: XCTestCase {
 
   @MainActor
   func testUITestPreferencesDoNotOverwriteRealAlarmOrDuration() {
-    let keys = ["feasibilityAlarmID", "feasibilityAlarmDate", "preferredRestMinutes"]
+    let keys = [
+      "feasibilityAlarmID", "feasibilityAlarmDate", "preferredRestMinutes",
+      "napPlanAlarmReceipt",
+    ]
     let standard = SpikePreferences.store(uiTesting: false)
     XCTAssertTrue(standard === UserDefaults.standard)
     let original = keys.map { standard.object(forKey: $0) as? NSObject }
@@ -29,6 +32,7 @@ final class SpikeModelsTests: XCTestCase {
     isolated.set("synthetic-alarm", forKey: keys[0])
     isolated.set(1_000.0, forKey: keys[1])
     isolated.set(45, forKey: keys[2])
+    isolated.set(Data("synthetic-nap-alarm".utf8), forKey: keys[3])
 
     XCTAssertEqual(SpikePreferences.store(uiTesting: true).integer(forKey: keys[2]), 45)
     for (key, expected) in zip(keys, original) {

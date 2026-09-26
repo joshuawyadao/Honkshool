@@ -87,7 +87,7 @@ struct NapRunCheckpoint: Equatable {
   let playedDuration: TimeInterval
 }
 
-/// Executes only the reviewed route. This object owns one in-memory run, not alarm or history storage.
+/// Executes only the reviewed route. Alarm scheduling and history storage have separate owners.
 @MainActor
 final class NapRunController: NSObject, ObservableObject {
   @Published private(set) var phase: NapRunPhase = .idle
@@ -121,6 +121,7 @@ final class NapRunController: NSObject, ObservableObject {
   private var interruptionIsActive = false
   private var appIsForeground = true
   private var waitingForNarration = false
+  private var activeRunHasWakeAlarm = false
   private var observerTokens: [NSObjectProtocol] = []
   private var remoteCommandTokens: [(MPRemoteCommand, Any)] = []
 
@@ -175,36 +176,33 @@ final class NapRunController: NSObject, ObservableObject {
     for (command, token) in remoteCommandTokens { command.removeTarget(token) }
   }
 
-  func start(review: NapPlanReview, catalog: PreparedCatalog) throws {
-    guard !hasActiveRun else { throw NapRunError.alreadyRunning }
-    guard !interruptionIsActive, appIsForeground else { throw NapRunError.audioUnavailable }
-    let now = clock()
-    guard now.timeIntervalSinceReferenceDate.isFinite, now <= review.plan.start,
-      now < review.plan.deadline
-    else { throw NapRunError.staleStart }
-    // D-021: no run may begin while its promised alarm has not been scheduled.
-    guard review.plan.wakeAlarm == nil else { throw NapRunError.alarmUnavailable }
-    guard review.plan.fallback == .silence else { throw NapRunError.ambienceUnavailable }
+  func preflight(review: NapPlanReview, catalog: PreparedCatalog) throws {
+    _ = try preparedRoute(for: review, catalog: catalog)
+  }
 
-    let preparedRoute = try review.plan.route.map { planned -> PreparedRouteItem in
-      guard let prepared = catalog.sessions[planned.session.id],
-        prepared.session.revision == planned.session.revision,
-        let url = try? prepared.narrationURL()
-      else { throw NapRunError.contentUnavailable }
-      if let point = planned.resumePoint {
-        guard point.audioOffset != nil else { throw NapRunError.invalidCheckpoint }
-        do { try prepared.validateAudioResumePoint(point) } catch {
-          throw NapRunError.invalidCheckpoint
-        }
-      }
-      return PreparedRouteItem(planned: planned, prepared: prepared, url: url)
+  func start(
+    review: NapPlanReview, catalog: PreparedCatalog,
+    scheduledAlarm: ScheduledNapAlarm? = nil
+  ) throws {
+    let preparedRoute = try preparedRoute(for: review, catalog: catalog)
+    if let deadline = review.plan.wakeAlarm {
+      guard let scheduledAlarm, scheduledAlarm.planID == review.plan.id,
+        scheduledAlarm.deadline == deadline
+      else { throw NapRunError.alarmUnavailable }
+    } else if scheduledAlarm != nil {
+      throw NapRunError.alarmUnavailable
     }
     let nextPlayback = try NapPlayback(plan: review.plan, runID: UUID().uuidString)
+    // Asset resolution and an earlier AlarmKit await may consume the last
+    // instant of the approved start window.
+    let now = clock()
+    guard now <= review.plan.start else { throw NapRunError.staleStart }
     route = preparedRoute
     playback = nextPlayback
     lastRunPlanID = review.plan.id
     records = []
     latestVerifiedCheckpoint = nil
+    activeRunHasWakeAlarm = scheduledAlarm != nil
     let token = UUID()
     activeToken = token
     waitingForNarration = true
@@ -219,6 +217,32 @@ final class NapRunController: NSObject, ObservableObject {
       cancelStart = scheduler(review.plan.start.timeIntervalSince(now)) { [weak self] in
         self?.beginAtPlannedStart(token: token)
       }
+    }
+  }
+
+  private func preparedRoute(
+    for review: NapPlanReview, catalog: PreparedCatalog
+  ) throws -> [PreparedRouteItem] {
+    guard !hasActiveRun else { throw NapRunError.alreadyRunning }
+    guard !interruptionIsActive, appIsForeground else { throw NapRunError.audioUnavailable }
+    let now = clock()
+    guard now.timeIntervalSinceReferenceDate.isFinite, now <= review.plan.start,
+      now < review.plan.deadline
+    else { throw NapRunError.staleStart }
+    guard review.plan.fallback == .silence else { throw NapRunError.ambienceUnavailable }
+
+    return try review.plan.route.map { planned -> PreparedRouteItem in
+      guard let prepared = catalog.sessions[planned.session.id],
+        prepared.session.revision == planned.session.revision,
+        let url = try? prepared.narrationURL()
+      else { throw NapRunError.contentUnavailable }
+      if let point = planned.resumePoint {
+        guard point.audioOffset != nil else { throw NapRunError.invalidCheckpoint }
+        do { try prepared.validateAudioResumePoint(point) } catch {
+          throw NapRunError.invalidCheckpoint
+        }
+      }
+      return PreparedRouteItem(planned: planned, prepared: prepared, url: url)
     }
   }
 
@@ -259,9 +283,13 @@ final class NapRunController: NSObject, ObservableObject {
       return
     }
     recordPartialIfPossible(reason: .stopped, token: token)
+    let hadWakeAlarm = activeRunHasWakeAlarm
     clearRun()
     phase = .stopped
-    statusMessage = "Playback stopped. No wake alarm was scheduled."
+    statusMessage =
+      hadWakeAlarm
+      ? "Playback stopped. The wake alarm was not cancelled here; check its status separately."
+      : "Playback stopped. No wake alarm was scheduled."
   }
 
   func scenePhaseChanged(isActive: Bool) {
@@ -457,6 +485,7 @@ final class NapRunController: NSObject, ObservableObject {
       recordMissedDeadlinePartial(token: token, stoppedAt: now)
     }
     let hadNarration = player != nil
+    let hadWakeAlarm = activeRunHasWakeAlarm
     clearRun()
     phase = .finished
     if hadNarration && now > playback.plan.deadline {
@@ -465,7 +494,10 @@ final class NapRunController: NSObject, ObservableObject {
         ? "The fixed deadline passed and audio stopped. No verified partial checkpoint was available."
         : "Audio stopped after the fixed deadline. An earlier verified position was recorded for resumption."
     } else {
-      statusMessage = "The fixed rest deadline arrived. Honkshool audio stopped."
+      statusMessage =
+        hadWakeAlarm
+        ? "The fixed rest deadline arrived. Honkshool audio stopped; the system wake alarm was scheduled separately."
+        : "The fixed rest deadline arrived. Honkshool audio stopped."
     }
   }
 
@@ -563,6 +595,7 @@ final class NapRunController: NSObject, ObservableObject {
   private func clearRun() {
     activeToken = nil
     waitingForNarration = false
+    activeRunHasWakeAlarm = false
     cancelStart?()
     cancelStart = nil
     cancelNarrationStart?()

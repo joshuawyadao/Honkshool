@@ -110,6 +110,7 @@ final class NapRunControllerTests: XCTestCase {
     let player = RunFakePlayer()
     let run = controller(clock: clock, scheduler: scheduler, player: player)
     let alarmReview = try review(catalog: catalog, now: clock.now, alarm: true)
+    XCTAssertNoThrow(try run.preflight(review: alarmReview, catalog: catalog))
     XCTAssertThrowsError(try run.start(review: alarmReview, catalog: catalog)) {
       XCTAssertEqual($0 as? NapRunError, .alarmUnavailable)
     }
@@ -121,6 +122,65 @@ final class NapRunControllerTests: XCTestCase {
     XCTAssertThrowsError(try run.start(review: noAlarmReview, catalog: catalog)) {
       XCTAssertEqual($0 as? NapRunError, .staleStart)
     }
+    XCTAssertEqual(player.playCount, 0)
+  }
+
+  func testOnlyExactScheduledAlarmCanStartAndStopKeepsWakePromise() throws {
+    let catalog = try PreparedCatalog.load()
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let player = RunFakePlayer()
+    let run = controller(clock: clock, scheduler: scheduler, player: player)
+    let approved = try review(catalog: catalog, now: clock.now, alarm: true)
+    let deadline = try XCTUnwrap(approved.plan.wakeAlarm)
+
+    let wrongPlan = ScheduledNapAlarm(
+      planID: "other-plan", id: UUID(), deadline: deadline)
+    XCTAssertThrowsError(
+      try run.start(review: approved, catalog: catalog, scheduledAlarm: wrongPlan)
+    ) { XCTAssertEqual($0 as? NapRunError, .alarmUnavailable) }
+    let wrongDate = ScheduledNapAlarm(
+      planID: approved.plan.id, id: UUID(), deadline: deadline.addingTimeInterval(60))
+    XCTAssertThrowsError(
+      try run.start(review: approved, catalog: catalog, scheduledAlarm: wrongDate)
+    ) { XCTAssertEqual($0 as? NapRunError, .alarmUnavailable) }
+    XCTAssertEqual(run.phase, .idle)
+    XCTAssertEqual(player.playCount, 0)
+
+    let exact = ScheduledNapAlarm(
+      planID: approved.plan.id, id: UUID(), deadline: deadline)
+    try run.start(review: approved, catalog: catalog, scheduledAlarm: exact)
+    XCTAssertEqual(run.phase, .waiting)
+    run.stop()
+    XCTAssertEqual(run.phase, .stopped)
+    XCTAssertTrue(run.statusMessage.contains("wake alarm was not cancelled"))
+    XCTAssertEqual(player.playCount, 0)
+  }
+
+  func testStartWindowExpiringDuringAssetPreflightDoesNotBeginAudio() throws {
+    let catalog = try PreparedCatalog.load()
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let player = RunFakePlayer()
+    let approved = try review(catalog: catalog, now: clock.now, alarm: true)
+    let deadline = try XCTUnwrap(approved.plan.wakeAlarm)
+    let receipt = ScheduledNapAlarm(
+      planID: approved.plan.id, id: UUID(), deadline: deadline)
+    var clockReads = 0
+    let run = NapRunController(
+      playerFactory: { _ in player },
+      clock: {
+        clockReads += 1
+        return clockReads == 1 ? clock.now : approved.plan.start.addingTimeInterval(0.1)
+      },
+      scheduler: { delay, action in scheduler.schedule(after: delay, action: action) },
+      activateAudioSession: {}, deactivateAudioSession: {},
+      observeSystemEvents: false, manageRemoteCommands: false)
+
+    XCTAssertThrowsError(
+      try run.start(review: approved, catalog: catalog, scheduledAlarm: receipt)
+    ) { XCTAssertEqual($0 as? NapRunError, .staleStart) }
+    XCTAssertEqual(run.phase, .idle)
     XCTAssertEqual(player.playCount, 0)
   }
 

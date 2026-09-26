@@ -1,30 +1,27 @@
 # Plan
 
-Connect a confirmed Nap Plan to a production playback run using the bundled prepared audio and the existing fixed-deadline domain. Keep the approved route immutable, retain truthful audio-position checkpoints, and allow alarm-free runs while the separate production AlarmKit/history slice remains pending.
+Connect alarm-requested confirmed Nap Plans to production AlarmKit while preserving the fixed approved deadline and D-021 start gate. Give production alarms their own recoverable identity and explicit controls, then validate the complete schedule-before-play sequence with deterministic tests and the strongest available device checks.
 
 ## Scope
-- In: a production run coordinator and play/pause/stop UI; approved-start and deadline enforcement; prepared-audio route sequencing; silence after narration; explicit interruption recovery; in-memory completion and partial evidence; audio-position resume support in the domain; focused automated and simulator validation; current-status documentation.
-- Out: scheduling production alarms, SwiftData persistence and history UI, accepted rain playback, new content, device-only manual acceptance, and merging the PR. An alarm-requested plan must not start in this slice.
+- In: one Honkshool-owned production wake alarm per active plan; authorization, scheduling and system verification before playback; persisted alarm identity and relaunch reconciliation; explicit cancellation; truthful playback and alarm status; focused tests and current-state documentation.
+- Out: SwiftData history/resume UI, rain acceptance, new content, changes to the feasibility spike alarm's stored identity, and merging the PR.
 
 ## Action items
-- [x] Extend `ResumePoint` and prepared-content validation for revision-bound prepared-audio positions without deriving a script offset from elapsed audio; cover planning, playback, and invalid checkpoints in domain/catalog tests.
-- [x] Add a production run coordinator under `Honkshool/Services` that consumes the exact confirmed snapshot, resolves and validates route assets, waits for the approved start, and rejects stale starts or alarm-requested runs before audio begins.
-- [x] Drive the approved route through `NapPlayback` using actual player completion, active playback time, explicit pause/resume and stop, silent rest, and a fixed cutoff; require the app to remain foregrounded until narration starts, record late cutoff using the actual stop time and a verified pre-deadline audio checkpoint, and guard stale callbacks and expected interruptions without automatic resume.
-- [x] Connect the confirmed review screen to a clear Start resting action and run controls/status, including visible terminal status after leaving the review, and a path to review again after a missed start or alarm gate; keep the feasibility console independent.
-- [x] Add coordinator unit tests for start/alarm gates, route and deadline behavior, pause/interruption/stop evidence, stale callbacks, and failure paths; update critical review UI tests for the new action and messaging.
-- [x] Run focused tests, the full simulator suite, repository verification, Swift formatting, and an unsigned Release simulator build; inspect the diff for timing and audio ownership risks. Record device-only checks as pending.
-- [x] Update `README.md`, `docs/Project-Implementation-Plan.md`, `docs/Project-Overview.md`, `docs/Nap-Planning-Domain.md`, and `docs/Content-Catalog.md` to describe the implemented boundary, then commit, push, and open [PR #6](https://github.com/joshuawyadao/Honkshool/pull/6) for review.
+- [x] Add a production Nap Plan alarm service around the existing `AlarmSystem` adapter with separate storage and metadata, exact plan/deadline binding, system-state reconciliation, and explicit cancellation; retain identity after uncertain schedule or cancellation failures.
+- [x] Preflight the immutable confirmed route and approved start before scheduling, then require verified alarm evidence for that exact plan and deadline when `NapRunController` begins; reject stale, denied, failed, mismatched, or already-tracked starts without audio.
+- [x] Connect the confirmed review and parent screen to asynchronous scheduling, in-progress and failure feedback, active alarm status, and a reachable cancel action; keep Stop, interruption, and audio failure semantics consistent with D-002.
+- [x] Add unit tests for authorization, successful fixed-deadline scheduling, verification failure, uncertain outcomes, relaunch, cancellation, stale starts, alarm-free regression, and Stop retaining the alarm; update critical UI tests using isolated alarm fixtures.
+- [x] Run focused iOS tests, the full simulator suite, repository verification, Swift formatting, and a Release simulator build; inspect timing and alarm ownership edges and record physical-device checks that require the owner's iPhone.
+- [x] Update `README.md`, `docs/Nap-Planning-Domain.md`, `docs/Project-Implementation-Plan.md`, `docs/Project-Overview.md`, and the physical-device guide to describe the production boundary and remaining acceptance work.
+- [x] Give the hosted iOS suite enough time to finish: the first PR run was still launching simulator tests when the 20-minute job limit cancelled it. Increase the CI limit, then verify the replacement run reaches a terminal passing result.
+- [x] Commit the implementation in reviewable checkpoints, push `codex/nap-plan-alarmkit`, open the PR, request Codex review, run Brooks review, and shepherd CI and feedback until merge-ready or a concrete blocker remains.
 
 ## Open questions
-- None. The approved D-021 alarm gate keeps alarm-requested runs unavailable until the production scheduling slice, and prepared audio positions provide truthful partial checkpoints without script-time alignment.
+- None. D-002, D-003, D-004, and D-021 establish the deadline, alarm ownership, Stop behavior, and authorization gate. A previous production alarm must be explicitly cancelled before starting another plan.
 
 ## Verification
-- Focused playback and catalog tests passed on iPhone 17 Pro / iOS 26.5 Simulator.
-- Full iOS simulator suite: 170 passed, 0 failed, 1 intentionally skipped device-only test.
-- Public repository verification: 31 passed. Strict Swift formatting and unsigned Release simulator build passed.
-- Apple-platform review found no remaining code blocker in the foreground-start or late-cutoff paths. Locked-screen playback, route changes, and interruption recovery on the target iPhone remain manual acceptance work.
-
-## PR feedback
-- [x] Preserve a verified pre-deadline checkpoint when Stop is pressed after a delayed deadline callback.
-- [x] Allow a fresh confirmed plan to start after a previous run reached a terminal phase without clearing prior in-memory evidence during review.
-- [x] Keep the UI test review clock valid across calendar time by fixing each launch's review instant relative to wall time.
+- Focused simulator integration: 29 passed, 0 failed on iPhone 17e / iOS 26.5 on an intermediate snapshot. The complete suite below validates the final simulator code. The final device-test cleanup edit passed a signed physical-device build.
+- Opt-in iPhone 18 Pro Max / iOS 27.0 production alarm and audio-cutoff test: 1 passed, 0 failed or skipped. It verified real alerting within five seconds and production audio cutoff within three seconds of the fixed deadline. Locked-screen interaction remains manual acceptance work.
+- Repository verification: 31 passed. Strict Swift formatting, Xcode project lint, and unsigned Release simulator build passed.
+- Complete iPhone 17e / iOS 26.5 simulator suite: 186 passed, 0 failed, 2 intentionally skipped physical-device tests.
+- PR #7 review: Codex and Brooks found no actionable issues. The first hosted iOS run was cancelled by the 20-minute job timeout while `xcodebuild` continued launching simulator tests. After increasing the limit to 40 minutes, the hosted iOS suite passed in 20 minutes 24 seconds. Repository Verify passed on both runs.

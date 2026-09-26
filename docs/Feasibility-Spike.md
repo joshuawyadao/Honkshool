@@ -252,6 +252,24 @@ PR #4's deadline and Now Playing follow-up passed 141 iOS 27 simulator tests wit
 
 The earlier physical confirmation is retained as historical evidence, not represented as a test of prepared playback. A separate real-call check remains optional. No model inference, download, thermal, or synthesis-latency test is needed for this architecture because the phone only decodes a bundled PCM file.
 
+## Production Nap Plan alarm acceptance
+
+The production Nap Plan flow now schedules a separately tracked AlarmKit wake alarm before an alarm-requested run starts. Its deterministic simulator tests exercise permission denial, scheduling and readback failure, exact deadline binding, cancellation, and relaunch reconciliation. The earlier real-alarm cutoff test exercised the feasibility controller. The new integrated device test below passed on iPhone 18 Pro Max / iOS 27.0 on 2026-09-25: one pass, zero failures or skips, with a real system alert within five seconds of the fixed deadline and the production run controller's audio cutoff within three seconds. The test did not lock the phone or assess audible loudness.
+
+An opt-in XCTest uses the production alarm service and run controller with a short test-only planning estimate. It schedules a real one-shot alarm for the same 90-second window as prepared narration, checks that both the system alert and audio cutoff occur near the fixed deadline, then cancels the test alarm. Run it only on the connected physical iPhone after authorizing Honkshool alarms:
+
+```sh
+TEST_RUNNER_HONKSHOOL_REAL_NAP_PLAN_ALARM_TEST=1 xcodebuild \
+  -project Honkshool.xcodeproj -scheme Honkshool \
+  -destination 'platform=iOS,id=<connected-device-id>' \
+  -parallel-testing-enabled NO -collect-test-diagnostics never \
+  -only-testing:HonkshoolTests/RealNapPlanAlarmDeviceTests test
+```
+
+The automated device test does not lock the screen, test the alarm's audible loudness, or assess long-form listening comfort; keep those manual checks separate.
+
+On the target iPhone with a signed build, clear any older tracked Nap Plan alarm, then choose and confirm a plan with **Request a wake alarm** on. Start within the approved minute and check that the screen reports a system alarm scheduled before the run status changes to waiting or narrating. An authorized short silence-only plan can check the alarm alert and snooze/cancel path with little active listening time. For a simultaneous narration/cutoff check, choose a 13-minute window so the prepared 730-second estimate fits, keep the app foregrounded until narration begins, then lock the phone. At the fixed deadline, observe whether narration stops and the system alarm alerts; record actual timing and whether the phone was locked. Stop playback early in a separate run and confirm the wake alarm remains available for explicit cancellation. Force-quit/relaunch while an alarm is pending and verify that its identity and next alert state reconcile without creating a replacement. Record pass, fail, or blocked below; do not treat simulator fixtures as physical evidence.
+
 Authorization messaging, scheduling failure, in-app Stop and pause/resume, active-alarm scrolling, event-log navigation, snooze/paused/ringing/unavailable presentation, cancellation routing, reusable duration persistence, exact-time control availability, and the Live Activity’s large-text height are automated. The renderer cannot reproduce Apple’s system-hosted card exactly; the owner’s visual confirmation is separate physical-device evidence. Repeat affected physical checks when audio/alarm behavior or the target device/OS changes. A separate real-call check, numerical narration-duration measurements, and accessibility sizes beyond the first accessibility setting are not covered by this closeout.
 
 ## Recording results
