@@ -29,3 +29,5 @@ Persist verified Nap Plan playback locally and expose history, Continue, Resume,
 - Final local validation: 204 passed, 0 failed, 2 intentionally skipped physical-device tests on iPhone 17e / iOS 26.5; 31 repository checks passed; strict Swift formatting, project lint, and unsigned Release simulator build passed. XCTest emitted internal QoS warnings in existing spike tests without failures.
 - Safety checkpoints: ac06c6b (resolved plan), fa6dd43 (history implementation, tests, and docs). Added SwiftData store/sidecar ignore patterns before publication.
 - PR review/check outcomes will be tracked in the live PR and the final task report; this committed plan records the local implementation and validation baseline.
+
+- Final documentation consistency pass: remove superseded references to history integration being future work while retaining the dated evidence and remaining physical acceptance. No application or test changes follow local validation.
