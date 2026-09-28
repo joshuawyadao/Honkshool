@@ -240,7 +240,7 @@ struct NapPlanReviewView: View {
             .accessibilityIdentifier("napPlanSoundUnavailable")
         } else if selectedSoundID == PreparedAmbience.gentleRainID {
           Text(
-            "If rain becomes unavailable, rest continues in silence. Before narration starts, this requires Honkshool to stay open; otherwise the plan ends and needs a new review. Any scheduled wake alarm stays active."
+            "If rain becomes unavailable, rest continues in silence. Before narration starts, this requires Honkshool to remain on screen; otherwise the plan ends and needs a new review. Any scheduled wake alarm stays active."
           )
           .font(.footnote)
           .foregroundStyle(.secondary)
@@ -414,7 +414,7 @@ struct NapPlanReviewView: View {
           .accessibilityIdentifier("napPlanPostNarrationSound")
         if review.plan.fallback == .ambience(id: PreparedAmbience.gentleRainID) {
           Text(
-            "If rain becomes unavailable, rest continues in silence. Before narration starts, this requires Honkshool to stay open; otherwise the plan ends and needs a new review. Any scheduled wake alarm stays active."
+            "If rain becomes unavailable, rest continues in silence. Before narration starts, this requires Honkshool to remain on screen; otherwise the plan ends and needs a new review. Any scheduled wake alarm stays active."
           )
           .font(.footnote)
           .accessibilityIdentifier("napPlanReviewedSoundFallback")
