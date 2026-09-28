@@ -34,3 +34,9 @@ Extend How a Car Works into a two-session journey by preparing Air, Fuel, and Sp
 - Original first-session catalog object is identical to merged main, and the original WAV retains its accepted fingerprint. Existing history and planner logic handle both sessions; only next-title context was added to production Swift UI.
 - Apple contract review found no actionable timing, history, route, or interruption issue. It did not establish physical or listening acceptance.
 - Portable repository checks: 37 passed. Strict Swift format, Python compile, project plist, and whitespace checks passed. Focused simulator tests are running; full suite, Release build, Brooks/Codex review, and hosted CI remain pending.
+
+## Validation and review ledger
+
+- First focused simulator run: 69 passed, 2 failed. All five selected UI cases passed. One new run-controller assertion expected silent resting after explicitly selected rain; corrected to the existing `ambience` phase. An older rewind/checkpoint test resumed near the first file's end, leaving enough budget for the new second session; constrained that test to its intended single-session window and asserted its route, retaining all checkpoint identity and completion checks. No production playback code changed for these test failures.
+- Release simulator build passed. Xcode's diagnostic collection delayed the first focused run after tests completed; only that run's diagnostic collector was stopped, and its result bundle finalized with the counts above. Subsequent local runs use the repository's usual `collect-test-diagnostics never` setting.
+- Corrected run-controller suite: 34 passed, 0 failed. Combined with the unchanged focused catalog/navigation/UI results, the affected behavior is green. The full local simulator suite is running; the separate PR will retain pending validation status until required checks finish.

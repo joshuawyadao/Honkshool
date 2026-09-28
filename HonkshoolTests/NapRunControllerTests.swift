@@ -294,7 +294,10 @@ final class NapRunControllerTests: XCTestCase {
     let player = RunFakePlayer()
     let run = controller(clock: clock, scheduler: scheduler, player: player, history: store)
     defer { run.stop() }
-    let approved = try review(catalog: catalog, now: clock.now, selection: selection)
+    let approved = try review(
+      catalog: catalog, now: clock.now,
+      duration: prepared.session.estimatedDuration - offset, selection: selection)
+    XCTAssertEqual(approved.plan.route.map(\.session.id), [prepared.session.id])
     try run.start(review: approved, catalog: catalog)
     scheduler.advance(to: approved.plan.start)
     player.currentTime = offset + 10
@@ -1059,7 +1062,7 @@ final class NapRunControllerTests: XCTestCase {
     XCTAssertEqual(resumedPlayer.currentTime, 90)
     clock.now = next.plan.start.addingTimeInterval(secondAsset.duration - 90)
     resumedPlayer.finish()
-    XCTAssertEqual(resumed.phase, .resting)
+    XCTAssertEqual(resumed.phase, .ambience)
     XCTAssertGreaterThan(resumedRain.playCount, 0)
     XCTAssertEqual(
       next.plan.deadline,
