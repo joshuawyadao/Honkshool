@@ -61,7 +61,9 @@ The publication helper now validates every destination first, creates both paren
 
 ## Codex follow-up: nested destinations and current roadmap count
 
-- [ ] Address [nested-destination feedback](https://github.com/joshuawyadao/Honkshool/pull/10#discussion_r4127893412): reject ancestor/descendant relationships among publication/input file paths before creating any parent directory. Reproduce both output-inside-provenance and provenance-inside-output cases without rendering; retain unchanged sentinels and no created directories on rejection. Run focused and portable tests, then save/push and acknowledge this item separately.
+- [x] Address [nested-destination feedback](https://github.com/joshuawyadao/Honkshool/pull/10#discussion_r4127893412): reject ancestor/descendant relationships among publication/input file paths before creating any parent directory. Reproduce both output-inside-provenance and provenance-inside-output cases without rendering; retain unchanged sentinels and no created directories on rejection. Run focused and portable tests, then save/push and acknowledge this item separately.
 - [ ] Address [current-status wording](https://github.com/joshuawyadao/Honkshool/pull/10#discussion_r4127893414): correct the Phase 3 current-status paragraph from one prepared session to both named sessions. Inspect nearby current-state claims, run relevant publication/document checks, and save/push and acknowledge this item separately.
 
 No product questions or app/audio changes are needed. Request a fresh review after both fixes; final hosted CI and readiness remain tracked in PR #10.
+
+Nested-path validation: both ancestor directions failed under the prior equality-only check; both now raise before directory creation. All 6 publication guard tests and all 40 portable repository tests pass, along with Python compilation and whitespace checks. The change remains preparation-only; no asset or iOS source changed.

@@ -71,7 +71,9 @@ def prepare_publication_paths(arguments: argparse.Namespace) -> None:
   resolved = {name: path.resolve() for name, path in paths.items()}
   for first, second in (("output", "provenance"), ("output", "catalog"),
                         ("provenance", "catalog")):
-    if resolved[first] == resolved[second]:
+    first_path, second_path = resolved[first], resolved[second]
+    if (first_path == second_path or first_path in second_path.parents
+        or second_path in first_path.parents):
       raise ValueError(f"{first} and {second} paths overlap: {paths[first]}")
   for name in ("output", "provenance"):
     path = paths[name]

@@ -191,6 +191,21 @@ class NarrationPublicationGuardTests(unittest.TestCase):
             self.assertFalse(output.exists())
             self.assertEqual(metadata.read_bytes(), b"existing file")
 
+    def test_nested_publication_paths_are_rejected_before_creating_directories(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for output_is_parent in (True, False):
+                parent = root / str(output_is_parent)
+                child = parent / "session.wav"
+                output, provenance = (parent, child) if output_is_parent else (child, parent)
+                with self.subTest(output=output, provenance=provenance):
+                    arguments = SimpleNamespace(
+                        output=output, provenance=provenance,
+                        catalog=RESOURCES / "PreparedCatalog.json")
+                    with self.assertRaisesRegex(ValueError, "paths overlap"):
+                        prepare_narration.prepare_publication_paths(arguments)
+                    self.assertFalse(parent.exists())
+
     def test_default_invocation_preserves_original_wav_and_provenance(self):
         wav = RESOURCES / "Turning-Fuel-Into-Motion-George.wav"
         provenance = RESOURCES / "GeorgeNarration-Provenance.json"
