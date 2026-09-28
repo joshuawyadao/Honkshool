@@ -34,25 +34,47 @@ final class NapPlanReviewUITests: XCTestCase {
       let alarm = app.switches["napPlanAlarm"]
       scrollTo(alarm, in: app)
       alarm.tap()
-      let review = app.buttons["reviewNapPlan"]
-      scrollTo(review, in: app)
-      review.tap()
-      XCTAssertTrue(app.staticTexts["napPlanNoContent"].exists)
-      XCTAssertEqual(app.staticTexts["napPlanAlarmChoice"].label, "Wake alarm, Not requested")
-      let confirm = app.buttons["confirmNapPlan"]
-      scrollTo(confirm, in: app)
-      confirm.tap()
-      let originalStart = app.staticTexts["napPlanConfirmedStart"].label
-      let originalDeadline = app.staticTexts["napPlanConfirmedDeadline"].label
-      let start = app.buttons["startNapRun"]
-      scrollTo(start, in: app)
-      start.tap()
-
       let status = app.staticTexts["napRunStatus"]
-      let playing = XCTNSPredicateExpectation(
-        predicate: NSPredicate(format: "label CONTAINS %@", "Gentle rain is playing"),
-        object: status)
-      XCTAssertEqual(XCTWaiter.wait(for: [playing], timeout: 70), .completed)
+      var originalStart = ""
+      var originalDeadline = ""
+      for attempt in 0..<2 {
+        let review = app.buttons["reviewNapPlan"]
+        scrollTo(review, in: app)
+        review.tap()
+        XCTAssertTrue(app.staticTexts["napPlanNoContent"].exists)
+        XCTAssertEqual(app.staticTexts["napPlanAlarmChoice"].label, "Wake alarm, Not requested")
+        let confirm = app.buttons["confirmNapPlan"]
+        scrollTo(confirm, in: app)
+        confirm.tap()
+        originalStart = app.staticTexts["napPlanConfirmedStart"].label
+        originalDeadline = app.staticTexts["napPlanConfirmedDeadline"].label
+        let start = app.buttons["startNapRun"]
+        scrollTo(start, in: app)
+        start.tap()
+
+        let outcome = XCTNSPredicateExpectation(
+          predicate: NSPredicate(
+            format: "label CONTAINS %@ OR label CONTAINS %@",
+            "Gentle rain is playing", "Review a new Nap Plan"),
+          object: status)
+        XCTAssertEqual(XCTWaiter.wait(for: [outcome], timeout: 70), .completed)
+        if status.label.contains("Gentle rain is playing") { break }
+        let failure = status.label
+        guard attempt == 0,
+          failure == "Audio output disconnected before playback. Review a new Nap Plan."
+        else {
+          XCTFail("The reviewed rain plan did not start: \(failure)")
+          return
+        }
+        let routeChange = XCTAttachment(string: failure)
+        routeChange.name = "Physical audio route change before playback"
+        routeChange.lifetime = .keepAlways
+        add(routeChange)
+        let another = app.buttons["reviewAnotherNapPlan"]
+        scrollTo(another, in: app)
+        another.tap()
+      }
+      XCTAssertTrue(status.label.contains("Gentle rain is playing"))
       let startObservation = XCTAttachment(
         string: "\(originalStart); UI observed rain at \(Date.now.ISO8601Format()).")
       startObservation.name = "Physical UI rain start"
