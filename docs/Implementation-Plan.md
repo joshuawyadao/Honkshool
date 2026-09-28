@@ -22,8 +22,14 @@ Connect accepted gentle rain to the production Nap Plan flow, then verify the co
 - [x] Fix the physical-pass history defect: successful narration completion can report a rewound player position, producing a zero-duration completed record that cannot replace a positive saved checkpoint. Derive completed duration from verified natural file end, retain the wall-time bound and store monotonicity, add a disk-backed regression, rerun controller tests and the affected physical cases, and record the corrected evidence.
 - [x] Correct the real-clock scheduler exposed by the normal one-minute UI start: an unspecified sleep tolerance can deliver the start timer outside the existing one-second acceptance window. Request precise timing without relaxing stale-start or fixed-deadline safeguards, rerun the real UI sequence and timer-dependent device cases, and document the result.
 - [x] Save and push the implementation branch with the plan, verification evidence, and explicitly pending direct physical acceptance clearly recorded; do not describe the goal as complete while required acceptance remains unobserved.
+- [x] Open PR #9 with the current device evidence and the owner's explicitly deferred manual checks; request Codex and Brooks review and start required CI.
+- [x] Diagnose the Brooks review disclosure mismatch against the tested foreground requirement: failed rain during settling cannot promise continued narration when the app is backgrounded.
+- [ ] Qualify the two rain-fallback disclosures in NapPlanReviewView.swift and align Product-Brief.md and D-008 in Decision-Log.md with the existing safety behavior and independent alarm ownership. Preserve the runtime and deferred manual acceptance.
+- [ ] Verify the copy against existing settling-failure tests and device guidance, run strict formatting and repository checks, and retain existing behavioral tests because only wording changes. No new tests are needed for this reversible copy correction; required PR CI will rerun the suite.
+- [ ] Save and push the review fix, recheck both reviews and CI on the updated head, and stop with PR #9 merge-ready without merging it.
 
 ## Open questions
+- None block the PR review correction. The owner explicitly deferred manual comfort, Lock Screen, and headphone checks and authorized packaging this implementation for merge preparation; their physical acceptance remains unverified.
 - None block implementation. On 2026-09-28 the owner requested automated physical tests instead of sitting through a five-minute manual run. Use short real-time device tests and unattended UI automation. Subjective comfort, actual headphone disconnection, and locked-screen behavior remain unverified unless directly observed; do not ask the owner to repeat the long manual checklist or imply synthetic events prove physical routing.
 
 ## Review and verification ledger
