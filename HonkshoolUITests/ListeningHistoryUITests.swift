@@ -8,7 +8,9 @@ final class ListeningHistoryUITests: XCTestCase {
     openHistory(in: app)
     XCTAssertTrue(app.staticTexts["historyOutcome"].label.contains("Last verified checkpoint"))
     XCTAssertTrue(app.staticTexts["historyPlayedDuration"].label.contains("2m 0s"))
-    XCTAssertTrue(app.staticTexts["historyJourneyProgress"].label.contains("0 of 1"))
+    XCTAssertTrue(app.staticTexts["historyJourneyProgress"].label.contains("0 of 2"))
+    XCTAssertTrue(app.staticTexts["historyNextSession"].label.contains("Turning Fuel Into Motion"))
+    XCTAssertTrue(app.buttons["historyContinue"].exists)
     let resume = app.buttons["historyResume"]
     scrollTo(resume, in: app)
     resume.tap()

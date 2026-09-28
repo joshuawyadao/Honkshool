@@ -1,0 +1,327 @@
+{
+  "schemaVersion": 1,
+  "sessionID": "air-fuel-and-spark",
+  "sessionRevision": "1",
+  "narrationTextSHA256": "030b0dee239567c7b45a8eaa755127f7ce210b731f3e9bf23ee491dac429b851",
+  "wordCount": 1847,
+  "paragraphCount": 14,
+  "engine": "Kokoro-82M v1.0",
+  "modelRepository": "hexgrad/Kokoro-82M",
+  "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+  "modelLicense": "Apache-2.0",
+  "modelSHA256": "496dba118d1a58f5f3db2efc88dbdc216e0483fc89fe6e47ee1f2c53f18ad1e4",
+  "voice": "bm_george",
+  "voiceSHA256": "f1bc812213dc59774769e5c80004b13eeb79bd78130b11b2d7f934542dab811b",
+  "languageCode": "b",
+  "speed": 0.86,
+  "seed": 20260921,
+  "sampleRate": 24000,
+  "channels": 1,
+  "sampleFormat": "signed 16-bit little-endian PCM WAV",
+  "paragraphGapFrames": 24000,
+  "leadingFrames": 6000,
+  "trailingFrames": 6000,
+  "gainLinear": 1.2495783915210679,
+  "targetRMSDBFS": -22.882915,
+  "peakLimitDBFS": -3.0,
+  "peakLimited": false,
+  "outputFile": "Air-Fuel-and-Spark-George.wav",
+  "outputSHA256": "8f8fb647eccb6eec0feeefb20127a681c101ffccb5d94ff9b7b49c95e5cc5fc5",
+  "outputBytes": 36324044,
+  "frames": 18162000,
+  "durationSeconds": 756.75,
+  "measuredRMSDBFS": -22.88291470042268,
+  "measuredPeakDBFS": -4.826303741615121,
+  "clippedSampleCount": 0,
+  "processing": "Kokoro native duration control; paragraph chunks concatenated in order; one second of silence between paragraphs; 250 ms at each end; one constant whole-file gain. No filtering, de-essing, pitch shifting, resampling, compression, rain, or waveform time stretching.",
+  "dependencies": {
+    "kokoro": "0.9.4",
+    "misaki": "0.9.4",
+    "torch": "2.14.0",
+    "transformers": "4.57.6",
+    "spacy": "3.8.16",
+    "en-core-web-sm": "3.8.0",
+    "espeakng-loader": "0.2.4",
+    "numpy": "2.4.6"
+  },
+  "assets": [
+    {
+      "file": "config.json",
+      "sha256": "5abb01e2403b072bf03d04fde160443e209d7a0dad49a423be15196b9b43c17f",
+      "bytes": 2351
+    },
+    {
+      "file": "kokoro-v1_0.pth",
+      "sha256": "496dba118d1a58f5f3db2efc88dbdc216e0483fc89fe6e47ee1f2c53f18ad1e4",
+      "bytes": 327212226
+    },
+    {
+      "file": "voices/bm_george.pt",
+      "sha256": "f1bc812213dc59774769e5c80004b13eeb79bd78130b11b2d7f934542dab811b",
+      "bytes": 523430
+    }
+  ],
+  "paragraphs": [
+    {
+      "index": 0,
+      "textSHA256": "ca4e68d5afe6d338540282916ff57d781d2ff1b4fca2022dc38a46fb1e88986f",
+      "wordCount": 110,
+      "frames": 959400,
+      "rawFloat32SHA256": "a71e7f1c41c3e962fd9cef6f4f4a53f1ab43823733d48f60c856a4feab46e1d4",
+      "chunks": [
+        {
+          "textSHA256": "06dedc1225ad2dcfef90acf69431bfa5101099703fdb85bce92c5031f79b03e4",
+          "phonemesSHA256": "7cbf50edcff34dc17a184aa68bad34aae4f37fabcc21ec3710bc7f3b107dac67",
+          "frames": 698400
+        },
+        {
+          "textSHA256": "d7b8a0f0ac3691182830fa8c91d66c0912eac40cd08d4415ea3693d245e871ca",
+          "phonemesSHA256": "69b2ad9c03761aaa7642f6d9b55f49fe518f57b6ea13d4de7ef50dc4188058c6",
+          "frames": 261000
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "textSHA256": "2b47aca2d0a59c37b45bb005fb39383f1c46d9a5d078013b7057a6f9cfcdd086",
+      "wordCount": 135,
+      "frames": 1332600,
+      "rawFloat32SHA256": "ff479f8bb73bea6a741fd9a6e83a88d0ec24ec1d063ca31a884e426f795e3ba2",
+      "chunks": [
+        {
+          "textSHA256": "04a6463106dfc2b0ec2fb6be051293f2307c06186946d754b3255d4847a058d7",
+          "phonemesSHA256": "b62bf7c9f9b37fa42c7fa747990a66536140c2c451d2925887b66f94af406e34",
+          "frames": 651600
+        },
+        {
+          "textSHA256": "412b3bca571fd738136c564fd1178993a92b9b97f6efe57c11b82c1671eb2e5e",
+          "phonemesSHA256": "24e44ad563be6f8af64e08e7622b4e2ad14272dbb833484ce682728a7212edcc",
+          "frames": 681000
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "textSHA256": "3354c3dc5373af93ccf446aaec7a9c1705569a1aa94d1dd387a76e2176ea1466",
+      "wordCount": 135,
+      "frames": 1329000,
+      "rawFloat32SHA256": "6c48e44296c14d73ba5c2425ea8ec91e5e920644ba30ba4860bb4f8dc0adc081",
+      "chunks": [
+        {
+          "textSHA256": "0f440061f1f9e0f48c9ac3b60854b7d74f6f860abb50bfd00b5d8e132829efbc",
+          "phonemesSHA256": "28052ba7cfa120a4d828626014b6a06e05c03a6b31998042e1a17a990279950f",
+          "frames": 741600
+        },
+        {
+          "textSHA256": "f7206593d2629031e6df642a33631d69bccf9355645ab79262021acb1e157a22",
+          "phonemesSHA256": "f39d997c79f9bfbefd30f8f23e7e489e030817c2d21c90be61ec54adc35bf0ae",
+          "frames": 587400
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "textSHA256": "140e33cf59e7650fa6354d1293538f51f6d8359f146f26e3683cdb4f7ffbc2f6",
+      "wordCount": 128,
+      "frames": 1247400,
+      "rawFloat32SHA256": "63876d771a44051205fef11233b5904b6cd23b9ede2c63ec92eaea16b41d9c7a",
+      "chunks": [
+        {
+          "textSHA256": "3f690e31becd2be771e611b91dd6d2835f7f4fdb722e686c736d0ff925dad63b",
+          "phonemesSHA256": "1e69d608d90135ee607c770559c1dc27c46249be66a0318884a7c166899029a0",
+          "frames": 732000
+        },
+        {
+          "textSHA256": "740409e0224c88ed6796a07df317163b0be7ef4cffaac683fd1e936f6ea50812",
+          "phonemesSHA256": "212f7651572cc230782af8cc7695464adeaa5fdc22747ae8da5f80e699e0d60d",
+          "frames": 515400
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "textSHA256": "08b56966cb5da08bcf8e23c447bdcfab32ebf0d43a7a28cdd83f05e14bf5edc2",
+      "wordCount": 134,
+      "frames": 1307400,
+      "rawFloat32SHA256": "987f8048aa00758fc21a3eae7e93801ba9ed883f6a9d7ffd7435175389b096e3",
+      "chunks": [
+        {
+          "textSHA256": "c0dcd758dc27e08739294767f92d2a43067aa3e8f399e23ad3562236aa197211",
+          "phonemesSHA256": "f13dfcced5492ef9fc7b2961eb2f072b8c736f4e695f4fecd0b600baddf543f0",
+          "frames": 759600
+        },
+        {
+          "textSHA256": "bfd94cee55ae68825a1a962c571aef0b65d4d19cf381d6ea5f4a11f870f4f9c3",
+          "phonemesSHA256": "c4a428d894e40857ce4e3145386da9f02d124cb3c082f0fb90e3d82bfbb72028",
+          "frames": 547800
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "textSHA256": "476a1345d4e7e719e6f13d24422db59a9c8043eabc01c28ed42fc521cba9b335",
+      "wordCount": 142,
+      "frames": 1320600,
+      "rawFloat32SHA256": "7e5390e8590fc766c3240f482ce709130621bfec8d267c79307d6ca563c363f6",
+      "chunks": [
+        {
+          "textSHA256": "627bb9f2435c92c3d2af2be7a303c36fa1ea28314aad34913db08876011ad682",
+          "phonemesSHA256": "9bd973126a0e287ae260ca662c8b3ddfc892307e070a205159347bbaad264fdc",
+          "frames": 702600
+        },
+        {
+          "textSHA256": "602049ce9c24ff455906c999e433a6c817248217779c57043241b34f401cb0d7",
+          "phonemesSHA256": "e1c89496036c38fec67b4e263e2b9a482f5b1cbc798c4ec489329bcb45272344",
+          "frames": 618000
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "textSHA256": "51e466651d825aafb7a71e5990ea0ba39661562387c464a49174e854ea5be0d5",
+      "wordCount": 139,
+      "frames": 1330200,
+      "rawFloat32SHA256": "f354ca8f6596f3c2c6ca6c0fa735274da47cf7675492d3bd7d338bc98037410a",
+      "chunks": [
+        {
+          "textSHA256": "0c845b9435aae74a150115cec177e3395aaec0acfb7c0e07d3d815da08de928d",
+          "phonemesSHA256": "4c9b9df1703e48e4f78acc868a309cc789f478d8042da95b995d9c6e8016bbaa",
+          "frames": 683400
+        },
+        {
+          "textSHA256": "3bd72f051b07b5d761e0ab918567489dbd3eb63234104fdfe1ef99661c6c1254",
+          "phonemesSHA256": "2961549eefb2a80ea8405ed465b942444f9e0c6e10353d9613bf7ae7db7c55ea",
+          "frames": 646800
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "textSHA256": "a0cdbb95889d794a32b7d1ed092a9cc8517a15a1d473d755dc71535f5c73578e",
+      "wordCount": 136,
+      "frames": 1315800,
+      "rawFloat32SHA256": "f6cf910f0067f9c05364628ffdad348e5d004ed9a51489571341a2d2275ad7d6",
+      "chunks": [
+        {
+          "textSHA256": "6979bbcbf9bf0caa0948ef78199648ae783f6df36e055e566ccf32dfd6c85424",
+          "phonemesSHA256": "b79c478b90ac17b2ab69b8007b2775217342e566da7a8e79b0c6beffcf59f212",
+          "frames": 704400
+        },
+        {
+          "textSHA256": "d2ef40ab2509fbf1231dc1d142551050d296f0f70c9ad374eea572e9beed06d4",
+          "phonemesSHA256": "795f469e3b75082b449ae48f7c8c95be1ad5913d1b17658c3e5e2b522a82bfd1",
+          "frames": 611400
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "textSHA256": "0c6a0a86bf5340936babab06d2911e473283fbcb4e6ac967b19723ff1b92d000",
+      "wordCount": 140,
+      "frames": 1340400,
+      "rawFloat32SHA256": "c70c185f531e0d47a50f54127eb0d3abdf23ae2868d8bbc65d03677218d61c1b",
+      "chunks": [
+        {
+          "textSHA256": "d0cac972287e700c5be8a7a89f0c50f739dae4e141730744d23daa7979b7a209",
+          "phonemesSHA256": "db593e46bb4a120adce3ccc02854a787361362e0231b8cf99493cba5d1cfbe5d",
+          "frames": 668400
+        },
+        {
+          "textSHA256": "fec5e254f18af3425f23381e952fe5b55ab0046fb53c0b1b35f29448c4c05e6b",
+          "phonemesSHA256": "d9522c0532b3ef629c2beaa51cff5483cd72fa2e085111359bea9e2e5fe9cef0",
+          "frames": 672000
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "textSHA256": "4421cb59caade49ca1c8e13f2b78a013799d2c8c79b716caafd306bce71b93e9",
+      "wordCount": 140,
+      "frames": 1404600,
+      "rawFloat32SHA256": "7f2677c2fb7a89d8935f61a846679c1111feb8c74e9df9e6137f1d4361666cc8",
+      "chunks": [
+        {
+          "textSHA256": "c0ba919658bc51fa25802c0b34d774a2504b5b283353440907db0ae5bc17ef1f",
+          "phonemesSHA256": "d80145393bb4a11e4e30b91e75de6c5df41ec4ced77381a7d7b616ff0bced62e",
+          "frames": 681000
+        },
+        {
+          "textSHA256": "61b9191e56bc6d11802faa3a972b9870f65de80f5527e24283576e020f881fc5",
+          "phonemesSHA256": "06c36636d19c0d23355d6ee68677c89ac1da858f9f90c4d48e1c8c093e7e8b49",
+          "frames": 723600
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "textSHA256": "1ffc414f7fafcbd1182d0322f8bde9aea22809f559de61871d1da9d0f3a661a6",
+      "wordCount": 139,
+      "frames": 1414200,
+      "rawFloat32SHA256": "2ccf7a9b82a1160a629b5b368dffd56addf6c888f873948a7bf2861afc53bfbf",
+      "chunks": [
+        {
+          "textSHA256": "f2087690b8995aac2c5a3b3d6d80daa8217ea45ead62802c7afd55f974f55985",
+          "phonemesSHA256": "83c4968ebad70bb0d57cb348271b2cb7da86ebed7fd2a69ac23d910e88b25fb0",
+          "frames": 697800
+        },
+        {
+          "textSHA256": "fc419ef23e8d1fbee4ca4c88e82b4630846f6495dc6adbd681c4002e0d87779a",
+          "phonemesSHA256": "b342f10e24c4f5ff76e823f5b1f8b8b2d977ef23a29383269aa13320ba8edcf3",
+          "frames": 716400
+        }
+      ]
+    },
+    {
+      "index": 11,
+      "textSHA256": "974fe8779e0d71788387ebc658e84d3b0aeeda783a9c7d3f3620c4b366b2687a",
+      "wordCount": 139,
+      "frames": 1432200,
+      "rawFloat32SHA256": "f9505ded345adbda833ac5b43557b65fa1eec7dffff117cee5fb34400b1f5246",
+      "chunks": [
+        {
+          "textSHA256": "7dce28dac5908f559bc0c9fdf137331db4a939d5f0ee5ce670232666c40ccdbf",
+          "phonemesSHA256": "fc945e2df92f45fff01047d03eed9c1236946345f7ed46dbd10c68d97a99f43a",
+          "frames": 732600
+        },
+        {
+          "textSHA256": "b23dfb6a8e39ff80b018349b1ccb8cc79b4f8dfc8720f613cee4633deb749bbc",
+          "phonemesSHA256": "320fda37c4f6678855182ce3b516e1b2ed7faff7ad9b3ed1a6ab4de1507293c1",
+          "frames": 699600
+        }
+      ]
+    },
+    {
+      "index": 12,
+      "textSHA256": "70ecfdc90a0699477ad10b125ad051d6c344abe26a615969710b6b1e99cf6b58",
+      "wordCount": 140,
+      "frames": 1401600,
+      "rawFloat32SHA256": "9678fae6656ed756d84f98585a44ab0156d690c04b4461c747ac451aadbf0092",
+      "chunks": [
+        {
+          "textSHA256": "c27600e8663b3b0baed5fbadee62bb4378cc0edca58994274c8d7676f84a5dd9",
+          "phonemesSHA256": "f99e2fbb88db32ed66a2381580263c11fde072ea9d784d27b35b5a8112f48a18",
+          "frames": 691800
+        },
+        {
+          "textSHA256": "f84200888e19c7af161319146080ea504262ced440a236c97204989f388a428d",
+          "phonemesSHA256": "7711fd8a08764c5882486232f8122cb632b618b507ca86457de4a2ca57413969",
+          "frames": 709800
+        }
+      ]
+    },
+    {
+      "index": 13,
+      "textSHA256": "c5408b0807fe69c1037a7f4b18643b25bd6ddfe8bac68df0988bf91e9293db5e",
+      "wordCount": 90,
+      "frames": 702600,
+      "rawFloat32SHA256": "705f607fcfbbe9fd19e6488801cf055927857c427bde7b019a8d56f0835835dd",
+      "chunks": [
+        {
+          "textSHA256": "c5408b0807fe69c1037a7f4b18643b25bd6ddfe8bac68df0988bf91e9293db5e",
+          "phonemesSHA256": "e556cd87488ef434be206643b98ee10b1cb68b04462afe338276ec248ed2845d",
+          "frames": 702600
+        }
+      ]
+    }
+  ]
+}

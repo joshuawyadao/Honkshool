@@ -36,6 +36,8 @@ class PublicRepositoryTests(unittest.TestCase):
             "Honkshool/Resources/Info.plist",
             "Honkshool/Resources/GeorgeNarration-Provenance.json",
             "Honkshool/Resources/Turning-Fuel-Into-Motion-George.wav",
+            "Honkshool/Resources/Air-Fuel-and-Spark-George.wav",
+            "Honkshool/Resources/Air-Fuel-and-Spark-George-Provenance.json",
             "HonkshoolTests/SpikeModelsTests.swift",
             "HonkshoolUITests/FeasibilityUITests.swift",
             "HonkshoolAlarmWidget/AlarmLockScreenLayout.swift",

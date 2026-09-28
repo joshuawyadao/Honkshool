@@ -13,13 +13,13 @@ Build Honkshool as a sequence of small, reviewable vertical slices, beginning wi
 - [x] Implement `codex/nap-plan-domain` with framework-independent journey, session, route, timing, completion, and history rules plus focused unit tests. Runtime execution and persistence were connected by the later slices below.
 - [x] Build the validated bundled catalog, one original citation-backed Enthusiast session from “How a Car Works,” source metadata, pronunciation guidance, configurable editorial estimates, and script-bound resume validation. This work was squash-merged through PR #4 as `39bd2a2`.
 - [x] Prepare a full Mac narration audition and measure its duration; bundle a CC0 gentle-rain candidate with provenance and objective loop/level checks.
-- [ ] Complete Phase 2 by validating the bundled Kokoro George `0.86` playback path on the target iPhone and accepting the complete 727.625-second session. Preparation, provenance, catalog timing, app playback, and automated deadline coverage are complete. On iPhone 18 Pro Max / iOS 27.0, the signed app launched, two focused fixture UI tests passed, and the owner reported locked playback and Lock Screen play/pause working. The remaining [manual device checks](Feasibility-Spike.md#manual-checks-to-do-later-on-iphone-18-pro-max--ios-270) are pending. The owner selected the prepared rain candidate on 2026-09-28. Its production integration and automated target-iPhone acceptance passed on this branch; locked controls, headphone disconnection, and extended listening comfort remain pending.
+- [ ] Complete Phase 2 by validating the bundled Kokoro George `0.86` playback path on the target iPhone and accepting the complete 727.625-second session. Preparation, provenance, catalog timing, app playback, and automated deadline coverage are complete. On iPhone 18 Pro Max / iOS 27.0, the signed app launched, two focused fixture UI tests passed, and the owner reported locked playback and Lock Screen play/pause working. The remaining [manual device checks](Feasibility-Spike.md#manual-checks-to-do-later-on-iphone-18-pro-max--ios-270) are pending. The owner selected the prepared rain candidate on 2026-09-28. Its production integration and automated target-iPhone acceptance passed in PR #9, merged as `1c7b3bf`; locked controls, headphone disconnection, and extended listening comfort remain pending.
 - [x] Build `codex/nap-plan-review-main` so a listener can select locally playable prepared content, choose a duration or wake time, inspect and confirm the fixed route, and choose from currently available rest sounds and alarm preference. That historical slice provided pre-play confirmation for one prepared session and silence. Later slices connected playback, alarms, Continue-from-history, and the selected rain candidate.
 - [x] Build `codex/nap-playback-runtime` to execute alarm-free approved plans without mid-nap prompts, support prepared background narration and media controls, transition to silence, and pause for expected audio interruptions. The subsequent local-history slice persists audio-position checkpoints and completion evidence. Target-iPhone runtime acceptance is still pending.
 - [x] Build `codex/nap-plan-alarmkit` to schedule and verify a production Honkshool wake alarm before an alarm-requested run starts, keep its identity across relaunch, and provide explicit cancellation while preserving D-002 Stop behavior. An opt-in iPhone 18 Pro Max / iOS 27.0 test passed real alarm alerting and production audio cutoff on 2026-09-25; locked-screen and route-control acceptance remains pending.
 - [x] Build `codex/local-history` to persist partial and completed playback locally with SwiftData, save verified in-flight checkpoints, advance sessions only on actual completion, and expose Continue/Resume/Replay through fresh plan reviews. Validate this branch with the tests recorded in its task plan; physical relaunch and locked-screen acceptance remain separate.
-- [ ] Validate `codex/gentle-rain-playback`: expose only the accepted, verified rain resource in Nap Plan review; loop it during approved rest with silence fallback, explicit controls, and the unchanged fixed deadline; complete automated and target-iPhone rain, route, alarm, and history checks before claiming physical acceptance. The owner selected the current candidate on 2026-09-28. Automated target-iPhone rain, narration/history, real-alarm, and background/relaunch checks passed; direct locked-control, headphone, and longer-listening checks remain open.
-- [ ] Build `feature/journey-branches` to finish the initial journey flow, preselect any recommended cross-journey route before playback, and preserve replay, restart, and alternate-branch history.
+- [x] Implement and merge `codex/gentle-rain-playback` (PR #9, `1c7b3bf`): expose only the accepted, verified rain resource in Nap Plan review; loop it during approved rest with silence fallback, explicit controls, and the unchanged fixed deadline; complete automated and target-iPhone rain, route, alarm, and history checks before claiming physical acceptance. The owner selected the current candidate on 2026-09-28. Automated target-iPhone rain, narration/history, real-alarm, and background/relaunch checks passed; direct locked-control, headphone, and longer-listening checks remain open.
+- [x] Build the bounded `codex/two-session-journey`: prepare Air, Fuel, and Spark with the accepted George voice; expose both sessions through existing review/history; retain stable first-session text/audio and completion-only advancement. Validate ordered multi-session routes, second-session resume, replay preservation, rain and deadlines. Broader branching, random/restart controls, additional catalog content, and home-screen redesign remain deferred until trial evidence warrants them.
 - [ ] Run `validation/ten-nap-trial`, record reliability and preference outcomes without analytics, fix launch-blocking defects, and decide whether the prototype merits further investment.
 
 ## Open questions
@@ -128,7 +128,7 @@ The pre-play portion from PR #5 lets the listener choose locally playable prepar
 
 ### Minimum user flow
 
-1. Continue or choose the bundled automotive session.
+1. Continue or choose a bundled automotive session.
 2. Select a nap duration or wake time using native iOS patterns.
 3. Review the fixed Nap Plan, including narration, post-narration behavior, ambience, and alarm.
 4. Start the plan, keep the app open until approved narration or rain begins, then lock the phone and listen without in-app attention prompts.
@@ -149,7 +149,11 @@ The pre-play portion from PR #5 lets the listener choose locally playable prepar
 
 Extend the tracer bullet into the smallest coherent journey experience while preserving the listener’s path.
 
-### Work
+### Current bounded milestone
+
+The owner selected a two-session journey before the ten-nap trial on 2026-09-28. Air, Fuel, and Spark follows Turning Fuel Into Motion using the existing catalog-driven route, Continue/Resume/Replay, and local history. The original text, revision, and WAV stay unchanged; session two is a separate revision-1 asset with measured timing and source-linked original prose. This supplies a real completion transition and partial-second recovery without new persistence schema or network services. Further Phase 4 expansion below is deferred until the trial provides evidence for it.
+
+### Later work
 
 - Add the remaining prepared “How a Car Works” sessions as content is researched and reviewed.
 - Support continue, explore, random topic, replay, restart, skipped branches, and alternate branches.
@@ -177,7 +181,7 @@ Determine whether the narrow product actually replaces browsing YouTube for nap 
 - Fit: the assembled plan matches the selected rest window closely enough without changing narration speed.
 - Recovery: missed or partial sessions are easy to find and replay.
 
-Record a lightweight manual trial log locally. Do not add analytics or transmit listening behavior.
+Run this as the next separate task after merging the two-session journey. Record a lightweight manual trial log locally. Include the deferred full-session comfort, relative rain level, locked controls, and headphone-disconnection observations during natural use; implementation automation does not establish them. Do not add analytics or transmit listening behavior.
 
 ### Exit criteria
 

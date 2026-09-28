@@ -58,6 +58,8 @@ Partial outcomes record stopped, interrupted, deadline-reached, or missed-deadli
 
 `ListeningHistory` appends immutable records identified by run ID and route index. Duplicate record IDs are rejected. Records retain plan identity, journey/session identity and revision, starting checkpoint, event dates, played duration, and final outcome. Replay, restart, and alternate branches create new runs and append records; no reset or replacement operation exists. Each partial record stays resumable by its own ID even after later playback completes.
 
+The bundled How a Car Works journey now contains two prepared sessions. Completing Turning Fuel Into Motion makes Air, Fuel, and Spark the next session; a partial second attempt remains resumable through a fresh review. The history view displays this next title, with 0/1/2 of 2 completion counts derived from the catalog. These are additional content and presentation under the existing contract, with no persistence-schema change.
+
 Journey progress consists of actually completed session IDs in that journey. `nextSessionID(in:)` returns its first incomplete session, so playing a later session does not skip an earlier gap. A partial replay cannot undo earlier completion. IDs remain catalog-owned; future persistence must preserve them and run identities across launches. Records describe what was **played** and **completed**, with no claim about awareness or retention.
 
 ## Local persistence and recovery

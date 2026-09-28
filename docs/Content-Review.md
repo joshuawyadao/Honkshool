@@ -2,7 +2,7 @@
 
 ## Reviewed scope
 
-The bundled [PreparedCatalog.json](../Honkshool/Resources/PreparedCatalog.json) contains one original Enthusiast session, **Turning Fuel Into Motion**, in **How a Car Works**. Session identity is `turning-fuel-into-motion`, script revision is `1`, and language is `en-US`. This is the first prepared session; the remaining candidate sessions and recommended journeys are not represented as available content.
+The bundled [PreparedCatalog.json](../Honkshool/Resources/PreparedCatalog.json) contains two original Enthusiast sessions in **How a Car Works**: **Turning Fuel Into Motion** (`turning-fuel-into-motion`) and **Air, Fuel, and Spark** (`air-fuel-and-spark`). Both use script revision `1` and content language `en-US`, rendered with British-English George. Later candidate sessions and recommended journeys are not represented as available content. The following historical first-session review is followed by the second-session review below.
 
 The script follows a common four-stroke, spark-ignition petrol car engine. It covers the relationship between combustion, the piston and crankshaft, the operating cycle, valves, several cylinders, the transmission, cooling, and lubrication. It deliberately avoids repair instructions, failure warnings, performance rankings, and claims of learning or retention. Natural delivery and breathing room between ideas remain the narration direction.
 
@@ -41,11 +41,11 @@ The narration was written as original connected prose after reviewing the source
 
 The unchanged revision-1 script has **1,838 words in 13 paragraphs**, counting word tokens with apostrophes kept inside words and hyphenated compounds counted separately. Its initial 765-second editorial estimate assumed 150 words per minute plus paragraph pauses; it was explicitly unmeasured.
 
-On 2026-09-17 the complete Mac development audition measured **674.222 seconds (11 minutes 14.222 seconds)**. Every whole paragraph received a completed synthesis callback using the reference Aaron voice at rate `0.45`. Offline processing retained that timing, with 0.25 seconds of leading silence, one second between paragraphs, and 0.5 seconds at the end. The configurable planning estimate is now **675 seconds**, calculated as `ceil(674.222 / 5) * 5`. The text and revision did not change.
+On 2026-09-17 the complete Mac development audition measured **674.222 seconds (11 minutes 14.222 seconds)**. Every whole paragraph received a completed synthesis callback using the reference Aaron voice at rate `0.45`. Offline processing retained that timing, with 0.25 seconds of leading silence, one second between paragraphs, and 0.5 seconds at the end. The planning estimate at that checkpoint was **675 seconds**, calculated as `ceil(674.222 / 5) * 5`. The text and revision did not change.
 
 That measurement is preserved as historical Apple-voice evidence. On 2026-09-21 the unchanged revision-1 script was rendered with the accepted Kokoro George voice at native model speed `0.86`. The verified output measures **727.625 seconds (12 minutes 7.625 seconds)**, so the current configurable estimate is **730 seconds**, calculated as `ceil(727.625 / 5) * 5`. The bundled PCM asset and its provenance are bound to the same session identity, revision, and exact narration-text hash. Listening review must still check the complete session; objective construction checks do not establish pronunciation or comfort.
 
-[Audio-Preparation.md](Audio-Preparation.md) and its measurement record preserve the script hash, paragraph frame counts, processing evidence, and full-file fingerprint. The estimate describes this Mac audition; target-iPhone direct-speech timing remains uncalibrated. Actual overruns still stop at the fixed wake deadline and retain partial progress.
+[Audio-Preparation.md](Audio-Preparation.md) and its measurement record preserve the script hash, paragraph frame counts, processing evidence, and full-file fingerprint. Current estimates describe the bundled prepared WAVs; the app does not resynthesize them on iPhone. Actual overruns still stop at the fixed wake deadline and retain partial progress.
 
 The full script has been rendered, but not accepted through full-session listening. Pronunciation notes remain authoring guidance, not applied speech substitutions. Technical words, pauses, consonants, sustained comfort, and target-device output still need listening review.
 
@@ -53,4 +53,27 @@ The full script has been rendered, but not accepted through full-session listeni
 
 The 97-word narration audition was a short voice-and-processing comparison. The owner accepted **F** as a provisional development reference after listening through MacBook speakers. That acceptance does not cover this full script, iPhone playback, or AirPods output. The existing feasibility spike script is also separate and remains available for its original technical purpose.
 
-This prepared catalog bundles text and source metadata, alongside a separately prepared CC0 rain candidate. Local processed narration stays outside the repository, and the playback runtime remains unchanged. Rain listening acceptance and target-device narration checks remain open work. See the [decision log](Decision-Log.md) and [durable roadmap](Project-Implementation-Plan.md).
+The prepared catalog bundles both complete George narrations and their provenance alongside text, source metadata, and the selected CC0 rain resource. Preparation environments, model weights, and historical auditions remain outside Git. Automated device evidence and deferred listening, locked-control, and headphone observations are recorded separately; no new subjective acceptance is implied. See the [decision log](Decision-Log.md) and [durable roadmap](Project-Implementation-Plan.md).
+
+## Air, Fuel, and Spark — reviewed 2026-09-28
+
+The second session has 1,847 whitespace-delimited words in 14 paragraphs. It stands alone while continuing the first session's gentle drawing motif. It follows a conventional injected, spark-ignition petrol engine from air admission and measurement through mixture preparation, ignition, finite flame propagation, and feedback. Opening and closing framing are original; the 12 factual paragraphs each link to a primary source. No source prose or media is reproduced.
+
+| Source ID | Reviewed claim / qualification | Source |
+| --- | --- | --- |
+| `doe-engine-basics` | Energy, pressure, and the four-stroke outline. | [DOE engine basics](https://www.energy.gov/cmei/vehicles/articles/internal-combustion-engine-basics) |
+| `bosch-air-management` | Electronic throttle and pedal request; qualified as one arrangement. | [Bosch air management](https://www.bosch-mobility.com/en/solutions/air-management/) |
+| `bosch-air-mass` | Heated sensing element turns airflow's thermal effect into information. | [Bosch air-mass meter](https://www.bosch-mobility.com/en/solutions/sensors/hotfilm-airflow-sensor/) |
+| `bosch-intake-sensor` | Pressure and temperature sensing support fuel control; sensor combinations vary. | [Bosch intake sensor](https://www.bosch-mobility.com/en/solutions/sensors/intake-manifold-and-boost-pressure-sensor/) |
+| `bosch-port-injector` | Injection before the valve; timing can precede or overlap its opening. | [Bosch port injector](https://www.bosch-mobility.com/en/solutions/valves/fuel-injector-manifold/) |
+| `bosch-direct-injector` | Metered, atomized fuel enters the chamber from a fuel rail. | [Bosch high-pressure injection valve](https://www.bosch-mobility.com/en/solutions/valves/high-pressure-injector/) |
+| `denso-ignition-coil` | Primary current and changing magnetic field produce secondary voltage. | [DENSO ignition coil](https://www.denso-am.eu/products/ignition/ignition-coil) |
+| `denso-spark-plug` | Electrical discharge across the electrode gap initiates combustion. | [DENSO spark plug](https://www.denso-am.eu/products/ignition/spark-plug) |
+| `doe-flame-propagation` | Normal flame spread takes milliseconds, rather than occurring simultaneously everywhere. | [DOE Co-Optima transcript](https://www.energy.gov/cmei/fuels/text-version-co-optima-webinar-how-can-co-optimized-fuels-and-spark-ignition-engines) |
+| `bosch-crank-sensor` | Position and speed signals support injection and ignition timing. | [Bosch crankshaft sensor](https://www.bosch-mobility.com/en/solutions/sensors/crankshaft-speed-sensor/) |
+| `bosch-engine-control` | ECU coordination of air, fuel, and ignition. | [Bosch engine-control summary](https://www.bosch-mobility.com/media/global/solutions/passenger-cars-and-light-commercial-vehicles/powertrain-solutions/gasoline-direct-injection/electronic-control-unit/ps_summary_ps_electric_control_unit_ecu_en_rgb_20201202.pdf) |
+| `bosch-oxygen-feedback` | Exhaust oxygen supplies feedback for mixture control. | [Bosch lambda sensor](https://www.bosch.com/stories/the-history-of-the-bosch-lambda-sensor/) |
+
+The read-only source review found no required narration correction. It corrected three source display titles and removed one repeated reassurance sentence before rendering. The commercial-vehicle crank-sensor page is used only for the shared sensing principle, not a claim that every passenger car installs that component. Normal combustion, sensor arrangements, and injection timing remain qualified; there are no universal voltage, pressure, mixture-ratio, ignition-angle, efficiency, or service prescriptions. The text offers no quiz, learning claim, diagnostic task, or repair instruction.
+
+Pronunciation guidance covers petrol, injector, electrodes, crankshaft, lambda, and milliseconds. It is metadata rather than an applied phoneme override. Its verified complete render measures 756.75 seconds, with a configurable 760-second estimate. Measured render evidence lives in [Audio-Preparation.md](Audio-Preparation.md) and the second session's bundled provenance. Text/chunk checks prove the submitted input and assembly order; they do not transcribe the output or establish pronunciation and comfort through the complete session.

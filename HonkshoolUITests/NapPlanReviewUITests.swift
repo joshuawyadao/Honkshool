@@ -136,7 +136,7 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertTrue(app.staticTexts["napPlanDeadline"].label.contains("Fixed wake deadline"))
     XCTAssertEqual(app.staticTexts["napPlanAlarmChoice"].label, "Wake alarm, Requested at deadline")
     XCTAssertEqual(app.staticTexts["napPlanPostNarrationSound"].label, "After narration, Silence")
-    XCTAssertTrue(app.staticTexts["napPlanRouteEnd"].label.contains("journey route ends"))
+    XCTAssertTrue(app.staticTexts["napPlanRouteEnd"].label.contains("does not fit"))
 
     let deadline = app.staticTexts["napPlanDeadline"].label
     let confirm = app.buttons["confirmNapPlan"]
@@ -148,6 +148,49 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertTrue(app.buttons["startNapRun"].exists)
     XCTAssertTrue(app.staticTexts["napPlanConfirmedStart"].label.contains("Planned rest start"))
     XCTAssertFalse(app.buttons["reviewNapPlan"].exists)
+    XCTAssertTrue(
+      app.staticTexts["napPlanConfirmedDeadline"].label.contains(
+        deadline.replacingOccurrences(of: "Fixed wake deadline, ", with: "")))
+  }
+
+  func testChoosingSecondSessionReviewsItFromTheStart() {
+    let app = launchReview()
+    let content = app.buttons["napPlanContent"]
+    scrollTo(content, in: app)
+    content.tap()
+    app.buttons["How a Car Works · Air, Fuel, and Spark"].tap()
+    let review = app.buttons["reviewNapPlan"]
+    scrollTo(review, in: app)
+    review.tap()
+    let firstRoute = app.descendants(matching: .any)["napPlanRouteItem-0"]
+    scrollTo(firstRoute, in: app)
+    XCTAssertTrue(firstRoute.label.contains("Air, Fuel, and Spark"))
+    XCTAssertFalse(app.descendants(matching: .any)["napPlanRouteItem-1"].exists)
+    XCTAssertFalse(app.staticTexts["napPlanReviewedResume"].exists)
+  }
+
+  func testLongPlanReviewsBothOrderedSessionsAndFixedDeadline() {
+    let app = launchReview()
+    let duration = app.buttons["napPlanDuration"]
+    scrollTo(duration, in: app)
+    duration.tap()
+    app.buttons["45 minutes"].tap()
+    let review = app.buttons["reviewNapPlan"]
+    scrollTo(review, in: app)
+    review.tap()
+    let first = app.descendants(matching: .any)["napPlanRouteItem-0"]
+    let second = app.descendants(matching: .any)["napPlanRouteItem-1"]
+    scrollTo(first, in: app)
+    XCTAssertTrue(first.label.contains("Turning Fuel Into Motion"))
+    scrollTo(second, in: app)
+    XCTAssertTrue(second.label.contains("Air, Fuel, and Spark"))
+    XCTAssertFalse(app.descendants(matching: .any)["napPlanRouteItem-2"].exists)
+    XCTAssertTrue(app.staticTexts["napPlanRouteEnd"].label.contains("journey route ends"))
+    let deadline = app.staticTexts["napPlanDeadline"].label
+    let confirm = app.buttons["confirmNapPlan"]
+    scrollTo(confirm, in: app)
+    confirm.tap()
+    XCTAssertTrue(app.staticTexts["napPlanConfirmation"].waitForExistence(timeout: 5))
     XCTAssertTrue(
       app.staticTexts["napPlanConfirmedDeadline"].label.contains(
         deadline.replacingOccurrences(of: "Fixed wake deadline, ", with: "")))

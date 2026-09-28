@@ -16,6 +16,7 @@ import wave
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = PROJECT_ROOT / "scripts/prepare-rain.py"
+NARRATION_SCRIPT = PROJECT_ROOT / "scripts/prepare-kokoro-narration.py"
 RESOURCES = PROJECT_ROOT / "Honkshool/Resources"
 spec = importlib.util.spec_from_file_location("prepare_rain", SCRIPT)
 prepare_rain = importlib.util.module_from_spec(spec)
@@ -151,116 +152,201 @@ class PreparedRainTests(unittest.TestCase):
             self.assertEqual(source.read_bytes(), b"source must remain untouched")
 
 
+class NarrationPublicationGuardTests(unittest.TestCase):
+    def run_renderer(self, *arguments):
+        with tempfile.TemporaryDirectory() as cache_root:
+            return subprocess.run(
+                [sys.executable, str(NARRATION_SCRIPT), "--cache-root", cache_root,
+                 *map(str, arguments)],
+                capture_output=True, text=True, check=False,
+            )
+
+    def test_default_invocation_preserves_original_wav_and_provenance(self):
+        wav = RESOURCES / "Turning-Fuel-Into-Motion-George.wav"
+        provenance = RESOURCES / "GeorgeNarration-Provenance.json"
+        before = (hashlib.sha256(wav.read_bytes()).digest(), provenance.read_bytes())
+        result = self.run_renderer()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Output already exists", result.stderr)
+        self.assertEqual(hashlib.sha256(wav.read_bytes()).digest(), before[0])
+        self.assertEqual(provenance.read_bytes(), before[1])
+
+    def test_existing_destinations_and_symlinks_fail_before_model_imports(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            catalog = RESOURCES / "PreparedCatalog.json"
+            for occupied in ("output", "provenance"):
+                for symlink in (False, True):
+                    with self.subTest(occupied=occupied, symlink=symlink):
+                        marker = root / "marker"
+                        marker.write_bytes(b"untouched")
+                        destination = root / occupied
+                        if symlink:
+                            destination.symlink_to(marker)
+                        else:
+                            destination.write_bytes(b"untouched")
+                        output = destination if occupied == "output" else root / "new.wav"
+                        provenance = destination if occupied == "provenance" else root / "new.json"
+                        result = self.run_renderer("--catalog", catalog, "--output", output,
+                                                   "--provenance", provenance)
+                        self.assertNotEqual(result.returncode, 0)
+                        self.assertIn("already exists", result.stderr)
+                        self.assertEqual(marker.read_bytes(), b"untouched")
+                        self.assertEqual(destination.read_bytes(), b"untouched")
+                        destination.unlink()
+
+    def test_overlapping_destinations_and_catalog_fail_early(self):
+        catalog = RESOURCES / "PreparedCatalog.json"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for output, provenance in (
+                (root / "same", root / "same"),
+                (catalog, root / "new.json"),
+                (root / "new.wav", catalog),
+            ):
+                with self.subTest(output=output, provenance=provenance):
+                    result = self.run_renderer("--catalog", catalog, "--output", output,
+                                               "--provenance", provenance)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn("paths overlap", result.stderr)
+
+
 class PreparedNarrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.provenance = json.loads(
-            (RESOURCES / "GeorgeNarration-Provenance.json").read_text(encoding="utf-8")
-        )
-        cls.asset = RESOURCES / cls.provenance["outputFile"]
         catalog = json.loads(
             (RESOURCES / "PreparedCatalog.json").read_text(encoding="utf-8")
         )
-        cls.session = next(
-            session
-            for session in catalog["sessions"]
-            if session["id"] == cls.provenance["sessionID"]
-        )
-        with wave.open(str(cls.asset), "rb") as audio:
-            cls.parameters = audio.getparams()
-            cls.pcm_bytes = audio.readframes(audio.getnframes())
-        cls.pcm = array.array("h", cls.pcm_bytes)
-        if sys.byteorder != "little":
-            cls.pcm.byteswap()
+        cls.sessions = {session["id"]: session for session in catalog["sessions"]}
+        cls.provenance_files = {
+            "turning-fuel-into-motion": "GeorgeNarration-Provenance.json",
+            "air-fuel-and-spark": "Air-Fuel-and-Spark-George-Provenance.json",
+        }
+        cls.assets = {}
+        for session_id, filename in cls.provenance_files.items():
+            provenance = json.loads((RESOURCES / filename).read_text(encoding="utf-8"))
+            asset = RESOURCES / provenance["outputFile"]
+            with wave.open(str(asset), "rb") as audio:
+                parameters = audio.getparams()
+                pcm_bytes = audio.readframes(audio.getnframes())
+            pcm = array.array("h", pcm_bytes)
+            if sys.byteorder != "little":
+                pcm.byteswap()
+            cls.assets[session_id] = (cls.sessions[session_id], provenance, asset,
+                                      parameters, pcm_bytes, pcm)
+
+    def test_every_catalog_narration_has_a_checked_asset(self):
+        catalog_assets = {
+            session_id for session_id, session in self.sessions.items()
+            if "narrationAsset" in session
+        }
+        self.assertEqual(catalog_assets, set(self.assets))
+        shipped_george = {path.name for path in RESOURCES.glob("*-George.wav")}
+        self.assertEqual(shipped_george, {item[2].name for item in self.assets.values()})
+
+    def test_original_narration_fingerprint_and_revision_remain_fixed(self):
+        session, provenance, asset, *_ = self.assets["turning-fuel-into-motion"]
+        self.assertEqual(session["revision"], "1")
+        self.assertEqual(provenance["sessionRevision"], "1")
+        self.assertEqual(provenance["narrationTextSHA256"],
+                         "7e44406d9d07d90463ffcceb977be64cbb43cbd6fe50524e769b3ce34af56f52")
+        self.assertEqual(asset.name, "Turning-Fuel-Into-Motion-George.wav")
+        self.assertEqual(provenance["outputSHA256"],
+                         "7117b18ce10e45844b6eba29936370131290baf30131b71cf2b01d5999847f37")
+
+    def test_second_session_identity_and_revision_are_fixed(self):
+        session, provenance, asset, *_ = self.assets["air-fuel-and-spark"]
+        self.assertEqual(session["revision"], "1")
+        self.assertEqual(provenance["sessionID"], "air-fuel-and-spark")
+        self.assertEqual(provenance["sessionRevision"], "1")
+        self.assertEqual(asset.name, "Air-Fuel-and-Spark-George.wav")
 
     def test_catalog_points_to_the_verified_bundled_asset(self):
-        metadata = self.session["narrationAsset"]
-        self.assertEqual(
-            self.asset.name, f'{metadata["resource"]}.{metadata["fileExtension"]}'
-        )
-        self.assertEqual(metadata["sha256"], self.provenance["outputSHA256"])
-        self.assertEqual(
-            hashlib.sha256(self.asset.read_bytes()).hexdigest(), metadata["sha256"]
-        )
-        self.assertEqual(self.asset.stat().st_size, self.provenance["outputBytes"])
-        self.assertEqual(metadata["duration"], self.provenance["durationSeconds"])
-        self.assertEqual(
-            self.session["estimatedDuration"],
-            math.ceil(metadata["duration"] / 5) * 5,
-        )
+        for session_id, (session, provenance, asset, *_rest) in self.assets.items():
+            with self.subTest(session=session_id):
+                metadata = session["narrationAsset"]
+                self.assertEqual(provenance["sessionID"], session_id)
+                self.assertEqual(asset.name, f'{metadata["resource"]}.{metadata["fileExtension"]}')
+                self.assertEqual(metadata["sha256"], provenance["outputSHA256"])
+                self.assertEqual(hashlib.sha256(asset.read_bytes()).hexdigest(), metadata["sha256"])
+                self.assertEqual(asset.stat().st_size, provenance["outputBytes"])
+                self.assertEqual(metadata["duration"], provenance["durationSeconds"])
+                self.assertEqual(session["estimatedDuration"],
+                                 math.ceil(metadata["duration"] / 5) * 5)
 
     def test_provenance_matches_the_current_versioned_script(self):
-        narration = "\n\n".join(
-            paragraph["text"] for paragraph in self.session["paragraphs"]
-        )
-        self.assertEqual(self.provenance["sessionRevision"], self.session["revision"])
-        self.assertEqual(
-            self.provenance["narrationTextSHA256"],
-            hashlib.sha256(narration.encode("utf-8")).hexdigest(),
-        )
-        self.assertEqual(self.provenance["paragraphCount"], len(self.session["paragraphs"]))
-        self.assertEqual(
-            self.provenance["wordCount"],
-            sum(len(paragraph["text"].split()) for paragraph in self.session["paragraphs"]),
-        )
-        for source, prepared in zip(
-            self.session["paragraphs"], self.provenance["paragraphs"]
-        ):
-            self.assertEqual(
-                prepared["textSHA256"],
-                hashlib.sha256(source["text"].encode("utf-8")).hexdigest(),
-            )
-            self.assertEqual(
-                prepared["frames"], sum(chunk["frames"] for chunk in prepared["chunks"])
-            )
+        for session_id, (session, provenance, *_rest) in self.assets.items():
+            with self.subTest(session=session_id):
+                narration = "\n\n".join(paragraph["text"] for paragraph in session["paragraphs"])
+                self.assertEqual(provenance["sessionRevision"], session["revision"])
+                self.assertEqual(provenance["narrationTextSHA256"],
+                                 hashlib.sha256(narration.encode("utf-8")).hexdigest())
+                self.assertEqual(provenance["paragraphCount"], len(session["paragraphs"]))
+                self.assertEqual(len(provenance["paragraphs"]), len(session["paragraphs"]))
+                self.assertEqual(provenance["wordCount"],
+                                 sum(len(item["text"].split()) for item in session["paragraphs"]))
+                for index, (source, prepared) in enumerate(zip(session["paragraphs"], provenance["paragraphs"])):
+                    self.assertEqual(prepared["index"], index)
+                    self.assertEqual(prepared["textSHA256"],
+                                     hashlib.sha256(source["text"].encode("utf-8")).hexdigest())
+                    self.assertTrue(prepared["chunks"])
+                    self.assertEqual(prepared["frames"], sum(chunk["frames"] for chunk in prepared["chunks"]))
+                    self.assertTrue(all(chunk["frames"] > 0 for chunk in prepared["chunks"]))
+                    self.assertTrue(all(chunk["textSHA256"] and chunk["phonemesSHA256"]
+                                        for chunk in prepared["chunks"]))
 
     def test_wav_format_duration_and_levels_match_provenance(self):
-        self.assertEqual(self.parameters.comptype, "NONE")
-        self.assertEqual(self.parameters.nchannels, self.provenance["channels"])
-        self.assertEqual(self.parameters.sampwidth, 2)
-        self.assertEqual(self.parameters.framerate, self.provenance["sampleRate"])
-        self.assertEqual(self.parameters.nframes, self.provenance["frames"])
-        self.assertEqual(len(self.pcm), self.parameters.nframes)
-        self.assertAlmostEqual(
-            self.parameters.nframes / self.parameters.framerate,
-            self.provenance["durationSeconds"],
-        )
-        measured_rms = 20 * math.log10(
-            math.sqrt(
-                sum((sample / 32768) ** 2 for sample in self.pcm) / len(self.pcm)
-            )
-        )
-        measured_peak = 20 * math.log10(
-            max(abs(sample) for sample in self.pcm) / 32768
-        )
-        clipped = sum(sample in (-32768, 32767) for sample in self.pcm)
-        self.assertAlmostEqual(measured_rms, self.provenance["measuredRMSDBFS"], places=6)
-        self.assertAlmostEqual(measured_peak, self.provenance["measuredPeakDBFS"], places=6)
-        self.assertEqual(clipped, self.provenance["clippedSampleCount"])
-        self.assertEqual(clipped, 0)
+        for session_id, (_session, provenance, _asset, parameters, _bytes, pcm) in self.assets.items():
+            with self.subTest(session=session_id):
+                self.assertEqual(parameters.comptype, "NONE")
+                self.assertEqual(parameters.nchannels, provenance["channels"])
+                self.assertEqual(parameters.sampwidth, 2)
+                self.assertEqual(parameters.framerate, provenance["sampleRate"])
+                self.assertEqual(parameters.nframes, provenance["frames"])
+                self.assertEqual(len(pcm), parameters.nframes)
+                self.assertAlmostEqual(parameters.nframes / parameters.framerate,
+                                       provenance["durationSeconds"])
+                measured_rms = 20 * math.log10(math.sqrt(
+                    sum((sample / 32768) ** 2 for sample in pcm) / len(pcm)))
+                measured_peak = 20 * math.log10(max(abs(sample) for sample in pcm) / 32768)
+                clipped = sum(sample in (-32768, 32767) for sample in pcm)
+                self.assertAlmostEqual(measured_rms, provenance["measuredRMSDBFS"], places=6)
+                self.assertAlmostEqual(measured_peak, provenance["measuredPeakDBFS"], places=6)
+                self.assertEqual(clipped, provenance["clippedSampleCount"])
+                self.assertEqual(clipped, 0)
 
     def test_timing_is_only_model_audio_and_recorded_silence(self):
-        paragraph_frames = sum(item["frames"] for item in self.provenance["paragraphs"])
-        expected = (
-            paragraph_frames
-            + self.provenance["leadingFrames"]
-            + self.provenance["trailingFrames"]
-            + self.provenance["paragraphGapFrames"]
-            * (self.provenance["paragraphCount"] - 1)
-        )
-        self.assertEqual(expected, self.provenance["frames"])
-        lead = self.provenance["leadingFrames"] * 2
-        trail = self.provenance["trailingFrames"] * 2
-        self.assertFalse(any(self.pcm_bytes[:lead]))
-        self.assertFalse(any(self.pcm_bytes[-trail:]))
+        for session_id, (_session, provenance, _asset, _parameters, pcm_bytes, _pcm) in self.assets.items():
+            with self.subTest(session=session_id):
+                paragraph_frames = sum(item["frames"] for item in provenance["paragraphs"])
+                expected = (paragraph_frames + provenance["leadingFrames"]
+                            + provenance["trailingFrames"]
+                            + provenance["paragraphGapFrames"] * (provenance["paragraphCount"] - 1))
+                self.assertEqual(expected, provenance["frames"])
+                lead = provenance["leadingFrames"] * 2
+                trail = provenance["trailingFrames"] * 2
+                self.assertFalse(any(pcm_bytes[:lead]))
+                self.assertFalse(any(pcm_bytes[-trail:]))
 
     def test_pinned_george_model_direction_is_preserved(self):
-        self.assertEqual(self.provenance["engine"], "Kokoro-82M v1.0")
-        self.assertEqual(self.provenance["modelRepository"], "hexgrad/Kokoro-82M")
-        self.assertEqual(self.provenance["modelLicense"], "Apache-2.0")
-        self.assertEqual(self.provenance["voice"], "bm_george")
-        self.assertEqual(self.provenance["speed"], 0.86)
-        self.assertIn("No filtering", self.provenance["processing"])
+        for session_id, (_session, provenance, *_rest) in self.assets.items():
+            with self.subTest(session=session_id):
+                self.assertEqual(provenance["engine"], "Kokoro-82M v1.0")
+                self.assertEqual(provenance["modelRepository"], "hexgrad/Kokoro-82M")
+                self.assertEqual(provenance["modelRevision"],
+                                 "f3ff3571791e39611d31c381e3a41a3af07b4987")
+                self.assertEqual(provenance["modelSHA256"],
+                                 "496dba118d1a58f5f3db2efc88dbdc216e0483fc89fe6e47ee1f2c53f18ad1e4")
+                self.assertEqual(provenance["modelLicense"], "Apache-2.0")
+                self.assertEqual(provenance["voice"], "bm_george")
+                self.assertEqual(provenance["voiceSHA256"],
+                                 "f1bc812213dc59774769e5c80004b13eeb79bd78130b11b2d7f934542dab811b")
+                self.assertEqual(provenance["languageCode"], "b")
+                self.assertEqual(provenance["speed"], 0.86)
+                self.assertEqual(provenance["targetRMSDBFS"], -22.882915)
+                self.assertEqual(provenance["peakLimitDBFS"], -3.0)
+                self.assertEqual(provenance["sampleFormat"], "signed 16-bit little-endian PCM WAV")
+                self.assertIn("No filtering", provenance["processing"])
 
 
 class NarrationMeasurementTests(unittest.TestCase):

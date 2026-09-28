@@ -4,9 +4,9 @@
 
 The accepted narration direction is now **Kokoro-82M v1.0 voice `bm_george` at model speed `0.86`**. The owner found both Kokoro Heart and George much more human and natural than the Apple auditions, preferred George's calm documentary character, and selected the more spacious of two native-duration comparisons. See the [accepted Kokoro reference](Narration-Reference.md#accepted-kokoro-george-direction-2026-09-21) for exact assets, settings, samples, fingerprints, and validation.
 
-[Audition F](Narration-Reference.md), the Apple premium comparisons, and the Aaron full-session master remain unchanged historical references. The complete Kokoro George session is bundled as lossless PCM and connected to both the feasibility console and production Nap Plans. It measures 727.625 seconds, and the configurable planning estimate is 730 seconds. Production plans also save verified narration checkpoints and partial/completed attempts in local history. The owner selected the unchanged prepared rain candidate for use on 2026-09-28 after receiving a four-loop audition. The production Nap Plan offers it only when the bundled PCM and accepted provenance validate; selected rain loops during rest, with silence as a choice and failure fallback. Target-iPhone rain/route/locked-control checks, relative narration-to-rain level, and full-session subjective comfort remain open.
+[Audition F](Narration-Reference.md), the Apple premium comparisons, and the Aaron full-session master remain unchanged historical references. Two complete Kokoro George sessions are bundled as lossless PCM for production Nap Plans. Turning Fuel Into Motion measures 727.625 seconds (730-second estimate); Air, Fuel, and Spark measures 756.75 seconds (760-second estimate). The feasibility console retains its original first-session example. Production plans also save verified narration checkpoints and partial/completed attempts in local history. The owner selected the unchanged prepared rain candidate for use on 2026-09-28 after receiving a four-loop audition. The production Nap Plan offers it only when the bundled PCM and accepted provenance validate; selected rain loops during rest, with silence as a choice and failure fallback. Target-iPhone rain/route/locked-control checks, relative narration-to-rain level, and full-session subjective comfort remain open.
 
-The machine-readable [narration measurements](Audio-Preparation-Measurements.json) preserve the historical Apple work. [George narration provenance](../Honkshool/Resources/GeorgeNarration-Provenance.json) identifies the bundled [prepared narration](../Honkshool/Resources/Turning-Fuel-Into-Motion-George.wav), and [rain provenance](../Honkshool/Resources/GentleRain-Provenance.json) retains the ambience evidence. Kokoro model weights and the isolated preparation environment remain outside the repository; the app contains the prepared session rather than a model runtime. The rain candidate is [GentleRain.wav](../Honkshool/Resources/GentleRain.wav).
+The machine-readable [narration measurements](Audio-Preparation-Measurements.json) preserve the historical Apple work. [George narration provenance](../Honkshool/Resources/GeorgeNarration-Provenance.json) identifies the original [prepared narration](../Honkshool/Resources/Turning-Fuel-Into-Motion-George.wav); [second-session provenance](../Honkshool/Resources/Air-Fuel-and-Spark-George-Provenance.json) identifies [Air, Fuel, and Spark](../Honkshool/Resources/Air-Fuel-and-Spark-George.wav), and [rain provenance](../Honkshool/Resources/GentleRain-Provenance.json) retains the ambience evidence. Kokoro model weights and the isolated preparation environment remain outside the repository; the app contains the prepared session rather than a model runtime. The rain candidate is [GentleRain.wav](../Honkshool/Resources/GentleRain.wav).
 
 ## Accepted Kokoro cadence evidence
 
@@ -36,14 +36,46 @@ Run preparation from the repository root in an isolated environment containing t
 
 ```sh
 python3 scripts/prepare-kokoro-narration.py \
-  --cache-root /path/to/pinned-kokoro-cache
+  --cache-root /path/to/pinned-kokoro-cache \
+  --output outputs/review/Turning-Fuel-Into-Motion-George.wav \
+  --provenance outputs/review/GeorgeNarration-Provenance.json
 ```
 
-The cache root must contain `model-assets.json` and the matching local Hugging Face files. The script operates offline, rejects asset hash or text/chunk mismatches, and writes the WAV plus provenance. The shipped model checkpoint is 327,212,226 bytes, while this single lossless prepared session is 34,926,044 bytes. For the curated first prototype, prepared audio therefore avoids a large model and third-party inference runtime while preserving exact sound and duration. The open-source [Kokoro Swift port](https://github.com/mlalma/kokoro-ios) remains relevant if later catalog scale justifies live synthesis; its own documentation requires applications to supply model and voice files.
+The cache root must contain `model-assets.json` and the matching local Hugging Face files. The script operates offline, rejects asset hash or text/chunk mismatches, and writes the WAV plus provenance. Existing destinations and aliases of the catalog or each other are rejected before model imports; final writes use exclusive creation. Use fresh output paths for any review render, then inspect measurements before deliberately publishing a new asset. The pinned model checkpoint is 327,212,226 bytes, while this single lossless prepared session is 34,926,044 bytes. For the curated first prototype, prepared audio therefore avoids a large model and third-party inference runtime while preserving exact sound and duration. The open-source [Kokoro Swift port](https://github.com/mlalma/kokoro-ios) remains relevant if later catalog scale justifies live synthesis; its own documentation requires applications to supply model and voice files.
+
+## Air, Fuel, and Spark — second prepared session
+
+The second session (`air-fuel-and-spark`, revision `1`) contains 1,847 words in 14 paragraphs. It was rendered on 2026-09-28 with the same model revision, verified model/voice hashes, George `bm_george`, British-English pipeline, seed, native speed `0.86`, PCM format, paragraph gaps, end padding, and whole-file level target as the first session. [Content-Review.md](Content-Review.md#air-fuel-and-spark--reviewed-2026-09-28) records the new original script's source review. The original session's text, revision, and complete WAV remain unchanged.
+
+| Property | Prepared value |
+| --- | --- |
+| Duration / planning estimate | 756.75 seconds / 760 seconds |
+| Encoding | WAV, mono, 24,000 Hz, signed 16-bit PCM |
+| Frame count / file size | 18,162,000 frames / 36,324,044 bytes |
+| Whole-file RMS / sample peak | −22.882915 / −4.826304 dBFS |
+| Full-file SHA-256 | `8f8fb647eccb6eec0feeefb20127a681c101ffccb5d94ff9b7b49c95e5cc5fc5` |
+| Narration-text SHA-256 | `030b0dee239567c7b45a8eaa755127f7ce210b731f3e9bf23ee491dac429b851` |
+| Construction checks | Exact submitted text/chunk order, pinned inputs, complete PCM readback, silence placement, measured levels, and zero clipping passed |
+
+The two WAVs total 71,250,088 bytes (about 68 MiB), excluding rain and metadata. They are bundled content, with no model or inference environment added to the app. A long approved plan can play them in order; finishing the first records completion before starting the second. A stopped or cut-off second session retains its own verified audio position for a fresh plan review. Their combined estimates are 1,490 seconds before settling and drift. Estimates never move the fixed deadline or substitute for completion callbacks.
+
+Reproduction uses an isolated Python 3.11 preparation environment. The prior transient environment was unavailable, so it was recreated from the recorded versions: Kokoro/Misaki `0.9.4`, Torch `2.14.0`, Transformers `4.57.6`, spaCy `3.8.16`, espeakng-loader `0.2.4`, and NumPy `2.4.6`. The English tokenizer package `en-core-web-sm==3.8.0` was installed before rendering and is now also recorded in provenance. Public model assets were downloaded at the pinned revision and checked against the first provenance's byte counts and SHA-256 values before the offline render. No credentials or hosted speech API were used.
+
+The cache-root manifest is a JSON object with `repo`, `revision`, and `assets` (`file`, `sha256`, `bytes` per entry), matching the model fields and assets array in the bundled provenance. Its `hf-cache/` directory holds the matching Hugging Face cache. Install the recorded packages and tokenizer before offline rendering; neither the environment nor the cache belongs in Git. From the repository root, with that environment active:
+
+```sh
+python3 scripts/prepare-kokoro-narration.py \
+  --cache-root /path/to/pinned-kokoro-cache \
+  --session-id air-fuel-and-spark \
+  --output outputs/review/Air-Fuel-and-Spark-George.wav \
+  --provenance outputs/review/Air-Fuel-and-Spark-George-Provenance.json
+```
+
+The provenance records the observed render, not a promise of byte-identical output on every future environment. Complete listening, pronunciation, and relative-level acceptance remain open. Deterministic text and signal checks cannot establish them.
 
 ### Short local review reel
 
-Run `python3 scripts/make-george-review-reel.py` from the repository root to create an ignored 86.125-second WAV in `outputs/`. It copies the first complete synthesis chunk of the opening and middle paragraphs and the complete ending paragraph from the verified bundled file, with the existing one-second paragraph gap between sections. The script checks the source SHA-256 and WAV format; it does not resynthesize, speed up, filter, or change the selected voice. This lets the owner judge representative pronunciation and cadence without sitting through the full session. It cannot prove that every word in the remaining audio is comfortable.
+For the original Turning Fuel Into Motion session, run `python3 scripts/make-george-review-reel.py` from the repository root to create an ignored 86.125-second WAV in `outputs/`. It copies the first complete synthesis chunk of the opening and middle paragraphs and the complete ending paragraph from the verified bundled file, with the existing one-second paragraph gap between sections. The script checks the source SHA-256 and WAV format; it does not resynthesize, speed up, filter, or change the selected voice. This lets the owner judge representative pronunciation and cadence without sitting through the full session. It cannot prove that every word in the remaining audio is comfortable.
 
 ## Historical Aaron full narration audition
 

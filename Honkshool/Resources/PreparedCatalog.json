@@ -5,7 +5,8 @@
       "id": "how-a-car-works",
       "title": "How a Car Works",
       "sessionIDs": [
-        "turning-fuel-into-motion"
+        "turning-fuel-into-motion",
+        "air-fuel-and-spark"
       ],
       "nextJourneyIDs": []
     }
@@ -200,6 +201,204 @@
         },
         {
           "text": "We can leave the drawing there, with its details in place and no need to keep looking at every one. Perhaps only the first pencil outline remains clear; perhaps the whole image has already become a little distant. Either way, there is nothing to finish examining. The picture can rest on the page, complete enough for this moment. The names can settle into the background, and the space around them can become quiet again.",
+          "sourceIDs": []
+        }
+      ]
+    },
+    {
+      "id": "air-fuel-and-spark",
+      "revision": "1",
+      "title": "Air, Fuel, and Spark",
+      "detailLevel": "enthusiast",
+      "language": "en-US",
+      "summary": "A calm look at air measurement, port and direct fuel injection, the ignition coil and spark plug, and the timing and feedback that coordinate combustion in a conventional petrol engine.",
+      "estimatedDuration": 760,
+      "durationEstimateBasis": "The complete prepared Kokoro-82M v1.0 bm_george render at native model speed 0.86 measures 756.75 seconds with one-second paragraph gaps and 250 ms end padding; rounded up to the next five-second increment, 760 seconds. The estimate remains configurable and is not a completion condition.",
+      "narrationAsset": {
+        "resource": "Air-Fuel-and-Spark-George",
+        "fileExtension": "wav",
+        "duration": 756.75,
+        "sha256": "8f8fb647eccb6eec0feeefb20127a681c101ffccb5d94ff9b7b49c95e5cc5fc5"
+      },
+      "sources": [
+        {
+          "id": "doe-engine-basics",
+          "title": "Internal Combustion Engine Basics",
+          "publisher": "U.S. Department of Energy",
+          "url": "https://www.energy.gov/cmei/vehicles/articles/internal-combustion-engine-basics"
+        },
+        {
+          "id": "bosch-air-management",
+          "title": "Air management",
+          "publisher": "Bosch Mobility",
+          "url": "https://www.bosch-mobility.com/en/solutions/air-management/"
+        },
+        {
+          "id": "bosch-air-mass",
+          "title": "Hot-film air-mass meter",
+          "publisher": "Bosch Mobility",
+          "url": "https://www.bosch-mobility.com/en/solutions/sensors/hotfilm-airflow-sensor/"
+        },
+        {
+          "id": "bosch-intake-sensor",
+          "title": "Intake manifold and boost-pressure sensor with integrated temperature sensor",
+          "publisher": "Bosch Mobility",
+          "url": "https://www.bosch-mobility.com/en/solutions/sensors/intake-manifold-and-boost-pressure-sensor/"
+        },
+        {
+          "id": "bosch-port-injector",
+          "title": "Fuel injector (PFI)",
+          "publisher": "Bosch Mobility",
+          "url": "https://www.bosch-mobility.com/en/solutions/valves/fuel-injector-manifold/"
+        },
+        {
+          "id": "bosch-direct-injector",
+          "title": "Solenoid valve for high-pressure injection",
+          "publisher": "Bosch Mobility",
+          "url": "https://www.bosch-mobility.com/en/solutions/valves/high-pressure-injector/"
+        },
+        {
+          "id": "denso-ignition-coil",
+          "title": "Ignition coils",
+          "publisher": "DENSO Europe",
+          "url": "https://www.denso-am.eu/products/ignition/ignition-coil"
+        },
+        {
+          "id": "denso-spark-plug",
+          "title": "Spark plugs",
+          "publisher": "DENSO Europe",
+          "url": "https://www.denso-am.eu/products/ignition/spark-plug"
+        },
+        {
+          "id": "doe-flame-propagation",
+          "title": "Text Version: Co-Optima Webinar: How Can Co-Optimized Fuels and Spark-Ignition Engines Enhance Efficiency While Reducing Carbon Emissions of Light-Duty Passenger Vehicles?",
+          "publisher": "U.S. Department of Energy",
+          "url": "https://www.energy.gov/cmei/fuels/text-version-co-optima-webinar-how-can-co-optimized-fuels-and-spark-ignition-engines"
+        },
+        {
+          "id": "bosch-crank-sensor",
+          "title": "Crankshaft speed sensor for commercial vehicles",
+          "publisher": "Bosch Mobility",
+          "url": "https://www.bosch-mobility.com/en/solutions/sensors/crankshaft-speed-sensor/"
+        },
+        {
+          "id": "bosch-engine-control",
+          "title": "Electronic engine control unit",
+          "publisher": "Bosch Mobility",
+          "url": "https://www.bosch-mobility.com/media/global/solutions/passenger-cars-and-light-commercial-vehicles/powertrain-solutions/gasoline-direct-injection/electronic-control-unit/ps_summary_ps_electric_control_unit_ecu_en_rgb_20201202.pdf"
+        },
+        {
+          "id": "bosch-oxygen-feedback",
+          "title": "The history of the Bosch lambda sensor",
+          "publisher": "Bosch",
+          "url": "https://www.bosch.com/stories/the-history-of-the-bosch-lambda-sensor/"
+        }
+      ],
+      "pronunciations": [
+        {
+          "term": "petrol",
+          "guidance": "PET-ruhl; the everyday British-English word for gasoline."
+        },
+        {
+          "term": "injector",
+          "guidance": "in-JEK-tuh; stress the middle syllable."
+        },
+        {
+          "term": "electrodes",
+          "guidance": "ih-LEK-trohdz; keep the final plural sound connected."
+        },
+        {
+          "term": "crankshaft",
+          "guidance": "KRANK-shaft; keep the compound word connected."
+        },
+        {
+          "term": "lambda",
+          "guidance": "LAM-duh; the b is silent."
+        },
+        {
+          "term": "milliseconds",
+          "guidance": "MIL-ih-sek-undz; do not speak as an abbreviation."
+        }
+      ],
+      "paragraphs": [
+        {
+          "text": "The drawing can begin with a little more space around the engine this time. A few lines arrive from one side, and a few small marks sit above a single cylinder. There is no need to recall an earlier drawing or to keep track of every name. This picture can stand on its own. We will follow the preparation for combustion in a familiar kind of petrol engine, with fuel injection and an electrical spark. It is one useful example among many designs. The pace can stay gentle, with each part of the picture allowed to appear, do its small job in the story, and settle into the background again.",
+          "sourceIDs": []
+        },
+        {
+          "text": "Air and fuel belong together in this example because combustion needs both. The fuel carries chemical energy, and burning it with air releases energy as heat. Inside the cylinder, the resulting hot gas exerts pressure on the piston. The mechanical parts then carry that push onward as rotation. Before that useful movement can take place, however, the engine has some preparation to do. It needs a fresh charge, a period of compression, and the start of combustion at a suitable point in the cycle. Afterward, the spent gas leaves and the sequence repeats. We can keep the familiar four-stroke outline very faint on the page: intake, compression, power, and exhaust. Our attention can rest on the smaller arrangements that make the combustion part possible, while the outline quietly holds their place in the larger movement.",
+          "sourceIDs": [
+            "doe-engine-basics"
+          ]
+        },
+        {
+          "text": "First, consider the path taken by the air. In the electronically controlled arrangement we are picturing, a throttle valve helps regulate how much air is admitted to the engine. Its opening can be adjusted as operating demands change. The accelerator pedal provides an electrical request to the control unit, which coordinates the response. The pedal and the throttle therefore belong to a conversation carried by signals, with the valve doing its work in the air passage. We do not need to imagine every wire or every instruction. A simple opening in a passage is enough for now, with its position adjusted by the system around it. That opening has a place in preparing the cylinder charge. Other engine designs can manage their air differently, so this single drawing need not stand for every petrol engine.",
+          "sourceIDs": [
+            "bosch-air-management"
+          ]
+        },
+        {
+          "text": "Admitting air is one task; measuring it is another. One kind of air-mass meter uses a small heated element in the intake stream. Air flowing past carries heat away, changing the temperature pattern across the sensing area. The electronics use that change to provide information about the mass of air passing through. The physical movement becomes an electrical signal that the engine's controller can use. In our drawing, the sensor can remain a small mark beside the passage. It does not need to look important to contribute useful information. The useful distinction is simply between the air itself, continuing along its route, and information about that air, travelling to the controller by another route. One belongs to the moving charge; the other helps the engine prepare for it.",
+          "sourceIDs": [
+            "bosch-air-mass"
+          ]
+        },
+        {
+          "text": "Pressure and temperature provide another view of the intake air. A combined sensor can report both conditions to the control unit, helping it determine an appropriate fuel quantity. Within one such pressure sensor, a tiny membrane changes shape under pressure, and that change is detected electrically. Temperature can be measured with an element whose electrical resistance varies as it warms or cools. The details are small enough to leave out of the main drawing, but they offer a quiet example of measurement. A physical condition becomes a signal. Different engines use different combinations of sensors, and we need not fit every possible arrangement to this one sketch. It is enough to picture the controller receiving information about the air, with each measurement adding a little context to the flow it is trying to manage.",
+          "sourceIDs": [
+            "bosch-intake-sensor"
+          ]
+        },
+        {
+          "text": "Now a second path joins the picture: the supply of fuel. With port injection, the injector delivers fuel into the passage before the intake valve. The fuel mixes with the incoming air on the way into the cylinder. The injector meters the delivery, and the shape of its spray is chosen to suit the engine around it. Depending on the design and operating conditions, injection can take place before the intake valve opens or while it is open. There is room for timing within this apparently simple arrangement. The position of the injector gives the mixture part of the intake passage in which to form. We can imagine that stretch of passage as a meeting place, where two supplies come together before entering the cylinder. The sketch needs no individual droplets counted or traced; a gentle line for the fuel is enough.",
+          "sourceIDs": [
+            "bosch-port-injector"
+          ]
+        },
+        {
+          "text": "Direct injection moves that meeting place inside the cylinder. Here the injector delivers fuel into the combustion chamber itself, supplied from a high-pressure fuel rail. Its job includes metering the quantity and breaking the fuel into a spray that supports mixture formation. The air still has its intake route, while the fuel reaches the chamber through this separate opening. Comparing the two arrangements does not require choosing a winner. Their names tell us where the fuel is introduced: in the intake port, or directly in the combustion chamber. Each arrangement has to work with the particular engine's shape and operating conditions. For our picture, the difference can be as small as moving the end of the fuel line from outside the intake valve to inside the cylinder. The larger story still has air and fuel being prepared for combustion.",
+          "sourceIDs": [
+            "bosch-direct-injector"
+          ]
+        },
+        {
+          "text": "The spark begins with another kind of preparation, this time electrical. An ignition coil contains windings that work with a magnetic field. Current in the primary winding builds that field. When the current is interrupted, the changing field induces a high voltage in the secondary winding. That voltage is used to produce the spark at the plug. We can picture the coil as a small stage between the electrical supply and the spark itself. It prepares the conditions for a brief event, while the engine continues its movement. The coil does not supply the fuel's chemical energy; its role is in providing ignition. There is no need to carry a voltage figure through the story. The relationship is enough: current, a magnetic field, a change in that field, and an electrical pulse delivered toward the plug.",
+          "sourceIDs": [
+            "denso-ignition-coil"
+          ]
+        },
+        {
+          "text": "The spark plug brings that pulse to a small gap between electrodes in the combustion chamber. As the voltage across the gap rises sufficiently, the gas there becomes able to conduct, and an electrical discharge crosses the space. This brief spark initiates combustion in the prepared mixture. The plug is therefore both a physical part of the chamber and the location of a carefully placed electrical event. We can leave its threaded body and insulating material as quiet shapes in the drawing, with our attention resting on the tiny gap. The spark is a beginning, rather than a supply that must continue throughout the whole burning process. Once that beginning has been established, the story moves outward into the surrounding mixture. A very small region has introduced a change that will develop through a much larger part of the chamber.",
+          "sourceIDs": [
+            "denso-spark-plug"
+          ]
+        },
+        {
+          "text": "Normal spark-ignition combustion takes time to spread. A flame begins near the plug and travels through the mixture, rather than the entire charge burning at one perfectly simultaneous instant. Its progress takes a short interval measured in milliseconds, while the engine's mechanical motion continues. That interval is small in an everyday sense, yet it matters within a rapidly repeating cycle. We can slow the imaginary drawing without changing the real process: a small beginning, an expanding region of burning mixture, and more of the charge becoming involved. This is an outline of normal flame propagation, with the more complicated details left outside the frame. There is no need to see a dramatic flash. A gradual change across a small chamber is a useful enough picture, and it gives the timing of the original spark a clear place in the story.",
+          "sourceIDs": [
+            "doe-flame-propagation"
+          ]
+        },
+        {
+          "text": "To place events within the cycle, the controller needs information about the engine's movement. A crankshaft sensor provides information about rotational speed and position. Those signals help coordinate fuel injection and ignition with the turning mechanism. Speed describes how quickly the movement is repeating, while position identifies a place within that movement. The two ideas belong together without being identical. We can picture a circular outline with a small reference mark beside it: the circle supplies an image of repetition, and the mark supplies an image of location. The real sensor turns mechanical movement into an electrical signal, using a reference pattern associated with the shaft. We do not need to follow each passing feature. It is enough to leave a link between the shaft and the controller, carrying the information needed to place other events around the rotation.",
+          "sourceIDs": [
+            "bosch-crank-sensor"
+          ]
+        },
+        {
+          "text": "The electronic engine control unit brings these separate tasks into coordination. It manages functions that include the air supply, fuel injection, and ignition, using information from the engine's sensors. The word control can sound larger than the picture needs. Here, it can mean arranging the actions of several components so that they belong to the same operating sequence. The throttle has one task, the injector another, and the ignition system another again. Their commands are related because they serve the same engine. In our sketch, a few thin signal lines can connect the parts without covering the page. The controller is not an extra source of mechanical power. Its contribution is to organise the preparation and timing around the engine's working parts. The movement remains in the cylinder and crankshaft, with this quieter network helping the individual events agree.",
+          "sourceIDs": [
+            "bosch-engine-control"
+          ]
+        },
+        {
+          "text": "There is also information returning from the exhaust. An oxygen sensor, often called a lambda sensor, measures residual oxygen in the exhaust gas. Its signal allows the fuel-control system to respond to the mixture that has actually burned, rather than relying only on information gathered before combustion. The exhaust therefore has a place in a feedback loop as well as a route away from the cylinder. We can draw one more thin line returning toward the controller, with no need to add a number or an ideal ratio. The details of the system vary with the engine and its operating conditions. For this picture, the useful idea is the return of information. Something happens in the cylinder, a measurement follows downstream, and that measurement helps guide the preparation for further cycles. The drawing has gently folded back toward its beginning.",
+          "sourceIDs": [
+            "bosch-oxygen-feedback"
+          ]
+        },
+        {
+          "text": "That is enough detail for this page. Perhaps the thin lines remain visible, or perhaps only the space around them feels worth noticing now. Nothing needs to be recalled in order. There is no task waiting at the edge of the drawing and no final question to answer. We can let the names become less distinct, as if the pencil had grown lighter toward the end of the sketch. The page can stay where it is, with room around it, and the rest of this moment can belong to quiet.",
           "sourceIDs": []
         }
       ]

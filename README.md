@@ -43,7 +43,7 @@ SECURITY.md                 Private vulnerability-reporting policy
 LICENSE                     MIT license
 ```
 
-The app opens on the feasibility console, with a separate Nap Plan review entry. Follow the [device test guide](docs/Feasibility-Spike.md) before drawing conclusions from the spike. The review screen offers one prepared automotive session, default Silence, and Gentle rain when the accepted bundled file and provenance validate. Rain can fill a short plan without narration or follow a completed session; an unavailable or failed rain loop visibly leaves rest in silence without asking the listener to act mid-nap.
+The app opens on the feasibility console, with a separate Nap Plan review entry. Follow the [device test guide](docs/Feasibility-Spike.md) before drawing conclusions from the spike. The review screen offers two ordered prepared automotive sessions—Turning Fuel Into Motion and Air, Fuel, and Spark—default Silence, and Gentle rain when the accepted bundled file and provenance validate. Rain can fill a short plan without narration or follow a completed session; an unavailable or failed rain loop visibly leaves rest in silence without asking the listener to act mid-nap.
 
 ## Automated validation
 
@@ -86,7 +86,7 @@ GitHub secret scanning, push protection, Dependabot security updates, and privat
 2. Implemented and tested the framework-independent Nap Plan, journey, progress, and history rules, squash-merged through PR #3 as `c5025ad`; see the [domain contract](docs/Nap-Planning-Domain.md). Fixed deadlines and short-window fallback follow approved D-004/D-009.
 3. Added a [bundled content catalog](docs/Content-Catalog.md) with an original citation-backed automotive session, source metadata, pronunciation guidance, and a complete prepared Kokoro George `0.86` narration. The lossless 727.625-second asset plays through the feasibility console; the planner uses a configurable 730-second estimate. [Audio preparation](docs/Audio-Preparation.md) records narration and CC0 rain provenance. The owner selected the prepared rain candidate for use on 2026-09-28; relative level against narration, longer comfort, and physical-device acceptance remain open.
 4. The choose → review screen connects confirmed plans to prepared narration, selected rain or silence, manual controls, a fixed audio cutoff, and optional production AlarmKit scheduling before playback. Alarm identity is kept separately from the feasibility test alarm and can be reconciled or explicitly cancelled after playback stops. SwiftData history retains narration attempts and verified checkpoints across relaunch, with completion-only journey progress and explicit Resume/Replay. Real-iPhone rain, alarm, history, and background-state checks passed; locked-screen controls and listening comfort still need direct observation.
-5. Extend the local journey experience only as needed for an approximately ten-nap personal validation trial.
+5. Added Air, Fuel, and Spark as the second prepared George session on `codex/two-session-journey`. Continue follows completion evidence to the next session or its saved partial position; a long plan can approve both sessions before playback. The next milestone is an approximately ten-nap personal validation trial, with the deferred manual audio observations recorded during use.
 
 See the [living project implementation plan](docs/Project-Implementation-Plan.md) for acceptance criteria and branch sequence. Questions that gate a phase are recorded in the [decision log](docs/Decision-Log.md), not left implicit in code.
 
