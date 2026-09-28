@@ -159,7 +159,9 @@ final class NapRunController: NSObject, ObservableObject {
     scheduler: @escaping NapRunScheduler = { delay, action in
       let task = Task { @MainActor in
         do {
-          try await Task.sleep(for: .seconds(max(0, delay)))
+          // Default clock tolerance may coalesce a one-minute start beyond the
+          // approved start window. Keep start, checkpoint, and cutoff timing precise.
+          try await Task.sleep(for: .seconds(max(0, delay)), tolerance: .zero)
         } catch {
           return
         }
@@ -559,8 +561,10 @@ final class NapRunController: NSObject, ObservableObject {
       reachDeadline(token: token)
       return
     }
+    // Successful completion proves the file reached its end. AVAudioPlayer may
+    // rewind currentTime before this callback, so it is no longer position evidence.
     let played = min(
-      max(0, player.currentTime - currentSessionOffset), now.timeIntervalSince(started))
+      max(0, player.duration - currentSessionOffset), max(0, now.timeIntervalSince(started)))
     do {
       var updated = playback
       let record = try updated.recordSession(

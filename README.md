@@ -55,7 +55,7 @@ On a Mac with Xcode 26 and an installed iOS 26 simulator, run the complete unit 
 
 The script defaults to the latest iPhone 17 Pro simulator. Set `HONKSHOOL_TEST_DESTINATION` to any compatible Xcode destination when needed. Pull requests run the same suite on a read-only GitHub-hosted macOS 26 runner in addition to the portable repository checks.
 
-UI tests use debug-only simulated alarm states, deterministic speech, and isolated preferences that leave real alarm tracking and saved defaults untouched. They never request real AlarmKit permission or schedule a system alarm. Separately gated physical-device tests check actual AlarmKit alerting and narration cutoff through the feasibility and production controllers; see the feasibility guide.
+Routine UI tests use debug-only simulated alarm states, deterministic speech, and isolated preferences that leave real alarm tracking and saved defaults untouched. They never request real AlarmKit permission or schedule a system alarm. An opt-in physical UI case uses real rain and clocks with isolated storage to check controls, background-state continuity, deadline completion, and relaunch. Separately gated physical-device tests use actual bundled audio and AlarmKit to check looping rain, narration completion and saved history, and alarm/cutoff timing; see the [unattended device test guide](docs/Feasibility-Spike.md#production-gentle-rain-acceptance-on-the-target-iphone).
 
 ## Start contributing
 

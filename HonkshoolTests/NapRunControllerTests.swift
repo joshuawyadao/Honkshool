@@ -271,6 +271,53 @@ final class NapRunControllerTests: XCTestCase {
     resumed.stop()
   }
 
+  func testNaturalCompletionAfterPlayerRewindsReplacesPersistedCheckpoint() throws {
+    let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let url = directory.appendingPathComponent("History.store")
+    let store = ListeningHistoryStore(storeURL: url)
+    let catalog = try PreparedCatalog.load()
+    let journey = try XCTUnwrap(catalog.journeys.first)
+    let prepared = try XCTUnwrap(catalog.sessions[journey.sessionIDs[0]])
+    let asset = try XCTUnwrap(prepared.narrationAsset)
+    let offset: TimeInterval = 700
+    let point = try ResumePoint(
+      session: prepared.session, audioOffset: offset,
+      estimatedRemainingDuration: asset.duration - offset, audioAssetSHA256: asset.sha256)
+    let selection = SessionSelection(
+      journeyID: journey.id, sessionID: prepared.session.id, resumePoint: point)
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let player = RunFakePlayer()
+    let run = controller(clock: clock, scheduler: scheduler, player: player, history: store)
+    defer { run.stop() }
+    let approved = try review(catalog: catalog, now: clock.now, selection: selection)
+    try run.start(review: approved, catalog: catalog)
+    scheduler.advance(to: approved.plan.start)
+    player.currentTime = offset + 10
+    clock.now = approved.plan.start.addingTimeInterval(10)
+    run.pause()
+    let checkpoint = try XCTUnwrap(store.entries.first)
+    XCTAssertTrue(checkpoint.isCheckpoint)
+    XCTAssertEqual(checkpoint.record.playedDuration, 10)
+    run.resume()
+
+    clock.now = approved.plan.start.addingTimeInterval(player.duration - offset)
+    // AVAudioPlayer can rewind before delivering its successful end callback.
+    player.currentTime = 0
+    player.onCompletion?()
+    XCTAssertEqual(run.phase, .resting)
+    XCTAssertEqual(try XCTUnwrap(run.records.first).playedDuration, player.duration - offset)
+    let reopened = ListeningHistoryStore(storeURL: url)
+    XCTAssertNil(reopened.errorMessage)
+    XCTAssertEqual(reopened.entries.count, 1)
+    let completed = try XCTUnwrap(reopened.entries.first)
+    XCTAssertEqual(completed.id, checkpoint.id)
+    XCTAssertFalse(completed.isCheckpoint)
+    XCTAssertTrue(completed.record.isCompleted)
+    XCTAssertEqual(completed.record.playedDuration, player.duration - offset)
+  }
+
   func testHistoryWriteFailureDoesNotInterruptPlaybackAndFinalOutcomeCanRetry() throws {
     let store = ListeningHistoryStore(inMemoryOnly: true)
     store.beforeSave = { throw CocoaError(.fileWriteOutOfSpace) }
