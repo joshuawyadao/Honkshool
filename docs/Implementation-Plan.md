@@ -58,3 +58,10 @@ Extend How a Car Works into a two-session journey by preparing Air, Fuel, and Sp
 There are no new product questions. The first completed Codex pass had no findings; the ready-triggered pass identified this bounded script issue. The hosted iOS run on the preceding commit was still in progress when the feedback arrived.
 
 The publication helper now validates every destination first, creates both parent directories, and only then loads the renderer. The WAV and provenance retain exclusive creation. The focused follow-up maintainability review found no additional issue; the fix adds no runtime dependency or app change.
+
+## Codex follow-up: nested destinations and current roadmap count
+
+- [ ] Address [nested-destination feedback](https://github.com/joshuawyadao/Honkshool/pull/10#discussion_r4127893412): reject ancestor/descendant relationships among publication/input file paths before creating any parent directory. Reproduce both output-inside-provenance and provenance-inside-output cases without rendering; retain unchanged sentinels and no created directories on rejection. Run focused and portable tests, then save/push and acknowledge this item separately.
+- [ ] Address [current-status wording](https://github.com/joshuawyadao/Honkshool/pull/10#discussion_r4127893414): correct the Phase 3 current-status paragraph from one prepared session to both named sessions. Inspect nearby current-state claims, run relevant publication/document checks, and save/push and acknowledge this item separately.
+
+No product questions or app/audio changes are needed. Request a fresh review after both fixes; final hosted CI and readiness remain tracked in PR #10.
