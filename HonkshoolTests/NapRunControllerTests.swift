@@ -72,16 +72,24 @@ private final class RunFakePlayer: NapRunAudioPlaying {
 }
 
 @MainActor
+private final class RunHistoryRecorder: NapHistoryRecording {
+  var saved: [(record: PlaybackRecord, isCheckpoint: Bool)] = []
+  func save(_ record: PlaybackRecord, isCheckpoint: Bool) {
+    saved.append((record, isCheckpoint))
+  }
+}
+
+@MainActor
 final class NapRunControllerTests: XCTestCase {
   private func review(
     catalog: PreparedCatalog, now: Date, duration: TimeInterval = 1_200,
-    alarm: Bool = false
+    alarm: Bool = false, selection: SessionSelection? = nil
   ) throws -> NapPlanReview {
     let journey = try XCTUnwrap(catalog.journeys.first)
     let sessionID = try XCTUnwrap(journey.sessionIDs.first)
     var request = NapRequest(
       window: .duration(duration),
-      startingAt: SessionSelection(journeyID: journey.id, sessionID: sessionID))
+      startingAt: selection ?? SessionSelection(journeyID: journey.id, sessionID: sessionID))
     request.alarmEnabled = alarm
     var state = NapPlanReviewState()
     try state.review(
@@ -94,13 +102,139 @@ final class NapRunControllerTests: XCTestCase {
   private func controller(
     clock: RunTestClock, scheduler: RunTestScheduler, player: RunFakePlayer,
     activation: (() throws -> Void)? = nil,
-    observeSystemEvents: Bool = false
+    observeSystemEvents: Bool = false,
+    history: (any NapHistoryRecording)? = nil
   ) -> NapRunController {
     return NapRunController(
       playerFactory: { _ in player }, clock: { clock.now },
       scheduler: { delay, action in scheduler.schedule(after: delay, action: action) },
       activateAudioSession: activation ?? {}, deactivateAudioSession: {},
-      observeSystemEvents: observeSystemEvents, manageRemoteCommands: false)
+      observeSystemEvents: observeSystemEvents, manageRemoteCommands: false, history: history)
+  }
+
+  func testPauseAndBackgroundSaveVerifiedCheckpointsWithoutEndingRun() throws {
+    let catalog = try PreparedCatalog.load()
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let player = RunFakePlayer()
+    let history = RunHistoryRecorder()
+    let run = controller(clock: clock, scheduler: scheduler, player: player, history: history)
+    let approved = try review(catalog: catalog, now: clock.now)
+    try run.start(review: approved, catalog: catalog)
+    XCTAssertTrue(history.saved.isEmpty)
+    scheduler.advance(to: approved.plan.start)
+    player.currentTime = 12
+    clock.now = approved.plan.start.addingTimeInterval(12)
+    run.pause()
+    let paused = try XCTUnwrap(history.saved.last)
+    XCTAssertTrue(paused.isCheckpoint)
+    XCTAssertEqual(paused.record.resumePoint?.audioOffset, 12)
+    XCTAssertEqual(paused.record.endedAt, clock.now)
+    XCTAssertEqual(
+      paused.record.resumePoint?.audioAssetSHA256,
+      catalog.sessions[paused.record.plannedSession.session.id]?.narrationAsset?.sha256)
+    XCTAssertTrue(run.records.isEmpty)
+    XCTAssertEqual(run.phase, .paused)
+    clock.now = clock.now.addingTimeInterval(30)
+    run.scenePhaseChanged(isActive: false)
+    XCTAssertEqual(history.saved.last?.record.playedDuration, 12)
+    XCTAssertTrue(run.hasActiveRun)
+    run.stop()
+    XCTAssertFalse(try XCTUnwrap(history.saved.last).isCheckpoint)
+    XCTAssertEqual(history.saved.last?.record.id, paused.record.id)
+  }
+
+  func testLateCutoffPersistsActualStopAndEarlierVerifiedPosition() throws {
+    let catalog = try PreparedCatalog.load()
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let player = RunFakePlayer()
+    let history = RunHistoryRecorder()
+    let run = controller(clock: clock, scheduler: scheduler, player: player, history: history)
+    let approved = try review(catalog: catalog, now: clock.now)
+    try run.start(review: approved, catalog: catalog)
+    scheduler.advance(to: approved.plan.start)
+    player.currentTime = 300
+    scheduler.advance(to: approved.plan.start.addingTimeInterval(300))
+    let checkpoint = try XCTUnwrap(history.saved.last?.record)
+    player.currentTime = 500
+    scheduler.advance(to: approved.plan.deadline.addingTimeInterval(4))
+    let saved = try XCTUnwrap(history.saved.last)
+    XCTAssertFalse(saved.isCheckpoint)
+    XCTAssertEqual(saved.record.endedAt, approved.plan.deadline.addingTimeInterval(4))
+    XCTAssertEqual(saved.record.checkpointCapturedAt, checkpoint.endedAt)
+    XCTAssertEqual(saved.record.resumePoint?.audioOffset, 300)
+    XCTAssertFalse(saved.record.isCompleted)
+  }
+
+  func testStoppedAttemptReopensAndResumesAsNewCompletedAttempt() throws {
+    let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let url = directory.appendingPathComponent("History.store")
+    let store = ListeningHistoryStore(storeURL: url)
+    let catalog = try PreparedCatalog.load()
+    let journey = try XCTUnwrap(catalog.journeys.first)
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let player = RunFakePlayer()
+    let run = controller(clock: clock, scheduler: scheduler, player: player, history: store)
+    let approved = try review(catalog: catalog, now: clock.now)
+    try run.start(review: approved, catalog: catalog)
+    scheduler.advance(to: approved.plan.start)
+    player.currentTime = 120
+    clock.now = approved.plan.start.addingTimeInterval(120)
+    run.stop()
+    XCTAssertNil(store.errorMessage)
+
+    let reopened = ListeningHistoryStore(storeURL: url)
+    XCTAssertNil(reopened.errorMessage)
+    let attempt = try XCTUnwrap(reopened.entries.first)
+    let selection = try XCTUnwrap(reopened.history.resumeSelection(for: attempt.id))
+    XCTAssertEqual(selection.resumePoint?.audioOffset, 120)
+    XCTAssertEqual(reopened.history.nextSessionID(in: journey), selection.sessionID)
+    let resumedPlayer = RunFakePlayer()
+    let resumed = controller(
+      clock: clock, scheduler: scheduler, player: resumedPlayer, history: reopened)
+    XCTAssertEqual(resumed.phase, .idle)
+    let next = try review(catalog: catalog, now: clock.now, selection: selection)
+    try resumed.start(review: next, catalog: catalog)
+    scheduler.advance(to: next.plan.start)
+    XCTAssertEqual(resumedPlayer.currentTime, 120)
+    clock.now = next.plan.start.addingTimeInterval(resumedPlayer.duration - 120)
+    resumedPlayer.finish()
+    XCTAssertNil(reopened.errorMessage)
+    XCTAssertEqual(reopened.entries.count, 2)
+    XCTAssertEqual(reopened.entries.filter { $0.record.isCompleted }.count, 1)
+    XCTAssertEqual(reopened.entries.first(where: { $0.id == attempt.id }), attempt)
+    XCTAssertNil(reopened.history.nextSessionID(in: journey))
+    resumed.stop()
+  }
+
+  func testHistoryWriteFailureDoesNotInterruptPlaybackAndFinalOutcomeCanRetry() throws {
+    let store = ListeningHistoryStore(inMemoryOnly: true)
+    store.beforeSave = { throw CocoaError(.fileWriteOutOfSpace) }
+    let catalog = try PreparedCatalog.load()
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let player = RunFakePlayer()
+    let run = controller(clock: clock, scheduler: scheduler, player: player, history: store)
+    let approved = try review(catalog: catalog, now: clock.now)
+    try run.start(review: approved, catalog: catalog)
+    scheduler.advance(to: approved.plan.start)
+    XCTAssertEqual(run.phase, .narrating)
+    XCTAssertNotNil(store.errorMessage)
+    XCTAssertTrue(store.entries.isEmpty)
+    player.currentTime = 35
+    clock.now = approved.plan.start.addingTimeInterval(35)
+    run.stop()
+    XCTAssertEqual(run.phase, .stopped)
+    store.beforeSave = nil
+    store.retrySave()
+    XCTAssertNil(store.errorMessage)
+    XCTAssertEqual(store.entries.count, 1)
+    XCTAssertEqual(store.entries.first?.record.resumePoint?.audioOffset, 35)
+    XCTAssertEqual(store.entries.first?.isCheckpoint, false)
   }
 
   func testAlarmRequestedAndStaleStartNeverStartAudio() throws {

@@ -69,6 +69,8 @@ struct ResumePoint: Equatable, Sendable {
   let revision: String
   private let position: Position
   let estimatedRemainingDuration: TimeInterval
+  /// Exact prepared render identity, when this checkpoint came from bundled audio.
+  let audioAssetSHA256: String?
 
   var utf16Offset: Int? {
     if case .script(let offset) = position { return offset }
@@ -89,20 +91,29 @@ struct ResumePoint: Equatable, Sendable {
     self.revision = session.revision
     self.position = .script(utf16Offset: utf16Offset)
     self.estimatedRemainingDuration = estimatedRemainingDuration
+    self.audioAssetSHA256 = nil
   }
 
-  init(session: Session, audioOffset: TimeInterval, estimatedRemainingDuration: TimeInterval) throws
-  {
+  init(
+    session: Session, audioOffset: TimeInterval, estimatedRemainingDuration: TimeInterval,
+    audioAssetSHA256: String? = nil
+  ) throws {
     guard audioOffset.isFinite, audioOffset >= 0 else {
       throw NapDomainError.invalidResumePoint
     }
     guard estimatedRemainingDuration.isFinite, estimatedRemainingDuration > 0 else {
       throw NapDomainError.invalidDuration
     }
+    if let audioAssetSHA256 {
+      guard audioAssetSHA256.count == 64, audioAssetSHA256.allSatisfy(\.isHexDigit) else {
+        throw NapDomainError.invalidResumePoint
+      }
+    }
     self.sessionID = session.id
     self.revision = session.revision
     self.position = .audio(seconds: audioOffset)
     self.estimatedRemainingDuration = estimatedRemainingDuration
+    self.audioAssetSHA256 = audioAssetSHA256
   }
 
   func matches(_ session: Session) -> Bool {
@@ -111,6 +122,7 @@ struct ResumePoint: Equatable, Sendable {
 
   /// A resumed run must keep its position kind and cannot move backwards.
   func isAtOrAfter(_ earlier: ResumePoint) -> Bool {
+    if let earlierHash = earlier.audioAssetSHA256, audioAssetSHA256 != earlierHash { return false }
     switch (position, earlier.position) {
     case (.script(let current), .script(let previous)): return current >= previous
     case (.audio(let current), .audio(let previous)): return current >= previous

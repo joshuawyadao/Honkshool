@@ -43,6 +43,11 @@
 		130000000000000000000002 /* NapRunControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140000000000000000000002 /* NapRunControllerTests.swift */; };
 		150000000000000000000001 /* NapPlanAlarmService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160000000000000000000001 /* NapPlanAlarmService.swift */; };
 		150000000000000000000002 /* NapPlanAlarmServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160000000000000000000002 /* NapPlanAlarmServiceTests.swift */; };
+		170000000000000000000001 /* ListeningHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180000000000000000000001 /* ListeningHistoryStore.swift */; };
+		170000000000000000000002 /* ListeningHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180000000000000000000002 /* ListeningHistoryView.swift */; };
+		170000000000000000000003 /* ListeningHistoryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180000000000000000000003 /* ListeningHistoryStoreTests.swift */; };
+		170000000000000000000004 /* ListeningHistoryNavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180000000000000000000004 /* ListeningHistoryNavigationTests.swift */; };
+		170000000000000000000005 /* ListeningHistoryUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180000000000000000000005 /* ListeningHistoryUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -125,6 +130,11 @@
 		140000000000000000000002 /* NapRunControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapRunControllerTests.swift; sourceTree = "<group>"; };
 		160000000000000000000001 /* NapPlanAlarmService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlanAlarmService.swift; sourceTree = "<group>"; };
 		160000000000000000000002 /* NapPlanAlarmServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlanAlarmServiceTests.swift; sourceTree = "<group>"; };
+		180000000000000000000001 /* ListeningHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/Services/ListeningHistoryStore.swift; sourceTree = SOURCE_ROOT; };
+		180000000000000000000002 /* ListeningHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/App/ListeningHistoryView.swift; sourceTree = SOURCE_ROOT; };
+		180000000000000000000003 /* ListeningHistoryStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/ListeningHistoryStoreTests.swift; sourceTree = SOURCE_ROOT; };
+		180000000000000000000004 /* ListeningHistoryNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/ListeningHistoryNavigationTests.swift; sourceTree = SOURCE_ROOT; };
+		180000000000000000000005 /* ListeningHistoryUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolUITests/ListeningHistoryUITests.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -185,6 +195,7 @@
 		A70000000000000000000003 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				180000000000000000000002 /* ListeningHistoryView.swift */,
 				A20000000000000000000001 /* HonkshoolApp.swift */,
 				A20000000000000000000002 /* FeasibilityConsoleView.swift */,
 				120000000000000000000002 /* NapPlanReviewView.swift */,
@@ -217,6 +228,7 @@
 		A70000000000000000000006 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				180000000000000000000001 /* ListeningHistoryStore.swift */,
 				A20000000000000000000005 /* AudioSpikeController.swift */,
 				A20000000000000000000006 /* AlarmSpikeService.swift */,
 				160000000000000000000001 /* NapPlanAlarmService.swift */,
@@ -228,6 +240,8 @@
 		A70000000000000000000007 /* HonkshoolTests */ = {
 			isa = PBXGroup;
 			children = (
+				180000000000000000000004 /* ListeningHistoryNavigationTests.swift */,
+				180000000000000000000003 /* ListeningHistoryStoreTests.swift */,
 				140000000000000000000002 /* NapRunControllerTests.swift */,
 				160000000000000000000002 /* NapPlanAlarmServiceTests.swift */,
 				E20000000000000000000005 /* NapPlaybackTests.swift */,
@@ -275,6 +289,7 @@
 		B00000000000000000000032 /* Alarm Activity and UI Tests */ = {
 			isa = PBXGroup;
 			children = (
+				180000000000000000000005 /* ListeningHistoryUITests.swift */,
 				B0000000000000000000000A /* HonkshoolAlarmMetadata.swift */,
 				D00000000000000000000004 /* AlarmLockScreenLayout.swift */,
 				B0000000000000000000000B /* HonkshoolAlarmWidget.swift */,
@@ -456,6 +471,8 @@
 				A10000000000000000000006 /* AlarmSpikeService.swift in Sources */,
 				150000000000000000000001 /* NapPlanAlarmService.swift in Sources */,
 				130000000000000000000001 /* NapRunController.swift in Sources */,
+				170000000000000000000002 /* ListeningHistoryView.swift in Sources */,
+				170000000000000000000001 /* ListeningHistoryStore.swift in Sources */,
 				B00000000000000000000001 /* HonkshoolAlarmMetadata.swift in Sources */,
 				C00000000000000000000001 /* UITestFixtures.swift in Sources */,
 			);
@@ -473,6 +490,8 @@
 				D00000000000000000000003 /* AlarmLockScreenLayoutTests.swift in Sources */,
 				A10000000000000000000007 /* SpikeModelsTests.swift in Sources */,
 				130000000000000000000002 /* NapRunControllerTests.swift in Sources */,
+				170000000000000000000004 /* ListeningHistoryNavigationTests.swift in Sources */,
+				170000000000000000000003 /* ListeningHistoryStoreTests.swift in Sources */,
 				150000000000000000000002 /* NapPlanAlarmServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -493,6 +512,7 @@
 			files = (
 				B00000000000000000000004 /* FeasibilityUITests.swift in Sources */,
 				110000000000000000000004 /* NapPlanReviewUITests.swift in Sources */,
+				170000000000000000000005 /* ListeningHistoryUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

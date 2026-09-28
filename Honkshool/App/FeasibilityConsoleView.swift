@@ -4,8 +4,19 @@ struct FeasibilityConsoleView: View {
   @Environment(\.scenePhase) private var scenePhase
   @StateObject private var audio = AudioSpikeController()
   @StateObject private var alarm = AlarmSpikeService()
-  @StateObject private var napRun = NapRunController()
+  @StateObject private var napRun: NapRunController
   @StateObject private var napAlarm = NapPlanAlarmService()
+  @StateObject private var historyStore: ListeningHistoryStore
+
+  init() {
+    #if DEBUG
+      let store = UITestFixtures.makeHistoryStore()
+    #else
+      let store = ListeningHistoryStore()
+    #endif
+    _historyStore = StateObject(wrappedValue: store)
+    _napRun = StateObject(wrappedValue: NapRunController(history: store))
+  }
 
   @AppStorage("preferredRestMinutes", store: SpikePreferences.defaults)
   private var preferredRestMinutes = RestDurationPolicy.initialSavedMinutes
@@ -35,6 +46,15 @@ struct FeasibilityConsoleView: View {
           if napAlarm.hasTrackedAlarm {
             napPlanAlarmCard
           }
+          if let error = historyStore.errorMessage {
+            SpikeCard(title: "Listening history", systemImage: "exclamationmark.triangle") {
+              Text(error)
+                .foregroundStyle(.red)
+                .accessibilityIdentifier("parentHistorySaveError")
+              Button("Retry saving") { historyStore.retrySave() }
+                .accessibilityIdentifier("parentRetryHistorySave")
+            }
+          }
           durationCard
             .disabled(isStarting || alarm.isScheduling || napRun.hasActiveRun)
           alarmCard
@@ -51,6 +71,7 @@ struct FeasibilityConsoleView: View {
               NapPlanReviewView(
                 run: napRun,
                 alarm: napAlarm,
+                historyStore: historyStore,
                 canStart: {
                   (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
                     && !alarm.hasTrackedAlarm
@@ -62,6 +83,7 @@ struct FeasibilityConsoleView: View {
               NapPlanReviewView(
                 run: napRun,
                 alarm: napAlarm,
+                historyStore: historyStore,
                 canStart: {
                   (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
                     && !alarm.hasTrackedAlarm
@@ -75,6 +97,20 @@ struct FeasibilityConsoleView: View {
           .controlSize(.large)
           .accessibilityIdentifier("openNapPlanReview")
           .disabled(napRun.hasActiveRun)
+          NavigationLink {
+            ListeningHistoryView(
+              store: historyStore,
+              canStart: !napRun.hasActiveRun,
+              isNarrationAvailable: historyNarrationAvailable,
+              reviewDestination: { selection in
+                reviewView(startingAt: selection)
+              })
+          } label: {
+            Label("Listening history and Continue", systemImage: "clock.arrow.circlepath")
+              .frame(maxWidth: .infinity)
+          }
+          .buttonStyle(.bordered)
+          .accessibilityIdentifier("openListeningHistory")
         }
         .padding()
       }
@@ -125,6 +161,35 @@ struct FeasibilityConsoleView: View {
         )
       }
     }
+  }
+
+  private var historyNarrationAvailable: (PreparedSession) -> Bool {
+    #if DEBUG
+      UITestFixtures.planReviewNarrationAvailable
+    #else
+      { (try? $0.narrationURL()) != nil }
+    #endif
+  }
+
+  private func reviewView(startingAt selection: SessionSelection) -> NapPlanReviewView {
+    #if DEBUG
+      NapPlanReviewView(
+        run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
+        canStart: {
+          (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
+            && !alarm.hasTrackedAlarm
+        },
+        clock: UITestFixtures.planReviewNow,
+        confirmationClock: UITestFixtures.planReviewConfirmationNow,
+        isNarrationAvailable: UITestFixtures.planReviewNarrationAvailable)
+    #else
+      NapPlanReviewView(
+        run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
+        canStart: {
+          (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
+            && !alarm.hasTrackedAlarm
+        })
+    #endif
   }
 
   private var napRunCard: some View {

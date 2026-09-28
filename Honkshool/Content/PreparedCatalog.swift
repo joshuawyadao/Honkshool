@@ -112,7 +112,8 @@ struct PreparedSession: Equatable, Sendable {
   /// session estimate. A point at the end has no audio left to resume.
   func validateAudioResumePoint(_ point: ResumePoint) throws {
     guard point.matches(session), let audioOffset = point.audioOffset,
-      let narrationAsset, audioOffset < narrationAsset.duration
+      let narrationAsset, audioOffset < narrationAsset.duration,
+      point.audioAssetSHA256.map({ $0 == narrationAsset.sha256 }) ?? true
     else { throw NapDomainError.invalidResumePoint }
   }
 
