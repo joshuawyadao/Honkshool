@@ -5,6 +5,123 @@ final class NapPlanReviewUITests: XCTestCase {
     continueAfterFailure = false
   }
 
+  func testPhysicalRainControlsBackgroundDeadlineAndEmptyHistoryOnRelaunch() throws {
+    guard ProcessInfo.processInfo.environment["HONKSHOOL_REAL_RAIN_TEST"] == "1" else {
+      throw XCTSkip("Opt in on a connected physical iPhone for real rain playback.")
+    }
+    #if targetEnvironment(simulator)
+      throw XCTSkip("A simulator cannot establish physical background playback.")
+    #else
+      // Keep the normal one-minute review lead and real run clock. Only the
+      // existing UI-test storage is isolated; the Nap Plan uses real audio.
+      let app = launchReview(additionalEnvironment: [
+        "HONKSHOOL_UI_TEST_PLAN_NOW": "",
+        "HONKSHOOL_UI_TEST_AUDIO": "0",
+      ])
+      defer { app.terminate() }
+      let duration = app.buttons["napPlanDuration"]
+      scrollTo(duration, in: app)
+      duration.tap()
+      app.buttons["5 minutes"].tap()
+      let custom = app.steppers["napPlanCustomDuration"]
+      scrollTo(custom, in: app)
+      for _ in 0..<4 { custom.buttons["napPlanCustomDuration-Decrement"].tap() }
+
+      let sound = app.buttons["napPlanSound"]
+      scrollTo(sound, in: app)
+      sound.tap()
+      app.buttons["Gentle rain"].tap()
+      let alarm = app.switches["napPlanAlarm"]
+      scrollTo(alarm, in: app)
+      alarm.tap()
+      let status = app.staticTexts["napRunStatus"]
+      var originalStart = ""
+      var originalDeadline = ""
+      for attempt in 0..<2 {
+        let review = app.buttons["reviewNapPlan"]
+        scrollTo(review, in: app)
+        review.tap()
+        XCTAssertTrue(app.staticTexts["napPlanNoContent"].exists)
+        XCTAssertEqual(app.staticTexts["napPlanAlarmChoice"].label, "Wake alarm, Not requested")
+        let confirm = app.buttons["confirmNapPlan"]
+        scrollTo(confirm, in: app)
+        confirm.tap()
+        originalStart = app.staticTexts["napPlanConfirmedStart"].label
+        originalDeadline = app.staticTexts["napPlanConfirmedDeadline"].label
+        let start = app.buttons["startNapRun"]
+        scrollTo(start, in: app)
+        start.tap()
+
+        let outcome = XCTNSPredicateExpectation(
+          predicate: NSPredicate(
+            format: "label CONTAINS %@ OR label CONTAINS %@",
+            "Gentle rain is playing", "Review a new Nap Plan"),
+          object: status)
+        XCTAssertEqual(XCTWaiter.wait(for: [outcome], timeout: 70), .completed)
+        if status.label.contains("Gentle rain is playing") { break }
+        let failure = status.label
+        guard attempt == 0,
+          failure == "Audio output disconnected before playback. Review a new Nap Plan."
+        else {
+          XCTFail("The reviewed rain plan did not start: \(failure)")
+          return
+        }
+        let routeChange = XCTAttachment(string: failure)
+        routeChange.name = "Physical audio route change before playback"
+        routeChange.lifetime = .keepAlways
+        add(routeChange)
+        let another = app.buttons["reviewAnotherNapPlan"]
+        scrollTo(another, in: app)
+        another.tap()
+      }
+      XCTAssertTrue(status.label.contains("Gentle rain is playing"))
+      let startObservation = XCTAttachment(
+        string: "\(originalStart); UI observed rain at \(Date.now.ISO8601Format()).")
+      startObservation.name = "Physical UI rain start"
+      startObservation.lifetime = .keepAlways
+      add(startObservation)
+      let pause = app.buttons["pauseNapRun"]
+      scrollTo(pause, in: app)
+      pause.tap()
+      XCTAssertTrue(status.label.contains("Paused"))
+      let resume = app.buttons["resumeNapRun"]
+      scrollTo(resume, in: app)
+      resume.tap()
+      XCTAssertTrue(status.label.contains("Gentle rain resumed"))
+
+      XCUIDevice.shared.press(.home)
+      XCTAssertTrue(app.wait(for: .runningBackground, timeout: 5))
+      // This spans a complete bundled loop while the real app is backgrounded.
+      Thread.sleep(forTimeInterval: 12)
+      XCTAssertEqual(app.state, .runningBackground)
+      app.activate()
+      XCTAssertTrue(status.label.contains("Gentle rain resumed"))
+      XCTAssertEqual(app.staticTexts["napPlanConfirmedDeadline"].label, originalDeadline)
+      scrollTo(pause, in: app)
+      pause.tap()
+      scrollTo(resume, in: app)
+      resume.tap()
+
+      let finished = XCTNSPredicateExpectation(
+        predicate: NSPredicate(
+          format: "label CONTAINS[c] %@ AND label CONTAINS %@", "stopped", "deadline"),
+        object: status)
+      XCTAssertEqual(XCTWaiter.wait(for: [finished], timeout: 65), .completed)
+      XCTAssertFalse(app.buttons["pauseNapRun"].exists)
+      XCTAssertFalse(app.buttons["resumeNapRun"].exists)
+      XCTAssertEqual(app.staticTexts["napPlanConfirmedDeadline"].label, originalDeadline)
+
+      app.terminate()
+      app.launchEnvironment["HONKSHOOL_UI_TEST_RESET"] = "0"
+      app.launch()
+      XCTAssertFalse(app.staticTexts["activeNapRunStatus"].exists)
+      let history = app.buttons["openListeningHistory"]
+      scrollTo(history, in: app)
+      history.tap()
+      XCTAssertTrue(app.staticTexts["No listening history yet"].waitForExistence(timeout: 5))
+    #endif
+  }
+
   func testDurationReviewShowsCompleteRouteFallbackAndHonestConfirmation() {
     let app = launchReview()
     let review = app.buttons["reviewNapPlan"]
@@ -34,6 +151,53 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertTrue(
       app.staticTexts["napPlanConfirmedDeadline"].label.contains(
         deadline.replacingOccurrences(of: "Fixed wake deadline, ", with: "")))
+  }
+
+  func testGentleRainChoiceIsReviewedConfirmedAndCanBeStoppedWhileWaiting() {
+    let app = launchReview()
+    let sound = app.buttons["napPlanSound"]
+    scrollTo(sound, in: app)
+    sound.tap()
+    app.buttons["Gentle rain"].tap()
+    XCTAssertTrue(app.staticTexts["napPlanSoundFallbackDisclosure"].exists)
+
+    let review = app.buttons["reviewNapPlan"]
+    scrollTo(review, in: app)
+    review.tap()
+    XCTAssertEqual(
+      app.staticTexts["napPlanPostNarrationSound"].label, "After narration, Gentle rain")
+    XCTAssertTrue(app.staticTexts["napPlanReviewedSoundFallback"].exists)
+
+    let confirm = app.buttons["confirmNapPlan"]
+    scrollTo(confirm, in: app)
+    confirm.tap()
+    XCTAssertEqual(app.staticTexts["napPlanConfirmedSound"].label, "After narration, Gentle rain")
+    let start = app.buttons["startNapRun"]
+    scrollTo(start, in: app)
+    start.tap()
+    XCTAssertTrue(app.staticTexts["napRunStatus"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["napRunStatus"].label.contains("Keep Honkshool open"))
+    let stop = app.buttons["stopNapRun"]
+    scrollTo(stop, in: app)
+    stop.tap()
+    XCTAssertFalse(app.buttons["stopNapRun"].exists)
+  }
+
+  func testUnavailableGentleRainIsHiddenAndSilenceRemainsSelectable() {
+    let app = launchReview(additionalEnvironment: [
+      "HONKSHOOL_UI_TEST_PLAN_RAIN_UNAVAILABLE": "1"
+    ])
+    XCTAssertTrue(app.staticTexts["napPlanSoundUnavailable"].waitForExistence(timeout: 5))
+    let sound = app.buttons["napPlanSound"]
+    scrollTo(sound, in: app)
+    sound.tap()
+    XCTAssertFalse(app.buttons["Gentle rain"].exists)
+    XCTAssertTrue(app.buttons["Silence"].exists)
+    app.buttons["Silence"].tap()
+    let review = app.buttons["reviewNapPlan"]
+    scrollTo(review, in: app)
+    review.tap()
+    XCTAssertEqual(app.staticTexts["napPlanPostNarrationSound"].label, "After narration, Silence")
   }
 
   func testAlarmRequestedSchedulesBeforeRunAndSurvivesPlaybackStop() {

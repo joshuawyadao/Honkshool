@@ -54,7 +54,7 @@ final class PreparedCatalogTests: XCTestCase {
       .joined()
     XCTAssertEqual(provenance["preparedSHA256"] as? String, hash)
     XCTAssertEqual(provenance["license"] as? String, "CC0-1.0")
-    XCTAssertEqual(provenance["status"] as? String, "prepared-candidate-awaiting-listening")
+    XCTAssertEqual(provenance["status"] as? String, "accepted-for-playback")
 
     let audio = try AVAudioFile(forReading: url)
     let metadata = try XCTUnwrap(provenance["validation"] as? [String: Any])
