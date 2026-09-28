@@ -986,7 +986,14 @@ final class NapRunControllerTests: XCTestCase {
     XCTAssertEqual(run.phase, .narrating)
     XCTAssertEqual(narration.playCount, 1)
     XCTAssertGreaterThan(rain.stopCount, 0)
-    XCTAssertTrue(history.saved.isEmpty)
+    XCTAssertEqual(history.saved.count, 1)
+    let checkpoint = try XCTUnwrap(history.saved.first)
+    XCTAssertTrue(checkpoint.isCheckpoint)
+    XCTAssertEqual(checkpoint.record.plannedSession, approved.plan.route.first)
+    XCTAssertEqual(checkpoint.record.startedAt, approved.plan.narrationStart)
+    XCTAssertEqual(checkpoint.record.playedDuration, 0)
+    XCTAssertEqual(checkpoint.record.resumePoint?.audioOffset, 0)
+    XCTAssertFalse(checkpoint.record.isCompleted)
     run.stop()
   }
 
