@@ -47,7 +47,7 @@ struct NapPlanReviewView: View {
     isNarrationAvailable: @escaping (PreparedSession) -> Bool = {
       (try? $0.narrationURL()) != nil
     },
-    availableAmbienceIDs: Set<String> = []
+    availableAmbienceIDs: Set<String> = PreparedAmbience.availableIDs(bundle: .main)
   ) {
     self.run = run
     self.alarm = alarm
@@ -229,16 +229,22 @@ struct NapPlanReviewView: View {
         Picker("Sound", selection: $selectedSoundID) {
           Text("Silence").tag(String?.none)
           ForEach(availableAmbienceIDs.sorted(), id: \.self) { id in
-            Text(id).tag(Optional(id))
+            Text(PreparedAmbience.displayName(for: id)).tag(Optional(id))
           }
         }
         .accessibilityIdentifier("napPlanSound")
         if availableAmbienceIDs.isEmpty {
+          Text("Gentle rain is unavailable on this device. This plan can still use silence.")
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .accessibilityIdentifier("napPlanSoundUnavailable")
+        } else if selectedSoundID == PreparedAmbience.gentleRainID {
           Text(
-            "Silence is currently the only available sound. The rain candidate is still under review."
+            "If gentle rain becomes unavailable during playback, rest continues in silence until the fixed wake deadline."
           )
           .font(.footnote)
           .foregroundStyle(.secondary)
+          .accessibilityIdentifier("napPlanSoundFallbackDisclosure")
         }
       }
 
@@ -406,6 +412,13 @@ struct NapPlanReviewView: View {
         .accessibilityIdentifier("napPlanAlarmChoice")
         LabeledContent("After narration", value: soundName(review.plan.fallback))
           .accessibilityIdentifier("napPlanPostNarrationSound")
+        if review.plan.fallback == .ambience(id: PreparedAmbience.gentleRainID) {
+          Text(
+            "If gentle rain becomes unavailable during playback, rest continues in silence until the fixed wake deadline."
+          )
+          .font(.footnote)
+          .accessibilityIdentifier("napPlanReviewedSoundFallback")
+        }
         if review.requestedSound != review.plan.fallback {
           Text("Requested sound is unavailable; this plan uses silence.")
             .font(.footnote)
@@ -423,7 +436,7 @@ struct NapPlanReviewView: View {
       card("Complete approved narration route", systemImage: "list.number") {
         if review.route.isEmpty {
           Text(
-            "No narration fits this rest window. The plan remains quiet through the fixed deadline."
+            "No narration fits this rest window. Rest continues with the selected sound through the fixed deadline."
           )
           .accessibilityIdentifier("napPlanNoContent")
         } else {
@@ -510,6 +523,8 @@ struct NapPlanReviewView: View {
       }
       .accessibilityIdentifier("napPlanConfirmedDeadline")
       LabeledContent("Approved narration", value: "\(confirmed.route.count) session(s)")
+      LabeledContent("After narration", value: soundName(confirmed.plan.fallback))
+        .accessibilityIdentifier("napPlanConfirmedSound")
       LabeledContent(
         "Wake alarm",
         value: confirmed.plan.wakeAlarm == nil ? "Not requested" : "Requested at fixed deadline")
@@ -521,11 +536,11 @@ struct NapPlanReviewView: View {
       if run.hasActiveRun {
         Label(run.statusMessage, systemImage: "waveform")
           .accessibilityIdentifier("napRunStatus")
-        if run.phase == .narrating {
-          Button("Pause narration") { run.pause() }
+        if run.canPause {
+          Button("Pause playback") { run.pause() }
             .accessibilityIdentifier("pauseNapRun")
-        } else if run.phase == .paused || run.phase == .interrupted {
-          Button("Resume narration") { run.resume() }
+        } else if run.canResume {
+          Button("Resume playback") { run.resume() }
             .accessibilityIdentifier("resumeNapRun")
         }
         Button("Stop playback", role: .destructive) { run.stop() }
@@ -542,8 +557,8 @@ struct NapPlanReviewView: View {
         } else {
           Text(
             confirmed.plan.wakeAlarm == nil
-              ? "This run has no wake alarm. Keep Honkshool open until narration begins, then you can lock the phone. Set another alarm if you need one."
-              : "Honkshool will request alarm access if needed, schedule the wake alarm, then start the approved route. Keep the app open until narration begins."
+              ? "This run has no wake alarm. Keep Honkshool open until approved playback begins, then you can lock the phone. Set another alarm if you need one."
+              : "Honkshool will request alarm access if needed, schedule the wake alarm, then start the approved route. Keep the app open until approved playback begins."
           )
           .font(.footnote)
           .foregroundStyle(.secondary)
@@ -633,7 +648,6 @@ struct NapPlanReviewView: View {
         switch error {
         case .staleStart: "The approved start passed. Review a new Nap Plan."
         case .alarmUnavailable: "The requested wake alarm is not verified for this plan."
-        case .ambienceUnavailable: "The approved rest sound is unavailable. Review a new plan."
         case .contentUnavailable: "The approved narration is unavailable. Review a new plan."
         case .invalidCheckpoint: "The approved audio checkpoint is unavailable. Review a new plan."
         case .audioUnavailable: "Audio could not start. Review a new plan after checking output."
@@ -678,7 +692,7 @@ struct NapPlanReviewView: View {
   private func soundName(_ sound: RestSound) -> String {
     switch sound {
     case .silence: "Silence"
-    case .ambience(let id): id
+    case .ambience(let id): PreparedAmbience.displayName(for: id)
     }
   }
 

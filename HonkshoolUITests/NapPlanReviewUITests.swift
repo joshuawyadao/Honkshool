@@ -36,6 +36,53 @@ final class NapPlanReviewUITests: XCTestCase {
         deadline.replacingOccurrences(of: "Fixed wake deadline, ", with: "")))
   }
 
+  func testGentleRainChoiceIsReviewedConfirmedAndCanBeStoppedWhileWaiting() {
+    let app = launchReview()
+    let sound = app.buttons["napPlanSound"]
+    scrollTo(sound, in: app)
+    sound.tap()
+    app.buttons["Gentle rain"].tap()
+    XCTAssertTrue(app.staticTexts["napPlanSoundFallbackDisclosure"].exists)
+
+    let review = app.buttons["reviewNapPlan"]
+    scrollTo(review, in: app)
+    review.tap()
+    XCTAssertEqual(
+      app.staticTexts["napPlanPostNarrationSound"].label, "After narration, Gentle rain")
+    XCTAssertTrue(app.staticTexts["napPlanReviewedSoundFallback"].exists)
+
+    let confirm = app.buttons["confirmNapPlan"]
+    scrollTo(confirm, in: app)
+    confirm.tap()
+    XCTAssertEqual(app.staticTexts["napPlanConfirmedSound"].label, "After narration, Gentle rain")
+    let start = app.buttons["startNapRun"]
+    scrollTo(start, in: app)
+    start.tap()
+    XCTAssertTrue(app.staticTexts["napRunStatus"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["napRunStatus"].label.contains("Keep Honkshool open"))
+    let stop = app.buttons["stopNapRun"]
+    scrollTo(stop, in: app)
+    stop.tap()
+    XCTAssertFalse(app.buttons["stopNapRun"].exists)
+  }
+
+  func testUnavailableGentleRainIsHiddenAndSilenceRemainsSelectable() {
+    let app = launchReview(additionalEnvironment: [
+      "HONKSHOOL_UI_TEST_PLAN_RAIN_UNAVAILABLE": "1"
+    ])
+    XCTAssertTrue(app.staticTexts["napPlanSoundUnavailable"].waitForExistence(timeout: 5))
+    let sound = app.buttons["napPlanSound"]
+    scrollTo(sound, in: app)
+    sound.tap()
+    XCTAssertFalse(app.buttons["Gentle rain"].exists)
+    XCTAssertTrue(app.buttons["Silence"].exists)
+    app.buttons["Silence"].tap()
+    let review = app.buttons["reviewNapPlan"]
+    scrollTo(review, in: app)
+    review.tap()
+    XCTAssertEqual(app.staticTexts["napPlanPostNarrationSound"].label, "After narration, Silence")
+  }
+
   func testAlarmRequestedSchedulesBeforeRunAndSurvivesPlaybackStop() {
     let app = launchReview()
     let review = app.buttons["reviewNapPlan"]

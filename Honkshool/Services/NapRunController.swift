@@ -6,6 +6,7 @@ enum NapRunPhase: Equatable {
   case idle
   case waiting
   case narrating
+  case ambience
   case paused
   case interrupted
   case resting
@@ -18,7 +19,6 @@ enum NapRunError: Error, Equatable {
   case alreadyRunning
   case staleStart
   case alarmUnavailable
-  case ambienceUnavailable
   case contentUnavailable
   case invalidCheckpoint
   case audioUnavailable
@@ -103,6 +103,8 @@ final class NapRunController: NSObject, ObservableObject {
   }
 
   private let playerFactory: @MainActor (URL) throws -> NapRunAudioPlaying
+  private let ambienceFactory: @MainActor (URL) throws -> NapAmbiencePlaying
+  private let resolveAmbience: @MainActor (String) throws -> URL
   private let clock: @MainActor () -> Date
   private let scheduler: NapRunScheduler
   private let activateAudioSession: @MainActor () throws -> Void
@@ -112,6 +114,11 @@ final class NapRunController: NSObject, ObservableObject {
   private var route: [PreparedRouteItem] = []
   private var playback: NapPlayback?
   private var player: NapRunAudioPlaying?
+  private var ambiencePlayer: NapAmbiencePlaying?
+  private var ambienceURL: URL?
+  private var ambienceToken: UUID?
+  private var restFailureMessage: String?
+  private var isSettling = false
   private var currentSessionStartedAt: Date?
   private var currentSessionOffset: TimeInterval = 0
   private var activeToken: UUID?
@@ -121,21 +128,32 @@ final class NapRunController: NSObject, ObservableObject {
   private var cancelCheckpoint: (@MainActor () -> Void)?
   private var interruptionIsActive = false
   private var appIsForeground = true
-  private var waitingForNarration = false
+  private var waitingForPlayback = false
   private var activeRunHasWakeAlarm = false
   private var observerTokens: [NSObjectProtocol] = []
   private var remoteCommandTokens: [(MPRemoteCommand, Any)] = []
 
   var hasActiveRun: Bool {
     switch phase {
-    case .waiting, .narrating, .paused, .interrupted, .resting: true
+    case .waiting, .narrating, .ambience, .paused, .interrupted, .resting: true
     default: false
     }
+  }
+
+  var canPause: Bool { phase == .narrating || phase == .ambience }
+  var canResume: Bool {
+    (phase == .paused || phase == .interrupted) && !interruptionIsActive
   }
 
   init(
     playerFactory: @escaping @MainActor (URL) throws -> NapRunAudioPlaying = {
       try NapRunAudioPlayer(url: $0)
+    },
+    ambienceFactory: @escaping @MainActor (URL) throws -> NapAmbiencePlaying = {
+      try NapAmbiencePlayer(url: $0)
+    },
+    resolveAmbience: @escaping @MainActor (String) throws -> URL = {
+      try PreparedAmbience.resolve(id: $0)
     },
     clock: @escaping @MainActor () -> Date = { .now },
     scheduler: @escaping NapRunScheduler = { delay, action in
@@ -164,6 +182,8 @@ final class NapRunController: NSObject, ObservableObject {
     history: (any NapHistoryRecording)? = nil
   ) {
     self.playerFactory = playerFactory
+    self.ambienceFactory = ambienceFactory
+    self.resolveAmbience = resolveAmbience
     self.clock = clock
     self.scheduler = scheduler
     self.activateAudioSession = activateAudioSession
@@ -196,21 +216,31 @@ final class NapRunController: NSObject, ObservableObject {
       throw NapRunError.alarmUnavailable
     }
     let nextPlayback = try NapPlayback(plan: review.plan, runID: UUID().uuidString)
+    let resolvedRain: URL?
+    if case .ambience(let id) = review.plan.fallback {
+      resolvedRain = try? resolveAmbience(id)
+    } else {
+      resolvedRain = nil
+    }
     // Asset resolution and an earlier AlarmKit await may consume the last
     // instant of the approved start window.
     let now = clock()
     guard now <= review.plan.start else { throw NapRunError.staleStart }
     route = preparedRoute
     playback = nextPlayback
+    ambienceURL = resolvedRain
+    restFailureMessage =
+      review.plan.fallback != .silence && resolvedRain == nil
+      ? "The selected rest sound is unavailable. Rest continues in silence." : nil
     lastRunPlanID = review.plan.id
     records = []
     latestVerifiedCheckpoint = nil
     activeRunHasWakeAlarm = scheduledAlarm != nil
     let token = UUID()
     activeToken = token
-    waitingForNarration = true
+    waitingForPlayback = true
     phase = .waiting
-    statusMessage = "Keep Honkshool open until narration begins at the approved start."
+    statusMessage = "Keep Honkshool open until playback begins at the approved start."
     cancelDeadline = scheduler(review.plan.deadline.timeIntervalSince(now)) { [weak self] in
       self?.reachDeadline(token: token)
     }
@@ -232,7 +262,6 @@ final class NapRunController: NSObject, ObservableObject {
     guard now.timeIntervalSinceReferenceDate.isFinite, now <= review.plan.start,
       now < review.plan.deadline
     else { throw NapRunError.staleStart }
-    guard review.plan.fallback == .silence else { throw NapRunError.ambienceUnavailable }
 
     return try review.plan.route.map { planned -> PreparedRouteItem in
       guard let prepared = catalog.sessions[planned.session.id],
@@ -250,33 +279,85 @@ final class NapRunController: NSObject, ObservableObject {
   }
 
   func pause() {
-    guard phase == .narrating, let player else { return }
-    player.pause()
-    if let token = activeToken { captureCheckpoint(token: token) }
+    guard canPause else { return }
+    pauseOutput()
     phase = .paused
     statusMessage = "Paused. Resume explicitly when ready."
     updateNowPlayingRate(0)
   }
 
+  private func pauseOutput() {
+    player?.pause()
+    ambiencePlayer?.pause()
+    cancelNarrationStart?()
+    cancelNarrationStart = nil
+    if let token = activeToken { captureCheckpoint(token: token) }
+  }
+
   func resume() {
-    guard phase == .paused || phase == .interrupted, !interruptionIsActive,
-      let token = activeToken, let player, let playback
-    else { return }
+    guard canResume, let token = activeToken, let playback else { return }
     guard clock() < playback.plan.deadline else {
       reachDeadline(token: token)
       return
     }
+    if (isSettling && clock() >= playback.plan.narrationStart)
+      || (!isSettling && player == nil && ambiencePlayer == nil)
+    {
+      // A paused completion must still advance through the entire approved route.
+      // A pause never moves the approved narration window or wake deadline.
+      phase = .resting
+      startNextSession(token: token)
+      return
+    }
     do {
       try activateAudioSession()
-      guard player.play() else {
-        fail("Prepared narration could not resume.", token: token)
+      guard clock() < playback.plan.deadline else {
+        reachDeadline(token: token)
         return
       }
-      phase = .narrating
-      statusMessage = "Narration resumed."
+      if let player {
+        guard player.play() else {
+          fail("Prepared narration could not resume.", token: token)
+          return
+        }
+        guard clock() < playback.plan.deadline else {
+          reachDeadline(token: token)
+          return
+        }
+        phase = .narrating
+        statusMessage = "Narration resumed."
+      } else if let ambiencePlayer {
+        // Session reactivation may have consumed the rest of settling.
+        if isSettling && clock() >= playback.plan.narrationStart {
+          phase = .resting
+          startNextSession(token: token)
+          return
+        }
+        let generation = ambienceToken
+        guard ambiencePlayer.play() else {
+          fallBackToSilence("Gentle rain could not resume.", token: token)
+          return
+        }
+        guard activeToken == token, ambienceToken == generation else { return }
+        guard clock() < playback.plan.deadline else {
+          reachDeadline(token: token)
+          return
+        }
+        phase = .ambience
+        statusMessage = "Gentle rain resumed."
+        scheduleNarrationAfterSettling(token: token)
+      } else {
+        beginRest(token: token, settling: isSettling)
+        scheduleNarrationAfterSettling(token: token)
+        return
+      }
       updateNowPlayingRate(1)
     } catch {
-      fail("Audio could not resume: \(error.localizedDescription)", token: token)
+      if player != nil {
+        fail("Audio could not resume: \(error.localizedDescription)", token: token)
+      } else {
+        fallBackToSilence("Gentle rain could not resume.", token: token)
+      }
     }
   }
 
@@ -299,9 +380,9 @@ final class NapRunController: NSObject, ObservableObject {
   func scenePhaseChanged(isActive: Bool) {
     appIsForeground = isActive
     guard !isActive, let token = activeToken else { return }
-    if waitingForNarration {
+    if waitingForPlayback {
       fail(
-        "The app left the foreground before narration began. Review a new Nap Plan.", token: token)
+        "The app left the foreground before playback began. Review a new Nap Plan.", token: token)
     } else {
       captureCheckpoint(token: token)
     }
@@ -332,7 +413,7 @@ final class NapRunController: NSObject, ObservableObject {
       return
     }
     guard appIsForeground else {
-      fail("The app must stay open until narration begins. Review a new Nap Plan.", token: token)
+      fail("The app must stay open until playback begins. Review a new Nap Plan.", token: token)
       return
     }
     // A suspended app may deliver the start timer long after the approved instant.
@@ -348,22 +429,35 @@ final class NapRunController: NSObject, ObservableObject {
       statusMessage = "Audio is interrupted. Review a new Nap Plan when it ends."
       return
     }
-    if now < playback.plan.narrationStart {
-      phase = .resting
-      statusMessage = "Resting in silence until narration begins."
-      cancelNarrationStart = scheduler(playback.plan.narrationStart.timeIntervalSince(now)) {
-        [weak self] in
-        self?.startNextSession(token: token)
-      }
+    if route.isEmpty {
+      beginRest(token: token, settling: false)
+    } else if now < playback.plan.narrationStart {
+      beginRest(token: token, settling: true)
+      scheduleNarrationAfterSettling(token: token)
     } else {
       startNextSession(token: token)
     }
   }
 
+  private func scheduleNarrationAfterSettling(token: UUID) {
+    guard activeToken == token, isSettling, let playback,
+      phase != .paused, phase != .interrupted
+    else { return }
+    cancelNarrationStart?()
+    cancelNarrationStart = scheduler(
+      max(0, playback.plan.narrationStart.timeIntervalSince(clock()))
+    ) {
+      [weak self] in
+      self?.startNextSession(token: token)
+    }
+  }
+
   private func startNextSession(token: UUID) {
-    guard activeToken == token, let playback else { return }
-    if waitingForNarration && !appIsForeground {
-      fail("The app must stay open until narration begins. Review a new Nap Plan.", token: token)
+    guard activeToken == token, let playback, phase != .paused, phase != .interrupted else {
+      return
+    }
+    if waitingForPlayback && !appIsForeground {
+      fail("The app must stay open until playback begins. Review a new Nap Plan.", token: token)
       return
     }
     cancelNarrationStart?()
@@ -386,7 +480,8 @@ final class NapRunController: NSObject, ObservableObject {
           }
           return
         }
-        try beginSilentRest(token: token)
+        _ = try playback.remainingRestSegments()
+        beginRest(token: token, settling: false)
         return
       }
       let index = playback.records.count
@@ -395,6 +490,8 @@ final class NapRunController: NSObject, ObservableObject {
         return
       }
       let item = route[index]
+      isSettling = false
+      releaseAmbience()
       try activateAudioSession()
       let nextPlayer = try playerFactory(item.url)
       guard nextPlayer.prepareToPlay() else {
@@ -411,7 +508,8 @@ final class NapRunController: NSObject, ObservableObject {
         self?.completeSession(token: token, routeIndex: index)
       }
       nextPlayer.onFailure = { [weak self] message in
-        self?.fail(message, token: token)
+        guard let self, self.playback?.records.count == index else { return }
+        self.fail(message, token: token)
       }
       guard clock() < playback.plan.deadline else {
         nextPlayer.onCompletion = nil
@@ -422,13 +520,24 @@ final class NapRunController: NSObject, ObservableObject {
       }
       let started = clock()
       guard nextPlayer.play() else {
+        nextPlayer.onCompletion = nil
+        nextPlayer.onFailure = nil
+        nextPlayer.stop()
         fail("The prepared narration could not start.", token: token)
+        return
+      }
+      guard activeToken == token else {
+        nextPlayer.stop()
         return
       }
       player = nextPlayer
       currentSessionStartedAt = started
       currentSessionOffset = offset
-      waitingForNarration = false
+      guard clock() < playback.plan.deadline else {
+        reachDeadline(token: token)
+        return
+      }
+      waitingForPlayback = false
       captureCheckpoint(token: token)
       phase = .narrating
       statusMessage = "Playing \(planned.session.title)."
@@ -467,16 +576,126 @@ final class NapRunController: NSObject, ObservableObject {
     }
   }
 
-  private func beginSilentRest(token: UUID) throws {
+  private func beginRest(token: UUID, settling: Bool) {
     guard activeToken == token, let playback else { return }
-    _ = try playback.remainingRestSegments()
-    waitingForNarration = false
+    guard clock() < playback.plan.deadline else {
+      reachDeadline(token: token)
+      return
+    }
+    isSettling = settling
     releasePlayer()
+    releaseAmbience()
+    guard let ambienceURL, restFailureMessage == nil else {
+      presentSilentRest()
+      return
+    }
+    do {
+      try activateAudioSession()
+      let nextPlayer = try ambienceFactory(ambienceURL)
+      guard nextPlayer.prepareToPlay() else {
+        nextPlayer.stop()
+        fallBackToSilence("Gentle rain could not be prepared.", token: token)
+        return
+      }
+      guard clock() < playback.plan.deadline else {
+        nextPlayer.stop()
+        reachDeadline(token: token)
+        return
+      }
+      if settling && clock() >= playback.plan.narrationStart {
+        nextPlayer.stop()
+        startNextSession(token: token)
+        return
+      }
+      let generation = UUID()
+      ambienceToken = generation
+      ambiencePlayer = nextPlayer
+      nextPlayer.onFailure = { [weak self] _ in
+        guard let self, self.ambienceToken == generation else { return }
+        self.fallBackToSilence("Gentle rain stopped unexpectedly.", token: token)
+      }
+      guard nextPlayer.play() else {
+        fallBackToSilence("Gentle rain could not start.", token: token)
+        return
+      }
+      guard activeToken == token, ambienceToken == generation else { return }
+      guard clock() < playback.plan.deadline else {
+        reachDeadline(token: token)
+        return
+      }
+      waitingForPlayback = false
+      phase = .ambience
+      statusMessage =
+        settling
+        ? "Gentle rain is playing until narration begins."
+        : "Gentle rain is playing until the fixed deadline."
+      installRemoteCommandsIfNeeded()
+      MPNowPlayingInfoCenter.default().nowPlayingInfo = [
+        MPMediaItemPropertyTitle: "Gentle rain",
+        MPMediaItemPropertyArtist: "Honkshool",
+        MPNowPlayingInfoPropertyPlaybackRate: 1,
+        MPNowPlayingInfoPropertyDefaultPlaybackRate: 1,
+        MPNowPlayingInfoPropertyMediaType: MPNowPlayingInfoMediaType.audio.rawValue,
+        MPNowPlayingInfoPropertyIsLiveStream: false,
+      ]
+    } catch {
+      fallBackToSilence("Gentle rain is unavailable.", token: token)
+    }
+  }
+
+  private func fallBackToSilence(_ message: String, token: UUID) {
+    guard activeToken == token, let playback else { return }
+    guard clock() < playback.plan.deadline else {
+      reachDeadline(token: token)
+      return
+    }
+    let wasPaused = phase == .paused || phase == .interrupted
+    let previousPhase = phase
+    releaseAmbience()
+    restFailureMessage = "\(message) Rest continues in silence."
+    presentSilentRest()
+    guard activeToken == token else { return }
+    // Losing the sound must never undo an explicit pause or interruption.
+    if wasPaused {
+      phase = previousPhase
+      statusMessage = "Gentle rain is unavailable. Resume explicitly to continue the plan."
+      installRemoteCommandsIfNeeded()
+      MPNowPlayingInfoCenter.default().nowPlayingInfo = [
+        MPMediaItemPropertyTitle: "Resting in silence",
+        MPMediaItemPropertyArtist: "Honkshool",
+        MPNowPlayingInfoPropertyPlaybackRate: 0,
+        MPNowPlayingInfoPropertyDefaultPlaybackRate: 1,
+        MPNowPlayingInfoPropertyMediaType: MPNowPlayingInfoMediaType.audio.rawValue,
+        MPNowPlayingInfoPropertyIsLiveStream: false,
+      ]
+    } else {
+      scheduleNarrationAfterSettling(token: token)
+    }
+  }
+
+  private func presentSilentRest() {
+    waitingForPlayback = isSettling
     removeRemoteCommands()
     MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
     deactivateAudioSession()
     phase = .resting
-    statusMessage = "Narration finished. Rest continues in silence until the fixed deadline."
+    statusMessage =
+      restFailureMessage
+      ?? (isSettling
+        ? "Resting in silence until narration begins."
+        : "Rest continues in silence until the fixed deadline.")
+    if isSettling && !appIsForeground, let token = activeToken {
+      fail(
+        "Rain became unavailable before narration while the app was backgrounded. Review a new Nap Plan.",
+        token: token)
+    }
+  }
+
+  private func releaseAmbience() {
+    ambienceToken = nil
+    ambiencePlayer?.onFailure = nil
+    ambiencePlayer?.stop()
+    ambiencePlayer = nil
   }
 
   private func reachDeadline(token: UUID) {
@@ -495,6 +714,7 @@ final class NapRunController: NSObject, ObservableObject {
       recordMissedDeadlinePartial(token: token, stoppedAt: now)
     }
     let hadNarration = player != nil
+    let hadRain = ambiencePlayer != nil
     let hadWakeAlarm = activeRunHasWakeAlarm
     clearRun()
     phase = .finished
@@ -503,6 +723,8 @@ final class NapRunController: NSObject, ObservableObject {
         records.last?.checkpointCapturedAt == nil
         ? "The fixed deadline passed and audio stopped. No verified partial checkpoint was available."
         : "Audio stopped after the fixed deadline. An earlier verified position was recorded for resumption."
+    } else if hadRain && now > playback.plan.deadline {
+      statusMessage = "Gentle rain stopped after the fixed deadline."
     } else {
       statusMessage =
         hadWakeAlarm
@@ -618,7 +840,7 @@ final class NapRunController: NSObject, ObservableObject {
 
   private func clearRun() {
     activeToken = nil
-    waitingForNarration = false
+    waitingForPlayback = false
     activeRunHasWakeAlarm = false
     cancelStart?()
     cancelStart = nil
@@ -629,6 +851,10 @@ final class NapRunController: NSObject, ObservableObject {
     cancelCheckpoint?()
     cancelCheckpoint = nil
     releasePlayer()
+    releaseAmbience()
+    ambienceURL = nil
+    restFailureMessage = nil
+    isSettling = false
     removeRemoteCommands()
     MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
     deactivateAudioSession()
@@ -668,13 +894,12 @@ final class NapRunController: NSObject, ObservableObject {
     switch type {
     case .began:
       interruptionIsActive = true
-      if waitingForNarration, let token = activeToken {
-        fail("Audio was interrupted before narration. Review a new Nap Plan.", token: token)
+      if waitingForPlayback, let token = activeToken {
+        fail("Audio was interrupted before playback. Review a new Nap Plan.", token: token)
         return
       }
-      guard phase == .narrating || phase == .paused else { return }
-      player?.pause()
-      if let token = activeToken { captureCheckpoint(token: token) }
+      guard canPause || phase == .paused else { return }
+      pauseOutput()
       phase = .interrupted
       statusMessage = "Audio was interrupted. Resume manually when ready."
       updateNowPlayingRate(0)
@@ -690,15 +915,12 @@ final class NapRunController: NSObject, ObservableObject {
   private func handleRouteChange(_ notification: Notification) {
     let raw = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt ?? 0
     guard AVAudioSession.RouteChangeReason(rawValue: raw) == .oldDeviceUnavailable else { return }
-    if waitingForNarration, let token = activeToken {
-      fail("Audio output disconnected before narration. Review a new Nap Plan.", token: token)
+    if waitingForPlayback, let token = activeToken {
+      fail("Audio output disconnected before playback. Review a new Nap Plan.", token: token)
       return
     }
-    guard
-      phase == .narrating || phase == .paused
-    else { return }
-    player?.pause()
-    if let token = activeToken { captureCheckpoint(token: token) }
+    guard canPause || phase == .paused else { return }
+    pauseOutput()
     phase = .interrupted
     statusMessage = "Audio output disconnected. Resume manually after choosing an output."
     updateNowPlayingRate(0)
@@ -718,7 +940,7 @@ final class NapRunController: NSObject, ObservableObject {
       (
         commands.togglePlayPauseCommand,
         {
-          if $0.phase == .narrating { $0.pause() } else { $0.resume() }
+          if $0.canPause { $0.pause() } else { $0.resume() }
         }
       ),
       (commands.stopCommand, { $0.stop() }),

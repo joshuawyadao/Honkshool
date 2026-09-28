@@ -48,6 +48,10 @@
 		170000000000000000000003 /* ListeningHistoryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180000000000000000000003 /* ListeningHistoryStoreTests.swift */; };
 		170000000000000000000004 /* ListeningHistoryNavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180000000000000000000004 /* ListeningHistoryNavigationTests.swift */; };
 		170000000000000000000005 /* ListeningHistoryUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180000000000000000000005 /* ListeningHistoryUITests.swift */; };
+		190000000000000000000001 /* PreparedAmbience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000000000000000000001 /* PreparedAmbience.swift */; };
+		190000000000000000000002 /* NapAmbiencePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000000000000000000002 /* NapAmbiencePlayer.swift */; };
+		190000000000000000000003 /* PreparedAmbienceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000000000000000000003 /* PreparedAmbienceTests.swift */; };
+		190000000000000000000004 /* NapAmbiencePlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000000000000000000004 /* NapAmbiencePlayerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -135,6 +139,10 @@
 		180000000000000000000003 /* ListeningHistoryStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/ListeningHistoryStoreTests.swift; sourceTree = SOURCE_ROOT; };
 		180000000000000000000004 /* ListeningHistoryNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/ListeningHistoryNavigationTests.swift; sourceTree = SOURCE_ROOT; };
 		180000000000000000000005 /* ListeningHistoryUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolUITests/ListeningHistoryUITests.swift; sourceTree = SOURCE_ROOT; };
+		1A0000000000000000000001 /* PreparedAmbience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/Content/PreparedAmbience.swift; sourceTree = SOURCE_ROOT; };
+		1A0000000000000000000002 /* NapAmbiencePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/Services/NapAmbiencePlayer.swift; sourceTree = SOURCE_ROOT; };
+		1A0000000000000000000003 /* PreparedAmbienceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/PreparedAmbienceTests.swift; sourceTree = SOURCE_ROOT; };
+		1A0000000000000000000004 /* NapAmbiencePlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/NapAmbiencePlayerTests.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -209,6 +217,7 @@
 			children = (
 				A20000000000000000000004 /* SampleContent.swift */,
 				F20000000000000000000001 /* PreparedCatalog.swift */,
+				1A0000000000000000000001 /* PreparedAmbience.swift */,
 			);
 			path = Content;
 			sourceTree = "<group>";
@@ -233,6 +242,7 @@
 				A20000000000000000000006 /* AlarmSpikeService.swift */,
 				160000000000000000000001 /* NapPlanAlarmService.swift */,
 				140000000000000000000001 /* NapRunController.swift */,
+				1A0000000000000000000002 /* NapAmbiencePlayer.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -243,9 +253,11 @@
 				180000000000000000000004 /* ListeningHistoryNavigationTests.swift */,
 				180000000000000000000003 /* ListeningHistoryStoreTests.swift */,
 				140000000000000000000002 /* NapRunControllerTests.swift */,
+				1A0000000000000000000004 /* NapAmbiencePlayerTests.swift */,
 				160000000000000000000002 /* NapPlanAlarmServiceTests.swift */,
 				E20000000000000000000005 /* NapPlaybackTests.swift */,
 				F20000000000000000000002 /* PreparedCatalogTests.swift */,
+				1A0000000000000000000003 /* PreparedAmbienceTests.swift */,
 				E20000000000000000000004 /* NapPlannerTests.swift */,
 				120000000000000000000003 /* NapPlanReviewTests.swift */,
 				A20000000000000000000008 /* SpikeModelsTests.swift */,
@@ -467,10 +479,12 @@
 				A10000000000000000000003 /* SpikeModels.swift in Sources */,
 				A10000000000000000000004 /* SampleContent.swift in Sources */,
 				F10000000000000000000001 /* PreparedCatalog.swift in Sources */,
+				190000000000000000000001 /* PreparedAmbience.swift in Sources */,
 				A10000000000000000000005 /* AudioSpikeController.swift in Sources */,
 				A10000000000000000000006 /* AlarmSpikeService.swift in Sources */,
 				150000000000000000000001 /* NapPlanAlarmService.swift in Sources */,
 				130000000000000000000001 /* NapRunController.swift in Sources */,
+				190000000000000000000002 /* NapAmbiencePlayer.swift in Sources */,
 				170000000000000000000002 /* ListeningHistoryView.swift in Sources */,
 				170000000000000000000001 /* ListeningHistoryStore.swift in Sources */,
 				B00000000000000000000001 /* HonkshoolAlarmMetadata.swift in Sources */,
@@ -484,12 +498,14 @@
 			files = (
 				E10000000000000000000005 /* NapPlaybackTests.swift in Sources */,
 				F10000000000000000000002 /* PreparedCatalogTests.swift in Sources */,
+				190000000000000000000003 /* PreparedAmbienceTests.swift in Sources */,
 				E10000000000000000000004 /* NapPlannerTests.swift in Sources */,
 				110000000000000000000003 /* NapPlanReviewTests.swift in Sources */,
 				D00000000000000000000002 /* AlarmLockScreenLayout.swift in Sources */,
 				D00000000000000000000003 /* AlarmLockScreenLayoutTests.swift in Sources */,
 				A10000000000000000000007 /* SpikeModelsTests.swift in Sources */,
 				130000000000000000000002 /* NapRunControllerTests.swift in Sources */,
+				190000000000000000000004 /* NapAmbiencePlayerTests.swift in Sources */,
 				170000000000000000000004 /* ListeningHistoryNavigationTests.swift in Sources */,
 				170000000000000000000003 /* ListeningHistoryStoreTests.swift in Sources */,
 				150000000000000000000002 /* NapPlanAlarmServiceTests.swift in Sources */,

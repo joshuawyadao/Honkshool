@@ -2,14 +2,14 @@
 
 `Honkshool/Content/PreparedCatalog.swift` loads the app-bundled `Honkshool/Resources/PreparedCatalog.json`. It uses Foundation only and makes no network requests. This is the prepared-content boundary between authored narration and the existing [nap-planning domain](Nap-Planning-Domain.md).
 
-The catalog currently contains **How a Car Works → Turning Fuel Into Motion** at Enthusiast detail. The script is original, with paragraph-linked references and a configurable duration estimate informed by the complete prepared render. [Content-Review.md](Content-Review.md) records factual review and estimation evidence. The Nap Plan review screen offers only sessions whose narration file resolves in the app bundle; unavailable sessions also end a reviewed route before playback. An alarm-free confirmed plan now resolves and plays the exact approved prepared file through the production run controller. The feasibility console keeps its separate spike flow; persistent history is not connected yet.
+The catalog currently contains **How a Car Works → Turning Fuel Into Motion** at Enthusiast detail. The script is original, with paragraph-linked references and a configurable duration estimate informed by the complete prepared render. [Content-Review.md](Content-Review.md) records factual review and estimation evidence. The Nap Plan review screen offers only sessions whose narration file resolves in the app bundle; unavailable sessions also end a reviewed route before playback. Confirmed plans play the approved prepared narration through the production run controller. Local SwiftData history stores verified narration checkpoints and partial/completed attempts; the feasibility console keeps its separate spike flow.
 
 ## Loading and planning
 
 - `PreparedCatalog(data:)` decodes injected JSON and returns immutable journeys, prepared sessions keyed by stable ID, and a `planningCatalog` snapshot.
 - `PreparedCatalog.load(bundle:)` reads the named JSON resource from the supplied bundle, defaulting to the app bundle. Missing resources, malformed JSON, unsupported schemas, and invalid metadata throw errors. Loading does not silently substitute the spike script or partially accept a broken catalog.
 - `planningCatalog` contains the existing `Journey` and `Session` values, including their configured duration estimates. It can be passed directly to `NapPlanner.makePlan`; loading never selects or changes a route.
-- A CC0 rain candidate and its provenance now ship as resources. They are not connected to playback or exposed as an available planner choice yet; callers continue to supply an empty available-ambience set until that adapter is implemented. A requested but unavailable ambience resolves to silence under the existing planner rules.
+- The owner selected the bundled CC0 Gentle rain candidate for use on 2026-09-28. `PreparedAmbience` checks its accepted provenance, exact SHA-256, frame count, and PCM format before exposing its ID to the review screen. Silence remains the default choice and unavailable rain resolves to silence under the planner rules. The run controller also falls back visibly to silence if rain later cannot play; it does not substitute another sound or change the fixed deadline.
 
 There is no clock, random choice, speech framework, persistence API, or content download in the loader. The only file access is the bundle adapter; decoding and validation operate on `Data`.
 
@@ -47,7 +47,7 @@ F combines a Mac-rendered Apple voice with editorial pauses and narrowly applied
 
 The complete prepared Kokoro George `0.86` narration measures 727.625 seconds; the configurable estimate is 730 seconds, rounded up to five seconds. The catalog identifies the exact bundled WAV by resource name, duration, and SHA-256 without coupling the domain layer to AVFoundation. This is not a completion condition, a reason to change speaking rate, or permission to move the fixed wake deadline. Physical-iPhone playback and full-session pronunciation/listening review remain open. See [Audio-Preparation.md](Audio-Preparation.md) for the preparation command, fingerprints, historical Aaron evidence, rain provenance, and validation limits.
 
-Gentle steady rain is the approved direction. A processed window-rain candidate and its CC0 provenance are bundled, with objective loop and level checks. Its subjective comfort and final selection remain pending. Silence remains the available fallback until the accepted asset is connected to playback. Generated narration auditions remain outside the repository.
+Gentle steady rain is the approved direction. The owner selected the processed window-rain candidate after an unchanged four-loop audition on 2026-09-28. Its CC0 provenance, exact file identity, and objective loop and level checks are retained. Silence remains a selectable fallback. Relative level against narration, longer listening comfort, and physical-device route and deadline behavior remain unobserved. Generated narration auditions remain outside the repository.
 
 ## Verification
 

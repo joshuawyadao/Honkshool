@@ -2,7 +2,13 @@
   "schemaVersion": 1,
   "id": "gentle-rain-window",
   "fileName": "GentleRain.wav",
-  "status": "prepared-candidate-awaiting-listening",
+  "status": "accepted-for-playback",
+  "selection": {
+    "selectedBy": "project owner",
+    "selectedOn": "2026-09-28",
+    "scope": "Use this prepared candidate as the selectable Gentle rain sound in Nap Plans",
+    "physicalPlaybackAccepted": false
+  },
   "creator": "alxl",
   "originalTitle": "Rain on Window Loop",
   "sourcePage": "https://opengameart.org/content/rain-on-window-loop",

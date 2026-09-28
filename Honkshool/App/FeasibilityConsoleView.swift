@@ -78,7 +78,8 @@ struct FeasibilityConsoleView: View {
                 },
                 clock: UITestFixtures.planReviewNow,
                 confirmationClock: UITestFixtures.planReviewConfirmationNow,
-                isNarrationAvailable: UITestFixtures.planReviewNarrationAvailable)
+                isNarrationAvailable: UITestFixtures.planReviewNarrationAvailable,
+                availableAmbienceIDs: UITestFixtures.planReviewAmbienceIDs)
             #else
               NapPlanReviewView(
                 run: napRun,
@@ -181,7 +182,8 @@ struct FeasibilityConsoleView: View {
         },
         clock: UITestFixtures.planReviewNow,
         confirmationClock: UITestFixtures.planReviewConfirmationNow,
-        isNarrationAvailable: UITestFixtures.planReviewNarrationAvailable)
+        isNarrationAvailable: UITestFixtures.planReviewNarrationAvailable,
+        availableAmbienceIDs: UITestFixtures.planReviewAmbienceIDs)
     #else
       NapPlanReviewView(
         run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
@@ -198,11 +200,11 @@ struct FeasibilityConsoleView: View {
         Text(napRun.statusMessage)
           .accessibilityIdentifier("activeNapRunStatus")
         HStack {
-          if napRun.phase == .narrating {
-            Button("Pause narration") { napRun.pause() }
+          if napRun.canPause {
+            Button("Pause playback") { napRun.pause() }
               .accessibilityIdentifier("parentPauseNapRun")
-          } else if napRun.phase == .paused || napRun.phase == .interrupted {
-            Button("Resume narration") { napRun.resume() }
+          } else if napRun.canResume {
+            Button("Resume playback") { napRun.resume() }
               .accessibilityIdentifier("parentResumeNapRun")
           }
           if napRun.hasActiveRun {

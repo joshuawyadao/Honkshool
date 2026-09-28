@@ -33,6 +33,7 @@ enum SpikePreferences {
     static let planNowEnvironmentKey = "HONKSHOOL_UI_TEST_PLAN_NOW"
     static let planConfirmOffsetEnvironmentKey = "HONKSHOOL_UI_TEST_PLAN_CONFIRM_OFFSET"
     static let planContentUnavailableEnvironmentKey = "HONKSHOOL_UI_TEST_PLAN_CONTENT_UNAVAILABLE"
+    static let planRainUnavailableEnvironmentKey = "HONKSHOOL_UI_TEST_PLAN_RAIN_UNAVAILABLE"
     static let seedHistoryEnvironmentKey = "HONKSHOOL_UI_TEST_SEED_HISTORY"
 
     private static let alarmID = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
@@ -64,6 +65,14 @@ enum SpikePreferences {
         ProcessInfo.processInfo.environment[planContentUnavailableEnvironmentKey] == "1"
       else { return (try? session.narrationURL()) != nil }
       return false
+    }
+
+    static var planReviewAmbienceIDs: Set<String> {
+      guard
+        !isEnabled
+          || ProcessInfo.processInfo.environment[planRainUnavailableEnvironmentKey] != "1"
+      else { return [] }
+      return PreparedAmbience.availableIDs(bundle: .main)
     }
 
     static func preparePersistentState(defaults: UserDefaults? = nil) {
