@@ -1,33 +1,22 @@
 # Plan
 
-Persist verified Nap Plan playback locally and expose history, Continue, Resume, and Replay through a fresh plan review. Keep the Foundation domain independent of SwiftData, preserve earlier attempts, and recover only the last saved evidence after an unexpected exit.
+Connect accepted gentle rain to the production Nap Plan flow, then verify the complete nap experience on the target iPhone. Use the bundled prepared loop, retain silence as a choice and fallback, and keep audio controls, fixed deadlines, alarm ownership, and honest listening history consistent across narration and rain.
 
 ## Scope
-- In: a versioned local SwiftData store; durable partial/completed records and in-flight checkpoints; explicit resume with content-revision validation; completion-only journey progress; history UI; isolated persistence/runtime/UI tests; canonical documentation; a reviewed, passing PR.
-- Out: rain playback, new content, full journey branching, automatic playback on relaunch, cloud sync, analytics, changes to alarm ownership, and merging the PR. Physical locked-screen and headphone acceptance remains separately documented.
+- In: a concrete rain audition and recorded listening decision; verified local rain availability; pre-play rain selection; looping rain for approved settling, drift, and remaining rest; pause/resume, interruption, headphone-loss, Stop, and fixed-deadline behavior; automated regression coverage; documented physical acceptance; local checkpoints and a final branch push.
+- Out: new factual content, journey branching, narration mixing or regeneration, voice selection, networking, cloud sync, analytics, automatic playback on relaunch, and changes to alarm ownership or saved-history schema. Full-session comfort requires an actual listening observation; simulator checks cannot close physical acceptance.
 
 ## Action items
-- [x] Inspect the domain, runtime, chooser, fixtures, test configuration, roadmap, decision log, and Apple SwiftData configuration/save documentation; confirm D-002/D-004 and existing resume contracts need no product decision.
-- [x] Add a versioned SwiftData adapter with explicit saves, append-only finalized attempts, replaceable verified checkpoints, safe restoration, duplicate protection, and visible load/save failures without erasing existing data.
-- [x] Connect runtime completion, partial outcomes, and periodic/pause checkpoints to storage; preserve the fixed deadline and separately owned alarm, and recover uncertain exits as partial evidence without inferring a stop time or completion.
-- [x] Add chronological history and Continue/Resume/Replay entry points that validate current prepared content and seed a fresh Nap Plan review; expose completion-based progress without rewriting prior attempts.
-- [x] Add persistence reopen/round-trip, checkpoint recovery, idempotency, stale-revision, storage-failure, runtime, and critical history-to-review UI coverage with isolated test stores.
-- [x] Run targeted simulator tests, the full iOS suite, repository verification, strict Swift formatting, project lint, and an unsigned Release build; review timing, storage, and privacy boundaries.
-- [x] Update README.md, docs/Nap-Planning-Domain.md, docs/Project-Implementation-Plan.md, docs/Project-Overview.md, and docs/Feasibility-Spike.md with storage, recovery, user flow, and remaining device acceptance.
-- [ ] Save coherent local checkpoints, push codex/local-history, open a PR, request Codex review, run Brooks review, and address actionable feedback/CI until merge-ready or a concrete blocker remains.
+- [x] Inspect the roadmap, product brief, D-002/D-004/D-008/D-009, audio preparation/provenance, runtime controls, review availability, and existing repository/iOS tests; confirm clean main at merged PR #8 (`7fb9801`).
+- [x] Prepare a 39.465-second audition containing four exact repetitions of the bundled rain PCM, with no gain or speed changes; keep the generated file in ignored `outputs/` and request the owner's listening decision.
+- [x] Resolve the rain choice: on 2026-09-28 the owner requested using the current candidate and continuing the goal. Commit this resolved plan as the first local checkpoint before implementation.
+- [ ] Add verified bundled-rain resolution and an injectable looping player; expose an understandable Gentle rain choice and reviewed silence fallback only when the accepted asset is available.
+- [ ] Execute the approved rest sound during settling and after narration, including rain-only short plans; share the run's fixed deadline and explicit controls, recheck the deadline after setup/resume, preserve alarm ownership, and keep rain out of narration checkpoints/completion evidence. Handle unavailable/failed rain with visible silence fallback without a mid-nap prompt.
+- [ ] Extend runtime and UI tests for narration-to-rain, settling/rain-only windows, loop setup failure, pause/resume, interruptions, output disconnection, Stop, exact/late cutoff, stale callbacks, and unchanged narration history; verify real bundled decoding/loop behavior at the adapter level.
+- [ ] Run targeted iOS tests, the full unit/UI suite via `scripts/test-ios.sh`, `scripts/verify-repository.sh`, strict Swift formatting, project lint, and an unsigned Release simulator build; request a focused Apple-platform correctness review and checkpoint coherent verified work.
+- [ ] Update README.md and docs/Project-Implementation-Plan.md, Project-Overview.md, Product-Brief.md, Nap-Planning-Domain.md, Content-Catalog.md, Audio-Preparation.md, Decision-Log.md, and Feasibility-Spike.md as applicable, including stale history-integration notes and the exact distinction between listening acceptance, automated checks, and physical observations.
+- [ ] Prepare/install the signed target-iPhone build when the device is available; guide short rain/locked-control, route-loss, alarm, and history/relaunch checks, record pass/fail/blocked observations without private identifiers, and address observed defects. Record full-session comfort only when the owner reports actual use.
+- [ ] Save and push the completed branch with the plan, verification evidence, and any explicitly pending physical acceptance clearly recorded; do not describe the goal as complete while required acceptance remains unobserved.
 
 ## Open questions
-- None. Relaunch restores saved evidence only; the listener explicitly chooses and approves a new plan before playback. Checkpoints are partial evidence at their captured time, not proof of when a terminated run stopped. Save failures are visible and do not interrupt an active nap or cancel its alarm.
-
-## Review and verification ledger
-- Initial state: clean main at merged PR #7 (5af6bd4); created codex/local-history from current origin/main.
-- Physical production locked-screen alarm, route/interruption, and long-form subjective acceptance remain pending; simulator results will not be reported as physical evidence.
-
-- Focused simulator suite: 53 passed, no failures on iPhone 17e / iOS 26.5; added a final storage-failure runtime regression for the full run. New history UI suite passed. Repository checks: 31 passed. Strict formatting and project lint passed.
-- Correctness review: no blocker; corrected Continue wording to describe resuming the current session. Additional checks bind saved audio positions to the prepared render fingerprint and distinguish unavailable history/content from completed journeys.
-
-- Final local validation: 204 passed, 0 failed, 2 intentionally skipped physical-device tests on iPhone 17e / iOS 26.5; 31 repository checks passed; strict Swift formatting, project lint, and unsigned Release simulator build passed. XCTest emitted internal QoS warnings in existing spike tests without failures.
-- Safety checkpoints: ac06c6b (resolved plan), fa6dd43 (history implementation, tests, and docs). Added SwiftData store/sidecar ignore patterns before publication.
-- PR review/check outcomes will be tracked in the live PR and the final task report; this committed plan records the local implementation and validation baseline.
-
-- Final documentation consistency pass: remove superseded references to history integration being future work while retaining the dated evidence and remaining physical acceptance. No application or test changes follow local validation.
+- None block implementation. The owner accepted the existing rain candidate on 2026-09-28. Narration-to-rain relative level and physical-device behavior remain explicit acceptance checks after implementation; no physical outcome is inferred from this sound-selection decision.
