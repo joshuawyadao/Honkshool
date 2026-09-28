@@ -51,8 +51,10 @@ Extend How a Car Works into a two-session journey by preparing Air, Fuel, and Sp
 
 ## Codex follow-up: separate narration publication directories
 
-- [ ] Address [Codex P2 feedback](https://github.com/joshuawyadao/Honkshool/pull/10#discussion_r4127829956): prepare both output and provenance parent directories before loading or rendering the model. A fresh provenance directory currently fails after the WAV is written, and the overwrite guard then prevents a straightforward retry.
-- [ ] Add a fast regression for distinct missing parent directories and an invalid provenance parent; verify failure occurs before any WAV is published. Preserve early occupied/overlapping-path rejection and exclusive writes.
-- [ ] Run the focused publication tests and the portable suite, save and push this item, acknowledge the Codex comment, and re-check hosted CI and review status. No narration re-render, app behavior change, or full local simulator repetition is needed for this preparation-only fix.
+- [x] Address [Codex P2 feedback](https://github.com/joshuawyadao/Honkshool/pull/10#discussion_r4127829956): prepare both output and provenance parent directories before loading or rendering the model. A fresh provenance directory currently fails after the WAV is written, and the overwrite guard then prevents a straightforward retry.
+- [x] Add a fast regression for distinct missing parent directories and an invalid provenance parent; verify failure occurs before any WAV is published. Preserve early occupied/overlapping-path rejection and exclusive writes.
+- [x] Run the focused publication tests and portable suite: both new regression cases failed before the fix; all five publication tests and all **39 repository checks** pass after it. Python compilation and whitespace checks pass. No narration re-render, app behavior change, or full local simulator repetition is needed for this preparation-only fix. Publication, comment acknowledgement, and fresh hosted CI/review status are tracked in PR #10 after this commit.
 
 There are no new product questions. The first completed Codex pass had no findings; the ready-triggered pass identified this bounded script issue. The hosted iOS run on the preceding commit was still in progress when the feedback arrived.
+
+The publication helper now validates every destination first, creates both parent directories, and only then loads the renderer. The WAV and provenance retain exclusive creation. The focused follow-up maintainability review found no additional issue; the fix adds no runtime dependency or app change.

@@ -10,6 +10,7 @@ import random
 import subprocess
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 import wave
 
@@ -21,6 +22,9 @@ RESOURCES = PROJECT_ROOT / "Honkshool/Resources"
 spec = importlib.util.spec_from_file_location("prepare_rain", SCRIPT)
 prepare_rain = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(prepare_rain)
+narration_spec = importlib.util.spec_from_file_location("prepare_narration", NARRATION_SCRIPT)
+prepare_narration = importlib.util.module_from_spec(narration_spec)
+narration_spec.loader.exec_module(prepare_narration)
 
 
 def rms(samples):
@@ -160,6 +164,32 @@ class NarrationPublicationGuardTests(unittest.TestCase):
                  *map(str, arguments)],
                 capture_output=True, text=True, check=False,
             )
+
+    def test_publication_creates_distinct_missing_parent_directories(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / "audio" / "session.wav"
+            provenance = root / "metadata" / "session.json"
+            arguments = SimpleNamespace(output=output, provenance=provenance,
+                                        catalog=RESOURCES / "PreparedCatalog.json")
+            prepare_narration.prepare_publication_paths(arguments)
+            self.assertTrue(output.parent.is_dir())
+            self.assertTrue(provenance.parent.is_dir())
+            self.assertFalse(output.exists())
+            self.assertFalse(provenance.exists())
+
+    def test_invalid_provenance_parent_fails_without_publishing_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            metadata = root / "metadata"
+            metadata.write_bytes(b"existing file")
+            output = root / "audio" / "session.wav"
+            arguments = SimpleNamespace(output=output, provenance=metadata / "session.json",
+                                        catalog=RESOURCES / "PreparedCatalog.json")
+            with self.assertRaises(OSError):
+                prepare_narration.prepare_publication_paths(arguments)
+            self.assertFalse(output.exists())
+            self.assertEqual(metadata.read_bytes(), b"existing file")
 
     def test_default_invocation_preserves_original_wav_and_provenance(self):
         wav = RESOURCES / "Turning-Fuel-Into-Motion-George.wav"

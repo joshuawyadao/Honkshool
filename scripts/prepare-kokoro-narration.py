@@ -61,8 +61,8 @@ def sha256_file(path: Path) -> str:
   return digest.hexdigest()
 
 
-def validate_publication_paths(arguments: argparse.Namespace) -> None:
-  """Reject occupied or aliased destinations before loading the renderer."""
+def prepare_publication_paths(arguments: argparse.Namespace) -> None:
+  """Validate destinations and create both parents before loading the renderer."""
   paths = {
     "output": arguments.output,
     "provenance": arguments.provenance,
@@ -77,11 +77,13 @@ def validate_publication_paths(arguments: argparse.Namespace) -> None:
     path = paths[name]
     if path.exists() or path.is_symlink():
       raise FileExistsError(f"{name.capitalize()} already exists: {path}")
+  for name in ("output", "provenance"):
+    paths[name].parent.mkdir(parents=True, exist_ok=True)
 
 
 def main() -> None:
   arguments = parse_arguments()
-  validate_publication_paths(arguments)
+  prepare_publication_paths(arguments)
   cache_root = arguments.cache_root.resolve()
   os.environ["HF_HOME"] = str(cache_root / "hf-cache")
   os.environ["HF_HUB_OFFLINE"] = "1"
@@ -218,7 +220,6 @@ def main() -> None:
   if np.any((pcm == -32768) | (pcm == 32767)):
     raise ValueError("Prepared narration clips at the selected gain.")
 
-  arguments.output.parent.mkdir(parents=True, exist_ok=True)
   with arguments.output.open("xb") as output_file:
     with wave.open(output_file, "wb") as output:
       output.setnchannels(1)
