@@ -48,3 +48,11 @@ Extend How a Car Works into a two-session journey by preparing Air, Fuel, and Sp
 - Source review and Apple contract review found no blocker. Brooks PR review of `origin/main...9c932ab`: 100/100, no Iron-Law findings. Codex review of `9c932ab` completed with no findings and no inline threads. The following commit updates validation documentation only.
 - The review cycle and CI remain visible on [PR #10](https://github.com/joshuawyadao/Honkshool/pull/10); its body/checks are the live status record rather than requiring a documentation-only commit after every hosted check. No conflict resolution or production-code review fix was needed at this checkpoint. The PR must remain unmerged at handoff.
 - Manual full-session comfort, relative rain level, locked controls, and physical headphone disconnection remain deferred, with the approximately ten-nap personal trial next after this journey PR is merged.
+
+## Codex follow-up: separate narration publication directories
+
+- [ ] Address [Codex P2 feedback](https://github.com/joshuawyadao/Honkshool/pull/10#discussion_r4127829956): prepare both output and provenance parent directories before loading or rendering the model. A fresh provenance directory currently fails after the WAV is written, and the overwrite guard then prevents a straightforward retry.
+- [ ] Add a fast regression for distinct missing parent directories and an invalid provenance parent; verify failure occurs before any WAV is published. Preserve early occupied/overlapping-path rejection and exclusive writes.
+- [ ] Run the focused publication tests and the portable suite, save and push this item, acknowledge the Codex comment, and re-check hosted CI and review status. No narration re-render, app behavior change, or full local simulator repetition is needed for this preparation-only fix.
+
+There are no new product questions. The first completed Codex pass had no findings; the ready-triggered pass identified this bounded script issue. The hosted iOS run on the preceding commit was still in progress when the feedback arrived.
