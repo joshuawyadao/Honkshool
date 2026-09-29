@@ -38,7 +38,7 @@ Rain-only playback creates no narration history. A session counts as completed o
 
 The private template has a small observation checklist. During ordinary use, note full-session comfort, narration-to-rain level/loop comfort, locked playback and controls, and a real headphone-disconnection event during playback if one is deliberately checked or actually occurs. Disconnecting headphones should pause playback without sending sound to the speaker; reconnecting requires explicit resume. Use the [production rain guide](Feasibility-Spike.md#production-gentle-rain-acceptance-on-the-target-iphone) for details if needed.
 
-Record only what you directly hear or see. A short comfortable excerpt does not establish whole-session comfort. If asleep or unsure whether the alarm sounded or the cutoff occurred, mark **unobserved**; automated tests and app history do not fill that gap. Leaving any item pending is valid and must remain visible at closeout.
+Record only what you directly hear or see. A short comfortable excerpt does not establish whole-session comfort. Record alarm delivery and audio cutoff independently: hearing one does not establish the other. If asleep or unsure whether either occurred, mark that specific outcome **unobserved**; automated tests and app history do not fill that gap. Leaving any item pending is valid and must remain visible at closeout.
 
 ## Review after approximately ten opportunities
 

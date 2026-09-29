@@ -18,7 +18,7 @@ Record one row even when choosing something else. Add rows if you choose to cont
 - **Plan:** rest-window minutes; first / second / both / rain-only / silence-only; fresh / Continue / Resume / Replay; rain / silence; alarm requested yes/no. Use the reviewed plan. A brief combination is enough.
 - **Window fit:** suited the chosen window / did not suit / unobserved / not applicable. Note an unwanted narration/rest balance or timing mismatch if noticed; do not estimate sleep time.
 - **Comfort:** calm / distracting / mixed / unobserved. Mention voice, transition, or relative rain level only if noticed.
-- **Playback / alarm:** record each separately as observed as expected / failed / unobserved. Alarm off is not applicable. Expected scheduling status alone is not audible alarm evidence.
+- **Playback / alarm:** write two independent outcomes (`playback: …; alarm: …`), each observed as expected / failed / unobserved. Alarm off is not applicable. Expected scheduling status alone is not audible alarm evidence.
 - **History / resume:** as expected / failed / unobserved / not applicable, with a short note if useful. Not applicable includes non-Honkshool choices; rain-only correctly has no narration record.
 - **Note:** context label if changed, one friction/defect/preference, or nothing. For a non-Honkshool choice, mark app-specific columns not applicable.
 
@@ -37,7 +37,7 @@ Record one row even when choosing something else. Add rows if you choose to cont
 
 ## Deferred direct observations
 
-Use observed as expected / failed / unobserved, the opportunity number, and a short note. All start unobserved. No extra timed test is required; an unobserved item stays pending.
+Use observed as expected / failed / unobserved, the opportunity number, and a short note. All start unobserved. Alarm off and silence-only audio cutoff are not applicable. No extra timed test is required; an unobserved item stays pending. Hearing an alarm does not establish that audio stopped, and observing audio stop does not establish alarm delivery.
 
 | Observation | Outcome | Opportunity / context / note |
 | --- | --- | --- |
@@ -45,13 +45,15 @@ Use observed as expected / failed / unobserved, the opportunity number, and a sh
 | Narration-to-rain level and repeated-loop comfort | Unobserved | |
 | Locked playback and Lock Screen controls (name the controls used) | Unobserved | |
 | Headphone disconnection during playback pauses without speaker output; reconnection needs explicit resume | Unobserved | |
-| Requested alarm heard and audio cutoff observed at the reviewed deadline (note locked/unlocked and approximate deviation, if observed) | Unobserved | |
+| Requested alarm heard at the reviewed deadline (note locked/unlocked and approximate deviation, if observed) | Unobserved | |
+| Audio cutoff observed at the reviewed deadline (record independently of the alarm; note approximate deviation if observed) | Unobserved | |
 
 ## Closeout — fill only after actual use
 
 - Recorded opportunities / Honkshool choices / YouTube choices / other choices:
 - Observed comfort: calm / mixed / distracting / unobserved counts among Honkshool choices:
 - Requested alarms: total / directly observed as expected / failed / unobserved:
+- Audio cutoff at deadline: observed as expected / failed / unobserved / not applicable counts:
 - Window fit among Honkshool choices: suited / did not suit / unobserved counts; recurring mismatch:
 - Playback and history/Resume observations:
 - Recurring friction or reasons for choosing another option:

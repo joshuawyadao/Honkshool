@@ -31,7 +31,7 @@ The first completed Codex pass found four documentation gaps. Address each separ
 
 - [x] Explain the silence-only exception using the controller's visible non-settling rest state; retain the foreground rule for silence before future narration (comment 4136306376).
 - [x] Capture a concise per-opportunity rest-window fit outcome so the closeout has contemporaneous evidence (comment 4136306387).
-- [ ] Separate directly heard alarm delivery from observed audio cutoff, including unknown/not-applicable outcomes (comment 4136306396).
+- [x] Separate directly heard alarm delivery from observed audio cutoff, including unknown/not-applicable outcomes (comment 4136306396).
 - [ ] Require a clean checkout before building and recording its commit, preserving unrelated work instead of discarding it (comment 4136306404).
 
 Check each changed document against its underlying behavior, run the portable publication checks, and review the final table structure and private-copy preservation. Request a fresh Codex review after all four fixes and wait for final CI. Actual trial results and physical acceptance remain unverified.
