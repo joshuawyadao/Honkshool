@@ -145,6 +145,11 @@ This preparation extends the earlier evidence without superseding the owner's ac
 - **Physical follow-up, 2026-09-23:** The opt-in XCTest passed on iPhone 18 Pro Max / iOS 27.0 with one pass, zero failures, and zero skips. It scheduled a real AlarmKit alarm and played the bundled George WAV toward the same 75-second wake deadline. AlarmKit reported `alerting` within five seconds of that deadline, and prepared narration stopped within three seconds with the wake-deadline status. The test cleaned up its alarm. This establishes the simultaneous app/system state on the target device; audible alarm quality, locked-screen presentation, and complete-session subjective comfort remain separate evidence.
 - **Owner observation, 2026-09-23:** During the short combined device run, the owner reported that the alarm rang as expected and the George narration sounded clear and natural. This adds audible-alarm and opening-listening evidence; it does not establish locked-screen alarm presentation or comfort across the entire 727.625-second narration.
 
+## Two-session journey scope, 2026-09-28
+
+- **D-014/D-017 — Bounded expansion before the personal trial:** After merging the rain implementation, the owner selected the two-session journey as the next separate feature branch. Add Air, Fuel, and Spark after Turning Fuel Into Motion, retaining the accepted George `0.86` preparation settings, existing first-session identity/audio, reviewed route, and completion-based history. Broader journey controls and catalog expansion are deferred until the approximately ten-nap trial supplies evidence. This changes delivery order without changing the product boundary.
+- **Acceptance boundary:** Source review, exact offline asset construction, and automated progression/resume/deadline checks support implementation readiness. Full-session comfort, rain level, locked controls, and real headphone-disconnection observations remain deferred to manual use; no new voice or subjective acceptance is inferred.
+
 ## Deferred beyond the first prototype
 
 These are intentionally outside the first prototype and should not block the current roadmap:

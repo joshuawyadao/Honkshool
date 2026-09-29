@@ -156,15 +156,18 @@ final class NapRunControllerTests: XCTestCase {
     let original = try Data(contentsOf: url)
     var document = try XCTUnwrap(
       JSONSerialization.jsonObject(with: original) as? [String: Any])
-    var sessions = try XCTUnwrap(document["sessions"] as? [[String: Any]])
-    var second = try XCTUnwrap(sessions.first)
+    let bundledSessions = try XCTUnwrap(document["sessions"] as? [[String: Any]])
+    let first = try XCTUnwrap(
+      bundledSessions.first { $0["id"] as? String == "turning-fuel-into-motion" })
+    var sessions = [first]
+    var second = first
     second["id"] = "second-prepared-session"
     second["title"] = "Second prepared session"
     sessions.append(second)
     document["sessions"] = sessions
     var journeys = try XCTUnwrap(document["journeys"] as? [[String: Any]])
     var journey = try XCTUnwrap(journeys.first)
-    var sessionIDs = try XCTUnwrap(journey["sessionIDs"] as? [String])
+    var sessionIDs = ["turning-fuel-into-motion"]
     sessionIDs.append("second-prepared-session")
     journey["sessionIDs"] = sessionIDs
     journeys[0] = journey
@@ -267,7 +270,7 @@ final class NapRunControllerTests: XCTestCase {
     XCTAssertEqual(reopened.entries.count, 2)
     XCTAssertEqual(reopened.entries.filter { $0.record.isCompleted }.count, 1)
     XCTAssertEqual(reopened.entries.first(where: { $0.id == attempt.id }), attempt)
-    XCTAssertNil(reopened.history.nextSessionID(in: journey))
+    XCTAssertEqual(reopened.history.nextSessionID(in: journey), "air-fuel-and-spark")
     resumed.stop()
   }
 
@@ -291,7 +294,10 @@ final class NapRunControllerTests: XCTestCase {
     let player = RunFakePlayer()
     let run = controller(clock: clock, scheduler: scheduler, player: player, history: store)
     defer { run.stop() }
-    let approved = try review(catalog: catalog, now: clock.now, selection: selection)
+    let approved = try review(
+      catalog: catalog, now: clock.now,
+      duration: prepared.session.estimatedDuration - offset, selection: selection)
+    XCTAssertEqual(approved.plan.route.map(\.session.id), [prepared.session.id])
     try run.start(review: approved, catalog: catalog)
     scheduler.advance(to: approved.plan.start)
     player.currentTime = offset + 10
@@ -978,6 +984,96 @@ final class NapRunControllerTests: XCTestCase {
     XCTAssertEqual(rain.playCount, 0)
     XCTAssertEqual(history.saved.filter { !$0.isCheckpoint }.count, 1)
     run.stop()
+  }
+
+  func testBundledTwoSessionRouteHandoffSecondResumeRainAndFixedDeadline() throws {
+    let catalog = try PreparedCatalog.load()
+    let journey = try XCTUnwrap(catalog.journeys.first { $0.id == "how-a-car-works" })
+    XCTAssertEqual(journey.sessionIDs, ["turning-fuel-into-motion", "air-fuel-and-spark"])
+    let first = try XCTUnwrap(catalog.sessions[journey.sessionIDs[0]])
+    let second = try XCTUnwrap(catalog.sessions[journey.sessionIDs[1]])
+    let firstAsset = try XCTUnwrap(first.narrationAsset)
+    let secondAsset = try XCTUnwrap(second.narrationAsset)
+    let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let url = directory.appendingPathComponent("History.store")
+    let store = ListeningHistoryStore(storeURL: url)
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let firstPlayer = RunFakePlayer(duration: firstAsset.duration)
+    let secondPlayer = RunFakePlayer(duration: secondAsset.duration)
+    let rain = RunFakeAmbience()
+    let run = NapRunController(
+      playerFactory: { url in
+        switch url.deletingPathExtension().lastPathComponent {
+        case firstAsset.resource: return firstPlayer
+        case secondAsset.resource: return secondPlayer
+        default: throw NapDomainError.invalidStartingPoint
+        }
+      },
+      ambienceFactory: { _ in rain },
+      resolveAmbience: { _ in URL(fileURLWithPath: "/tmp/rain.wav") },
+      clock: { clock.now },
+      scheduler: { delay, action in scheduler.schedule(after: delay, action: action) },
+      activateAudioSession: {}, deactivateAudioSession: {},
+      observeSystemEvents: false, manageRemoteCommands: false, history: store)
+    let approved = try review(
+      catalog: catalog, now: clock.now,
+      duration: first.session.estimatedDuration + second.session.estimatedDuration + 120,
+      sound: .ambience(id: PreparedAmbience.gentleRainID))
+    XCTAssertEqual(approved.plan.route.map(\.session.id), journey.sessionIDs)
+    let fixedDeadline = approved.plan.deadline
+    try run.start(review: approved, catalog: catalog)
+    scheduler.advance(to: approved.plan.start)
+    XCTAssertEqual(run.phase, .narrating)
+    clock.now = approved.plan.start.addingTimeInterval(firstPlayer.duration)
+    firstPlayer.finish()
+    XCTAssertEqual(run.records.map(\.plannedSession.session.id), [first.session.id])
+    XCTAssertTrue(try XCTUnwrap(run.records.first).isCompleted)
+    XCTAssertEqual(store.history.nextSessionID(in: journey), second.session.id)
+    XCTAssertEqual(run.phase, .narrating)
+    XCTAssertEqual(secondPlayer.playCount, 1)
+    secondPlayer.currentTime = 90
+    clock.now = clock.now.addingTimeInterval(90)
+    run.stop()
+    XCTAssertEqual(store.history.completedSessionIDs(in: journey.id), [first.session.id])
+
+    let reopened = ListeningHistoryStore(storeURL: url)
+    XCTAssertNil(reopened.errorMessage)
+    let partial = try XCTUnwrap(
+      reopened.entries.first { $0.record.plannedSession.session.id == second.session.id })
+    XCTAssertEqual(partial.record.resumePoint?.audioOffset, 90)
+    let selection = try XCTUnwrap(
+      ListeningHistoryNavigation.next(
+        in: catalog, history: reopened.history, isNarrationAvailable: { _ in true }))
+    XCTAssertEqual(selection.sessionID, second.session.id)
+    XCTAssertEqual(selection.resumePoint, partial.record.resumePoint)
+    let resumedPlayer = RunFakePlayer(duration: secondAsset.duration)
+    let resumedRain = RunFakeAmbience()
+    let resumed = controller(
+      clock: clock, scheduler: scheduler, player: resumedPlayer,
+      history: reopened, ambience: resumedRain)
+    let next = try review(
+      catalog: catalog, now: clock.now,
+      duration: second.session.estimatedDuration + 120, selection: selection,
+      sound: .ambience(id: PreparedAmbience.gentleRainID))
+    try resumed.start(review: next, catalog: catalog)
+    scheduler.advance(to: next.plan.start)
+    XCTAssertEqual(resumedPlayer.currentTime, 90)
+    clock.now = next.plan.start.addingTimeInterval(secondAsset.duration - 90)
+    resumedPlayer.finish()
+    XCTAssertEqual(resumed.phase, .ambience)
+    XCTAssertGreaterThan(resumedRain.playCount, 0)
+    XCTAssertEqual(
+      next.plan.deadline,
+      next.plan.start.addingTimeInterval(second.session.estimatedDuration + 120))
+    XCTAssertEqual(approved.plan.deadline, fixedDeadline)
+    XCTAssertNil(reopened.history.nextSessionID(in: journey))
+    XCTAssertEqual(reopened.history.completedSessionIDs(in: journey.id), Set(journey.sessionIDs))
+    XCTAssertEqual(reopened.entries.count, 3)
+    XCTAssertEqual(reopened.entries.first(where: { $0.id == partial.id }), partial)
+    scheduler.advance(to: next.plan.deadline)
+    XCTAssertEqual(resumed.phase, .finished)
   }
 
   func testRainFailureWhilePausedKeepsExplicitResumeBeforeSilentRest() throws {

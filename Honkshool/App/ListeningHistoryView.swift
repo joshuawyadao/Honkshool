@@ -98,15 +98,23 @@ struct ListeningHistoryView: View {
           if let next = ListeningHistoryNavigation.next(
             in: catalog, history: store.history, isNarrationAvailable: isNarrationAvailable)
           {
-            NavigationLink {
-              reviewDestination(next)
-            } label: {
-              Label("Continue listening", systemImage: "arrow.right.circle.fill")
-                .frame(maxWidth: .infinity)
+            VStack(alignment: .leading, spacing: 8) {
+              if let title = catalog.sessions[next.sessionID]?.session.title {
+                Text("Up next: \(title)")
+                  .font(.subheadline)
+                  .foregroundStyle(.secondary)
+                  .accessibilityIdentifier("historyNextSession")
+              }
+              NavigationLink {
+                reviewDestination(next)
+              } label: {
+                Label("Continue listening", systemImage: "arrow.right.circle.fill")
+                  .frame(maxWidth: .infinity)
+              }
+              .buttonStyle(.borderedProminent)
+              .disabled(!canStart)
+              .accessibilityIdentifier("historyContinue")
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(!canStart)
-            .accessibilityIdentifier("historyContinue")
           } else if ListeningHistoryNavigation.allAvailableJourneysCompleted(
             in: catalog, history: store.history)
           {

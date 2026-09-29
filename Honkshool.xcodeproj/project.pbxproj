@@ -35,6 +35,8 @@
 		F10000000000000000000005 /* GentleRain-Provenance.json in Resources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000005 /* GentleRain-Provenance.json */; };
 		F10000000000000000000006 /* Turning-Fuel-Into-Motion-George.wav in Resources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000006 /* Turning-Fuel-Into-Motion-George.wav */; };
 		F10000000000000000000007 /* GeorgeNarration-Provenance.json in Resources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000007 /* GeorgeNarration-Provenance.json */; };
+		F10000000000000000000008 /* Air-Fuel-and-Spark-George.wav in Resources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000008 /* Air-Fuel-and-Spark-George.wav */; };
+		F10000000000000000000009 /* Air-Fuel-and-Spark-George-Provenance.json in Resources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000009 /* Air-Fuel-and-Spark-George-Provenance.json */; };
 		110000000000000000000001 /* NapPlanReview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000001 /* NapPlanReview.swift */; };
 		110000000000000000000002 /* NapPlanReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000002 /* NapPlanReviewView.swift */; };
 		110000000000000000000003 /* NapPlanReviewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000003 /* NapPlanReviewTests.swift */; };
@@ -126,6 +128,8 @@
 		F20000000000000000000005 /* GentleRain-Provenance.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "GentleRain-Provenance.json"; sourceTree = "<group>"; };
 		F20000000000000000000006 /* Turning-Fuel-Into-Motion-George.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "Turning-Fuel-Into-Motion-George.wav"; sourceTree = "<group>"; };
 		F20000000000000000000007 /* GeorgeNarration-Provenance.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "GeorgeNarration-Provenance.json"; sourceTree = "<group>"; };
+		F20000000000000000000008 /* Air-Fuel-and-Spark-George.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "Air-Fuel-and-Spark-George.wav"; sourceTree = "<group>"; };
+		F20000000000000000000009 /* Air-Fuel-and-Spark-George-Provenance.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Air-Fuel-and-Spark-George-Provenance.json"; sourceTree = "<group>"; };
 		120000000000000000000001 /* NapPlanReview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlanReview.swift; sourceTree = "<group>"; };
 		120000000000000000000002 /* NapPlanReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlanReviewView.swift; sourceTree = "<group>"; };
 		120000000000000000000003 /* NapPlanReviewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapPlanReviewTests.swift; sourceTree = "<group>"; };
@@ -284,6 +288,8 @@
 				F20000000000000000000005 /* GentleRain-Provenance.json */,
 				F20000000000000000000006 /* Turning-Fuel-Into-Motion-George.wav */,
 				F20000000000000000000007 /* GeorgeNarration-Provenance.json */,
+				F20000000000000000000008 /* Air-Fuel-and-Spark-George.wav */,
+				F20000000000000000000009 /* Air-Fuel-and-Spark-George-Provenance.json */,
 				F20000000000000000000003 /* PreparedCatalog.json */,
 			);
 			path = Resources;
@@ -437,6 +443,8 @@
 				F10000000000000000000005 /* GentleRain-Provenance.json in Resources */,
 				F10000000000000000000006 /* Turning-Fuel-Into-Motion-George.wav in Resources */,
 				F10000000000000000000007 /* GeorgeNarration-Provenance.json in Resources */,
+				F10000000000000000000008 /* Air-Fuel-and-Spark-George.wav in Resources */,
+				F10000000000000000000009 /* Air-Fuel-and-Spark-George-Provenance.json in Resources */,
 				F10000000000000000000003 /* PreparedCatalog.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

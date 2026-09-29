@@ -61,8 +61,31 @@ def sha256_file(path: Path) -> str:
   return digest.hexdigest()
 
 
+def prepare_publication_paths(arguments: argparse.Namespace) -> None:
+  """Validate destinations and create both parents before loading the renderer."""
+  paths = {
+    "output": arguments.output,
+    "provenance": arguments.provenance,
+    "catalog": arguments.catalog,
+  }
+  resolved = {name: path.resolve() for name, path in paths.items()}
+  for first, second in (("output", "provenance"), ("output", "catalog"),
+                        ("provenance", "catalog")):
+    first_path, second_path = resolved[first], resolved[second]
+    if (first_path == second_path or first_path in second_path.parents
+        or second_path in first_path.parents):
+      raise ValueError(f"{first} and {second} paths overlap: {paths[first]}")
+  for name in ("output", "provenance"):
+    path = paths[name]
+    if path.exists() or path.is_symlink():
+      raise FileExistsError(f"{name.capitalize()} already exists: {path}")
+  for name in ("output", "provenance"):
+    paths[name].parent.mkdir(parents=True, exist_ok=True)
+
+
 def main() -> None:
   arguments = parse_arguments()
+  prepare_publication_paths(arguments)
   cache_root = arguments.cache_root.resolve()
   os.environ["HF_HOME"] = str(cache_root / "hf-cache")
   os.environ["HF_HUB_OFFLINE"] = "1"
@@ -199,12 +222,12 @@ def main() -> None:
   if np.any((pcm == -32768) | (pcm == 32767)):
     raise ValueError("Prepared narration clips at the selected gain.")
 
-  arguments.output.parent.mkdir(parents=True, exist_ok=True)
-  with wave.open(str(arguments.output), "wb") as output:
-    output.setnchannels(1)
-    output.setsampwidth(2)
-    output.setframerate(SAMPLE_RATE)
-    output.writeframes(pcm.tobytes())
+  with arguments.output.open("xb") as output_file:
+    with wave.open(output_file, "wb") as output:
+      output.setnchannels(1)
+      output.setsampwidth(2)
+      output.setframerate(SAMPLE_RATE)
+      output.writeframes(pcm.tobytes())
 
   decoded_pcm = None
   with wave.open(str(arguments.output), "rb") as prepared:
@@ -272,6 +295,7 @@ def main() -> None:
         "torch",
         "transformers",
         "spacy",
+        "en-core-web-sm",
         "espeakng-loader",
         "numpy",
       ]
@@ -286,7 +310,8 @@ def main() -> None:
     ],
     "paragraphs": paragraph_records,
   }
-  arguments.provenance.write_text(json.dumps(provenance, indent=2) + "\n")
+  with arguments.provenance.open("x", encoding="utf-8") as record:
+    record.write(json.dumps(provenance, indent=2) + "\n")
   print(json.dumps({key: provenance[key] for key in [
     "outputFile", "outputSHA256", "outputBytes", "durationSeconds",
     "measuredRMSDBFS", "measuredPeakDBFS", "peakLimited"

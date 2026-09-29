@@ -44,6 +44,46 @@ final class PreparedCatalogTests: XCTestCase {
     XCTAssertEqual(decodedFrames, audio.length)
   }
 
+  func testSecondGeorgeNarrationAndProvenanceAreBundledAndMatchCatalog() throws {
+    let catalog = try PreparedCatalog.load()
+    let prepared = try XCTUnwrap(catalog.sessions["air-fuel-and-spark"])
+    let metadata = try XCTUnwrap(prepared.narrationAsset)
+    let url = try prepared.narrationURL()
+    let provenanceURL = try XCTUnwrap(
+      Bundle.main.url(forResource: "Air-Fuel-and-Spark-George-Provenance", withExtension: "json"))
+    let provenance = try XCTUnwrap(
+      JSONSerialization.jsonObject(with: Data(contentsOf: provenanceURL)) as? [String: Any])
+    let hash = SHA256.hash(data: try Data(contentsOf: url)).map { String(format: "%02x", $0) }
+      .joined()
+
+    XCTAssertEqual(prepared.session.title, "Air, Fuel, and Spark")
+    XCTAssertEqual(prepared.session.revision, "1")
+    XCTAssertEqual(url.lastPathComponent, "Air-Fuel-and-Spark-George.wav")
+    XCTAssertEqual(metadata.sha256, hash)
+    XCTAssertEqual(provenance["outputSHA256"] as? String, hash)
+    XCTAssertEqual(provenance["voice"] as? String, "bm_george")
+    XCTAssertEqual((provenance["speed"] as? NSNumber)?.doubleValue, 0.86)
+
+    let audio = try AVAudioFile(forReading: url)
+    XCTAssertEqual(audio.processingFormat.channelCount, 1)
+    XCTAssertEqual(audio.processingFormat.sampleRate, 24_000)
+    XCTAssertEqual(audio.length, (provenance["frames"] as? NSNumber)?.int64Value)
+    XCTAssertEqual(metadata.duration, Double(audio.length) / audio.processingFormat.sampleRate)
+    XCTAssertGreaterThan(prepared.session.estimatedDuration, metadata.duration)
+    XCTAssertLessThan(prepared.session.estimatedDuration - metadata.duration, 5)
+
+    let buffer = try XCTUnwrap(
+      AVAudioPCMBuffer(pcmFormat: audio.processingFormat, frameCapacity: 8_192))
+    var decodedFrames: AVAudioFramePosition = 0
+    while decodedFrames < audio.length {
+      let remaining = AVAudioFrameCount(audio.length - decodedFrames)
+      try audio.read(into: buffer, frameCount: min(buffer.frameCapacity, remaining))
+      XCTAssertGreaterThan(buffer.frameLength, 0)
+      decodedFrames += AVAudioFramePosition(buffer.frameLength)
+    }
+    XCTAssertEqual(decodedFrames, audio.length)
+  }
+
   func testRainCandidateAndProvenanceAreBundledAndDecodable() throws {
     let url = try XCTUnwrap(Bundle.main.url(forResource: "GentleRain", withExtension: "wav"))
     let provenanceURL = try XCTUnwrap(
@@ -74,7 +114,8 @@ final class PreparedCatalogTests: XCTestCase {
     let journey = try XCTUnwrap(catalog.journeys.first { $0.id == "how-a-car-works" })
     let prepared = try XCTUnwrap(catalog.sessions["turning-fuel-into-motion"])
 
-    XCTAssertEqual(journey.sessionIDs.first, prepared.session.id)
+    XCTAssertEqual(journey.sessionIDs, ["turning-fuel-into-motion", "air-fuel-and-spark"])
+    XCTAssertEqual(catalog.sessions.count, 2)
     XCTAssertEqual(catalog.planningCatalog.sessions[prepared.session.id], prepared.session)
     XCTAssertEqual(prepared.detailLevel, .enthusiast)
     XCTAssertFalse(prepared.session.revision.isEmpty)
@@ -84,11 +125,20 @@ final class PreparedCatalogTests: XCTestCase {
     XCTAssertGreaterThanOrEqual(prepared.sources.count, 2)
     XCTAssertEqual(prepared.narration, prepared.paragraphs.map(\.text).joined(separator: "\n\n"))
     XCTAssertEqual(Set(prepared.paragraphs.flatMap(\.sourceIDs)), Set(prepared.sources.map(\.id)))
-    for source in prepared.sources {
-      XCTAssertEqual(source.url.scheme, "https")
-      XCTAssertFalse(source.title.isEmpty)
-      XCTAssertFalse(source.publisher.isEmpty)
-      XCTAssertFalse(prepared.narration.contains(source.url.absoluteString))
+    for sessionID in journey.sessionIDs {
+      let session = try XCTUnwrap(catalog.sessions[sessionID])
+      XCTAssertEqual(session.detailLevel, .enthusiast)
+      XCTAssertFalse(session.summary.isEmpty)
+      XCTAssertFalse(session.durationEstimateBasis.isEmpty)
+      XCTAssertGreaterThanOrEqual(session.sources.count, 2)
+      XCTAssertEqual(session.narration, session.paragraphs.map(\.text).joined(separator: "\n\n"))
+      XCTAssertEqual(Set(session.paragraphs.flatMap(\.sourceIDs)), Set(session.sources.map(\.id)))
+      for source in session.sources {
+        XCTAssertEqual(source.url.scheme, "https")
+        XCTAssertFalse(source.title.isEmpty)
+        XCTAssertFalse(source.publisher.isEmpty)
+        XCTAssertFalse(session.narration.contains(source.url.absoluteString))
+      }
     }
   }
 
