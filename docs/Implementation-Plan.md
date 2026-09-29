@@ -24,3 +24,14 @@ Prepare the ten-nap personal trial with a concise setup guide, a blank local-onl
 - The documented private-copy commands were exercised with a fresh copy and a synthetic existing log. The first draft exposed macOS `cp -n` returning a nonzero status when preserving an existing file; an existence check now makes repeat setup succeed while keeping no-clobber copying. Exact snippet reruns preserve the existing bytes. The local blank copy is ignored by `/local-data/` and is not tracked; no observations were added.
 - Independent Brooks and Apple/product documentation review found no actionable issue (100/100). The review covered UI labels, ordinary launch versus fixtures, foreground playback rules, separate alarm ownership, observation limits, private log handling, and counting alternative choices. The production-test review was skipped because this change affects documentation only.
 - Final Codex feedback, hosted CI, mergeability, and any subsequent fixes remain live PR gates; this plan does not claim they passed before the PR exists. Actual trial participation, direct physical observations, and the eventual public-safe report remain pending.
+
+## Codex follow-up plan
+
+The first completed Codex pass found four documentation gaps. Address each separately with a saved/pushed commit and comment acknowledgement; no product decision or app/test change is needed.
+
+- [ ] Explain the silence-only exception using the controller's visible non-settling rest state; retain the foreground rule for silence before future narration (comment 4136306376).
+- [ ] Capture a concise per-opportunity rest-window fit outcome so the closeout has contemporaneous evidence (comment 4136306387).
+- [ ] Separate directly heard alarm delivery from observed audio cutoff, including unknown/not-applicable outcomes (comment 4136306396).
+- [ ] Require a clean checkout before building and recording its commit, preserving unrelated work instead of discarding it (comment 4136306404).
+
+Check each changed document against its underlying behavior, run the portable publication checks, and review the final table structure and private-copy preservation. Request a fresh Codex review after all four fixes and wait for final CI. Actual trial results and physical acceptance remain unverified.
