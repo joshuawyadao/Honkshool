@@ -20,6 +20,7 @@ Build Honkshool as a sequence of small, reviewable vertical slices, beginning wi
 - [x] Build `codex/local-history` to persist partial and completed playback locally with SwiftData, save verified in-flight checkpoints, advance sessions only on actual completion, and expose Continue/Resume/Replay through fresh plan reviews. Validate this branch with the tests recorded in its task plan; physical relaunch and locked-screen acceptance remain separate.
 - [x] Implement and merge `codex/gentle-rain-playback` (PR #9, `1c7b3bf`): expose only the accepted, verified rain resource in Nap Plan review; loop it during approved rest with silence fallback, explicit controls, and the unchanged fixed deadline; complete automated and target-iPhone rain, route, alarm, and history checks before claiming physical acceptance. The owner selected the current candidate on 2026-09-28. Automated target-iPhone rain, narration/history, real-alarm, and background/relaunch checks passed; direct locked-control, headphone, and longer-listening checks remain open.
 - [x] Build the bounded `codex/two-session-journey`: prepare Air, Fuel, and Spark with the accepted George voice; expose both sessions through existing review/history; retain stable first-session text/audio and completion-only advancement. Validate ordered multi-session routes, second-session resume, replay preservation, rain and deadlines. Broader branching, random/restart controls, additional catalog content, and home-screen redesign remain deferred until trial evidence warrants them.
+- [x] Prepare the [ten-nap trial guide](Ten-Nap-Trial.md), blank private-log template, and decision criteria. Preparation establishes no new listening or physical acceptance.
 - [ ] Run `validation/ten-nap-trial`, record reliability and preference outcomes without analytics, fix launch-blocking defects, and decide whether the prototype merits further investment.
 
 ## Open questions
@@ -151,7 +152,7 @@ Extend the tracer bullet into the smallest coherent journey experience while pre
 
 ### Current bounded milestone
 
-The owner selected a two-session journey before the ten-nap trial on 2026-09-28. Air, Fuel, and Spark follows Turning Fuel Into Motion using the existing catalog-driven route, Continue/Resume/Replay, and local history. The original text, revision, and WAV stay unchanged; session two is a separate revision-1 asset with measured timing and source-linked original prose. This supplies a real completion transition and partial-second recovery without new persistence schema or network services. Further Phase 4 expansion below is deferred until the trial provides evidence for it.
+The owner selected a two-session journey before the ten-nap trial on 2026-09-28. Air, Fuel, and Spark follows Turning Fuel Into Motion using the existing catalog-driven route, Continue/Resume/Replay, and local history. The original text, revision, and WAV stay unchanged; session two is a separate revision-1 asset with measured timing and source-linked original prose. This supplies a real completion transition and partial-second recovery without new persistence schema or network services. The slice was merged through PR #10 as `19f4339`. Further Phase 4 expansion below is deferred until the trial provides evidence for it.
 
 ### Later work
 
@@ -181,7 +182,7 @@ Determine whether the narrow product actually replaces browsing YouTube for nap 
 - Fit: the assembled plan matches the selected rest window closely enough without changing narration speed.
 - Recovery: missed or partial sessions are easy to find and replay.
 
-Run this as the next separate task after merging the two-session journey. Record a lightweight manual trial log locally. Include the deferred full-session comfort, relative rain level, locked controls, and headphone-disconnection observations during natural use; implementation automation does not establish them. Do not add analytics or transmit listening behavior.
+The two-session journey is merged. The [trial guide](Ten-Nap-Trial.md) and [blank log template](Ten-Nap-Trial-Log.template.md) provide setup, observation vocabulary, and continue/pivot/stop/inconclusive criteria. Trial preparation is complete; actual use and the closeout report remain pending. Count approximately ten normal nap opportunities, including choices of YouTube or another alternative, and record the lightweight log only in the ignored `local-data/` directory or another private local location. Include the deferred full-session comfort, relative rain level, locked controls, and headphone-disconnection observations during natural use; implementation automation does not establish them. Do not add analytics or transmit listening behavior.
 
 ### Exit criteria
 
