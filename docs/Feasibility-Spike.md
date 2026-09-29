@@ -280,6 +280,8 @@ For unexpected-exit recovery, terminate during narration after a checkpoint has 
 
 ## Production Gentle rain acceptance on the target iPhone
 
+For ordinary use, the [ten-nap trial guide](Ten-Nap-Trial.md) combines a short setup checklist with a blank private log. Its preparation does not perform the device checks below or change any pending result to a pass.
+
 The owner selected the unchanged prepared rain candidate on 2026-09-28 after receiving a four-loop audition. This authorizes its Nap Plan integration. Automated target-iPhone tests now cover real rain, narration handoff, the production alarm/deadline path, and an actual output-loss event before playback. Relative listening level, longer comfort, locked controls, and physical headphone disconnection during playback still require direct observation. Use a signed build on the iPhone 18 Pro Max / iOS 27.0. Start each plan before its approved start and keep Honkshool foregrounded until playback begins. If rain fails during settling before narration, keep the app open for pending narration; backgrounding in that silent period ends the run and requires a fresh review. A separately scheduled alarm remains tracked. Note the reviewed deadline and whether the screen is locked. Record only outcomes actually observed, using the fields below; leave the rest pending.
 
 On 2026-09-28, the signed Debug build from `f99c65c` was installed and launched normally on the connected physical iPhone 18 Pro Max / iOS 27.0. Installation and launch succeeded; the listening and behavior checks below remain pending owner observation.
