@@ -16,23 +16,24 @@ Record one row even when choosing something else. Add rows if you choose to cont
 
 - **Choice:** Honkshool / YouTube / other; an optional short reason goes in Note.
 - **Plan:** rest-window minutes; first / second / both / rain-only / silence-only; fresh / Continue / Resume / Replay; rain / silence; alarm requested yes/no. Use the reviewed plan. A brief combination is enough.
+- **Window fit:** suited the chosen window / did not suit / unobserved / not applicable. Note an unwanted narration/rest balance or timing mismatch if noticed; do not estimate sleep time.
 - **Comfort:** calm / distracting / mixed / unobserved. Mention voice, transition, or relative rain level only if noticed.
 - **Playback / alarm:** record each separately as observed as expected / failed / unobserved. Alarm off is not applicable. Expected scheduling status alone is not audible alarm evidence.
 - **History / resume:** as expected / failed / unobserved / not applicable, with a short note if useful. Not applicable includes non-Honkshool choices; rain-only correctly has no narration record.
 - **Note:** context label if changed, one friction/defect/preference, or nothing. For a non-Honkshool choice, mark app-specific columns not applicable.
 
-| # | Choice | Plan | Comfort | Playback / alarm | History / resume | Note |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | | | | | | |
-| 2 | | | | | | |
-| 3 | | | | | | |
-| 4 | | | | | | |
-| 5 | | | | | | |
-| 6 | | | | | | |
-| 7 | | | | | | |
-| 8 | | | | | | |
-| 9 | | | | | | |
-| 10 | | | | | | |
+| # | Choice | Plan | Window fit | Comfort | Playback / alarm | History / resume | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | | | | | | | |
+| 2 | | | | | | | |
+| 3 | | | | | | | |
+| 4 | | | | | | | |
+| 5 | | | | | | | |
+| 6 | | | | | | | |
+| 7 | | | | | | | |
+| 8 | | | | | | | |
+| 9 | | | | | | | |
+| 10 | | | | | | | |
 
 ## Deferred direct observations
 
@@ -51,7 +52,8 @@ Use observed as expected / failed / unobserved, the opportunity number, and a sh
 - Recorded opportunities / Honkshool choices / YouTube choices / other choices:
 - Observed comfort: calm / mixed / distracting / unobserved counts among Honkshool choices:
 - Requested alarms: total / directly observed as expected / failed / unobserved:
-- Playback, reviewed-window fit, and history/Resume observations:
+- Window fit among Honkshool choices: suited / did not suit / unobserved counts; recurring mismatch:
+- Playback and history/Resume observations:
 - Recurring friction or reasons for choosing another option:
 - Observed defects: opportunity/context, expected versus actual behavior, reproduction if known, fix/recheck still needed:
 - Deferred observations still unobserved:

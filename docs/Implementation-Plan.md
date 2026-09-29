@@ -30,7 +30,7 @@ Prepare the ten-nap personal trial with a concise setup guide, a blank local-onl
 The first completed Codex pass found four documentation gaps. Address each separately with a saved/pushed commit and comment acknowledgement; no product decision or app/test change is needed.
 
 - [x] Explain the silence-only exception using the controller's visible non-settling rest state; retain the foreground rule for silence before future narration (comment 4136306376).
-- [ ] Capture a concise per-opportunity rest-window fit outcome so the closeout has contemporaneous evidence (comment 4136306387).
+- [x] Capture a concise per-opportunity rest-window fit outcome so the closeout has contemporaneous evidence (comment 4136306387).
 - [ ] Separate directly heard alarm delivery from observed audio cutoff, including unknown/not-applicable outcomes (comment 4136306396).
 - [ ] Require a clean checkout before building and recording its commit, preserving unrelated work instead of discarding it (comment 4136306404).
 
