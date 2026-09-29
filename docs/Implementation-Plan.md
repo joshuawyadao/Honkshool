@@ -16,12 +16,12 @@ Run the full project checkup against merged `main` (`ac026fd`), then repair the 
 - [x] Scope publication checks in `tests/test_publication.py` to tracked and nonignored untracked Git files; add isolated temporary-repository regressions proving private/generated exclusions and detection of new public errors and tracked ignored-name artifacts. Preserve existing privacy enforcement.
 - [x] Normalize a restored feasibility saved duration before it is displayed or selected; use the existing Debug-only, isolated UI fixtures and add a UI regression for values outside both bounds. Keep ordinary defaults and production Nap Plan behavior intact.
 - [x] Add `docs/Architecture.md` for current module ownership, test seams, verification choices, and why broad refactoring remains deferred; link it from `docs/Project-Overview.md` and clarify public verification scope in `CONTRIBUTING.md`.
-- [ ] Run focused regression checks, the portable gate, the complete simulator suite after the Swift change, and a Release simulator build for fixture exclusion. Reassess changed modules and consumers; update external report scores, fix log, residuals, and stopping reason.
+- [x] Run focused regression checks, the portable gate, the complete simulator suite after the Swift change, and a Release simulator build for fixture exclusion. Reassess changed modules and consumers; update external report scores, fix log, residuals, and stopping reason.
 - [ ] Save coherent local checkpoints and push; open a PR, complete Codex/Brooks review and CI, address actionable feedback in separate validated commits, and leave the PR unmerged.
 
 ## Open questions
 
-- None block these bounded fixes. The ordinary-entry architecture candidate is speculative and remains deferred under the existing roadmap. Goal-tool bookkeeping is independent of this implementation scope.
+- None block these bounded fixes. The ordinary-entry architecture candidate is speculative and remains deferred under the existing roadmap.
 
 ## Diagnosis and validation notes
 
@@ -38,3 +38,5 @@ Run the full project checkup against merged `main` (`ac026fd`), then repair the 
 
 - UI-001: both focused simulator UI tests passed (new bounds/relaunch regression and existing valid custom/default flow), with no failures or skips; 65.70 seconds command wall time. The change uses the existing isolated Debug fixture path and repairs only out-of-range stored values.
 - Baseline simulator result: 233 passed, 0 failed, 6 intentional physical opt-in skips. Summed test-case duration was 571.067 seconds; total command time was 617.23 seconds including runner/build overhead. The suite shape and platform cases do not establish a structural slow-test finding.
+
+- Final local verification: 48 portable tests passed; the complete post-fix simulator suite passed 234 tests with no failures and six intentional physical opt-in skips in 613.78 seconds. The Release simulator build passed in 20.53 seconds; its executable excludes the new Debug fixture marker. One changed-module/consumer rescan found no remaining confirmed issue, so the bounded fix workflow stops with an empty queue. Hosted review and CI remain PR gates.
