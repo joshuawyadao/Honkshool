@@ -32,6 +32,8 @@ The first completed Codex pass found four documentation gaps. Address each separ
 - [x] Explain the silence-only exception using the controller's visible non-settling rest state; retain the foreground rule for silence before future narration (comment 4136306376).
 - [x] Capture a concise per-opportunity rest-window fit outcome so the closeout has contemporaneous evidence (comment 4136306387).
 - [x] Separate directly heard alarm delivery from observed audio cutoff, including unknown/not-applicable outcomes (comment 4136306396).
-- [ ] Require a clean checkout before building and recording its commit, preserving unrelated work instead of discarding it (comment 4136306404).
+- [x] Require a clean checkout before building and recording its commit, preserving unrelated work instead of discarding it (comment 4136306404).
 
 Check each changed document against its underlying behavior, run the portable publication checks, and review the final table structure and private-copy preservation. Request a fresh Codex review after all four fixes and wait for final CI. Actual trial results and physical acceptance remain unverified.
+
+All four corrections passed the 40 portable repository checks individually, and the final table/copy checks passed with ten blank entries, aligned columns, separate outcomes, and preserved existing bytes. The local blank copy was refreshed only after verifying it was byte-identical to the unchanged template created during this task; any differing private log would be preserved. The final bounded independent review found no further actionable issue. No app code, tests, or physical evidence changed; fresh Codex review and hosted CI remain live PR gates.

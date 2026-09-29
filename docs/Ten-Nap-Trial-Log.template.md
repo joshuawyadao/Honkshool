@@ -7,7 +7,8 @@ Copy this file to `local-data/ten-nap-trial/Trial-Log.md` before filling anythin
 Fill only in the private copy. Add another context if the installed build or device/OS changes; reference its label in later notes.
 
 - Context label:
-- Installed build commit (from the checkout used to build):
+- Installed build commit (from the same clean checkout used to build):
+- Checkout clean before Run (`git status --short` empty; source unchanged through installation):
 - Device model / public iOS version:
 
 ## Ten normal nap opportunities
