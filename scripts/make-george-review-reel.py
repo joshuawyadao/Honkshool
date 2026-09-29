@@ -18,6 +18,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
+    output = args.output.expanduser()
+    if output.exists() or output.is_symlink():
+        raise FileExistsError(f"Output already exists; choose a new file: {output}")
 
     record = json.loads(PROVENANCE.read_text())
     source = RESOURCES / Path(record["outputFile"]).name
@@ -38,9 +41,7 @@ def main() -> None:
         ) + gap * index
         sections.append((index, start, length))
 
-    output = args.output.expanduser()
-    output.parent.mkdir(parents=True, exist_ok=True)
-    with wave.open(str(source), "rb") as original, wave.open(str(output), "wb") as reel:
+    with wave.open(str(source), "rb") as original:
         if (
             original.getnframes() != record["frames"]
             or original.getframerate() != record["sampleRate"]
@@ -48,15 +49,18 @@ def main() -> None:
             or original.getsampwidth() != 2
         ):
             raise ValueError("Bundled George WAV format differs from its provenance")
-        reel.setparams(original.getparams())
-        for position, (_, start, length) in enumerate(sections):
-            original.setpos(start)
-            frames = original.readframes(length)
-            if len(frames) != length * original.getnchannels() * original.getsampwidth():
-                raise ValueError("Review section extends beyond bundled audio")
-            reel.writeframes(frames)
-            if position < len(sections) - 1:
-                reel.writeframes(bytes(gap * original.getnchannels() * original.getsampwidth()))
+        output.parent.mkdir(parents=True, exist_ok=True)
+        # Exclusive creation also protects a destination appearing after preflight.
+        with output.open("xb") as destination, wave.open(destination, "wb") as reel:
+            reel.setparams(original.getparams())
+            for position, (_, start, length) in enumerate(sections):
+                original.setpos(start)
+                frames = original.readframes(length)
+                if len(frames) != length * original.getnchannels() * original.getsampwidth():
+                    raise ValueError("Review section extends beyond bundled audio")
+                reel.writeframes(frames)
+                if position < len(sections) - 1:
+                    reel.writeframes(bytes(gap * original.getnchannels() * original.getsampwidth()))
 
     expected_frames = sum(length for _, _, length in sections) + 2 * gap
     with wave.open(str(output), "rb") as reel:
