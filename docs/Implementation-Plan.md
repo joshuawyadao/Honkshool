@@ -1,39 +1,33 @@
 # Plan
 
-Prepare the ten-nap personal trial with a concise setup guide, a blank local-only log template, and evidence-based decision criteria. Keep the preparation separate from performing the trial: no device session, personal observations, or physical acceptance is claimed by this PR.
+Run the full project checkup against merged `main` (`ac026fd`), then repair the confirmed bounded findings with focused regressions. Preserve the production Nap Plan, audio assets, alarm/history contracts, and installed personal-trial build; save the work on `codex/project-checkup` and prepare an unmerged, reviewed PR.
 
 ## Scope
-- In: `docs/Ten-Nap-Trial.md`, `docs/Ten-Nap-Trial-Log.template.md`, links and current status in README, Project-Overview, Project-Implementation-Plan, and Feasibility-Spike; safe private-copy instructions using the existing ignored `local-data/` directory; documentation verification; a reviewed, green PR on `codex/ten-nap-trial-preparation`.
-- Out: app or test behavior changes, new analytics/storage/schema/permissions, device installation or testing now, collecting personal results, performing the ten naps, new content, distribution, and changing deferred observations to passes.
+
+- In: full R1–R6/T1–T6 diagnosis, architecture and test maps, reports outside the repository, safe publication of review reels, public Git scope for repository checks, normalized saved-duration presentation in the feasibility console, and durable architecture/verification documentation.
+- Out: home-screen redesign, new runtime interfaces, broader catalog or product work, live synthesis/dependency upgrades, device installation, private trial notes, and claims of manual listening or hardware acceptance.
 
 ## Action items
-- [x] Inspect the Phase 5 roadmap, product goal, device evidence, production UI labels, ignore rules, and existing publication checks. Start from merged two-session main (`19f4339`).
-- [x] Checkpoint this resolved plan before writing the trial material.
-- [x] Add one short guide covering a normal signed build, the production Nap Plan entry, foreground-until-playback requirement, alarm ownership, private log setup, natural use, and observation limits. Link to the existing signing/device guide rather than duplicate it.
-- [x] Add a blank ten-entry log template with build context, choices including alternatives, comfort, playback/alarm and history outcomes, optional deferred observations, and a closeout summary. Keep unknown, not applicable, and directly observed outcomes distinct; never overwrite an existing private log.
-- [x] Define practical continue/pivot/stop and insufficient-evidence criteria; prioritize observed defects and preserve the owner's final decision. Update the README, overview, roadmap, and device-guide links without changing historical evidence or marking the trial complete.
-- [x] Verify relative links and public-data rules with `./scripts/verify-repository.sh`, check private-copy ignore behavior and non-overwrite behavior, and inspect the diff. No new automated tests or local iOS rerun are needed for documentation-only changes; existing CI still runs its required jobs.
-- [x] Review the bounded documentation and instructions for product/privacy/Apple contract accuracy and prepare the PR handoff. Complete Codex review, address actionable feedback, and wait for required CI and mergeability before final handoff; track those live gates in the PR body and an ignored local ledger. Leave the PR unmerged.
+
+- [x] Inspect all significant app/domain/content/runtime/widget modules, the Swift and Python suites, offline scripts, CI/project configuration, and canonical product/domain/decision documents; deduplicate findings and record source-coverage exceptions.
+- [x] Reproduce TOOL-1 (review reel overwrites its source) and TOOL-2 (ignored private Markdown breaks public verification) using temporary synthetic files. Confirm UI-001 (raw saved duration disagrees with the bounded deadline) through its view/policy path.
+- [ ] Finish the unchanged baseline simulator suite; record measured duration, expected device skips, and verification limits in the external Markdown and HTML reports. The Python baseline already passed all 40 checks.
+- [ ] Protect `scripts/make-george-review-reel.py` destinations with exclusive creation and prepublication source validation; add regression coverage for existing files, source aliases, and unchanged extracted PCM in `tests/test_audio_assets.py`; update `docs/Audio-Preparation.md`.
+- [ ] Scope publication checks in `tests/test_publication.py` to tracked and nonignored untracked Git files; add isolated temporary-repository regressions proving private/generated exclusions and detection of new public errors and tracked ignored-name artifacts. Preserve existing privacy enforcement.
+- [ ] Normalize a restored feasibility saved duration before it is displayed or selected; use the existing Debug-only, isolated UI fixtures and add a UI regression for values outside both bounds. Keep ordinary defaults and production Nap Plan behavior intact.
+- [ ] Add `docs/Architecture.md` for current module ownership, test seams, verification choices, and why broad refactoring remains deferred; link it from `docs/Project-Overview.md` and clarify public verification scope in `CONTRIBUTING.md`.
+- [ ] Run focused regression checks, the portable gate, the complete simulator suite after the Swift change, and a Release simulator build for fixture exclusion. Reassess changed modules and consumers; update external report scores, fix log, residuals, and stopping reason.
+- [ ] Save coherent local checkpoints and push; open a PR, complete Codex/Brooks review and CI, address actionable feedback in separate validated commits, and leave the PR unmerged.
 
 ## Open questions
-- None block preparation. Actual use and deferred physical observations stay pending until the owner is ready; a public-safe aggregate report is future work after the private trial.
 
-## Verification and review evidence
+- None block these bounded fixes. The ordinary-entry architecture candidate is speculative and remains deferred under the existing roadmap. Goal-tool bookkeeping is independent of this implementation scope.
 
-- All 40 existing portable repository checks pass, including relative Markdown links and public-data guards. No test files, app source, resources, project configuration, or CI behavior changed; no local iOS or physical-device repetition is needed for this documentation-only slice. Hosted required CI will still run before PR handoff.
-- The documented private-copy commands were exercised with a fresh copy and a synthetic existing log. The first draft exposed macOS `cp -n` returning a nonzero status when preserving an existing file; an existence check now makes repeat setup succeed while keeping no-clobber copying. Exact snippet reruns preserve the existing bytes. The local blank copy is ignored by `/local-data/` and is not tracked; no observations were added.
-- Independent Brooks and Apple/product documentation review found no actionable issue (100/100). The review covered UI labels, ordinary launch versus fixtures, foreground playback rules, separate alarm ownership, observation limits, private log handling, and counting alternative choices. The production-test review was skipped because this change affects documentation only.
-- Final Codex feedback, hosted CI, mergeability, and any subsequent fixes remain live PR gates; this plan does not claim they passed before the PR exists. Actual trial participation, direct physical observations, and the eventual public-safe report remain pending.
+## Diagnosis and validation notes
 
-## Codex follow-up plan
-
-The first completed Codex pass found four documentation gaps. Address each separately with a saved/pushed commit and comment acknowledgement; no product decision or app/test change is needed.
-
-- [x] Explain the silence-only exception using the controller's visible non-settling rest state; retain the foreground rule for silence before future narration (comment 4136306376).
-- [x] Capture a concise per-opportunity rest-window fit outcome so the closeout has contemporaneous evidence (comment 4136306387).
-- [x] Separate directly heard alarm delivery from observed audio cutoff, including unknown/not-applicable outcomes (comment 4136306396).
-- [x] Require a clean checkout before building and recording its commit, preserving unrelated work instead of discarding it (comment 4136306404).
-
-Check each changed document against its underlying behavior, run the portable publication checks, and review the final table structure and private-copy preservation. Request a fresh Codex review after all four fixes and wait for final CI. Actual trial results and physical acceptance remain unverified.
-
-All four corrections passed the 40 portable repository checks individually, and the final table/copy checks passed with ten blank entries, aligned columns, separate outcomes, and preserved existing bytes. The local blank copy was refreshed only after verifying it was byte-identical to the unchanged template created during this task; any differing private log would be preserved. The final bounded independent review found no further actionable issue. No app code, tests, or physical evidence changed; fresh Codex review and hosted CI remain live PR gates.
+- TOOL-1: Warning, R3/T5; review-reel publication differs from the other offline renderers and lacks destructive-output regression coverage. Extended-Safe: three implementation/test/doc files, existing Python baseline passes, no public signature change.
+- TOOL-2: Warning, T2 (with T1 evidence); recursive checks depend on ignored private/generated files. Extended-Safe: the test gate and its regressions/docs, no app contract change.
+- UI-001: Suggestion, R6; the feasibility console normalizes its initial selection but displays and later reselects the raw saved preference. Extended-Safe once the iOS baseline passes: one view, the existing fixture module, and one UI test file; no new test infrastructure or public interface change.
+- Baseline `./scripts/verify-repository.sh`: 40 passed, 0 failed; 7.88 seconds wall time. Baseline iOS suite is running on the installed iPhone 18 Pro Max / iOS 27.0 simulator, using isolated derived data and no physical opt-ins.
+- Reports and raw logs remain outside Git. Public documentation will contain only durable architecture and verified, sanitized outcomes. No personal trial data is read or modified as part of the review.
+- Sweep authorization comes from the user's explicit check-and-fix request. `plan-implement-save` owns checkpoints/push; sweep owns bounded edits, verification, and changed-module rescans. Three retry attempts per finding and three noncritical rescan rounds are the maximum; no speculative product/architecture redesign is applied.
