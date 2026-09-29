@@ -12,6 +12,7 @@ The primary outcome is relaxation and rest. Interesting factual exposure is seco
 - [Project implementation plan](Project-Implementation-Plan.md): durable phased delivery sequence, branch-sized milestones, acceptance criteria, test strategy, and validation goal.
 - [Decision log](Decision-Log.md): accepted, pending, and deferred product and technical decisions.
 - [Nap-planning domain](Nap-Planning-Domain.md): immutable plans, timing, playback outcomes, resume/history rules, and local persistence contracts.
+- [Architecture](Architecture.md): module ownership, dependency direction, test seams, and the separate feasibility and production paths.
 - [Content catalog](Content-Catalog.md): prepared session loading, citations, estimates, resume boundaries, and remaining audio work.
 - [Narration reference](Narration-Reference.md): provisional F acceptance, reproducible audition details, and remaining listening checks.
 - [Feasibility spike guide](Feasibility-Spike.md): Xcode setup, current implementation boundary, and the physical-device evidence checklist.
