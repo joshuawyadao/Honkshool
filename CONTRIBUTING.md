@@ -23,6 +23,8 @@ By participating, you agree to follow the [Contributor Covenant Code of Conduct]
    ./scripts/verify-repository.sh
    ```
 
+   Public-file checks include Git-tracked files and nonignored untracked candidates. Ignored private notes, generated output, and dependency environments are excluded; a tracked file remains checked even if its name matches an ignore rule.
+
    Changes to the experimental iOS target should also pass the complete automated simulator suite:
 
    ```sh
