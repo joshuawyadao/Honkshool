@@ -152,9 +152,11 @@ struct FeasibilityConsoleView: View {
         napAlarm.refresh()
         guard !loadedPreferences else { return }
         loadedPreferences = true
-        selectedMinutes = RestDurationPolicy.normalized(
-          minutes: preferredRestMinutes
-        )
+        let savedMinutes = RestDurationPolicy.normalized(minutes: preferredRestMinutes)
+        if savedMinutes != preferredRestMinutes {
+          preferredRestMinutes = savedMinutes
+        }
+        selectedMinutes = savedMinutes
         customMinutes = selectedMinutes
         exactWakeTime = RestDurationPolicy.wakeDate(
           startingAt: .now,
