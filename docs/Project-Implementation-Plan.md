@@ -2,6 +2,8 @@
 
 Build Honkshool as a sequence of small, reviewable vertical slices, beginning with the riskiest real-device behavior: calm background narration followed by ambience or silence and a dependable AlarmKit wake alarm. Keep this document as the roadmap, use the [product brief](Product-Brief.md) as the product source of truth, and record resolved questions in the [decision log](Decision-Log.md).
 
+The owner approved [Quiet curiosity](Design-Language.md) and its [33-screen atlas](../design/quiet-curiosity/screen-atlas.html) on 2026-09-30 as the default style for every current and future UI. The atlas's screens 25–32 are capability concepts, not an expansion of the current content or feature scope.
+
 ## Scope
 
 - In: an iPhone-first iOS 26 app using Swift, SwiftUI, SwiftData, AlarmKit, and AVFoundation; prepared local Kokoro narration for the curated catalog; deterministic Nap Plans; background playback; a system alarm; local journey progress and history; and a ten-nap personal validation trial.
@@ -21,6 +23,7 @@ Build Honkshool as a sequence of small, reviewable vertical slices, beginning wi
 - [x] Implement and merge `codex/gentle-rain-playback` (PR #9, `1c7b3bf`): expose only the accepted, verified rain resource in Nap Plan review; loop it during approved rest with silence fallback, explicit controls, and the unchanged fixed deadline; complete automated and target-iPhone rain, route, alarm, and history checks before claiming physical acceptance. The owner selected the current candidate on 2026-09-28. Automated target-iPhone rain, narration/history, real-alarm, and background/relaunch checks passed; direct locked-control, headphone, and longer-listening checks remain open.
 - [x] Build the bounded `codex/two-session-journey`: prepare Air, Fuel, and Spark with the accepted George voice; expose both sessions through existing review/history; retain stable first-session text/audio and completion-only advancement. Validate ordered multi-session routes, second-session resume, replay preservation, rain and deadlines. Broader branching, random/restart controls, additional catalog content, and home-screen redesign remain deferred until trial evidence warrants them.
 - [x] Prepare the [ten-nap trial guide](Ten-Nap-Trial.md), blank private-log template, and decision criteria. Preparation establishes no new listening or physical acceptance.
+- [ ] Implement the approved Rest-first design slice: shared adaptive colors and components, a quiet root shell with Rest and History, existing Feasibility Lab behind Settings → Advanced, and calm Nap Plan, active-rest, alarm, recovery, and history presentation. Preserve frozen reviewed routes, fixed deadlines, pre-play alarm verification, explicit Start, Stop/alarm independence, verified checkpoints, and no autoplay. Expose session details and sources only from existing bundled metadata; do not enable atlas future concepts without prepared capability and dedicated validation. Verify light/dark, Dynamic Type, VoiceOver order, narrow layouts, and the existing behavior tests before calling this slice complete.
 - [ ] Run `validation/ten-nap-trial`, record reliability and preference outcomes without analytics, fix launch-blocking defects, and decide whether the prototype merits further investment.
 
 ## Open questions
@@ -36,6 +39,7 @@ Build Honkshool as a sequence of small, reviewable vertical slices, beginning wi
 - Describe listening as content being “played.” Never infer learning, retention, sleep state, therapy, or treatment.
 - Fix the playback route when the nap starts. No branch question, vibration, regenerated content, or other attention demand may be introduced mid-nap.
 - Keep source citations with each session and visible in the app, but never read them aloud.
+- Apply [Quiet curiosity](Design-Language.md) by default to new and existing screens unless the owner changes the direction. Keep the Rest-first path short and static during active rest.
 
 ## Phase 0: feasibility and decisions
 

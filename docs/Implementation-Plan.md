@@ -7,14 +7,19 @@ Establish the approved Quiet curiosity / Rest first previews as Honkshool’s du
 - Out: new recordings, unprepared journeys, alternate voices/detail variants, downloads/backend/accounts, changes to deadline/alarm/history evidence rules, public release, PR creation or merge. Future atlas concepts remain documented specifications until their underlying capabilities exist.
 
 ## Action items
-[ ] Record the approved palette, typography, spacing, motif, components, 33-screen mapping, accessibility rules, and future-feature boundaries in `docs/Design-Language.md`; link it from project/product/roadmap docs and add persistent contributor guidance.
-[ ] Add reusable native SwiftUI design primitives and the approved goose image for in-app use, preserving the app icon.
-[ ] Introduce a Rest/History shell, one-time quiet welcome, and Settings → Feasibility Lab with one shared lifetime for playback, alarms, and history.
-[ ] Apply the design to session selection/detail, duration and sound choices, complete immutable plan review, explicit confirmation/start, active/paused/quiet/ended states, and existing-alarm/error recovery.
-[ ] Restyle history and checkpoint/unavailable states, preserving verified timestamps, completion evidence, and fresh Resume/Replay reviews.
-[ ] Update navigation/UI regression tests and add meaningful coverage for the new shell, welcome, session details, and cross-tab active-run/alarm lifetime; retain existing safety assertions.
+[x] Record the approved palette, typography, spacing, motif, components, 33-screen mapping, accessibility rules, and future-feature boundaries in `docs/Design-Language.md`; link it from project/product/roadmap docs and add persistent contributor guidance.
+[x] Add reusable native SwiftUI design primitives and the approved goose image for in-app use, preserving the app icon.
+[x] Introduce a Rest/History shell, one-time quiet welcome, and Settings → Feasibility Lab with one shared lifetime for playback, alarms, and history.
+[x] Apply the design to session selection/detail, duration and sound choices, complete immutable plan review, explicit confirmation/start, active/paused/quiet/ended states, and existing-alarm/error recovery.
+[x] Restyle history and checkpoint/unavailable states, preserving verified timestamps, completion evidence, and fresh Resume/Replay reviews.
+[x] Update navigation/UI regression tests and add meaningful coverage for the new shell, welcome, session details, and cross-tab active-run/alarm lifetime; retain existing safety assertions.
 [ ] Run repository checks, targeted iOS tests, the complete iOS suite, Release build, and simulator visual checks in light/dark and larger text; review timing/alarm/privacy contracts and repair findings.
 [ ] Update status and usage documentation, record validation, commit coherent checkpoints, and push the completed branch.
 
 ## Open questions
 - None. The approved overview establishes the design direction; implementation of future content capabilities remains phased as already labeled in the overview.
+
+## Validation progress
+- Debug build-for-testing and Release simulator build passed; repository checks passed (40 cases).
+- Targeted contract and UI checks found four accessibility/navigation failures; repairs passed all six follow-up cases, including consumed-confirmation protection and larger text.
+- Apple-platform review findings were repaired and rechecked. Full-suite and dark-appearance validation are in progress.

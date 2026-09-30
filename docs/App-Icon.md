@@ -4,7 +4,7 @@
 
 The icon shows an ivory goose asleep with its neck folded into its wing against a midnight-blue background. Its softly rounded body and two small trailing dots also suggest a thought bubble. The closed eye and compact silhouette emphasize rest; the small amber beak makes the face recognizable. It contains no text or claims about learning during sleep.
 
-The owner approved this second design iteration as the active app icon. It does not establish a complete app design system.
+The owner approved this second design iteration as the active app icon. Its palette, calm silhouette, and thought-bubble motif inform the subsequently approved [Quiet curiosity design language](Design-Language.md).
 
 ## Asset and integration
 

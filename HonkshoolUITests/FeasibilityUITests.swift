@@ -276,6 +276,13 @@ final class FeasibilityUITests: XCTestCase {
       "HONKSHOOL_UI_TEST_CATALOG_FAILURE": failCatalogLoading ? "1" : "0",
     ]
     app.launch()
+    let settings = app.buttons["openSettings"]
+    XCTAssertTrue(settings.waitForExistence(timeout: 5))
+    settings.tap()
+    let lab = app.buttons["openFeasibilityLab"]
+    XCTAssertTrue(lab.waitForExistence(timeout: 5))
+    lab.tap()
+    XCTAssertTrue(app.navigationBars["Feasibility Lab"].waitForExistence(timeout: 5))
     return app
   }
 

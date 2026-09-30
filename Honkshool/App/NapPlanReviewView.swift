@@ -3,9 +3,11 @@ import SwiftUI
 /// Review remains immutable; a separate controller executes the confirmed snapshot on request.
 struct NapPlanReviewView: View {
   private static let plannedStartLead: TimeInterval = 60
+  @Environment(\.openURL) private var openURL
   @ObservedObject private var run: NapRunController
   @ObservedObject private var alarm: NapPlanAlarmService
   @ObservedObject private var historyStore: ListeningHistoryStore
+  private let isHome: Bool
   private let initialSelection: SessionSelection?
   private let canStart: () -> Bool
   private let clock: () -> Date
@@ -15,6 +17,8 @@ struct NapPlanReviewView: View {
   private let isNarrationAvailable: (PreparedSession) -> Bool
   private let availableAmbienceIDs: Set<String>
 
+  @State private var showsTimeOptions = false
+  @State private var showsSessionDetail = false
   @State private var catalog: PreparedCatalog?
   @State private var reviewCatalog: NapCatalog?
   @State private var loadError: String?
@@ -31,6 +35,7 @@ struct NapPlanReviewView: View {
   @State private var reviewState = NapPlanReviewState()
   @State private var reviewError: String?
   @State private var runError: String?
+  @State private var startedPlanID: String?
   @State private var isStarting = false
   @State private var isVisible = false
 
@@ -39,6 +44,7 @@ struct NapPlanReviewView: View {
     alarm: NapPlanAlarmService,
     historyStore: ListeningHistoryStore,
     startingAt initialSelection: SessionSelection? = nil,
+    isHome: Bool = false,
     canStart: @escaping () -> Bool = { true },
     clock: @escaping () -> Date = { .now },
     confirmationClock: (() -> Date)? = nil,
@@ -49,6 +55,7 @@ struct NapPlanReviewView: View {
     },
     availableAmbienceIDs: Set<String> = PreparedAmbience.availableIDs(bundle: .main)
   ) {
+    self.isHome = isHome
     self.run = run
     self.alarm = alarm
     self.historyStore = historyStore
@@ -67,44 +74,66 @@ struct NapPlanReviewView: View {
   }
 
   var body: some View {
-    ScrollView {
-      VStack(alignment: .leading, spacing: 20) {
-        if let error = historyStore.errorMessage {
-          Label(error, systemImage: "exclamationmark.triangle")
-            .foregroundStyle(.red)
-            .accessibilityIdentifier("napHistorySaveError")
-          Button("Retry saving") { historyStore.retrySave() }
-            .accessibilityIdentifier("retryNapHistorySave")
-        }
-        Text(
-          "Choose what you would like to hear, then review the entire route and fixed wake deadline before confirming."
-        )
-        .foregroundStyle(.secondary)
-
-        if let loadError {
-          ContentUnavailableView(
-            "Content unavailable", systemImage: "book.closed", description: Text(loadError)
-          )
-          .accessibilityIdentifier("napPlanCatalogError")
-        } else if let catalog, let reviewCatalog {
-          if let confirmed = reviewState.confirmed {
-            confirmedContent(confirmed)
-          } else {
-            choices(catalog, reviewCatalog: reviewCatalog)
-            if let review = reviewState.reviewed {
-              reviewContent(review)
-            }
+    ScrollViewReader { proxy in
+      ScrollView {
+        VStack(alignment: .leading, spacing: 20) {
+          Color.clear.frame(height: 0).id("planTop")
+          if let error = historyStore.errorMessage {
+            errorLabel(error, id: "napHistorySaveError")
+            Button("Retry saving") { historyStore.retrySave() }
+              .frame(minHeight: 44)
+              .accessibilityIdentifier("retryNapHistorySave")
           }
-        } else {
-          ProgressView("Loading prepared content")
+          if run.hasActiveRun
+            || (run.phase != .idle
+              && (isHome || run.lastRunPlanID == reviewState.confirmed?.plan.id))
+          {
+            runContent(run.presentationPlan)
+          } else if let loadError {
+            ContentUnavailableView(
+              "Content unavailable", systemImage: "book.closed", description: Text(loadError)
+            )
+            .accessibilityIdentifier("napPlanCatalogError")
+          } else if let catalog, let reviewCatalog {
+            if let confirmed = reviewState.confirmed {
+              confirmedContent(confirmed)
+            } else if let reviewed = reviewState.reviewed {
+              reviewContent(reviewed)
+            } else {
+              choices(catalog, reviewCatalog: reviewCatalog)
+            }
+          } else {
+            ProgressView("Loading prepared content")
+          }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(RestStyle.pageInset)
       }
-      .frame(maxWidth: .infinity, alignment: .leading)
-      .padding()
+      .onChange(of: reviewState.reviewed?.plan.id) { _, _ in proxy.scrollTo("planTop", anchor: .top)
+      }
+      .onChange(of: reviewState.confirmed?.plan.id) { _, _ in
+        proxy.scrollTo("planTop", anchor: .top)
+      }
+      .onChange(of: run.phase) { _, _ in proxy.scrollTo("planTop", anchor: .top) }
     }
-    .background(Color(.systemGroupedBackground))
-    .navigationTitle("Nap Plan")
-    .onAppear { isVisible = true }
+    .safeAreaInset(edge: .bottom) {
+      if !run.hasActiveRun, !(isHome && run.phase != .idle), reviewState.reviewed == nil,
+        reviewState.confirmed == nil, let catalog, let reviewCatalog
+      {
+        reviewButton(catalog: catalog, reviewCatalog: reviewCatalog)
+          .padding(.horizontal, RestStyle.pageInset)
+          .padding(.vertical, 12)
+          .background(RestStyle.background)
+      }
+    }
+    .restScreen()
+    .navigationTitle(isHome ? "Honkshool" : "Nap Plan")
+    .navigationBarTitleDisplayMode(.inline)
+    .onAppear {
+      isVisible = true
+      clearConsumedReviewIfNeeded()
+    }
+    .onChange(of: run.lastRunPlanID) { _, _ in clearConsumedReviewIfNeeded() }
     .onDisappear { isVisible = false }
     .task {
       guard catalog == nil && loadError == nil else { return }
@@ -113,27 +142,7 @@ struct NapPlanReviewView: View {
         let playable = try loaded.reviewCatalog(isNarrationAvailable: isNarrationAvailable)
         reviewCatalog = playable
         catalog = loaded
-        if let initialSelection {
-          let options = sessionOptions(in: loaded, reviewCatalog: playable)
-          if let index = options.firstIndex(where: {
-            $0.journey.id == initialSelection.journeyID
-              && $0.session.id == initialSelection.sessionID
-          }) {
-            selectionIndex = index
-            if let point = initialSelection.resumePoint {
-              let prepared = loaded.sessions[initialSelection.sessionID]
-              if let prepared, (try? prepared.validateAudioResumePoint(point)) != nil {
-                selectedResumePoint = point
-              } else {
-                seedError =
-                  "The saved position no longer matches available audio. Choose current content and review a new plan."
-              }
-            }
-          } else {
-            seedError =
-              "The requested session is no longer prepared or its audio is unavailable. Choose current content and review a new plan."
-          }
-        }
+        seedSelection(in: loaded, reviewCatalog: playable)
       } catch {
         loadError = "The prepared catalog could not be loaded. \(error.localizedDescription)"
       }
@@ -142,120 +151,167 @@ struct NapPlanReviewView: View {
 
   private func choices(_ catalog: PreparedCatalog, reviewCatalog: NapCatalog) -> some View {
     let options = sessionOptions(in: catalog, reviewCatalog: reviewCatalog)
-    return Group {
-      card("Available content", systemImage: "book") {
+    return VStack(alignment: .leading, spacing: 20) {
+      HStack(alignment: .top) {
+        RestHeading("A little time\nto drift.")
+        Spacer(minLength: 12)
+        GooseMark()
+      }
+      if alarm.hasTrackedAlarm { trackedAlarmContent }
+      RestCard(title: selectedResumePoint == nil ? "Your selected session" : "Ready to continue") {
         if options.isEmpty {
           Text("No prepared sessions are available for planning.")
-          if let seedError {
-            Label(seedError, systemImage: "exclamationmark.circle")
-              .foregroundStyle(.red)
-              .accessibilityIdentifier("napPlanSeedError")
-          }
-        } else {
-          Picker(
-            "Start with",
-            selection: Binding(
-              get: { selectionIndex },
-              set: { index in
-                selectionIndex = index
-                selectedResumePoint = nil
-                seedError = nil
-                shorterIndices.removeAll()
-                invalidateReview()
-              }
-            )
-          ) {
-            ForEach(options.indices, id: \.self) { index in
-              Text("\(options[index].journey.title) · \(options[index].session.title)")
-                .tag(index)
-            }
-          }
-          .accessibilityIdentifier("napPlanContent")
-          if let seedError {
-            Label(seedError, systemImage: "exclamationmark.circle")
-              .foregroundStyle(.red)
-              .accessibilityIdentifier("napPlanSeedError")
-            Button("Start current session from beginning") {
-              selectedResumePoint = nil
-              self.seedError = nil
-              invalidateReview()
-            }
-            .accessibilityIdentifier("napPlanClearSeedError")
-          }
+        } else if options.indices.contains(selectionIndex) {
+          let selected = options[selectionIndex]
+          Text(selected.session.title)
+            .font(.system(.title2, design: .rounded).weight(.medium))
+          Text(selected.journey.title)
+            .foregroundStyle(RestStyle.secondary)
           if let selectedResumePoint {
             Text(
               "Resume at \(ListeningHistoryView.position(selectedResumePoint)); about \(ListeningHistoryView.duration(selectedResumePoint.estimatedRemainingDuration)) of narration remains."
             )
+            .font(.subheadline)
             .accessibilityIdentifier("napPlanResumePosition")
             Button("Start this session over") {
               self.selectedResumePoint = nil
               invalidateReview()
             }
+            .frame(minHeight: 44)
             .accessibilityIdentifier("napPlanStartOver")
           }
-          Text(
-            "Only prepared content can be selected. The plan never searches for new content during rest."
-          )
-          .font(.footnote)
-          .foregroundStyle(.secondary)
+          Menu {
+            Picker(
+              "Change session",
+              selection: Binding(
+                get: { selectionIndex },
+                set: { index in
+                  selectionIndex = index
+                  selectedResumePoint = nil
+                  seedError = nil
+                  shorterIndices.removeAll()
+                  invalidateReview()
+                })
+            ) {
+              ForEach(options.indices, id: \.self) { index in
+                Text("\(options[index].journey.title) · \(options[index].session.title)").tag(index)
+              }
+            }
+
+          } label: {
+            Label("Change session", systemImage: "chevron.down")
+              .frame(minHeight: 44)
+          }
+          .accessibilityIdentifier("napPlanContent")
+          Button("About this session") { showsSessionDetail = true }
+            .frame(minHeight: 44)
+            .accessibilityIdentifier("napPlanSessionDetail")
+            .sheet(isPresented: $showsSessionDetail) {
+              if let prepared = catalog.sessions[selected.session.id] {
+                SessionDetailView(prepared: prepared, journey: selected.journey)
+              }
+            }
+        }
+        if let seedError {
+          Label(seedError, systemImage: "exclamationmark.circle")
+            .foregroundStyle(RestStyle.error)
+            .accessibilityIdentifier("napPlanSeedError")
+          Button("Start current session from beginning") {
+            selectedResumePoint = nil
+            self.seedError = nil
+            invalidateReview()
+          }
+          .frame(minHeight: 44)
+          .accessibilityIdentifier("napPlanClearSeedError")
         }
       }
 
-      card("Rest window", systemImage: "timer") {
-        Toggle("Choose an exact wake time", isOn: $usesExactWakeTime)
-          .accessibilityIdentifier("napPlanUseExactWakeTime")
-        if usesExactWakeTime {
-          DatePicker(
-            "Wake time", selection: $exactWakeTime, displayedComponents: [.date, .hourAndMinute]
-          )
-          .accessibilityLabel("Wake time")
-          .accessibilityIdentifier("napPlanExactWakeTime")
-        } else {
-          Picker("Rest duration", selection: $durationMinutes) {
+      RestCard {
+        if !usesExactWakeTime {
+          Picker("Time to rest", selection: $durationMinutes) {
             ForEach([5, 10, 20, 30, 45, 60], id: \.self) { minutes in
               Text("\(minutes) minutes").tag(minutes)
             }
+            if ![5, 10, 20, 30, 45, 60].contains(durationMinutes) {
+              Text("\(durationMinutes) minutes").tag(durationMinutes)
+            }
           }
+          .pickerStyle(.menu)
           .accessibilityIdentifier("napPlanDuration")
-          Stepper("\(durationMinutes) minutes", value: $durationMinutes, in: 1...180)
-            .accessibilityIdentifier("napPlanCustomDuration")
+          LazyVGrid(columns: [GridItem(.adaptive(minimum: 54))], spacing: 8) {
+            ForEach(RestDurationPolicy.recommendedMinutes, id: \.self) { minutes in
+              Button {
+                durationMinutes = minutes
+              } label: {
+                Text("\(minutes)")
+                  .frame(maxWidth: .infinity, minHeight: 44)
+                  .background(
+                    durationMinutes == minutes ? RestStyle.quiet : RestStyle.well,
+                    in: RoundedRectangle(cornerRadius: 12))
+              }
+              .accessibilityLabel("\(minutes) minutes")
+              .accessibilityIdentifier("napPlanPreset-\(minutes)")
+              .accessibilityAddTraits(durationMinutes == minutes ? .isSelected : [])
+            }
+          }
         }
-        Text("This is a rest window, not a promise of sleep time.")
-          .font(.footnote)
-          .foregroundStyle(.secondary)
+        Button {
+          showsTimeOptions.toggle()
+        } label: {
+          HStack {
+            Text("More time options")
+            Spacer()
+            Image(systemName: showsTimeOptions ? "chevron.up" : "chevron.down")
+          }.frame(minHeight: 44)
+        }
+        .accessibilityValue(showsTimeOptions ? "Expanded" : "Collapsed")
+        .accessibilityIdentifier("napPlanTimeOptions")
+        if showsTimeOptions {
+          VStack(alignment: .leading, spacing: 16) {
+            Toggle("Choose an exact wake time", isOn: $usesExactWakeTime)
+              .accessibilityIdentifier("napPlanUseExactWakeTime")
+            if usesExactWakeTime {
+              DatePicker(
+                "Wake time", selection: $exactWakeTime,
+                displayedComponents: [.date, .hourAndMinute]
+              )
+              .accessibilityLabel("Wake time")
+              .accessibilityIdentifier("napPlanExactWakeTime")
+            } else {
+              Stepper("\(durationMinutes) minutes", value: $durationMinutes, in: 1...180)
+                .accessibilityIdentifier("napPlanCustomDuration")
+            }
+            Text("This is a rest window, not a promise of sleep time.")
+              .font(.footnote)
+              .foregroundStyle(RestStyle.secondary)
+          }
+          .padding(.top, 12)
+        }
       }
 
-      card("After narration", systemImage: "speaker.wave.2") {
-        Picker("Sound", selection: $selectedSoundID) {
+      RestCard {
+        Picker("After narration", selection: $selectedSoundID) {
           Text("Silence").tag(String?.none)
           ForEach(availableAmbienceIDs.sorted(), id: \.self) { id in
             Text(PreparedAmbience.displayName(for: id)).tag(Optional(id))
           }
         }
+        .pickerStyle(.menu)
         .accessibilityIdentifier("napPlanSound")
+        Divider()
+        Toggle("Wake alarm", isOn: $alarmEnabled)
+          .accessibilityIdentifier("napPlanAlarm")
         if availableAmbienceIDs.isEmpty {
           Text("Gentle rain is unavailable on this device. This plan can still use silence.")
-            .font(.footnote)
-            .foregroundStyle(.secondary)
+            .font(.footnote).foregroundStyle(RestStyle.secondary)
             .accessibilityIdentifier("napPlanSoundUnavailable")
         } else if selectedSoundID == PreparedAmbience.gentleRainID {
           Text(
-            "If rain becomes unavailable, rest continues in silence. Before narration starts, this requires Honkshool to remain on screen; otherwise the plan ends and needs a new review. Any scheduled wake alarm stays active."
+            "Rain fills quiet parts of your plan. If it becomes unavailable, rest continues in silence."
           )
-          .font(.footnote)
-          .foregroundStyle(.secondary)
+          .font(.footnote).foregroundStyle(RestStyle.secondary)
           .accessibilityIdentifier("napPlanSoundFallbackDisclosure")
         }
-      }
-
-      card("Wake alarm", systemImage: "alarm") {
-        Toggle("Request a wake alarm", isOn: $alarmEnabled)
-          .accessibilityIdentifier("napPlanAlarm")
-        Text(
-          "If requested, a system wake alarm must be scheduled for the fixed deadline before playback can start."
-        )
-        .font(.footnote)
-        .foregroundStyle(.secondary)
       }
 
       if let selected = options.indices.contains(selectionIndex) ? options[selectionIndex] : nil {
@@ -265,45 +321,38 @@ struct NapPlanReviewView: View {
               < (selectedResumePoint?.estimatedRemainingDuration
                 ?? selected.session.estimatedDuration)
         }
-        card("Shorter options", systemImage: "text.line.first.and.arrowtriangle.forward") {
-          if shorter.isEmpty {
-            Text(
-              "No shorter prepared sessions are available. A short window may use silence throughout."
-            )
-            .font(.footnote)
-          } else {
-            Text(
-              "Approve these only if the selected session cannot fit. They are tried in the order shown."
-            )
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-            ForEach(shorter, id: \.self) { index in
-              Toggle(
-                "\(options[index].journey.title) · \(options[index].session.title)",
-                isOn: Binding(
-                  get: { shorterIndices.contains(index) },
-                  set: { enabled in
-                    if enabled {
-                      shorterIndices.insert(index)
-                    } else {
-                      shorterIndices.remove(index)
-                    }
-                    invalidateReview()
-                  }
-                )
-              )
-              .accessibilityIdentifier("napPlanShorterOption-\(index)")
+        if !shorter.isEmpty {
+          RestCard {
+            DisclosureGroup("Shorter alternatives") {
+              VStack(alignment: .leading, spacing: 12) {
+                Text("Only if your selected session won’t fit. Tried in this order.")
+                  .font(.footnote).foregroundStyle(RestStyle.secondary)
+                ForEach(shorter, id: \.self) { index in
+                  Toggle(
+                    options[index].session.title,
+                    isOn: Binding(
+                      get: { shorterIndices.contains(index) },
+                      set: { enabled in
+                        if enabled {
+                          shorterIndices.insert(index)
+                        } else {
+                          shorterIndices.remove(index)
+                        }
+                        invalidateReview()
+                      })
+                  )
+                  .accessibilityIdentifier("napPlanShorterOption-\(index)")
+                }
+              }.padding(.top, 12)
             }
           }
         }
       }
-
       let branching = catalog.journeys.filter { !$0.nextJourneyIDs.isEmpty }
       if !branching.isEmpty {
-        card("Journey transitions", systemImage: "arrow.triangle.branch") {
+        RestCard(title: "Journey transitions") {
           Text("Only a transition approved here may follow a completed journey.")
-            .font(.footnote)
-            .foregroundStyle(.secondary)
+            .font(.footnote).foregroundStyle(RestStyle.secondary)
           ForEach(branching, id: \.id) { journey in
             Picker(
               "After \(journey.title)",
@@ -312,8 +361,7 @@ struct NapPlanReviewView: View {
                 set: {
                   approvedNextJourney[journey.id] = $0
                   invalidateReview()
-                }
-              )
+                })
             ) {
               Text("Stop narration").tag(String?.none)
               ForEach(journey.nextJourneyIDs, id: \.self) { id in
@@ -326,25 +374,32 @@ struct NapPlanReviewView: View {
           }
         }
       }
-
-      if let reviewError {
-        Label(reviewError, systemImage: "exclamationmark.circle")
-          .foregroundStyle(.red)
-          .accessibilityIdentifier("napPlanError")
+      if let reviewError { errorLabel(reviewError, id: "napPlanError") }
+      if !canStart() {
+        Text(
+          "End the experimental audio and cancel its test alarm in Settings → Feasibility Lab before starting a rest."
+        )
+        .font(.footnote).foregroundStyle(RestStyle.secondary)
       }
-      Button("Review Nap Plan") {
-        review(catalog, reviewCatalog: reviewCatalog, options: options)
-      }
-      .buttonStyle(.borderedProminent)
-      .controlSize(.large)
-      .disabled(options.isEmpty || seedError != nil)
-      .accessibilityIdentifier("reviewNapPlan")
     }
     .onChange(of: durationMinutes) { _, _ in invalidateReview() }
     .onChange(of: usesExactWakeTime) { _, _ in invalidateReview() }
     .onChange(of: exactWakeTime) { _, _ in invalidateReview() }
     .onChange(of: selectedSoundID) { _, _ in invalidateReview() }
     .onChange(of: alarmEnabled) { _, _ in invalidateReview() }
+  }
+
+  private func reviewButton(catalog: PreparedCatalog, reviewCatalog: NapCatalog) -> some View {
+    let options = sessionOptions(in: catalog, reviewCatalog: reviewCatalog)
+    return Button("Review nap plan") {
+      review(catalog, reviewCatalog: reviewCatalog, options: options)
+    }
+    .buttonStyle(RestButtonStyle())
+    .disabled(
+      options.isEmpty || seedError != nil || alarm.hasTrackedAlarm || alarm.isScheduling
+        || !canStart()
+    )
+    .accessibilityIdentifier("reviewNapPlan")
   }
 
   private func review(
@@ -389,51 +444,42 @@ struct NapPlanReviewView: View {
   }
 
   private func reviewContent(_ review: NapPlanReview) -> some View {
-    Group {
-      card("Review before confirming", systemImage: "checklist") {
-        if let point = review.route.first?.planned.resumePoint {
-          Text(
-            "Narration resumes at \(ListeningHistoryView.position(point)); about \(ListeningHistoryView.duration(point.estimatedRemainingDuration)) remains."
-          )
-          .accessibilityIdentifier("napPlanReviewedResume")
-        }
-        LabeledContent("Planned rest start") {
-          Text(review.plan.start.formatted(date: .abbreviated, time: .standard))
-        }
-        .accessibilityIdentifier("napPlanPlannedStart")
+    VStack(alignment: .leading, spacing: 20) {
+      Button {
+        invalidateReview()
+      } label: {
+        Label("Your choices", systemImage: "chevron.left").frame(minHeight: 44)
+      }
+      .accessibilityIdentifier("editNapPlanChoices")
+      RestHeading("Your nap plan")
+      RestCard(title: "Rest ends at") {
+        Text(review.plan.deadline.formatted(date: .omitted, time: .shortened))
+          .font(.system(.largeTitle, design: .rounded).weight(.medium))
         LabeledContent("Fixed wake deadline") {
           Text(review.plan.deadline.formatted(date: .abbreviated, time: .standard))
         }
+        .font(.footnote).foregroundStyle(RestStyle.secondary)
         .accessibilityIdentifier("napPlanDeadline")
+        LabeledContent("Planned rest start") {
+          Text(review.plan.start.formatted(date: .abbreviated, time: .standard))
+        }
+        .font(.subheadline)
+        .accessibilityIdentifier("napPlanPlannedStart")
         LabeledContent(
           "Wake alarm",
           value: review.plan.wakeAlarm == nil ? "Not requested" : "Requested at deadline"
         )
+        .font(.subheadline)
         .accessibilityIdentifier("napPlanAlarmChoice")
-        LabeledContent("After narration", value: soundName(review.plan.fallback))
-          .accessibilityIdentifier("napPlanPostNarrationSound")
-        if review.plan.fallback == .ambience(id: PreparedAmbience.gentleRainID) {
-          Text(
-            "If rain becomes unavailable, rest continues in silence. Before narration starts, this requires Honkshool to remain on screen; otherwise the plan ends and needs a new review. Any scheduled wake alarm stays active."
-          )
-          .font(.footnote)
-          .accessibilityIdentifier("napPlanReviewedSoundFallback")
-        }
-        if review.requestedSound != review.plan.fallback {
-          Text("Requested sound is unavailable; this plan uses silence.")
-            .font(.footnote)
-            .accessibilityIdentifier("napPlanSoundFallback")
-        }
-        if review.plan.usedShorterAlternative {
-          Text("The selected session did not fit. A preapproved shorter session was chosen.")
-            .accessibilityIdentifier("napPlanShorterSelection")
-        }
-        Text(endExplanation(review.plan))
-          .font(.footnote)
-          .accessibilityIdentifier("napPlanRouteEnd")
       }
-
-      card("Complete approved narration route", systemImage: "list.number") {
+      RestCard(title: "Your narration route") {
+        if let point = review.route.first?.planned.resumePoint {
+          Text(
+            "Narration resumes at \(ListeningHistoryView.position(point)); about \(ListeningHistoryView.duration(point.estimatedRemainingDuration)) remains."
+          )
+          .font(.subheadline).foregroundStyle(RestStyle.secondary)
+          .accessibilityIdentifier("napPlanReviewedResume")
+        }
         if review.route.isEmpty {
           Text(
             "No narration fits this rest window. Rest continues with the selected sound through the fixed deadline."
@@ -441,51 +487,66 @@ struct NapPlanReviewView: View {
           .accessibilityIdentifier("napPlanNoContent")
         } else {
           ForEach(Array(review.route.enumerated()), id: \.offset) { index, item in
-            VStack(alignment: .leading, spacing: 2) {
-              Text("\(index + 1). \(item.planned.session.title)")
-                .font(.subheadline.weight(.semibold))
-              Text(item.journeyTitle)
+            HStack(alignment: .top, spacing: 12) {
+              Text("\(index + 1)")
+                .font(.caption).frame(width: 24, height: 24)
+                .background(RestStyle.well, in: Circle())
+              VStack(alignment: .leading, spacing: 6) {
+                Text(item.planned.session.title)
+                  .font(.system(.headline, design: .rounded).weight(.medium))
+                Text(item.journeyTitle).font(.subheadline)
+                Text(
+                  "Estimated \(item.planned.estimatedStart.formatted(date: .omitted, time: .shortened))–\(item.planned.estimatedEnd.formatted(date: .omitted, time: .shortened))"
+                )
                 .font(.footnote)
-                .foregroundStyle(.secondary)
-              Text(
-                "Estimated \(item.planned.estimatedStart.formatted(date: .omitted, time: .shortened))–\(item.planned.estimatedEnd.formatted(date: .omitted, time: .shortened))"
-              )
-              .font(.footnote)
-              .foregroundStyle(.secondary)
+              }
             }
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("napPlanRouteItem-\(index)")
           }
         }
-      }
-
-      card("Approved journey transitions", systemImage: "arrow.triangle.branch") {
-        let approvals = review.approvedTransitions.sorted { $0.from < $1.from }
-        if approvals.isEmpty {
-          Text("None")
-        } else {
-          ForEach(approvals, id: \.from) { approval in
+        if review.plan.usedShorterAlternative {
+          Text("The selected session did not fit. A preapproved shorter session was chosen.")
+            .font(.subheadline).accessibilityIdentifier("napPlanShorterSelection")
+        }
+        Text(endExplanation(review.plan))
+          .font(.footnote).foregroundStyle(RestStyle.secondary)
+          .accessibilityIdentifier("napPlanRouteEnd")
+        Divider()
+        LabeledContent("After narration", value: soundName(review.plan.fallback))
+          .accessibilityIdentifier("napPlanPostNarrationSound")
+        if review.plan.fallback == .ambience(id: PreparedAmbience.gentleRainID) {
+          Text(
+            "If rain becomes unavailable, rest continues in silence. Before playback starts, keep Honkshool open. A scheduled wake alarm stays active."
+          )
+          .font(.footnote).foregroundStyle(RestStyle.secondary)
+          .accessibilityIdentifier("napPlanReviewedSoundFallback")
+        }
+        if review.requestedSound != review.plan.fallback {
+          Text("Requested sound is unavailable; this plan uses silence.")
+            .font(.footnote).accessibilityIdentifier("napPlanSoundFallback")
+        }
+        if !review.approvedTransitions.isEmpty {
+          Text("Approved journey transitions").font(.subheadline.weight(.medium))
+          ForEach(review.approvedTransitions.sorted { $0.from < $1.from }, id: \.from) { approval in
             let fromTitle = catalog?.planningCatalog.journeys[approval.from]?.title ?? approval.from
             let toTitle = catalog?.planningCatalog.journeys[approval.to]?.title ?? approval.to
-            Text("\(fromTitle) → \(toTitle)")
+            Text("\(fromTitle) → \(toTitle)").font(.subheadline)
           }
         }
-        if !review.plan.transitions.isEmpty {
-          Text("The reviewed route uses \(review.plan.transitions.count) approved transition(s).")
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-        }
       }
-
       Text(
-        "Confirm by the planned rest start. Short exact wake windows allow less review time. If the start passes, the deadline and route will refresh for another review."
+        "Your ending time stays fixed. If playback stops early, we’ll save a verified position when possible."
       )
-      .font(.footnote)
-      .foregroundStyle(.secondary)
-      Button("Confirm reviewed plan") { confirm() }
-        .buttonStyle(.borderedProminent)
-        .controlSize(.large)
+      .font(.subheadline)
+      .padding(16).frame(maxWidth: .infinity, alignment: .leading)
+      .background(RestStyle.quiet, in: RoundedRectangle(cornerRadius: 16))
+      if let reviewError { errorLabel(reviewError, id: "napPlanError") }
+      Button("Confirm this plan") { confirm() }
+        .buttonStyle(RestButtonStyle())
         .accessibilityIdentifier("confirmNapPlan")
+      Text("If the planned start passes, we’ll refresh the timing for another review.")
+        .font(.footnote).foregroundStyle(RestStyle.secondary)
     }
   }
 
@@ -511,98 +572,230 @@ struct NapPlanReviewView: View {
   }
 
   private func confirmedContent(_ confirmed: NapPlanReview) -> some View {
-    card("Plan confirmed", systemImage: "checkmark.circle") {
+    VStack(alignment: .leading, spacing: 24) {
+      GooseMark(size: 108).frame(maxWidth: .infinity).padding(.top, 24)
+      RestHeading("Ready when\nyou are.")
       Text("Your approved route and fixed deadline are ready for a start request.")
+        .foregroundStyle(RestStyle.secondary)
         .accessibilityIdentifier("napPlanConfirmation")
-      LabeledContent("Planned rest start") {
-        Text(confirmed.plan.start.formatted(date: .abbreviated, time: .standard))
+      RestCard(title: "Rest ends at") {
+        deadlineText(confirmed.plan.deadline)
+        confirmedTiming(confirmed.plan)
+        LabeledContent("After narration", value: soundName(confirmed.plan.fallback))
+          .accessibilityIdentifier("napPlanConfirmedSound")
+        Text(
+          confirmed.plan.wakeAlarm == nil
+            ? "No wake alarm requested." : "We’ll verify your wake alarm before starting."
+        )
+        .font(.subheadline).foregroundStyle(RestStyle.secondary)
       }
-      .accessibilityIdentifier("napPlanConfirmedStart")
-      LabeledContent("Fixed wake deadline") {
-        Text(confirmed.plan.deadline.formatted(date: .abbreviated, time: .standard))
-      }
-      .accessibilityIdentifier("napPlanConfirmedDeadline")
-      LabeledContent("Approved narration", value: "\(confirmed.route.count) session(s)")
-      LabeledContent("After narration", value: soundName(confirmed.plan.fallback))
-        .accessibilityIdentifier("napPlanConfirmedSound")
-      LabeledContent(
-        "Wake alarm",
-        value: confirmed.plan.wakeAlarm == nil ? "Not requested" : "Requested at fixed deadline")
       if let runError {
-        Label(runError, systemImage: "exclamationmark.circle")
-          .foregroundStyle(.red)
-          .accessibilityIdentifier("napRunError")
-      }
-      if run.hasActiveRun {
-        Label(run.statusMessage, systemImage: "waveform")
-          .accessibilityIdentifier("napRunStatus")
-        if run.canPause {
-          Button("Pause playback") { run.pause() }
-            .accessibilityIdentifier("pauseNapRun")
-        } else if run.canResume {
-          Button("Resume playback") { run.resume() }
-            .accessibilityIdentifier("resumeNapRun")
-        }
-        Button("Stop playback", role: .destructive) { run.stop() }
-          .accessibilityIdentifier("stopNapRun")
-        if confirmed.plan.wakeAlarm != nil {
-          Text("Stopping playback does not cancel the wake alarm.")
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-        }
-      } else if run.lastRunPlanID != confirmed.plan.id && runError == nil {
-        if alarm.hasTrackedAlarm {
-          Text("A Honkshool wake alarm is still tracked. Cancel it before starting another plan.")
-            .accessibilityIdentifier("napRunPreviousAlarmGate")
-        } else {
-          Text(
-            confirmed.plan.wakeAlarm == nil
-              ? "This run has no wake alarm. Keep Honkshool open until approved playback begins, then you can lock the phone. Set another alarm if you need one."
-              : "Honkshool will request alarm access if needed, schedule the wake alarm, then start the approved route. Keep the app open until approved playback begins."
-          )
-          .font(.footnote)
-          .foregroundStyle(.secondary)
-          Button("Start resting") {
-            Task { await startConfirmed(confirmed) }
+        errorLabel(runError, id: "napRunError")
+        if alarm.authorization == .denied {
+          Button("Open iPhone Settings") {
+            if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
           }
-          .buttonStyle(.borderedProminent)
-          .controlSize(.large)
+          .buttonStyle(RestButtonStyle(secondary: true))
+          .accessibilityIdentifier("openAlarmSettings")
+        }
+      }
+      if alarm.hasTrackedAlarm {
+        trackedAlarmContent
+      } else if runError == nil {
+        Text(
+          confirmed.plan.route.isEmpty && confirmed.plan.fallback == .silence
+            ? "Keep Honkshool open until the resting state begins at the planned start. Then you can lock your phone."
+            : "Keep Honkshool open until playback begins. Then you can lock your phone."
+        )
+        .font(.subheadline).foregroundStyle(RestStyle.secondary)
+        Button("Start resting") { Task { await startConfirmed(confirmed) } }
+          .buttonStyle(RestButtonStyle())
           .disabled(isStarting || alarm.isScheduling)
           .accessibilityIdentifier("startNapRun")
-          if isStarting {
-            ProgressView("Scheduling the wake alarm")
-              .accessibilityIdentifier("napRunScheduling")
-          }
+        if isStarting {
+          ProgressView("Setting your wake alarm")
+            .accessibilityIdentifier("napRunScheduling")
         }
-      } else if run.phase != .idle {
-        Label(run.statusMessage, systemImage: "info.circle")
-          .accessibilityIdentifier("napRunStatus")
       }
-      if run.lastRunPlanID == confirmed.plan.id && !run.records.isEmpty {
-        Text("Completed sessions in this run: \(run.records.filter(\.isCompleted).count)")
-          .accessibilityIdentifier("napRunCompletionCount")
+      Button("Review another plan") { resetPlan() }
+        .frame(minHeight: 44)
+        .disabled(isStarting || alarm.isScheduling)
+        .accessibilityIdentifier("reviewAnotherNapPlan")
+    }
+  }
+
+  private func runContent(_ plan: NapPlan?) -> some View {
+    VStack(alignment: .leading, spacing: 24) {
+      HStack {
+        Text("Your rest").font(.headline.weight(.medium))
+        Spacer()
+        GooseMark()
+      }
+      VStack(alignment: .leading, spacing: 16) {
+        RestHeading(runHeading)
+        Text(run.statusMessage)
+          .foregroundStyle(RestStyle.secondary)
+          .accessibilityIdentifier("napRunStatus")
+        if run.phase == .resting || run.phase == .ambience { ThoughtDots() }
+      }
+      .padding(.vertical, 24)
+      if let plan {
+        RestCard(title: run.hasActiveRun ? "Rest ends at" : "Planned ending time") {
+          deadlineText(plan.deadline)
+          confirmedTiming(plan)
+          LabeledContent("After narration", value: soundName(plan.fallback))
+            .font(.subheadline)
+            .accessibilityIdentifier("napPlanConfirmedSound")
+          Text(plan.wakeAlarm == nil ? "No wake alarm was requested." : alarm.statusMessage)
+            .font(.subheadline).foregroundStyle(RestStyle.secondary)
+            .accessibilityIdentifier("napPlanAlarmStatus")
+        }
+      }
+      if run.canPause {
+        Button("Pause playback", systemImage: "pause") { run.pause() }
+          .buttonStyle(RestButtonStyle(secondary: true))
+          .accessibilityIdentifier("pauseNapRun")
+      } else if run.canResume {
+        Button("Resume playback", systemImage: "play") { run.resume() }
+          .buttonStyle(RestButtonStyle(secondary: true))
+          .accessibilityIdentifier("resumeNapRun")
+      }
+      if run.hasActiveRun {
+        Button("Stop playback") { run.stop() }
+          .frame(minHeight: 44)
+          .accessibilityIdentifier("stopNapRun")
+        if plan?.wakeAlarm != nil {
+          Text("Stopping playback does not cancel the wake alarm.")
+            .font(.footnote).foregroundStyle(RestStyle.secondary)
+        }
+      } else {
+        if !run.records.isEmpty {
+          Text("Played through in this rest: \(run.records.filter(\.isCompleted).count) session(s)")
+            .font(.subheadline).foregroundStyle(RestStyle.secondary)
+            .accessibilityIdentifier("napRunCompletionCount")
+        }
+        if alarm.hasTrackedAlarm { trackedAlarmContent }
+        Button("Plan another rest") { resetPlan() }
+          .buttonStyle(RestButtonStyle(secondary: true))
+          .accessibilityIdentifier("reviewAnotherNapPlan")
+      }
+    }
+  }
+
+  private var runHeading: String {
+    switch run.phase {
+    case .waiting: "Get comfortable."
+    case .narrating: run.currentNarrationTitle ?? "A thought to follow."
+    case .paused, .interrupted: "Take your time."
+    case .ambience: "Let the rain stay."
+    case .resting: "Nothing else to do."
+    case .finished: "Take your time."
+    case .stopped: "Another time is fine."
+    case .failed: "A moment to reset."
+    case .idle: "A little time to drift."
+    }
+  }
+
+  private var trackedAlarmContent: some View {
+    RestCard(title: "Your wake alarm", systemImage: "alarm") {
+      Text(alarm.statusMessage)
+        .accessibilityIdentifier("trackedNapPlanAlarmStatus")
+      if let alert = alarm.alarmStatus.nextAlertDate {
+        Text(alert.formatted(date: .abbreviated, time: .shortened))
+          .font(.system(.title2, design: .rounded).weight(.medium))
       }
       if !run.hasActiveRun {
-        if alarm.hasTrackedAlarm {
-          Label(alarm.statusMessage, systemImage: "alarm")
-            .accessibilityIdentifier("napPlanAlarmStatus")
-          if alarm.canCancelTrackedAlarm {
-            Button("Cancel wake alarm", role: .destructive) {
-              if !alarm.cancel() { runError = alarm.statusMessage }
-            }
-            .disabled(alarm.isScheduling)
-            .accessibilityIdentifier("cancelNapPlanAlarm")
+        Text("Cancel the existing alarm before making another plan.")
+          .font(.subheadline).foregroundStyle(RestStyle.secondary)
+          .accessibilityIdentifier("napRunPreviousAlarmGate")
+        if alarm.canCancelTrackedAlarm {
+          Button("Cancel wake alarm") {
+            if !alarm.cancel() { runError = alarm.statusMessage }
           }
+          .buttonStyle(RestButtonStyle(secondary: true))
+          .disabled(alarm.isScheduling)
+          .accessibilityIdentifier("cancelNapPlanAlarm")
         }
-        Button("Review another plan") {
-          run.resetPresentation()
-          reviewState = NapPlanReviewState()
-          reviewError = nil
-          runError = nil
-        }
-        .disabled(isStarting)
-        .accessibilityIdentifier("reviewAnotherNapPlan")
       }
+    }
+  }
+
+  private func confirmedTiming(_ plan: NapPlan) -> some View {
+    VStack(alignment: .leading, spacing: 8) {
+      LabeledContent("Fixed wake deadline") {
+        Text(plan.deadline.formatted(date: .abbreviated, time: .standard))
+      }
+      .accessibilityIdentifier("napPlanConfirmedDeadline")
+      LabeledContent("Planned rest start") {
+        Text(plan.start.formatted(date: .abbreviated, time: .standard))
+      }
+      .accessibilityIdentifier("napPlanConfirmedStart")
+    }
+    .font(.footnote).foregroundStyle(RestStyle.secondary)
+  }
+
+  private func deadlineText(_ date: Date) -> some View {
+    Text(date.formatted(date: .omitted, time: .shortened))
+      .font(.system(.largeTitle, design: .rounded).weight(.medium))
+      .monospacedDigit()
+  }
+
+  private func errorLabel(_ text: String, id: String) -> some View {
+    Label(text, systemImage: "exclamationmark.circle")
+      .foregroundStyle(RestStyle.error)
+      .fixedSize(horizontal: false, vertical: true)
+      .accessibilityIdentifier(id)
+  }
+
+  private func resetPlan() {
+    run.resetPresentation()
+    reviewState = NapPlanReviewState()
+    startedPlanID = nil
+    reviewError = nil
+    runError = nil
+    if isHome, let catalog, let reviewCatalog {
+      seedSelection(in: catalog, reviewCatalog: reviewCatalog)
+    }
+  }
+
+  private func clearConsumedReviewIfNeeded() {
+    guard let startedPlanID, startedPlanID != run.lastRunPlanID else { return }
+    // A different tab may reset a finished run. Its consumed confirmation must
+    // never become a second Start request when this destination reappears.
+    reviewState = NapPlanReviewState()
+    self.startedPlanID = nil
+    reviewError = nil
+    runError = nil
+  }
+
+  private func seedSelection(in loaded: PreparedCatalog, reviewCatalog: NapCatalog) {
+    let seed =
+      initialSelection
+      ?? (isHome
+        ? ListeningHistoryNavigation.next(
+          in: loaded, history: historyStore.history, isNarrationAvailable: isNarrationAvailable)
+        : nil)
+    guard let seed else { return }
+    let options = sessionOptions(in: loaded, reviewCatalog: reviewCatalog)
+    if let index = options.firstIndex(where: {
+      $0.journey.id == seed.journeyID && $0.session.id == seed.sessionID
+    }) {
+      selectionIndex = index
+      selectedResumePoint = nil
+      seedError = nil
+      if let point = seed.resumePoint {
+        if let prepared = loaded.sessions[seed.sessionID],
+          (try? prepared.validateAudioResumePoint(point)) != nil
+        {
+          selectedResumePoint = point
+        } else {
+          seedError =
+            "The saved position no longer matches available audio. Choose current content and review a new plan."
+        }
+      }
+    } else {
+      seedError =
+        "The requested session is no longer prepared or its audio is unavailable. Choose current content and review a new plan."
     }
   }
 
@@ -642,6 +835,7 @@ struct NapPlanReviewView: View {
         scheduledAlarm = scheduled
       }
       try run.start(review: confirmed, catalog: catalog, scheduledAlarm: scheduledAlarm)
+      startedPlanID = confirmed.plan.id
       runError = nil
     } catch let error as NapRunError {
       let message =
@@ -719,21 +913,57 @@ struct NapPlanReviewView: View {
     }
   }
 
-  private func card<Content: View>(
-    _ title: String, systemImage: String, @ViewBuilder content: () -> Content
-  ) -> some View {
-    VStack(alignment: .leading, spacing: 12) {
-      Label(title, systemImage: systemImage)
-        .font(.headline)
-      content()
-    }
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .padding()
-    .background(.background, in: RoundedRectangle(cornerRadius: 18))
-  }
 }
 
 private struct SessionOption {
   let journey: Journey
   let session: Session
+}
+
+/// Only the bundled, validated session metadata is presented here.
+private struct SessionDetailView: View {
+  let prepared: PreparedSession
+  let journey: Journey
+  @Environment(\.dismiss) private var dismiss
+
+  var body: some View {
+    NavigationStack {
+      ScrollView {
+        VStack(alignment: .leading, spacing: 24) {
+          Text(journey.title).font(.subheadline).foregroundStyle(RestStyle.secondary)
+          RestHeading(prepared.session.title, subtitle: prepared.summary)
+          RestCard(title: "This session") {
+            LabeledContent(
+              "Narration", value: ListeningHistoryView.duration(prepared.session.estimatedDuration))
+            LabeledContent("Detail", value: "Enthusiast")
+            Label("Ready offline", systemImage: "checkmark")
+          }
+          RestCard(title: "Sources · for when you’re awake") {
+            ForEach(prepared.sources, id: \.id) { source in
+              Link(destination: source.url) {
+                VStack(alignment: .leading, spacing: 6) {
+                  Text(source.title).font(.headline.weight(.medium))
+                  Label(source.publisher, systemImage: "arrow.up.right")
+                    .font(.subheadline).foregroundStyle(RestStyle.secondary)
+                }
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+              }
+              .accessibilityHint("Opens this source in your browser")
+            }
+          }
+          Text("You can leave this for tomorrow.")
+            .font(.footnote).foregroundStyle(RestStyle.secondary)
+        }
+        .padding(RestStyle.pageInset)
+      }
+      .restScreen()
+      .navigationTitle("About this session")
+      .navigationBarTitleDisplayMode(.inline)
+      .toolbar {
+        ToolbarItem(placement: .confirmationAction) {
+          Button("Done") { dismiss() }.accessibilityIdentifier("dismissSessionDetail")
+        }
+      }
+    }
+  }
 }

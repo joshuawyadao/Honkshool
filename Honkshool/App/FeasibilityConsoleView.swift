@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct FeasibilityConsoleView: View {
+  private enum Tab: Hashable { case rest, history }
   @Environment(\.scenePhase) private var scenePhase
   @StateObject private var audio = AudioSpikeController()
   @StateObject private var alarm = AlarmSpikeService()
@@ -34,133 +35,230 @@ struct FeasibilityConsoleView: View {
   @State private var isStarting = false
   @State private var runWakeDate: Date?
   @State private var loadedPreferences = false
+  @State private var selectedTab: Tab = .rest
+  @State private var showingSettings = false
+  @State private var showingWelcome = false
+  @State private var evaluatedWelcome = false
+  @AppStorage("hasSeenQuietWelcome", store: SpikePreferences.defaults)
+  private var hasSeenQuietWelcome = false
 
   var body: some View {
-    NavigationStack {
-      ScrollView {
-        VStack(spacing: 16) {
-          introductionCard
-          if napRun.phase != .idle {
-            napRunCard
-          }
-          if napAlarm.hasTrackedAlarm {
-            napPlanAlarmCard
-          }
-          if let error = historyStore.errorMessage {
-            SpikeCard(title: "Listening history", systemImage: "exclamationmark.triangle") {
-              Text(error)
-                .foregroundStyle(.red)
-                .accessibilityIdentifier("parentHistorySaveError")
-              Button("Retry saving") { historyStore.retrySave() }
-                .accessibilityIdentifier("parentRetryHistorySave")
+    TabView(selection: $selectedTab) {
+      NavigationStack {
+        reviewView(startingAt: nil, isHome: true)
+          .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+              Button {
+                showingSettings = true
+              } label: {
+                Label("Settings", systemImage: "gearshape")
+              }
+              .accessibilityIdentifier("openSettings")
             }
           }
-          durationCard
-            .disabled(isStarting || alarm.isScheduling || napRun.hasActiveRun)
-          alarmCard
-            .disabled(isStarting || alarm.isScheduling || napRun.hasActiveRun)
-          playbackCard
-            .disabled(napRun.hasActiveRun)
-          NavigationLink("Audio event log") {
-            AudioEventLogView(audio: audio)
+          .navigationDestination(isPresented: $showingSettings) {
+            settingsScreen
           }
-          .buttonStyle(.bordered)
-          .accessibilityIdentifier("audioEventLog")
-          NavigationLink {
-            #if DEBUG
-              NapPlanReviewView(
-                run: napRun,
-                alarm: napAlarm,
-                historyStore: historyStore,
-                canStart: {
-                  (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
-                    && !alarm.hasTrackedAlarm
-                },
-                clock: UITestFixtures.planReviewNow,
-                confirmationClock: UITestFixtures.planReviewConfirmationNow,
-                isNarrationAvailable: UITestFixtures.planReviewNarrationAvailable,
-                availableAmbienceIDs: UITestFixtures.planReviewAmbienceIDs)
-            #else
-              NapPlanReviewView(
-                run: napRun,
-                alarm: napAlarm,
-                historyStore: historyStore,
-                canStart: {
-                  (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
-                    && !alarm.hasTrackedAlarm
-                })
-            #endif
-          } label: {
-            Label("Choose and review a Nap Plan", systemImage: "checklist")
-              .frame(maxWidth: .infinity)
-          }
-          .buttonStyle(.borderedProminent)
-          .controlSize(.large)
-          .accessibilityIdentifier("openNapPlanReview")
-          .disabled(napRun.hasActiveRun)
-          NavigationLink {
-            ListeningHistoryView(
-              store: historyStore,
-              canStart: !napRun.hasActiveRun,
-              isNarrationAvailable: historyNarrationAvailable,
-              reviewDestination: { selection in
-                reviewView(startingAt: selection)
-              })
-          } label: {
-            Label("Listening history and Continue", systemImage: "clock.arrow.circlepath")
-              .frame(maxWidth: .infinity)
-          }
-          .buttonStyle(.bordered)
-          .accessibilityIdentifier("openListeningHistory")
+      }
+      .tabItem { Label("Rest", systemImage: "moon") }
+      .tag(Tab.rest)
+      .accessibilityIdentifier("restTab")
+
+      NavigationStack {
+        historyScreen
+      }
+      .tabItem { Label("History", systemImage: "book.closed") }
+      .tag(Tab.history)
+      .accessibilityIdentifier("historyTab")
+    }
+    .tint(RestStyle.ink)
+    .fullScreenCover(isPresented: $showingWelcome) {
+      welcomeScreen
+    }
+    .task { await alarm.observeUpdates() }
+    .task { await napAlarm.observeUpdates() }
+    .task(id: scenePhase) {
+      guard scenePhase == .active else { return }
+      alarm.refresh()
+      napAlarm.refresh()
+    }
+    .onChange(of: scenePhase) { _, next in
+      napRun.scenePhaseChanged(isActive: next == .active)
+    }
+    .task(id: scenePhase == .active && alarm.needsCountdownReconciliation) {
+      guard scenePhase == .active && alarm.needsCountdownReconciliation else { return }
+      await alarm.reconcileCountdown()
+    }
+    .task(id: scenePhase == .active && napAlarm.needsCountdownReconciliation) {
+      guard scenePhase == .active && napAlarm.needsCountdownReconciliation else { return }
+      await napAlarm.reconcileCountdown()
+    }
+    .onAppear {
+      napRun.scenePhaseChanged(isActive: scenePhase == .active)
+      alarm.refresh()
+      napAlarm.refresh()
+      if !evaluatedWelcome {
+        evaluatedWelcome = true
+        #if DEBUG
+          showingWelcome =
+            !hasSeenQuietWelcome
+            && (!UITestFixtures.isEnabled
+              || ProcessInfo.processInfo.environment["HONKSHOOL_UI_TEST_SHOW_WELCOME"] == "1")
+        #else
+          showingWelcome = !hasSeenQuietWelcome
+        #endif
+      }
+      guard !loadedPreferences else { return }
+      loadedPreferences = true
+      selectedMinutes = RestDurationPolicy.normalized(minutes: preferredRestMinutes)
+      customMinutes = selectedMinutes
+      exactWakeTime = RestDurationPolicy.wakeDate(startingAt: .now, minutes: selectedMinutes)
+    }
+  }
+
+  private var historyScreen: some View {
+    ListeningHistoryView(
+      store: historyStore,
+      canStart: !napRun.hasActiveRun && !napAlarm.hasTrackedAlarm && !napAlarm.isScheduling,
+      isNarrationAvailable: historyNarrationAvailable,
+      reviewDestination: { selection in reviewView(startingAt: selection) })
+  }
+
+  private var settingsScreen: some View {
+    ScrollView {
+      VStack(alignment: .leading, spacing: 20) {
+        RestHeading("Settings", subtitle: "A few quiet preferences and useful details.")
+        RestCard(title: "Your listening", systemImage: "book.closed") {
+          Text("Listening history stays on this iPhone. There is no account or cloud sync.")
+            .font(.body)
+            .foregroundStyle(RestStyle.secondary)
         }
-        .padding()
+        RestCard(title: "Rest", systemImage: "moon") {
+          Text(
+            "Honkshool follows your iPhone’s appearance and text size. Silence is the default after narration."
+          )
+          .font(.body)
+          .foregroundStyle(RestStyle.secondary)
+        }
+        RestCard(title: "Advanced", systemImage: "wrench.and.screwdriver") {
+          NavigationLink {
+            labScreen
+          } label: {
+            Label("Feasibility Lab", systemImage: "chevron.right")
+              .frame(maxWidth: .infinity, alignment: .leading)
+          }
+          .buttonStyle(RestButtonStyle(secondary: true))
+          .accessibilityIdentifier("openFeasibilityLab")
+          Text("Experimental alarm and audio controls for testing this iPhone.")
+            .font(.footnote)
+            .foregroundStyle(RestStyle.secondary)
+        }
       }
-      .background(Color(.systemGroupedBackground))
-      .navigationTitle("Feasibility Lab")
-      .alert(
-        "Test cannot start",
-        isPresented: Binding(
-          get: { blockedReason != nil },
-          set: { if !$0 { blockedReason = nil } }
-        )
-      ) {
-        Button("OK", role: .cancel) { blockedReason = nil }
-      } message: {
-        Text(blockedReason ?? "")
+      .frame(maxWidth: .infinity, alignment: .leading)
+      .padding(.horizontal, RestStyle.pageInset)
+      .padding(.vertical, 24)
+    }
+    .restScreen()
+    .navigationTitle("Settings")
+    .navigationBarTitleDisplayMode(.inline)
+  }
+
+  private var welcomeScreen: some View {
+    ScrollView {
+      VStack(alignment: .leading, spacing: 24) {
+        Spacer(minLength: 24)
+        GooseMark(size: 84)
+          .accessibilityHidden(true)
+        Text("A little time to drift.")
+          .font(.system(.largeTitle, design: .rounded).weight(.medium))
+          .foregroundStyle(RestStyle.ink)
+        Text("Choose something gentle to hear, set your rest time, and put the phone down.")
+          .font(.body)
+          .foregroundStyle(RestStyle.secondary)
+        Spacer()
+        Button("Get comfortable") {
+          hasSeenQuietWelcome = true
+          showingWelcome = false
+        }
+        .buttonStyle(RestButtonStyle())
+        .accessibilityIdentifier("dismissQuietWelcome")
+        Text("No account needed. Your listening stays on this iPhone.")
+          .font(.footnote)
+          .foregroundStyle(RestStyle.secondary)
       }
-      .task { await alarm.observeUpdates() }
-      .task { await napAlarm.observeUpdates() }
-      .task(id: scenePhase) {
-        guard scenePhase == .active else { return }
-        alarm.refresh()
-        napAlarm.refresh()
+      .padding(RestStyle.pageInset)
+      .frame(maxWidth: .infinity, alignment: .leading)
+      .restScreen()
+    }
+    .restScreen()
+  }
+
+  private var labScreen: some View {
+    ScrollView {
+      VStack(alignment: .leading, spacing: 16) {
+        RestHeading(
+          "Feasibility Lab", subtitle: "Experimental controls for testing on this iPhone.")
+        introductionCard
+        if napRun.phase != .idle {
+          napRunCard
+        }
+        if napAlarm.hasTrackedAlarm {
+          napPlanAlarmCard
+        }
+        if let error = historyStore.errorMessage {
+          SpikeCard(title: "Listening history", systemImage: "exclamationmark.triangle") {
+            Text(error)
+              .foregroundStyle(.red)
+              .accessibilityIdentifier("parentHistorySaveError")
+            Button("Retry saving") { historyStore.retrySave() }
+              .accessibilityIdentifier("parentRetryHistorySave")
+          }
+        }
+        durationCard
+          .disabled(isStarting || alarm.isScheduling || napRun.hasActiveRun)
+        alarmCard
+          .disabled(isStarting || alarm.isScheduling || napRun.hasActiveRun)
+        playbackCard
+          .disabled(napRun.hasActiveRun)
+        NavigationLink("Audio event log") {
+          AudioEventLogView(audio: audio)
+        }
+        .buttonStyle(.bordered)
+        .accessibilityIdentifier("audioEventLog")
+        NavigationLink {
+          reviewView(startingAt: nil)
+        } label: {
+          Label("Choose and review a Nap Plan", systemImage: "checklist")
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.borderedProminent)
+        .controlSize(.large)
+        .accessibilityIdentifier("openNapPlanReview")
+        .disabled(napRun.hasActiveRun)
+        NavigationLink {
+          historyScreen
+        } label: {
+          Label("Listening history and Continue", systemImage: "clock.arrow.circlepath")
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .accessibilityIdentifier("openListeningHistory")
       }
-      .onChange(of: scenePhase) { _, next in
-        napRun.scenePhaseChanged(isActive: next == .active)
-      }
-      .task(id: scenePhase == .active && alarm.needsCountdownReconciliation) {
-        guard scenePhase == .active && alarm.needsCountdownReconciliation else { return }
-        await alarm.reconcileCountdown()
-      }
-      .task(id: scenePhase == .active && napAlarm.needsCountdownReconciliation) {
-        guard scenePhase == .active && napAlarm.needsCountdownReconciliation else { return }
-        await napAlarm.reconcileCountdown()
-      }
-      .onAppear {
-        napRun.scenePhaseChanged(isActive: scenePhase == .active)
-        alarm.refresh()
-        napAlarm.refresh()
-        guard !loadedPreferences else { return }
-        loadedPreferences = true
-        selectedMinutes = RestDurationPolicy.normalized(
-          minutes: preferredRestMinutes
-        )
-        customMinutes = selectedMinutes
-        exactWakeTime = RestDurationPolicy.wakeDate(
-          startingAt: .now,
-          minutes: selectedMinutes
-        )
-      }
+      .padding(.horizontal, RestStyle.pageInset)
+      .padding(.vertical, 24)
+    }
+    .restScreen()
+    .navigationTitle("Feasibility Lab")
+    .alert(
+      "Test cannot start",
+      isPresented: Binding(
+        get: { blockedReason != nil },
+        set: { if !$0 { blockedReason = nil } }
+      )
+    ) {
+      Button("OK", role: .cancel) { blockedReason = nil }
+    } message: {
+      Text(blockedReason ?? "")
     }
   }
 
@@ -172,10 +270,13 @@ struct FeasibilityConsoleView: View {
     #endif
   }
 
-  private func reviewView(startingAt selection: SessionSelection) -> NapPlanReviewView {
+  private func reviewView(
+    startingAt selection: SessionSelection?, isHome: Bool = false
+  ) -> NapPlanReviewView {
     #if DEBUG
       NapPlanReviewView(
         run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
+        isHome: isHome,
         canStart: {
           (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
             && !alarm.hasTrackedAlarm
@@ -187,6 +288,7 @@ struct FeasibilityConsoleView: View {
     #else
       NapPlanReviewView(
         run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
+        isHome: isHome,
         canStart: {
           (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
             && !alarm.hasTrackedAlarm
@@ -605,6 +707,8 @@ private struct AudioEventLogView: View {
       }
     }
     .navigationTitle("Audio event log")
+    .scrollContentBackground(.hidden)
+    .restScreen()
   }
 }
 
@@ -614,14 +718,9 @@ private struct SpikeCard<Content: View>: View {
   @ViewBuilder let content: Content
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 12) {
-      Label(title, systemImage: systemImage)
-        .font(.headline)
+    RestCard(title: title, systemImage: systemImage) {
       content
     }
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .padding()
-    .background(.background, in: RoundedRectangle(cornerRadius: 18))
   }
 }
 

@@ -61,11 +61,10 @@ final class ListeningHistoryUITests: XCTestCase {
   }
 
   private func openHistory(in app: XCUIApplication) {
-    let open = app.buttons["openListeningHistory"]
+    let open = app.tabBars.buttons["History"]
     XCTAssertTrue(open.waitForExistence(timeout: 5))
-    scrollTo(open, in: app)
     open.tap()
-    XCTAssertTrue(app.navigationBars["Listening History"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.navigationBars["History"].waitForExistence(timeout: 5))
   }
 
   private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {

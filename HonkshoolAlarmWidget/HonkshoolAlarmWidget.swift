@@ -21,7 +21,9 @@ struct HonkshoolAlarmActivity: Widget {
         .controlSize(.small)
         .accessibilityLabel("Cancel alarm")
       }
-      .activityBackgroundTint(.indigo.opacity(0.15))
+      .foregroundStyle(RestStyle.ink)
+      .tint(RestStyle.ink)
+      .activityBackgroundTint(RestStyle.background)
     } dynamicIsland: { context in
       DynamicIsland {
         DynamicIslandExpandedRegion(.leading) {
@@ -34,7 +36,7 @@ struct HonkshoolAlarmActivity: Widget {
           }
         }
       } compactLeading: {
-        Image(systemName: "zzz")
+        Image(systemName: "moon")
       } compactTrailing: {
         AlarmCountdownTimer(state: context.state)
           .frame(maxWidth: 60)

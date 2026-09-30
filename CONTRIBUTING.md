@@ -9,6 +9,7 @@ By participating, you agree to follow the [Contributor Covenant Code of Conduct]
 ## Before opening a change
 
 1. Read the [project overview](docs/Project-Overview.md) and search existing issues and pull requests.
+   For UI changes, also read the approved [Quiet curiosity design language](docs/Design-Language.md) and [screen atlas](design/quiet-curiosity/screen-atlas.html). It is the default for current and future screens unless the owner explicitly changes it; the atlas's future examples do not imply shipped features.
 2. Open an issue before choosing a framework, adding a network service, introducing persistent storage, requesting new permissions, or changing privacy behavior.
 3. Keep each pull request focused on one coherent outcome.
 

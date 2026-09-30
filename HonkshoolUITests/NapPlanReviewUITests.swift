@@ -23,6 +23,7 @@ final class NapPlanReviewUITests: XCTestCase {
       scrollTo(duration, in: app)
       duration.tap()
       app.buttons["5 minutes"].tap()
+      openTimeOptions(in: app)
       let custom = app.steppers["napPlanCustomDuration"]
       scrollTo(custom, in: app)
       for _ in 0..<4 { custom.buttons["napPlanCustomDuration-Decrement"].tap() }
@@ -114,11 +115,9 @@ final class NapPlanReviewUITests: XCTestCase {
       app.terminate()
       app.launchEnvironment["HONKSHOOL_UI_TEST_RESET"] = "0"
       app.launch()
-      XCTAssertFalse(app.staticTexts["activeNapRunStatus"].exists)
-      let history = app.buttons["openListeningHistory"]
-      scrollTo(history, in: app)
-      history.tap()
-      XCTAssertTrue(app.staticTexts["No listening history yet"].waitForExistence(timeout: 5))
+      XCTAssertFalse(app.staticTexts["napRunStatus"].exists)
+      app.tabBars.buttons["History"].tap()
+      XCTAssertTrue(app.staticTexts["Nothing played yet"].waitForExistence(timeout: 5))
     #endif
   }
 
@@ -171,10 +170,9 @@ final class NapPlanReviewUITests: XCTestCase {
 
   func testLongPlanReviewsBothOrderedSessionsAndFixedDeadline() {
     let app = launchReview()
-    let duration = app.buttons["napPlanDuration"]
+    let duration = app.buttons["napPlanPreset-45"]
     scrollTo(duration, in: app)
     duration.tap()
-    app.buttons["45 minutes"].tap()
     let review = app.buttons["reviewNapPlan"]
     scrollTo(review, in: app)
     review.tap()
@@ -257,22 +255,21 @@ final class NapPlanReviewUITests: XCTestCase {
     start.tap()
     XCTAssertTrue(app.staticTexts["napRunStatus"].waitForExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["napRunStatus"].label.contains("Keep Honkshool open"))
-    app.navigationBars["Nap Plan"].buttons.element(boundBy: 0).tap()
 
-    let alarmStatus = app.staticTexts["parentNapPlanAlarmStatus"]
+    let alarmStatus = app.staticTexts["napPlanAlarmStatus"]
     scrollTo(alarmStatus, in: app)
     XCTAssertTrue(alarmStatus.label.contains("scheduled"))
-    XCTAssertFalse(app.buttons["parentCancelNapPlanAlarm"].exists)
+    XCTAssertFalse(app.buttons["cancelNapPlanAlarm"].exists)
 
-    let stop = app.buttons["parentStopNapRun"]
+    let stop = app.buttons["stopNapRun"]
     scrollTo(stop, in: app)
     stop.tap()
     XCTAssertTrue(
-      app.staticTexts["activeNapRunStatus"].label.contains("wake alarm was not cancelled"))
-    let cancel = app.buttons["parentCancelNapPlanAlarm"]
+      app.staticTexts["napRunStatus"].label.contains("wake alarm was not cancelled"))
+    let cancel = app.buttons["cancelNapPlanAlarm"]
     scrollTo(cancel, in: app)
     cancel.tap()
-    XCTAssertFalse(app.buttons["parentCancelNapPlanAlarm"].exists)
+    XCTAssertFalse(app.buttons["cancelNapPlanAlarm"].exists)
   }
 
   func testAlarmDenialBlocksRequestedRunWithoutAudio() {
@@ -320,17 +317,16 @@ final class NapPlanReviewUITests: XCTestCase {
     start.tap()
     XCTAssertTrue(app.staticTexts["napRunStatus"].waitForExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["napRunStatus"].label.contains("Keep Honkshool open"))
-    app.navigationBars["Nap Plan"].buttons.element(boundBy: 0).tap()
-    let parentStatus = app.staticTexts["activeNapRunStatus"]
+    let parentStatus = app.staticTexts["napRunStatus"]
     scrollTo(parentStatus, in: app)
     XCTAssertTrue(parentStatus.label.contains("Keep Honkshool open"))
-    let stop = app.buttons["parentStopNapRun"]
+    let stop = app.buttons["stopNapRun"]
     scrollTo(stop, in: app)
     stop.tap()
     XCTAssertTrue(parentStatus.label.contains("Playback stopped"))
-    XCTAssertFalse(app.buttons["parentStopNapRun"].exists)
+    XCTAssertFalse(app.buttons["stopNapRun"].exists)
 
-    let reopen = app.buttons["openNapPlanReview"]
+    let reopen = app.buttons["reviewAnotherNapPlan"]
     scrollTo(reopen, in: app)
     reopen.tap()
     let anotherDuration = app.buttons["napPlanDuration"]
@@ -351,6 +347,7 @@ final class NapPlanReviewUITests: XCTestCase {
 
   func testExactWakeTimeAndAccessibilityLabelsAreAvailable() {
     let app = launchReview()
+    openTimeOptions(in: app)
     let exact = app.switches["napPlanUseExactWakeTime"]
     scrollTo(exact, in: app)
     exact.tap()
@@ -407,6 +404,7 @@ final class NapPlanReviewUITests: XCTestCase {
     let app = launchReview(additionalEnvironment: [
       "HONKSHOOL_UI_TEST_PLAN_CONFIRM_OFFSET": "1800"
     ])
+    openTimeOptions(in: app)
     let exact = app.switches["napPlanUseExactWakeTime"]
     scrollTo(exact, in: app)
     exact.tap()
@@ -419,6 +417,62 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertFalse(app.staticTexts["napPlanConfirmation"].exists)
     XCTAssertTrue(
       app.staticTexts["napPlanError"].label.contains("Choose a wake time later"))
+  }
+
+  func testActiveNapAndWakeAlarmSurviveHistoryTabRoundTrip() {
+    let app = launchReview()
+    scrollTo(app.buttons["reviewNapPlan"], in: app)
+    app.buttons["reviewNapPlan"].tap()
+    scrollTo(app.buttons["confirmNapPlan"], in: app)
+    app.buttons["confirmNapPlan"].tap()
+    scrollTo(app.buttons["startNapRun"], in: app)
+    app.buttons["startNapRun"].tap()
+    XCTAssertTrue(app.staticTexts["napRunStatus"].waitForExistence(timeout: 5))
+    let deadline = app.staticTexts["napPlanConfirmedDeadline"].label
+    app.tabBars.buttons["History"].tap()
+    XCTAssertFalse(app.buttons["historyContinue"].isEnabled)
+    app.tabBars.buttons["Rest"].tap()
+    XCTAssertEqual(app.staticTexts["napPlanConfirmedDeadline"].label, deadline)
+    XCTAssertTrue(app.staticTexts["napRunStatus"].label.contains("Keep Honkshool open"))
+    scrollTo(app.buttons["stopNapRun"], in: app)
+    app.buttons["stopNapRun"].tap()
+    XCTAssertTrue(app.buttons["cancelNapPlanAlarm"].exists)
+  }
+
+  func testSessionDetailsUseBundledMetadataAndDismissWithoutStarting() {
+    let app = launchReview()
+    let details = app.buttons["napPlanSessionDetail"]
+    scrollTo(details, in: app)
+    details.tap()
+    XCTAssertTrue(app.navigationBars["About this session"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["Turning Fuel Into Motion"].exists)
+    XCTAssertFalse(app.buttons["stopNapRun"].exists)
+    app.buttons["dismissSessionDetail"].tap()
+    XCTAssertTrue(app.buttons["reviewNapPlan"].waitForExistence(timeout: 5))
+  }
+
+  func testConsumedHistoryConfirmationCannotRestartAfterRestResetsRun() {
+    let app = launchReview(additionalEnvironment: ["HONKSHOOL_UI_TEST_SEED_HISTORY": "1"])
+    app.tabBars.buttons["History"].tap()
+    scrollTo(app.buttons["historyResume"], in: app)
+    app.buttons["historyResume"].tap()
+    scrollTo(app.switches["napPlanAlarm"], in: app)
+    app.switches["napPlanAlarm"].tap()
+    scrollTo(app.buttons["reviewNapPlan"], in: app)
+    app.buttons["reviewNapPlan"].tap()
+    scrollTo(app.buttons["confirmNapPlan"], in: app)
+    app.buttons["confirmNapPlan"].tap()
+    scrollTo(app.buttons["startNapRun"], in: app)
+    app.buttons["startNapRun"].tap()
+    scrollTo(app.buttons["stopNapRun"], in: app)
+    app.buttons["stopNapRun"].tap()
+    app.tabBars.buttons["Rest"].tap()
+    scrollTo(app.buttons["reviewAnotherNapPlan"], in: app)
+    app.buttons["reviewAnotherNapPlan"].tap()
+    app.tabBars.buttons["History"].tap()
+    XCTAssertTrue(app.buttons["reviewNapPlan"].waitForExistence(timeout: 5))
+    XCTAssertFalse(app.buttons["startNapRun"].exists)
+    XCTAssertFalse(app.staticTexts["napPlanConfirmation"].exists)
   }
 
   private func launchReview(additionalEnvironment: [String: String] = [:]) -> XCUIApplication {
@@ -434,12 +488,15 @@ final class NapPlanReviewUITests: XCTestCase {
     ]
     app.launchEnvironment.merge(additionalEnvironment) { _, new in new }
     app.launch()
-    let open = app.buttons["openNapPlanReview"]
-    XCTAssertTrue(open.waitForExistence(timeout: 5))
-    scrollTo(open, in: app)
-    open.tap()
-    XCTAssertTrue(app.navigationBars["Nap Plan"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.navigationBars["Honkshool"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.buttons["reviewNapPlan"].waitForExistence(timeout: 5))
     return app
+  }
+
+  private func openTimeOptions(in app: XCUIApplication) {
+    let options = app.buttons["napPlanTimeOptions"]
+    scrollTo(options, in: app)
+    options.tap()
   }
 
   private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {

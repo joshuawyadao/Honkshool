@@ -55,6 +55,10 @@
 		190000000000000000000003 /* PreparedAmbienceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000000000000000000003 /* PreparedAmbienceTests.swift */; };
 		190000000000000000000004 /* NapAmbiencePlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000000000000000000004 /* NapAmbiencePlayerTests.swift */; };
 		1B0000000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1C0000000000000000000001 /* Assets.xcassets */; };
+		1D0000000000000000000001 /* RestDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0000000000000000000002 /* RestDesign.swift */; };
+		1D0000000000000000000003 /* RestShellUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0000000000000000000004 /* RestShellUITests.swift */; };
+		1D0000000000000000000005 /* RestStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0000000000000000000007 /* RestStyle.swift */; };
+		1D0000000000000000000006 /* RestStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0000000000000000000007 /* RestStyle.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -149,6 +153,9 @@
 		1A0000000000000000000003 /* PreparedAmbienceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/PreparedAmbienceTests.swift; sourceTree = SOURCE_ROOT; };
 		1A0000000000000000000004 /* NapAmbiencePlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/NapAmbiencePlayerTests.swift; sourceTree = SOURCE_ROOT; };
 		1C0000000000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1D0000000000000000000002 /* RestDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/App/RestDesign.swift; sourceTree = SOURCE_ROOT; };
+		1D0000000000000000000004 /* RestShellUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolUITests/RestShellUITests.swift; sourceTree = SOURCE_ROOT; };
+		1D0000000000000000000007 /* RestStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/Shared/RestStyle.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -213,6 +220,8 @@
 				A20000000000000000000001 /* HonkshoolApp.swift */,
 				A20000000000000000000002 /* FeasibilityConsoleView.swift */,
 				120000000000000000000002 /* NapPlanReviewView.swift */,
+				1D0000000000000000000002 /* RestDesign.swift */,
+				1D0000000000000000000007 /* RestStyle.swift */,
 				C00000000000000000000002 /* UITestFixtures.swift */,
 			);
 			path = App;
@@ -311,6 +320,7 @@
 			isa = PBXGroup;
 			children = (
 				180000000000000000000005 /* ListeningHistoryUITests.swift */,
+				1D0000000000000000000004 /* RestShellUITests.swift */,
 				B0000000000000000000000A /* HonkshoolAlarmMetadata.swift */,
 				D00000000000000000000004 /* AlarmLockScreenLayout.swift */,
 				B0000000000000000000000B /* HonkshoolAlarmWidget.swift */,
@@ -485,6 +495,8 @@
 				E10000000000000000000002 /* NapPlan.swift in Sources */,
 				110000000000000000000001 /* NapPlanReview.swift in Sources */,
 				110000000000000000000002 /* NapPlanReviewView.swift in Sources */,
+				1D0000000000000000000001 /* RestDesign.swift in Sources */,
+				1D0000000000000000000005 /* RestStyle.swift in Sources */,
 				E10000000000000000000001 /* NapContent.swift in Sources */,
 				A10000000000000000000001 /* HonkshoolApp.swift in Sources */,
 				A10000000000000000000002 /* FeasibilityConsoleView.swift in Sources */,
@@ -531,6 +543,7 @@
 				D00000000000000000000001 /* AlarmLockScreenLayout.swift in Sources */,
 				B00000000000000000000002 /* HonkshoolAlarmMetadata.swift in Sources */,
 				B00000000000000000000003 /* HonkshoolAlarmWidget.swift in Sources */,
+				1D0000000000000000000006 /* RestStyle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -541,6 +554,7 @@
 				B00000000000000000000004 /* FeasibilityUITests.swift in Sources */,
 				110000000000000000000004 /* NapPlanReviewUITests.swift in Sources */,
 				170000000000000000000005 /* ListeningHistoryUITests.swift in Sources */,
+				1D0000000000000000000003 /* RestShellUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
