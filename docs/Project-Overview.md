@@ -8,6 +8,7 @@ The primary outcome is relaxation and rest. Interesting factual exposure is seco
 
 ## Sources of truth
 
+- [App icon](App-Icon.md): first sleeping-goose artwork, generation provenance, asset-catalog integration, and editing checks.
 - [Product brief](Product-Brief.md): purpose, language and safety boundaries, core experience, first content, technical constraints, and first-release scope.
 - [Project implementation plan](Project-Implementation-Plan.md): durable phased delivery sequence, branch-sized milestones, acceptance criteria, test strategy, and validation goal.
 - [Decision log](Decision-Log.md): accepted, pending, and deferred product and technical decisions.

@@ -54,6 +54,7 @@
 		190000000000000000000002 /* NapAmbiencePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000000000000000000002 /* NapAmbiencePlayer.swift */; };
 		190000000000000000000003 /* PreparedAmbienceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000000000000000000003 /* PreparedAmbienceTests.swift */; };
 		190000000000000000000004 /* NapAmbiencePlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000000000000000000004 /* NapAmbiencePlayerTests.swift */; };
+		1B0000000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1C0000000000000000000001 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -147,6 +148,7 @@
 		1A0000000000000000000002 /* NapAmbiencePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/Services/NapAmbiencePlayer.swift; sourceTree = SOURCE_ROOT; };
 		1A0000000000000000000003 /* PreparedAmbienceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/PreparedAmbienceTests.swift; sourceTree = SOURCE_ROOT; };
 		1A0000000000000000000004 /* NapAmbiencePlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/NapAmbiencePlayerTests.swift; sourceTree = SOURCE_ROOT; };
+		1C0000000000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -283,6 +285,7 @@
 		A70000000000000000000009 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				1C0000000000000000000001 /* Assets.xcassets */,
 				A20000000000000000000007 /* Info.plist */,
 				F20000000000000000000004 /* GentleRain.wav */,
 				F20000000000000000000005 /* GentleRain-Provenance.json */,
@@ -439,6 +442,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B0000000000000000000001 /* Assets.xcassets in Resources */,
 				F10000000000000000000004 /* GentleRain.wav in Resources */,
 				F10000000000000000000005 /* GentleRain-Provenance.json in Resources */,
 				F10000000000000000000006 /* Turning-Fuel-Into-Motion-George.wav in Resources */,
@@ -631,6 +635,7 @@
 		AC0000000000000000000003 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -653,6 +658,7 @@
 		AC0000000000000000000004 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
