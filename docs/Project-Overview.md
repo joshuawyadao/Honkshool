@@ -6,6 +6,8 @@ Honkshool is an iPhone-first project for calm, uninterrupted factual narration d
 
 The primary outcome is relaxation and rest. Interesting factual exposure is secondary, and the product must not claim subconscious learning, guaranteed retention, therapy, or treatment of insomnia or another medical condition.
 
+For installation and everyday controls, start with [Getting started](Getting-Started.md) and the [user guide](User-Guide.md). The [documentation index](README.md) separates user guides, engineering contracts, and historical evidence. [Privacy and local data](Privacy.md) describes the implemented storage and permission boundary.
+
 ## Sources of truth
 
 - [Product brief](Product-Brief.md): purpose, language and safety boundaries, core experience, first content, technical constraints, and first-release scope.
@@ -14,8 +16,9 @@ The primary outcome is relaxation and rest. Interesting factual exposure is seco
 - [Nap-planning domain](Nap-Planning-Domain.md): immutable plans, timing, playback outcomes, resume/history rules, and local persistence contracts.
 - [Architecture](Architecture.md): module ownership, dependency direction, test seams, and the separate feasibility and production paths.
 - [Content catalog](Content-Catalog.md): prepared session loading, citations, estimates, resume boundaries, and remaining audio work.
-- [Narration reference](Narration-Reference.md): provisional F acceptance, reproducible audition details, and remaining listening checks.
-- [Feasibility spike guide](Feasibility-Spike.md): Xcode setup, current implementation boundary, and the physical-device evidence checklist.
+- [Audio preparation](Audio-Preparation.md): current George and rain assets, source provenance, reproduction commands, and remaining listening checks.
+- [Narration reference](Narration-Reference.md): accepted George voice direction and the historical Apple audition record.
+- [Feasibility spike guide](Feasibility-Spike.md): links to maintained setup, current implementation boundary, and the physical-device evidence checklist.
 - [Ten-nap trial guide](Ten-Nap-Trial.md): ordinary-use setup, a blank private-log template, and decision criteria; no personal results are recorded in the repository.
 - [Issue #1](https://github.com/joshuawyadao/Honkshool/issues/1): original public product-definition milestone.
 

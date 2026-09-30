@@ -13,7 +13,7 @@ Make the public repository understandable to first-time readers and contributors
 - [x] Commit this resolved plan before editing public guidance.
 - [x] Rewrite README around availability, a visual first-nap flow, bundled content, controls, and clear links; add original accessible SVG diagrams with text equivalents.
 - [x] Add a documentation index and focused getting-started, user, troubleshooting, and privacy guides, checked against the implemented screens and service contracts.
-- [ ] Document developer setup, module/script ownership and validation; reconcile CONTRIBUTING, SECURITY, project overview, trial, and feasibility guidance without rewriting historical evidence.
+- [x] Document developer setup, module/script ownership and validation; reconcile CONTRIBUTING, SECURITY, project overview, trial, and feasibility guidance without rewriting historical evidence.
 - [ ] Validate relative links and anchors, SVG structure/rendering and legibility, command/config accuracy, and public-data boundaries; run `./scripts/verify-repository.sh`. No new tests or app test rerun is needed locally because executable behavior does not change; retain hosted full iOS checks.
 - [ ] Complete independent Apple-contract and Brooks diff review, resolve confirmed documentation issues, and save coherent local checkpoints.
 - [ ] Push all checkpoints, open the PR, request Codex review, observe hosted Repository Verify and iOS Unit and UI Tests to terminal results, and leave the PR unmerged.
@@ -30,3 +30,5 @@ Make the public repository understandable to first-time readers and contributors
 
 - First documentation slice: README and two original SVGs now introduce the actual Nap Plan flow and separate audio/alarm controls. Added installation, use, troubleshooting, privacy, and contributor guides plus an audience-based index. Rendered SVGs at native and 390-pixel widths: no clipping; adjacent README text carries the same instructions at narrow widths.
 - Local verification: all 48 repository tests passed; 229 public local links/anchors and both self-contained SVG title/description structures passed supplemental checks. No application, test, or bundled audio changes.
+
+- Canonical guidance slice: CONTRIBUTING and SECURITY now describe the implemented experimental app; feasibility setup delegates to the new setup/development guides while dated evidence remains unchanged. Project overview, trial, catalog, and narration reference link current guidance and distinguish automated device evidence from pending listening observations.

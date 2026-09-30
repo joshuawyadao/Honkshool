@@ -1,45 +1,17 @@
 # Contributing
 
-Thanks for helping shape Honkshool.
+Thanks for helping shape Honkshool. Read the [Code of Conduct](CODE_OF_CONDUCT.md) before participating. Report vulnerabilities through [SECURITY.md](SECURITY.md), using its private channel rather than a public issue.
 
-## Code of conduct
+Honkshool is an experimental iPhone app with no supported release. Start with the [project overview](docs/Project-Overview.md), the [getting started guide](docs/Getting-Started.md), and the [development guide](docs/Development.md). The development guide is the source of truth for repository layout, tests, simulator settings, physical-device checks, CI, and audio preparation.
 
-By participating, you agree to follow the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). Conduct reports and security reports use separate private channels; do not post sensitive details in a public issue.
+## Proposing a change
 
-## Before opening a change
-
-1. Read the [project overview](docs/Project-Overview.md) and search existing issues and pull requests.
-2. Open an issue before choosing a framework, adding a network service, introducing persistent storage, requesting new permissions, or changing privacy behavior.
-3. Keep each pull request focused on one coherent outcome.
-
-## Development workflow
-
-1. Fork or clone the repository and create a descriptive branch from `main`.
-2. Add or update focused tests when executable behavior changes.
-3. Update the canonical documentation when behavior, architecture, data handling, operations, installation, or supported environments change.
-4. Run the complete repository gate:
-
-   ```sh
-   ./scripts/verify-repository.sh
-   ```
-
-   Public-file checks include Git-tracked files and nonignored untracked candidates. Ignored private notes, generated output, and dependency environments are excluded; a tracked file remains checked even if its name matches an ignore rule.
-
-   Changes to the experimental iOS target should also pass the complete automated simulator suite:
-
-   ```sh
-   ./scripts/test-ios.sh
-   ```
-
-   The [feasibility spike guide](docs/Feasibility-Spike.md) documents destination overrides, completed physical acceptance, and when to repeat affected locked-screen audio, hardware-routing, or AlarmKit checks. Simulator success is not physical-device acceptance evidence.
-
-5. Describe the user-visible outcome, privacy and security implications, verification performed, and any known limitations in the pull request.
+1. Search existing issues and pull requests. Open an issue before choosing a framework, adding a network service or persistent storage, requesting a new permission, or changing privacy behavior.
+2. Create a descriptive branch from `main` and keep the pull request focused on one outcome.
+3. Add or update focused tests when executable behavior changes. Update the relevant [documentation](docs/README.md) when behavior, architecture, installation, data handling, verification, or supported environments change.
+4. Run the [repository gate and applicable iOS tests](docs/Development.md#verification) before opening the pull request. Explain any check you could not run.
+5. Describe the user-visible outcome, privacy and security implications, verification performed, and known limitations in the pull request.
 
 ## Public-data rules
 
-- Use synthetic fixtures and examples.
-- Do not commit credentials, tokens, certificates, personal exports, private configuration, local databases, logs, or generated reports.
-- Redact usernames and machine-specific paths from screenshots and command output.
-- Never attach exploit details or sensitive personal information to a public issue.
-
-Report vulnerabilities using [SECURITY.md](SECURITY.md).
+Use synthetic examples and fixtures. Do not commit credentials, tokens, certificates, personal exports, private configuration, local databases, logs, generated reports, or audio preparation caches. Redact local usernames, device identifiers, and machine-specific paths from screenshots and command output. The [development guide](docs/Development.md#maintaining-public-documentation) explains how to keep documentation safe for this public repository.
