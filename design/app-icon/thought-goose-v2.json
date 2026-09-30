@@ -1,13 +1,20 @@
 {
   "name": "Sleeping goose as a thought bubble",
   "created": "2026-09-30",
-  "status": "Separate design concept for visual review; not the installed app icon",
+  "status": "Owner-approved active app icon",
   "generation": "Codex built-in imagegen edit",
-  "reference": "Honkshool/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon.png",
+  "reference": "design/app-icon/sleeping-goose-v1.png",
   "reference_sha256": "4d72e8125382ecf415320e816140064b41a55bd7d0b5a85b4e1a054eda37e869",
   "artwork": "thought-goose-v2.png",
   "artwork_sha256": "7918f9419dffa2604a17f84e4b642bb323c49179b9b1c6b6884822932d9428ae",
   "postprocessing": "None; original generated PNG copied without modification",
+  "export": {
+    "path": "Honkshool/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon.png",
+    "size": "1024x1024",
+    "color_space": "RGB",
+    "method": "Proportional resample from the approved 1254x1254 source with macOS sips; no crop or visual redesign",
+    "sha256": "36570c609fc29650d9c507197138ea2d1d0d4b811c3ec56f352d783a5ebcc9ea"
+  },
   "intent": "A sleeping goose whose cloudlike contour and two trailing dots suggest rest, drifting thoughts, and curiosity. No claim of learning or retention during sleep.",
   "prompt": "Use case: precise-object-edit\nAsset type: a new sibling concept for the Honkshool iPhone app icon.\nInput image: the existing sleeping-goose icon is the edit target and identity/style reference.\nPrimary request: evolve this same sleeping goose into a clever dual-read symbol that is also a thought bubble. The goose itself must form the main thought-bubble silhouette; do not put a goose inside a separate bubble or add a bubble over its head.\nChange only: gently round and simplify the goose's outer body and folded wing contour so its compact soft shape subtly suggests a cloud-shaped thought bubble. Add exactly two small detached warm-ivory circular dots, decreasing in size and trailing diagonally down-left from the lower-left edge of the goose, with clearly separated navy gaps. Give the dots enough breathing room within the square. Shift and scale the whole motif only enough to balance this new tail.\nPreserve: the gracefully folded long neck, tucked amber beak, single closed sleepy eye, ivory body, soft blue-gray shading, delicate matte texture, calm expression, deep midnight-blue full-bleed background, and the refined softly sculpted illustration style of the original. Keep the goose immediately recognizable and let the thought-bubble reading come from the combined contour and dots.\nComposition: one centered compact mark, bold at Home Screen size, ample padding, opaque square artwork with straight outer edges. Retain the original visual simplicity.\nMood: peaceful rest, drifting thoughts, quiet curiosity.\nNo text, letters, floating Zs, stars, books, lightbulbs, extra animals, extra thought bubble outline, speech-bubble triangle, frame, watermark, rounded-square tile, or mockup. Produce one polished square icon variant."
 }

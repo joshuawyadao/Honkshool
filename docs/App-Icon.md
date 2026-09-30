@@ -1,26 +1,33 @@
 # Honkshool app icon
 
-## First design iteration
+## Approved design
 
-The icon shows an ivory goose asleep with its neck folded into its wing against a midnight-blue background. The closed eye and compact curved silhouette emphasize rest; the small amber beak adds warmth and makes the face recognizable. It contains no text or claims about learning during sleep.
+The icon shows an ivory goose asleep with its neck folded into its wing against a midnight-blue background. Its softly rounded body and two small trailing dots also suggest a thought bubble. The closed eye and compact silhouette emphasize rest; the small amber beak makes the face recognizable. It contains no text or claims about learning during sleep.
 
-This is the first implemented design proposal, pending the owner's visual feedback. It does not establish a complete app design system.
+The owner approved this second design iteration as the active app icon. It does not establish a complete app design system.
 
 ## Asset and integration
 
-The canonical shipped artwork is [AppIcon.png](../Honkshool/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon.png), an opaque 1024 × 1024 RGB PNG. The app target includes the asset catalog and selects `AppIcon` in both Debug and Release. Xcode generates the required iPhone sizes and icon metadata. The source Info.plist does not need hand-maintained icon filenames.
+The installed artwork is [AppIcon.png](../Honkshool/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon.png), an opaque 1024 × 1024 RGB PNG exported from the approved [thought-bubble goose source](../design/app-icon/thought-goose-v2.png). The [original sleeping-goose icon](../design/app-icon/sleeping-goose-v1.png) is archived alongside it. The app target includes the asset catalog and selects `AppIcon` in both Debug and Release. Xcode generates the required iPhone sizes and icon metadata. The source Info.plist does not need hand-maintained icon filenames.
 
-The artwork fills a square without baked rounded corners; iOS supplies its icon mask. This first iteration supplies the default appearance only. Custom dark, tinted, and layered Icon Composer artwork remain future design work. Playback, alarms, signing, permissions, and the widget target are unchanged.
+The artwork fills a square without baked rounded corners; iOS supplies its icon mask. This iteration supplies the default appearance only. Custom dark, tinted, and layered Icon Composer artwork remain future design work. Playback, alarms, signing, permissions, and the widget target are unchanged.
 
 Apple references: [Configuring your app icon using an asset catalog](https://developer.apple.com/documentation/xcode/configuring-your-app-icon) and [App icons](https://developer.apple.com/design/human-interface-guidelines/app-icons).
 
-## Artwork provenance
+## Approved artwork provenance
+
+- Created on 2026-09-30 with Codex's built-in image generation edit tool, using the first sleeping-goose icon as its reference. The exact edit prompt and source details are saved in [thought-goose-v2.json](../design/app-icon/thought-goose-v2.json).
+- Approved source: `design/app-icon/thought-goose-v2.png`, an opaque 1254 × 1254 RGB PNG copied from the tool output without modification; SHA-256 `7918f9419dffa2604a17f84e4b642bb323c49179b9b1c6b6884822932d9428ae`.
+- Installed export: `Honkshool/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon.png`, an opaque 1024 × 1024 RGB PNG; SHA-256 `36570c609fc29650d9c507197138ea2d1d0d4b811c3ec56f352d783a5ebcc9ea`.
+- The only change from approved source to installed export was a proportional resample to 1024 × 1024 with macOS `sips`. No crop or visual redesign was applied.
+
+## First design iteration (archived)
 
 - Created on 2026-09-29 with Codex's built-in image generation tool; no reference images or third-party artwork were supplied.
 - The tool returned an opaque 1254 × 1254 RGB PNG. The only export adjustment was a proportional resample to 1024 × 1024 with macOS `sips`; no crop or visual redesign was applied after generation.
 - Original generated PNG SHA-256: `0488bb93c0579a2249f473457bcbd514b64b26bfad33f11b0c799774a3ec771e`.
-- Shipped PNG SHA-256: `4d72e8125382ecf415320e816140064b41a55bd7d0b5a85b4e1a054eda37e869`.
-- The shipped PNG is the repository's source artwork for this raster iteration. The original tool output remains in the local generation history; the build does not depend on that history.
+- Archived first export: [sleeping-goose-v1.png](../design/app-icon/sleeping-goose-v1.png), SHA-256 `4d72e8125382ecf415320e816140064b41a55bd7d0b5a85b4e1a054eda37e869`.
+- This first export served as the reference image for the approved edit. The original tool output remains in the local generation history; the build does not depend on that history.
 
 ### Exact generation prompt
 
@@ -39,7 +46,7 @@ Constraints: exactly one square 1024x1024 artwork, opaque edge-to-edge backgroun
 
 ## Editing and verification
 
-Create a new sibling draft when exploring alternatives, then replace the canonical asset after choosing a revision. Keep a full-square opaque 1024 × 1024 RGB export and update the provenance and prompt. Inspect the closed eye, folded neck, beak, edge padding, and light-on-dark contrast at Home Screen and Settings sizes.
+Create a new sibling draft when exploring alternatives, then replace the installed asset after choosing a revision. Keep a full-square opaque 1024 × 1024 RGB export and update the provenance and prompt. Inspect the closed eye, folded neck, beak, bubble dots, edge padding, and light-on-dark contrast at Home Screen and Settings sizes.
 
 Run `./scripts/verify-repository.sh` and `./scripts/test-ios.sh`. Confirm the compiled app contains `Assets.car`, generated icon PNGs, and `CFBundleIcons.CFBundlePrimaryIcon.CFBundleIconName = AppIcon`. A Release build checks the other app configuration. Reinstall on a simulator or device for visual Home Screen review if iOS has cached earlier artwork.
 
