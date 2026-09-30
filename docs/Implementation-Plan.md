@@ -1,29 +1,20 @@
 # Plan
 
-Promote the owner-approved thought-bubble goose to Honkshool's app icon on `codex/app-icon`. Preserve the original artwork, export the approved source at the asset catalog's required size, and update the design record before committing and pushing.
+Establish the approved Quiet curiosity / Rest first previews as Honkshool’s durable design language, then apply them to the functional iOS app. Reuse the existing planning, playback, alarm, and history contracts while making setup, review, rest, and return calm and coherent.
 
 ## Scope
-- In: approved icon replacement, preservation of the first artwork, provenance/design documentation, asset verification, builds and existing checks, commit and push.
-- Out: new artwork generation, alternate icon appearances, runtime changes, physical-device installation, and a pull request.
+- In: canonical design guide and contributor guidance; reusable adaptive SwiftUI tokens/components; Rest/History navigation, welcome and settings; session details and existing bundled sources; styled setup, full review, confirmation, active/rest/recovery, history, and advanced lab; accessibility and functional regression verification; commit and push on `codex/app-icon`.
+- Out: new recordings, unprepared journeys, alternate voices/detail variants, downloads/backend/accounts, changes to deadline/alarm/history evidence rules, public release, PR creation or merge. Future atlas concepts remain documented specifications until their underlying capabilities exist.
 
 ## Action items
-[x] Inspect the saved v2 artwork/provenance, current AppIcon catalog, `docs/App-Icon.md`, `docs/Project-Overview.md`, and the validation guidance in `CONTRIBUTING.md`.
-[x] Checkpoint the resolved plan before replacing the asset.
-[x] Preserve the original 1024-pixel icon as `design/app-icon/sleeping-goose-v1.png`, then export `thought-goose-v2.png` proportionally to the active 1024-pixel `AppIcon.png`.
-[x] Update `docs/App-Icon.md`, its project-overview description, and `thought-goose-v2.json` to record the approved icon, archived reference, exact prompt, and source/export hashes.
-[x] Verify source preservation, PNG size/opacity, both thought dots at small sizes, compiled Debug/Release icon metadata, and target isolation.
-[x] Run the repository gate and existing iOS suite with the installed iPhone 17 Pro iOS 26.5 destination. No new test cases are needed because artwork changes no executable behavior.
-[x] Record the results in this plan, commit only task files, and push `codex/app-icon` using save-branch.
+[ ] Record the approved palette, typography, spacing, motif, components, 33-screen mapping, accessibility rules, and future-feature boundaries in `docs/Design-Language.md`; link it from project/product/roadmap docs and add persistent contributor guidance.
+[ ] Add reusable native SwiftUI design primitives and the approved goose image for in-app use, preserving the app icon.
+[ ] Introduce a Rest/History shell, one-time quiet welcome, and Settings → Feasibility Lab with one shared lifetime for playback, alarms, and history.
+[ ] Apply the design to session selection/detail, duration and sound choices, complete immutable plan review, explicit confirmation/start, active/paused/quiet/ended states, and existing-alarm/error recovery.
+[ ] Restyle history and checkpoint/unavailable states, preserving verified timestamps, completion evidence, and fresh Resume/Replay reviews.
+[ ] Update navigation/UI regression tests and add meaningful coverage for the new shell, welcome, session details, and cross-tab active-run/alarm lifetime; retain existing safety assertions.
+[ ] Run repository checks, targeted iOS tests, the complete iOS suite, Release build, and simulator visual checks in light/dark and larger text; review timing/alarm/privacy contracts and repair findings.
+[ ] Update status and usage documentation, record validation, commit coherent checkpoints, and push the completed branch.
 
 ## Open questions
-- None. The owner explicitly approved the thought-bubble version and requested making it the app icon.
-
-## Validation evidence
-
-- All 40 repository checks passed, including Markdown links and public-artifact checks; whitespace checks passed.
-- Debug and Release builds compiled the updated icon. Both app bundles contain the expected AppIcon metadata and refreshed compiled assets; iPhone-only configuration and widget metadata remain unchanged.
-- The original v1 and approved v2 source hashes are unchanged. The installed export is a valid opaque 1024 × 1024 RGB PNG. Visual inspection of the 60-pixel preview and compiled 120-pixel icon confirmed both thought dots and the sleeping face remain visible.
-- A separate Apple-platform review found no actionable issues with asset preservation, export fidelity, or small-size legibility. Physical-device Home Screen review is outside this task.
-- The full existing iOS suite passed on iPhone 17 Pro with iOS 26.5: 233 passed, 0 failed, and 6 skipped. Xcode recorded 12 runtime warnings; no test failures occurred. No new test files were needed because no executable behavior changed.
-
-- Save record: resolved-plan checkpoint `bc7f08d` and approved-icon checkpoint `b2495b5`; the final validation commit records this completed plan. All task files are included, with no unrelated files changed or left unstaged.
+- None. The approved overview establishes the design direction; implementation of future content capabilities remains phased as already labeled in the overview.
