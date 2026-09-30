@@ -40,7 +40,7 @@ struct RestTimeSheet: View {
               }
             }
             .accessibilityIdentifier("napPlanDuration")
-            RestDurationChoices(minutes: $draft.minutes)
+            RestDurationChoices(minutes: $draft.minutes, identifierPrefix: "napTimePreset")
             Stepper("Custom duration: \(draft.minutes) minutes", value: $draft.minutes, in: 1...180)
               .accessibilityIdentifier("napPlanCustomDuration")
           }
@@ -73,6 +73,7 @@ struct RestTimeSheet: View {
 
 struct RestDurationChoices: View {
   @Binding var minutes: Int
+  var identifierPrefix = "napPlanPreset"
   var body: some View {
     LazyVGrid(columns: [GridItem(.adaptive(minimum: 54))], spacing: 8) {
       ForEach(RestDurationPolicy.recommendedMinutes, id: \.self) { value in
@@ -92,7 +93,7 @@ struct RestDurationChoices: View {
             }
         }
         .accessibilityLabel("\(value) minutes")
-        .accessibilityIdentifier("napPlanPreset-\(value)")
+        .accessibilityIdentifier("\(identifierPrefix)-\(value)")
         .accessibilityAddTraits(minutes == value ? .isSelected : [])
       }
     }

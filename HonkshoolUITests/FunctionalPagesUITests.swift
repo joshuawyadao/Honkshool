@@ -5,11 +5,17 @@ final class FunctionalPagesUITests: XCTestCase {
 
   func testTimeAndSoundDraftsCancelWithoutChangingThePlan() {
     let app = launch()
+    XCTAssertTrue(app.switches["napPlanAlarm"].isHittable)
+    XCTAssertLessThan(
+      app.switches["napPlanAlarm"].frame.maxY, app.buttons["reviewNapPlan"].frame.minY)
+    capture("Rest home")
     app.buttons["napPlanTimeOptions"].tap()
-    app.buttons["napPlanPreset-60"].tap()
+    app.buttons["napTimePreset-60"].tap()
+    capture("Time to rest")
     app.buttons["cancelNapTime"].tap()
     tap("napPlanSound", in: app)
     app.buttons["Gentle rain"].tap()
+    capture("After narration")
     app.buttons["cancelNapSound"].tap()
     tap("reviewNapPlan", in: app)
     XCTAssertEqual(app.staticTexts["napPlanPostNarrationSound"].label, "After narration, Silence")
@@ -48,7 +54,7 @@ final class FunctionalPagesUITests: XCTestCase {
     var app = launch()
     tap("openSettings", in: app)
     tap("openRestDefaults", in: app)
-    app.buttons["30m"].tap()
+    app.buttons["defaultRestPreset-30"].tap()
     tap("defaultRestSound", in: app)
     app.buttons["Gentle rain"].tap()
     let alarm = app.switches["defaultRestAlarm"]
@@ -109,6 +115,7 @@ final class FunctionalPagesUITests: XCTestCase {
     let app = launch(environment: ["HONKSHOOL_UI_TEST_ALARM": "not-determined"])
     tap("reviewNapPlan", in: app)
     tap("confirmNapPlan", in: app)
+    XCTAssertTrue(app.buttons["startNapRun"].isHittable)
     capture("Ready to start")
     tap("startNapRun", in: app)
     XCTAssertTrue(app.buttons["continueAlarmAccess"].waitForExistence(timeout: 5))

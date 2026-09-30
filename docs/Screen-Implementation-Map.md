@@ -28,7 +28,7 @@ The [approved atlas](../design/quiet-curiosity/screen-atlas.html) establishes la
 | 20 `screen-existing-alarm` | Rest reopened with a tracked wake alarm. | `NapPlanReviewView.swift` (`existingAlarmPage`, `trackedAlarmContent`); cancel the old alarm before another plan. |
 | 21 `screen-short-plan` | Reviewed route contains no narration that fits. | `NapPlanReviewView.swift` (`reviewContent`); the actual selected rain or silence runs to the fixed deadline after confirmation and Start. |
 | 22 `screen-rain-fallback` | Rain fails during active rest. | `NapPlanReviewView.swift` (`runContent`); visible silent rest, unchanged deadline and wake alarm. |
-| 23 `screen-recovered` | Rest reopened after an unfinished run with a verified checkpoint. | `NapPlanReviewView.swift` (`checkpointRecovery`); no autoplay or inferred completion. |
+| 23 `screen-recovered` | Rest reopened with a verified checkpoint as the latest saved entry. | `NapPlanReviewView.swift` (`checkpointRecovery`); no autoplay or inferred completion. |
 | 24 `screen-expired` | Confirmed plan has a stale approved start. | `NapPlanReviewView.swift` (`blockedStartContent`); refresh choices and review again. |
 | 25 `screen-journeys` | Rest → Settings → Journeys and sessions. | `FeasibilityConsoleView.swift` → `RestContentViews.swift` (`RestLibraryView`); one real journey, **How a Car Works**, containing two prepared sessions. No illustrated extra journeys. |
 | 26 `screen-journey` | Journey library → View journey. | `RestContentViews.swift` (`journeyDetail`); actual ordered sessions and completion/partial/next state from history. Planning opens a fresh review. |

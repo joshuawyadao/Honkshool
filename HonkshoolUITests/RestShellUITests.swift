@@ -71,6 +71,23 @@ final class RestShellUITests: XCTestCase {
     app.tabBars.buttons["History"].tap()
     XCTAssertTrue(app.navigationBars["History"].waitForExistence(timeout: 5))
     attachScreen("History — accessibility text")
+    app.tabBars.buttons["Rest"].tap()
+    app.buttons["openSettings"].tap()
+    scrollTo(app.buttons["openRestDefaults"], in: app)
+    app.buttons["openRestDefaults"].tap()
+    XCTAssertTrue(app.buttons["defaultRestPreset-60"].waitForExistence(timeout: 5))
+    scrollTo(app.buttons["defaultRestPreset-60"], in: app)
+    XCTAssertTrue(app.buttons["defaultRestPreset-60"].isHittable)
+    attachScreen("Rest defaults — accessibility text")
+    scrollTo(app.buttons["saveRestDefaults"], in: app)
+    app.buttons["saveRestDefaults"].tap()
+    app.navigationBars.buttons.firstMatch.tap()
+    app.buttons["reviewNapPlan"].tap()
+    scrollTo(app.buttons["confirmNapPlan"], in: app)
+    app.buttons["confirmNapPlan"].tap()
+    XCTAssertTrue(app.buttons["startNapRun"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.buttons["startNapRun"].isHittable)
+    attachScreen("Ready — accessibility text")
   }
 
   private func attachScreen(_ name: String) {

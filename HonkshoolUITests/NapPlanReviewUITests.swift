@@ -142,7 +142,8 @@ final class NapPlanReviewUITests: XCTestCase {
     confirm.tap()
     let confirmation = app.staticTexts["napPlanConfirmation"]
     XCTAssertTrue(confirmation.waitForExistence(timeout: 5))
-    XCTAssertTrue(confirmation.label.contains("approved route and fixed deadline"))
+    XCTAssertEqual(confirmation.label, "Your plan is ready. Start when you’re comfortable.")
+    XCTAssertFalse(app.staticTexts["napRunStatus"].exists)
     XCTAssertTrue(app.buttons["startNapRun"].exists)
     XCTAssertTrue(app.staticTexts["napPlanConfirmedStart"].label.contains("Planned rest start"))
     XCTAssertFalse(app.buttons["reviewNapPlan"].exists)

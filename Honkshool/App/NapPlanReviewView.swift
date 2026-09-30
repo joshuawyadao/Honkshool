@@ -88,7 +88,6 @@ struct NapPlanReviewView: View {
     ScrollViewReader { proxy in
       ScrollView {
         VStack(alignment: .leading, spacing: 20) {
-          Color.clear.frame(height: 0).id("planTop")
           if let error = historyStore.errorMessage {
             errorLabel(error, id: "napHistorySaveError")
             Button("Retry saving") { historyStore.retrySave() }
@@ -129,6 +128,7 @@ struct NapPlanReviewView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(RestStyle.pageInset)
+        .id("planTop")
       }
       .onChange(of: reviewState.reviewed?.plan.id) { _, _ in proxy.scrollTo("planTop", anchor: .top)
       }
@@ -143,6 +143,14 @@ struct NapPlanReviewView: View {
         let reviewCatalog
       {
         reviewButton(catalog: catalog, reviewCatalog: reviewCatalog)
+          .padding(.horizontal, RestStyle.pageInset)
+          .padding(.vertical, 12)
+          .background(RestStyle.background)
+      } else if !run.hasActiveRun, !(isHome && run.phase != .idle),
+        let confirmed = reviewState.confirmed, run.lastRunPlanID != confirmed.plan.id,
+        runError == nil, !showsAlarmPrimer, !alarm.hasTrackedAlarm
+      {
+        startRestAction(confirmed)
           .padding(.horizontal, RestStyle.pageInset)
           .padding(.vertical, 12)
           .background(RestStyle.background)
@@ -318,7 +326,7 @@ struct NapPlanReviewView: View {
           }.frame(minHeight: 44).accessibilityIdentifier("napPlanClearSeedError")
         }
       }
-      RestCard {
+      VStack(alignment: .leading, spacing: 12) {
         HStack {
           Text(usesExactWakeTime ? "Rest until" : "Time to rest · minutes")
             .font(.subheadline).foregroundStyle(RestStyle.secondary)
@@ -627,9 +635,9 @@ struct NapPlanReviewView: View {
       blockedStartContent(confirmed, message: runError)
     } else {
       VStack(alignment: .leading, spacing: 24) {
-        GooseMark(size: 108).frame(maxWidth: .infinity).padding(.vertical, 24)
+        GooseMark(size: 84).frame(maxWidth: .infinity).padding(.vertical, 8)
         RestHeading("Ready when\nyou are.")
-        Text("Your approved route and fixed deadline are ready for a start request.")
+        Text("Your plan is ready. Start when you’re comfortable.")
           .foregroundStyle(RestStyle.secondary).accessibilityIdentifier("napPlanConfirmation")
         RestCard(title: "Rest ends at") {
           deadlineText(confirmed.plan.deadline)
@@ -651,22 +659,27 @@ struct NapPlanReviewView: View {
               : "Keep Honkshool open until playback begins. Then you can lock your phone."
           )
           .font(.subheadline).foregroundStyle(RestStyle.secondary)
-          Button("Start resting") {
-            if confirmed.plan.wakeAlarm != nil && alarm.authorization == .notDetermined {
-              showsAlarmPrimer = true
-            } else {
-              Task { await startConfirmed(confirmed) }
-            }
-          }
-          .buttonStyle(RestButtonStyle())
-          .disabled(isStarting || alarm.isScheduling).accessibilityIdentifier("startNapRun")
-          if isStarting {
-            ProgressView("Setting your wake alarm").accessibilityIdentifier("napRunScheduling")
-          }
         }
         Button("Change your plan") { resetPlan() }
           .frame(minHeight: 44).disabled(isStarting || alarm.isScheduling)
           .accessibilityIdentifier("reviewAnotherNapPlan")
+      }
+    }
+  }
+
+  private func startRestAction(_ confirmed: NapPlanReview) -> some View {
+    VStack(spacing: 8) {
+      Button("Start resting") {
+        if confirmed.plan.wakeAlarm != nil && alarm.authorization == .notDetermined {
+          showsAlarmPrimer = true
+        } else {
+          Task { await startConfirmed(confirmed) }
+        }
+      }
+      .buttonStyle(RestButtonStyle())
+      .disabled(isStarting || alarm.isScheduling).accessibilityIdentifier("startNapRun")
+      if isStarting {
+        ProgressView("Setting your wake alarm").accessibilityIdentifier("napRunScheduling")
       }
     }
   }

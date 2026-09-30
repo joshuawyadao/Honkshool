@@ -39,6 +39,7 @@ struct RestDefaultsView: View {
                   }
               }
               .accessibilityLabel("\(minutes) minutes")
+              .accessibilityIdentifier("defaultRestPreset-\(minutes)")
               .accessibilityAddTraits(draft.durationMinutes == minutes ? .isSelected : [])
             }
           }
