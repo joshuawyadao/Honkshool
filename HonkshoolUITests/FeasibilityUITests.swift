@@ -281,6 +281,7 @@ final class FeasibilityUITests: XCTestCase {
     settings.tap()
     let lab = app.buttons["openFeasibilityLab"]
     XCTAssertTrue(lab.waitForExistence(timeout: 5))
+    scrollTo(lab, in: app)
     lab.tap()
     XCTAssertTrue(app.navigationBars["Feasibility Lab"].waitForExistence(timeout: 5))
     return app

@@ -84,6 +84,7 @@ enum SpikePreferences {
         defaults.removeObject(forKey: storedAlarmDateKey)
         defaults.removeObject(forKey: "napPlanAlarmReceipt")
         defaults.removeObject(forKey: "hasSeenQuietWelcome")
+        RestPreferences.reset(defaults: defaults)
         defaults.set(RestDurationPolicy.initialSavedMinutes, forKey: "preferredRestMinutes")
       }
 

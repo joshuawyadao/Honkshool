@@ -65,7 +65,7 @@ Prefer no motion. If a transition helps orientation, keep it short and respect R
 
 ## Atlas coverage and capability boundary
 
-The [approved atlas](../design/quiet-curiosity/screen-atlas.html) groups its numbered examples as follows. The first 24 depict the core flow and important states, not 24 independent features; actual copy and timing come from runtime state. Screens 25–31 explore future content and browsing capabilities, with current metadata called out below. Screens 32–33 establish the implemented Settings screen and its Advanced section for the existing Feasibility Lab.
+The [approved atlas](../design/quiet-curiosity/screen-atlas.html) groups its numbered examples as follows. The first 24 depict the core flow and important states, not 24 independent features; actual copy and timing come from runtime state. Some browsing ideas from screens 25–31 now have narrow functional pages backed by the current bundle; their expanded content and choice controls remain future work. The [screen implementation map](Screen-Implementation-Map.md) names every atlas ID, reachable route or state, and current view.
 
 | Atlas screens | Scope and contract |
 | --- | --- |
@@ -73,13 +73,13 @@ The [approved atlas](../design/quiet-curiosity/screen-atlas.html) groups its num
 | 5–9 Time, Sound, Review, Alarm permission, Ready | Native timing choices; Silence default, verified Gentle rain when available; fixed full-route review; alarm authorization/scheduling before an alarm-requested start; separate Confirm and Start. |
 | 10–16 Waiting, Playing, Paused, Quiet, Finished, Stopped, Rain unavailable | Keep foreground until approved audio starts or silence-only rest begins at its approved start. Deadline stays fixed; Stop leaves any wake alarm active; narration history follows actual playback evidence. |
 | 17–24 History, invalid saved place, alarm denial, existing alarm, short quiet plan, rain failure, unexpected exit, expired start | Recovery shows evidence and an explicit next step. Resume requires valid revision/render identity and fresh review; no autoplay or invented completion. Existing alarms must be handled before another plan. |
-| 25–27 Journey library, journey detail, branch choice | Future expanded 5–8-session journeys and branch navigation. The current catalog has only two prepared sessions; these screens must not advertise unprepared sessions as playable. |
-| 28 Session notes and sources | Source-linked metadata exists now; a richer browsing presentation is illustrated for future exploration. It can be surfaced for current prepared content without adding narration or network access. |
-| 29–31 Detail for next time, offline library, voice preview | Future capabilities. First prototype has Enthusiast detail, bundled/offline audio, and George `0.86`; alternate detail levels, download management, and voice selection need prepared assets and measured timing before controls become functional. |
-| 32 Quiet settings | Implemented information screen for local history, appearance, rest defaults, and Advanced access. Keep it short and retain the Rest-first path; any additional preference controls remain future work until supported. |
+| 25–27 Journey library, journey detail, branch choice | Settings opens a real journey library and ordered detail for the current two-session **How a Car Works** journey. A branch choice is absent because the bundled catalog has no next-journey destination; future transition approval requires a validated real catalog entry. |
+| 28 Session notes and sources | Session detail opens a readable page with the bundled summary, paragraphs, citation metadata, and source links. Citations never enter spoken audio. |
+| 29–31 Detail for next time, offline library, voice preview | Settings shows the current Enthusiast detail without a chooser, a verified packaged-audio inventory with recheck but no download/deletion, and an explicit 12-second George preview. The preview never records history and is blocked during active rest or Feasibility Lab audio. Other detail levels and voices need prepared assets and measured timing. |
+| 32 Quiet settings | Rest opens Settings with Rest defaults, prepared-content pages, information, and Advanced access. Duration, available sound, and wake-alarm defaults apply only to the next unreviewed plan. Appearance and text size follow iPhone settings. |
 | 33 Feasibility Lab | Existing experimental controls, moved away from routine navigation but preserved for device testing. |
 
-The atlas is a reference for style and hierarchy, not a mandate to ship speculative features during the current UI pass. Map each screen to an implemented capability before enabling its controls. Do not imply accounts, cloud sync, live research, arbitrary topic generation, downloads, alternative voices, or extra content currently exist.
+The atlas is a reference for style and hierarchy, not a mandate to ship speculative features during the current UI pass. Map each screen to an implemented capability before enabling its controls. Do not imply accounts, cloud sync, live research, arbitrary topic generation, downloadable content, alternative voices, or extra content currently exist.
 
 ## Implementation and review checklist
 

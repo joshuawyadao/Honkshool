@@ -37,6 +37,14 @@ struct FeasibilityConsoleView: View {
   @State private var loadedPreferences = false
   @State private var selectedTab: Tab = .rest
   @State private var showingSettings = false
+  @State private var browsingCatalog: PreparedCatalog?
+  @State private var browsingError: String?
+  @AppStorage("restDefaultDurationMinutes", store: SpikePreferences.defaults)
+  private var defaultRestMinutes = 20
+  @AppStorage("defaultRestSoundID", store: SpikePreferences.defaults)
+  private var defaultSoundID = ""
+  @AppStorage("defaultRestWakeAlarm", store: SpikePreferences.defaults)
+  private var defaultWakeAlarm = true
   @State private var showingWelcome = false
   @State private var evaluatedWelcome = false
   @AppStorage("hasSeenQuietWelcome", store: SpikePreferences.defaults)
@@ -127,40 +135,120 @@ struct FeasibilityConsoleView: View {
   private var settingsScreen: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 20) {
-        RestHeading("Settings", subtitle: "A few quiet preferences and useful details.")
-        RestCard(title: "Your listening", systemImage: "book.closed") {
-          Text("Listening history stays on this iPhone. There is no account or cloud sync.")
-            .font(.body)
-            .foregroundStyle(RestStyle.secondary)
-        }
-        RestCard(title: "Rest", systemImage: "moon") {
-          Text(
-            "Honkshool follows your iPhone’s appearance and text size. Silence is the default after narration."
+        RestHeading("Settings", subtitle: "A few choices to make rest feel familiar.")
+        RestCard(title: "Rest") {
+          NavigationLink {
+            RestDefaultsView()
+          } label: {
+            settingsRow("Rest defaults", value: "\(defaultRestMinutes) min")
+          }.accessibilityIdentifier("openRestDefaults")
+          LabeledContent(
+            "After narration", value: defaultSoundID.isEmpty ? "Silence" : "Gentle rain"
           )
-          .font(.body)
-          .foregroundStyle(RestStyle.secondary)
+          .font(.subheadline).foregroundStyle(RestStyle.secondary)
+          LabeledContent(
+            "Wake alarm", value: defaultWakeAlarm ? "On for new plans" : "Off for new plans"
+          )
+          .font(.subheadline).foregroundStyle(RestStyle.secondary)
+          Text(
+            "Every rest is reviewed before it starts. Changes here apply to your next unreviewed plan."
+          )
+          .font(.footnote).foregroundStyle(RestStyle.secondary)
         }
-        RestCard(title: "Advanced", systemImage: "wrench.and.screwdriver") {
+        if let catalog = browsingCatalog {
+          preparedSettings(catalog)
+        } else if let browsingError {
+          RestCard(title: "Prepared content") {
+            Text(browsingError).foregroundStyle(RestStyle.secondary)
+            Button("Try loading again") { loadBrowsingCatalog() }.frame(minHeight: 44)
+          }
+        } else {
+          ProgressView("Loading prepared content")
+        }
+        RestCard(title: "About") {
+          Text("Listening history stays on this iPhone. Honkshool works without an account.")
+            .foregroundStyle(RestStyle.secondary)
+          Text("Appearance and text size follow your iPhone settings.")
+            .font(.subheadline).foregroundStyle(RestStyle.secondary)
+        }
+        RestCard(title: "Advanced") {
           NavigationLink {
             labScreen
           } label: {
-            Label("Feasibility Lab", systemImage: "chevron.right")
-              .frame(maxWidth: .infinity, alignment: .leading)
-          }
-          .buttonStyle(RestButtonStyle(secondary: true))
-          .accessibilityIdentifier("openFeasibilityLab")
+            settingsRow("Feasibility Lab")
+          }.accessibilityIdentifier("openFeasibilityLab")
           Text("Experimental alarm and audio controls for testing this iPhone.")
-            .font(.footnote)
-            .foregroundStyle(RestStyle.secondary)
+            .font(.footnote).foregroundStyle(RestStyle.secondary)
         }
       }
       .frame(maxWidth: .infinity, alignment: .leading)
-      .padding(.horizontal, RestStyle.pageInset)
-      .padding(.vertical, 24)
+      .padding(RestStyle.pageInset)
     }
-    .restScreen()
-    .navigationTitle("Settings")
-    .navigationBarTitleDisplayMode(.inline)
+    .restScreen().navigationTitle("Settings").navigationBarTitleDisplayMode(.inline)
+    .task { if browsingCatalog == nil { loadBrowsingCatalog() } }
+  }
+
+  private func preparedSettings(_ catalog: PreparedCatalog) -> some View {
+    RestCard(title: "Prepare ahead") {
+      NavigationLink {
+        RestLibraryView(
+          catalog: catalog, historyStore: historyStore,
+          isAvailable: historyNarrationAvailable,
+          canPlan: !napRun.hasActiveRun && !napAlarm.hasTrackedAlarm && !napAlarm.isScheduling
+            && audio.canStartNewRun && !alarm.hasTrackedAlarm,
+          reviewDestination: { reviewView(startingAt: $0) })
+      } label: {
+        settingsRow("Journeys and sessions")
+      }
+      .accessibilityIdentifier("openJourneyLibrary")
+      Divider()
+      NavigationLink {
+        BundledAudioView(catalog: catalog)
+      } label: {
+        settingsRow("Offline library")
+      }
+      .accessibilityIdentifier("openOfflineLibrary")
+      Divider()
+      NavigationLink {
+        NarrationVoiceView(
+          catalog: catalog,
+          canPreview: !napRun.hasActiveRun && audio.canStartNewRun
+            && !napAlarm.isScheduling && !alarm.isScheduling && !isStarting)
+      } label: {
+        settingsRow("Narration voice", value: "George")
+      }
+      .accessibilityIdentifier("openNarrationVoice")
+      Divider()
+      NavigationLink {
+        CurrentDetailView()
+      } label: {
+        settingsRow("Session detail", value: "Enthusiast")
+      }
+      .accessibilityIdentifier("openCurrentDetail")
+    }
+  }
+
+  private func settingsRow(_ title: String, value: String? = nil) -> some View {
+    HStack {
+      Text(title)
+      Spacer(minLength: 8)
+      if let value { Text(value).foregroundStyle(RestStyle.secondary) }
+      Image(systemName: "chevron.right").font(.caption).foregroundStyle(RestStyle.secondary)
+    }.frame(minHeight: 44)
+  }
+
+  private func loadBrowsingCatalog() {
+    do {
+      browsingCatalog = try PreparedCatalog.load()
+      browsingError = nil
+    } catch {
+      browsingError = "The prepared library could not be loaded. \(error.localizedDescription)"
+    }
+  }
+
+  private func showHistory() {
+    showingSettings = false
+    selectedTab = .history
   }
 
   private var welcomeScreen: some View {
@@ -169,14 +257,14 @@ struct FeasibilityConsoleView: View {
         Spacer(minLength: 24)
         GooseMark(size: 84)
           .accessibilityHidden(true)
-        Text("A little time to drift.")
+        Text("Room to rest.\nA thought to follow.")
           .font(.system(.largeTitle, design: .rounded).weight(.medium))
           .foregroundStyle(RestStyle.ink)
-        Text("Choose something gentle to hear, set your rest time, and put the phone down.")
+        Text("Gentle narration for a little downtime. Pick something to hear, then settle in.")
           .font(.body)
           .foregroundStyle(RestStyle.secondary)
         Spacer()
-        Button("Get comfortable") {
+        Button("Choose your first rest") {
           hasSeenQuietWelcome = true
           showingWelcome = false
         }
@@ -276,7 +364,7 @@ struct FeasibilityConsoleView: View {
     #if DEBUG
       NapPlanReviewView(
         run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
-        isHome: isHome,
+        isHome: isHome, onShowHistory: showHistory,
         canStart: {
           (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
             && !alarm.hasTrackedAlarm
@@ -288,7 +376,7 @@ struct FeasibilityConsoleView: View {
     #else
       NapPlanReviewView(
         run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
-        isHome: isHome,
+        isHome: isHome, onShowHistory: showHistory,
         canStart: {
           (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
             && !alarm.hasTrackedAlarm

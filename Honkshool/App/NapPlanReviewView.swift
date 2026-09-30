@@ -4,10 +4,12 @@ import SwiftUI
 struct NapPlanReviewView: View {
   private static let plannedStartLead: TimeInterval = 60
   @Environment(\.openURL) private var openURL
+  @Environment(\.dismiss) private var dismiss
   @ObservedObject private var run: NapRunController
   @ObservedObject private var alarm: NapPlanAlarmService
   @ObservedObject private var historyStore: ListeningHistoryStore
   private let isHome: Bool
+  private let onShowHistory: () -> Void
   private let initialSelection: SessionSelection?
   private let canStart: () -> Bool
   private let clock: () -> Date
@@ -17,8 +19,14 @@ struct NapPlanReviewView: View {
   private let isNarrationAvailable: (PreparedSession) -> Bool
   private let availableAmbienceIDs: Set<String>
 
-  @State private var showsTimeOptions = false
-  @State private var showsSessionDetail = false
+  private enum SetupSheet: String, Identifiable {
+    case sessions, detail, time, sound
+    var id: String { rawValue }
+  }
+  @State private var activeSheet: SetupSheet?
+  @State private var appliedDefaults: RestDefaults?
+  @State private var dismissedCheckpointID: PlaybackRecord.ID?
+  @State private var showsAlarmPrimer = false
   @State private var catalog: PreparedCatalog?
   @State private var reviewCatalog: NapCatalog?
   @State private var loadError: String?
@@ -35,6 +43,7 @@ struct NapPlanReviewView: View {
   @State private var reviewState = NapPlanReviewState()
   @State private var reviewError: String?
   @State private var runError: String?
+  @State private var startFailure: NapRunError?
   @State private var startedPlanID: String?
   @State private var isStarting = false
   @State private var isVisible = false
@@ -45,6 +54,7 @@ struct NapPlanReviewView: View {
     historyStore: ListeningHistoryStore,
     startingAt initialSelection: SessionSelection? = nil,
     isHome: Bool = false,
+    onShowHistory: @escaping () -> Void = {},
     canStart: @escaping () -> Bool = { true },
     clock: @escaping () -> Date = { .now },
     confirmationClock: (() -> Date)? = nil,
@@ -56,6 +66,7 @@ struct NapPlanReviewView: View {
     availableAmbienceIDs: Set<String> = PreparedAmbience.availableIDs(bundle: .main)
   ) {
     self.isHome = isHome
+    self.onShowHistory = onShowHistory
     self.run = run
     self.alarm = alarm
     self.historyStore = historyStore
@@ -89,6 +100,12 @@ struct NapPlanReviewView: View {
               && (isHome || run.lastRunPlanID == reviewState.confirmed?.plan.id))
           {
             runContent(run.presentationPlan)
+          } else if isHome && alarm.hasTrackedAlarm && reviewState.confirmed == nil {
+            existingAlarmPage
+          } else if isHome, run.phase == .idle, reviewState.reviewed == nil,
+            let entry = recoveryEntry
+          {
+            checkpointRecovery(entry)
           } else if let loadError {
             ContentUnavailableView(
               "Content unavailable", systemImage: "book.closed", description: Text(loadError)
@@ -96,7 +113,11 @@ struct NapPlanReviewView: View {
             .accessibilityIdentifier("napPlanCatalogError")
           } else if let catalog, let reviewCatalog {
             if let confirmed = reviewState.confirmed {
-              confirmedContent(confirmed)
+              if showsAlarmPrimer {
+                alarmAccessContent(confirmed)
+              } else {
+                confirmedContent(confirmed)
+              }
             } else if let reviewed = reviewState.reviewed {
               reviewContent(reviewed)
             } else {
@@ -118,7 +139,8 @@ struct NapPlanReviewView: View {
     }
     .safeAreaInset(edge: .bottom) {
       if !run.hasActiveRun, !(isHome && run.phase != .idle), reviewState.reviewed == nil,
-        reviewState.confirmed == nil, let catalog, let reviewCatalog
+        reviewState.confirmed == nil, !alarm.hasTrackedAlarm, recoveryEntry == nil, let catalog,
+        let reviewCatalog
       {
         reviewButton(catalog: catalog, reviewCatalog: reviewCatalog)
           .padding(.horizontal, RestStyle.pageInset)
@@ -132,9 +154,14 @@ struct NapPlanReviewView: View {
     .onAppear {
       isVisible = true
       clearConsumedReviewIfNeeded()
+      applyChangedDefaults()
     }
     .onChange(of: run.lastRunPlanID) { _, _ in clearConsumedReviewIfNeeded() }
     .onDisappear { isVisible = false }
+    .sheet(item: $activeSheet) { sheet in
+      NavigationStack { setupSheet(sheet) }
+        .presentationDragIndicator(.visible)
+    }
     .task {
       guard catalog == nil && loadError == nil else { return }
       do {
@@ -149,6 +176,92 @@ struct NapPlanReviewView: View {
     }
   }
 
+  @ViewBuilder private func setupSheet(_ sheet: SetupSheet) -> some View {
+    switch sheet {
+    case .time:
+      RestTimeSheet(
+        initial: .init(
+          minutes: durationMinutes, usesExactWakeTime: usesExactWakeTime, wakeTime: exactWakeTime)
+      ) { choices in
+        durationMinutes = choices.minutes
+        usesExactWakeTime = choices.usesExactWakeTime
+        exactWakeTime = choices.wakeTime
+        invalidateReview()
+      }
+    case .sound:
+      RestSoundSheet(selectedID: selectedSoundID, availableIDs: availableAmbienceIDs) { sound in
+        selectedSoundID = sound
+        invalidateReview()
+      }
+    case .sessions:
+      if let catalog {
+        RestSessionPickerView(
+          catalog: catalog, historyStore: historyStore,
+          isAvailable: isNarrationAvailable, onChoose: chooseSession
+        )
+        .toolbar {
+          ToolbarItem(placement: .cancellationAction) {
+            Button("Done") { activeSheet = nil }.accessibilityIdentifier("dismissSessionPicker")
+          }
+        }
+      }
+    case .detail:
+      if let catalog, let reviewCatalog {
+        let options = sessionOptions(in: catalog, reviewCatalog: reviewCatalog)
+        if options.indices.contains(selectionIndex),
+          let prepared = catalog.sessions[options[selectionIndex].session.id]
+        {
+          RestSessionDetailView(
+            prepared: prepared, journey: options[selectionIndex].journey,
+            resumePoint: historyStore.errorMessage == nil ? selectedResumePoint : nil,
+            isAvailable: isNarrationAvailable(prepared),
+            onChoose: chooseSession
+          )
+          .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+              Button("Done") { activeSheet = nil }.accessibilityIdentifier("dismissSessionDetail")
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private func chooseSession(_ selection: SessionSelection) {
+    guard selection.resumePoint == nil || historyStore.errorMessage == nil else { return }
+    guard let catalog, let reviewCatalog else { return }
+    let options = sessionOptions(in: catalog, reviewCatalog: reviewCatalog)
+    guard
+      let index = options.firstIndex(where: {
+        $0.journey.id == selection.journeyID && $0.session.id == selection.sessionID
+      }),
+      let prepared = catalog.sessions[selection.sessionID], isNarrationAvailable(prepared)
+    else { return }
+    if let point = selection.resumePoint, (try? prepared.validateAudioResumePoint(point)) == nil {
+      return
+    }
+    selectionIndex = index
+    selectedResumePoint = selection.resumePoint
+    seedError = nil
+    shorterIndices.removeAll()
+    approvedNextJourney.removeAll()
+    invalidateReview()
+    activeSheet = nil
+  }
+
+  private func applyChangedDefaults(force: Bool = false) {
+    guard !run.hasActiveRun, reviewState.confirmed == nil, reviewState.reviewed == nil else {
+      return
+    }
+    let defaults = RestPreferences.load(defaults: SpikePreferences.defaults)
+    guard force || appliedDefaults != defaults else { return }
+    appliedDefaults = defaults
+    durationMinutes = defaults.durationMinutes
+    selectedSoundID = defaults.soundID.flatMap { availableAmbienceIDs.contains($0) ? $0 : nil }
+    alarmEnabled = defaults.wakeAlarm
+    usesExactWakeTime = false
+  }
+
   private func choices(_ catalog: PreparedCatalog, reviewCatalog: NapCatalog) -> some View {
     let options = sessionOptions(in: catalog, reviewCatalog: reviewCatalog)
     return VStack(alignment: .leading, spacing: 20) {
@@ -158,146 +271,85 @@ struct NapPlanReviewView: View {
         GooseMark()
       }
       if alarm.hasTrackedAlarm { trackedAlarmContent }
-      RestCard(title: selectedResumePoint == nil ? "Your selected session" : "Ready to continue") {
+      RestCard(title: selectedResumePoint == nil ? "Ready for a rest" : "Ready to continue") {
         if options.isEmpty {
           Text("No prepared sessions are available for planning.")
         } else if options.indices.contains(selectionIndex) {
           let selected = options[selectionIndex]
-          Text(selected.session.title)
-            .font(.system(.title2, design: .rounded).weight(.medium))
-          Text(selected.journey.title)
-            .foregroundStyle(RestStyle.secondary)
-          if let selectedResumePoint {
-            Text(
-              "Resume at \(ListeningHistoryView.position(selectedResumePoint)); about \(ListeningHistoryView.duration(selectedResumePoint.estimatedRemainingDuration)) of narration remains."
-            )
-            .font(.subheadline)
-            .accessibilityIdentifier("napPlanResumePosition")
-            Button("Start this session over") {
-              self.selectedResumePoint = nil
-              invalidateReview()
+          VStack(alignment: .leading, spacing: 6) {
+            Text(selected.session.title)
+              .font(.system(.headline, design: .rounded).weight(.medium))
+            Text(selected.journey.title)
+              .font(.subheadline).foregroundStyle(RestStyle.secondary)
+            if let selectedResumePoint {
+              Text(
+                "Resume at \(ListeningHistoryView.position(selectedResumePoint)) · About \(ListeningHistoryView.duration(selectedResumePoint.estimatedRemainingDuration)) left"
+              )
+              .font(.subheadline).foregroundStyle(RestStyle.secondary)
+              .accessibilityIdentifier("napPlanResumePosition")
             }
-            .frame(minHeight: 44)
-            .accessibilityIdentifier("napPlanStartOver")
           }
-          Menu {
-            Picker(
-              "Change session",
-              selection: Binding(
-                get: { selectionIndex },
-                set: { index in
-                  selectionIndex = index
-                  selectedResumePoint = nil
-                  seedError = nil
-                  shorterIndices.removeAll()
-                  invalidateReview()
-                })
-            ) {
-              ForEach(options.indices, id: \.self) { index in
-                Text("\(options[index].journey.title) · \(options[index].session.title)").tag(index)
-              }
+          HStack {
+            Button("Change session") { activeSheet = .sessions }
+              .frame(minHeight: 44).accessibilityIdentifier("napPlanContent")
+            Spacer()
+            Button {
+              activeSheet = .detail
+            } label: {
+              Image(systemName: "info.circle").frame(width: 44, height: 44)
             }
-
-          } label: {
-            Label("Change session", systemImage: "chevron.down")
-              .frame(minHeight: 44)
-          }
-          .accessibilityIdentifier("napPlanContent")
-          Button("About this session") { showsSessionDetail = true }
-            .frame(minHeight: 44)
+            .accessibilityLabel("About this session")
             .accessibilityIdentifier("napPlanSessionDetail")
-            .sheet(isPresented: $showsSessionDetail) {
-              if let prepared = catalog.sessions[selected.session.id] {
-                SessionDetailView(prepared: prepared, journey: selected.journey)
-              }
-            }
+          }
+          if selectedResumePoint != nil {
+            Button("Start this session over") {
+              selectedResumePoint = nil
+              invalidateReview()
+            }.frame(minHeight: 44).accessibilityIdentifier("napPlanStartOver")
+          }
         }
         if let seedError {
           Label(seedError, systemImage: "exclamationmark.circle")
-            .foregroundStyle(RestStyle.error)
-            .accessibilityIdentifier("napPlanSeedError")
+            .foregroundStyle(RestStyle.error).accessibilityIdentifier("napPlanSeedError")
           Button("Start current session from beginning") {
             selectedResumePoint = nil
             self.seedError = nil
             invalidateReview()
-          }
-          .frame(minHeight: 44)
-          .accessibilityIdentifier("napPlanClearSeedError")
+          }.frame(minHeight: 44).accessibilityIdentifier("napPlanClearSeedError")
         }
       }
-
       RestCard {
-        if !usesExactWakeTime {
-          Picker("Time to rest", selection: $durationMinutes) {
-            ForEach([5, 10, 20, 30, 45, 60], id: \.self) { minutes in
-              Text("\(minutes) minutes").tag(minutes)
-            }
-            if ![5, 10, 20, 30, 45, 60].contains(durationMinutes) {
-              Text("\(durationMinutes) minutes").tag(durationMinutes)
-            }
-          }
-          .pickerStyle(.menu)
-          .accessibilityIdentifier("napPlanDuration")
-          LazyVGrid(columns: [GridItem(.adaptive(minimum: 54))], spacing: 8) {
-            ForEach(RestDurationPolicy.recommendedMinutes, id: \.self) { minutes in
-              Button {
-                durationMinutes = minutes
-              } label: {
-                Text("\(minutes)")
-                  .frame(maxWidth: .infinity, minHeight: 44)
-                  .background(
-                    durationMinutes == minutes ? RestStyle.quiet : RestStyle.well,
-                    in: RoundedRectangle(cornerRadius: 12))
-              }
-              .accessibilityLabel("\(minutes) minutes")
-              .accessibilityIdentifier("napPlanPreset-\(minutes)")
-              .accessibilityAddTraits(durationMinutes == minutes ? .isSelected : [])
-            }
+        HStack {
+          Text(usesExactWakeTime ? "Rest until" : "Time to rest · minutes")
+            .font(.subheadline).foregroundStyle(RestStyle.secondary)
+          Spacer()
+          Button("More options") { activeSheet = .time }
+            .font(.subheadline).frame(minHeight: 44)
+            .accessibilityIdentifier("napPlanTimeOptions")
+        }
+        if usesExactWakeTime {
+          Text(exactWakeTime.formatted(date: .abbreviated, time: .shortened))
+            .accessibilityIdentifier("napPlanTimeSummary")
+        } else {
+          RestDurationChoices(minutes: $durationMinutes)
+          if !RestDurationPolicy.recommendedMinutes.contains(durationMinutes) {
+            Text("\(durationMinutes) minutes").font(.subheadline)
+              .accessibilityIdentifier("napPlanTimeSummary")
           }
         }
+      }
+      RestCard {
         Button {
-          showsTimeOptions.toggle()
+          activeSheet = .sound
         } label: {
           HStack {
-            Text("More time options")
+            Text("After narration")
             Spacer()
-            Image(systemName: showsTimeOptions ? "chevron.up" : "chevron.down")
-          }.frame(minHeight: 44)
-        }
-        .accessibilityValue(showsTimeOptions ? "Expanded" : "Collapsed")
-        .accessibilityIdentifier("napPlanTimeOptions")
-        if showsTimeOptions {
-          VStack(alignment: .leading, spacing: 16) {
-            Toggle("Choose an exact wake time", isOn: $usesExactWakeTime)
-              .accessibilityIdentifier("napPlanUseExactWakeTime")
-            if usesExactWakeTime {
-              DatePicker(
-                "Wake time", selection: $exactWakeTime,
-                displayedComponents: [.date, .hourAndMinute]
-              )
-              .accessibilityLabel("Wake time")
-              .accessibilityIdentifier("napPlanExactWakeTime")
-            } else {
-              Stepper("\(durationMinutes) minutes", value: $durationMinutes, in: 1...180)
-                .accessibilityIdentifier("napPlanCustomDuration")
-            }
-            Text("This is a rest window, not a promise of sleep time.")
-              .font(.footnote)
+            Text(soundName(selectedSoundID.map(RestSound.ambience(id:)) ?? .silence))
               .foregroundStyle(RestStyle.secondary)
-          }
-          .padding(.top, 12)
-        }
-      }
-
-      RestCard {
-        Picker("After narration", selection: $selectedSoundID) {
-          Text("Silence").tag(String?.none)
-          ForEach(availableAmbienceIDs.sorted(), id: \.self) { id in
-            Text(PreparedAmbience.displayName(for: id)).tag(Optional(id))
-          }
-        }
-        .pickerStyle(.menu)
-        .accessibilityIdentifier("napPlanSound")
+            Image(systemName: "chevron.right").font(.caption)
+          }.frame(minHeight: 44)
+        }.accessibilityIdentifier("napPlanSound")
         Divider()
         Toggle("Wake alarm", isOn: $alarmEnabled)
           .accessibilityIdentifier("napPlanAlarm")
@@ -313,7 +365,6 @@ struct NapPlanReviewView: View {
           .accessibilityIdentifier("napPlanSoundFallbackDisclosure")
         }
       }
-
       if let selected = options.indices.contains(selectionIndex) ? options[selectionIndex] : nil {
         let shorter = options.indices.filter {
           $0 != selectionIndex
@@ -451,7 +502,7 @@ struct NapPlanReviewView: View {
         Label("Your choices", systemImage: "chevron.left").frame(minHeight: 44)
       }
       .accessibilityIdentifier("editNapPlanChoices")
-      RestHeading("Your nap plan")
+      RestHeading(review.route.isEmpty ? "A little quiet\nis enough." : "Your nap plan")
       RestCard(title: "Rest ends at") {
         Text(review.plan.deadline.formatted(date: .omitted, time: .shortened))
           .font(.system(.largeTitle, design: .rounded).weight(.medium))
@@ -542,7 +593,7 @@ struct NapPlanReviewView: View {
       .padding(16).frame(maxWidth: .infinity, alignment: .leading)
       .background(RestStyle.quiet, in: RoundedRectangle(cornerRadius: 16))
       if let reviewError { errorLabel(reviewError, id: "napPlanError") }
-      Button("Confirm this plan") { confirm() }
+      Button(review.route.isEmpty ? "Confirm quiet plan" : "Confirm this plan") { confirm() }
         .buttonStyle(RestButtonStyle())
         .accessibilityIdentifier("confirmNapPlan")
       Text("If the planned start passes, we’ll refresh the timing for another review.")
@@ -571,57 +622,163 @@ struct NapPlanReviewView: View {
     }
   }
 
-  private func confirmedContent(_ confirmed: NapPlanReview) -> some View {
-    VStack(alignment: .leading, spacing: 24) {
-      GooseMark(size: 108).frame(maxWidth: .infinity).padding(.top, 24)
-      RestHeading("Ready when\nyou are.")
-      Text("Your approved route and fixed deadline are ready for a start request.")
-        .foregroundStyle(RestStyle.secondary)
-        .accessibilityIdentifier("napPlanConfirmation")
-      RestCard(title: "Rest ends at") {
-        deadlineText(confirmed.plan.deadline)
-        confirmedTiming(confirmed.plan)
-        LabeledContent("After narration", value: soundName(confirmed.plan.fallback))
-          .accessibilityIdentifier("napPlanConfirmedSound")
-        Text(
-          confirmed.plan.wakeAlarm == nil
-            ? "No wake alarm requested." : "We’ll verify your wake alarm before starting."
-        )
-        .font(.subheadline).foregroundStyle(RestStyle.secondary)
+  @ViewBuilder private func confirmedContent(_ confirmed: NapPlanReview) -> some View {
+    if let runError {
+      blockedStartContent(confirmed, message: runError)
+    } else {
+      VStack(alignment: .leading, spacing: 24) {
+        GooseMark(size: 108).frame(maxWidth: .infinity).padding(.vertical, 24)
+        RestHeading("Ready when\nyou are.")
+        Text("Your approved route and fixed deadline are ready for a start request.")
+          .foregroundStyle(RestStyle.secondary).accessibilityIdentifier("napPlanConfirmation")
+        RestCard(title: "Rest ends at") {
+          deadlineText(confirmed.plan.deadline)
+          confirmedTiming(confirmed.plan)
+          LabeledContent("After narration", value: soundName(confirmed.plan.fallback))
+            .accessibilityIdentifier("napPlanConfirmedSound")
+          Text(
+            confirmed.plan.wakeAlarm == nil
+              ? "No wake alarm requested." : "We’ll verify your wake alarm before starting."
+          )
+          .font(.subheadline).foregroundStyle(RestStyle.secondary)
+        }
+        if alarm.hasTrackedAlarm {
+          trackedAlarmContent
+        } else {
+          Text(
+            confirmed.plan.route.isEmpty && confirmed.plan.fallback == .silence
+              ? "Keep Honkshool open until the resting state begins at the planned start. Then you can lock your phone."
+              : "Keep Honkshool open until playback begins. Then you can lock your phone."
+          )
+          .font(.subheadline).foregroundStyle(RestStyle.secondary)
+          Button("Start resting") {
+            if confirmed.plan.wakeAlarm != nil && alarm.authorization == .notDetermined {
+              showsAlarmPrimer = true
+            } else {
+              Task { await startConfirmed(confirmed) }
+            }
+          }
+          .buttonStyle(RestButtonStyle())
+          .disabled(isStarting || alarm.isScheduling).accessibilityIdentifier("startNapRun")
+          if isStarting {
+            ProgressView("Setting your wake alarm").accessibilityIdentifier("napRunScheduling")
+          }
+        }
+        Button("Change your plan") { resetPlan() }
+          .frame(minHeight: 44).disabled(isStarting || alarm.isScheduling)
+          .accessibilityIdentifier("reviewAnotherNapPlan")
       }
-      if let runError {
-        errorLabel(runError, id: "napRunError")
+    }
+  }
+
+  private func alarmAccessContent(_ confirmed: NapPlanReview) -> some View {
+    VStack(alignment: .leading, spacing: 24) {
+      Text("Before you settle in").font(.subheadline).foregroundStyle(RestStyle.secondary)
+      RestHeading(
+        "A wake-up\nyou’ve chosen.",
+        subtitle:
+          "Allow Honkshool to set the wake alarm in your plan. iPhone will ask for alarm access next."
+      )
+      RestCard(title: "Requested alarm") {
+        deadlineText(confirmed.plan.deadline)
+        Text("We’ll check that it’s set before narration starts.").foregroundStyle(
+          RestStyle.secondary)
+      }
+      Button("Continue to alarm access") {
+        showsAlarmPrimer = false
+        Task { await startConfirmed(confirmed) }
+      }
+      .buttonStyle(RestButtonStyle()).accessibilityIdentifier("continueAlarmAccess")
+      Button("Go back to your choices") { resetPlan() }
+        .frame(minHeight: 44).accessibilityIdentifier("cancelAlarmAccess")
+    }
+  }
+
+  private func blockedStartContent(_ confirmed: NapPlanReview, message: String) -> some View {
+    VStack(alignment: .leading, spacing: 24) {
+      Text("Playback hasn’t started").font(.subheadline).foregroundStyle(RestStyle.secondary)
+      RestHeading(
+        startFailure == .staleStart
+          ? "Let’s check the\ntiming again."
+          : alarm.authorization == .denied
+            ? "Your wake alarm\nisn’t set." : "A moment before\nyou rest.")
+      RestCard {
+        Text(message).accessibilityIdentifier("napRunError")
         if alarm.authorization == .denied {
+          Text("Allow alarms for Honkshool in iPhone Settings, then try again.")
+            .foregroundStyle(RestStyle.secondary)
           Button("Open iPhone Settings") {
             if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
-          }
-          .buttonStyle(RestButtonStyle(secondary: true))
-          .accessibilityIdentifier("openAlarmSettings")
+          }.buttonStyle(RestButtonStyle()).accessibilityIdentifier("openAlarmSettings")
         }
       }
       if alarm.hasTrackedAlarm {
         trackedAlarmContent
-      } else if runError == nil {
+      } else if startFailure != .staleStart {
+        Button("Try again") {
+          runError = nil
+          Task { await startConfirmed(confirmed) }
+        }
+        .buttonStyle(RestButtonStyle(secondary: true))
+        .disabled(isStarting || alarm.isScheduling).accessibilityIdentifier("retryNapStart")
+      }
+      Button(startFailure == .staleStart ? "Update your nap plan" : "Change your plan") {
+        resetPlan()
+      }
+      .buttonStyle(RestButtonStyle(secondary: true))
+      .disabled(isStarting || alarm.isScheduling).accessibilityIdentifier("reviewAnotherNapPlan")
+      Text("Changes to the route, timing, or wake alarm need a fresh review.")
+        .font(.footnote).foregroundStyle(RestStyle.secondary)
+    }
+  }
+
+  private var recoveryEntry: ListeningHistoryEntry? {
+    guard isHome, run.phase == .idle, let latest = historyStore.entries.first,
+      latest.isCheckpoint, latest.id != dismissedCheckpointID
+    else { return nil }
+    return latest
+  }
+
+  private func checkpointRecovery(_ entry: ListeningHistoryEntry) -> some View {
+    VStack(alignment: .leading, spacing: 24) {
+      RestHeading(
+        "Welcome back.", subtitle: "A final listening update wasn’t saved. No audio has restarted.")
+      RestCard(title: "Last verified checkpoint") {
+        Text(entry.record.plannedSession.session.title).font(.system(.title2, design: .rounded))
+        Text(ListeningHistoryView.position(entry.record.resumePoint)).font(.title.monospacedDigit())
+        Text("Saved at \(entry.record.endedAt.formatted(date: .abbreviated, time: .shortened))")
+          .foregroundStyle(RestStyle.secondary)
         Text(
-          confirmed.plan.route.isEmpty && confirmed.plan.fallback == .silence
-            ? "Keep Honkshool open until the resting state begins at the planned start. Then you can lock your phone."
-            : "Keep Honkshool open until playback begins. Then you can lock your phone."
+          "Playback may have continued a little further. Your history keeps the verified position."
         )
         .font(.subheadline).foregroundStyle(RestStyle.secondary)
-        Button("Start resting") { Task { await startConfirmed(confirmed) } }
-          .buttonStyle(RestButtonStyle())
-          .disabled(isStarting || alarm.isScheduling)
-          .accessibilityIdentifier("startNapRun")
-        if isStarting {
-          ProgressView("Setting your wake alarm")
-            .accessibilityIdentifier("napRunScheduling")
-        }
       }
-      Button("Review another plan") { resetPlan() }
-        .frame(minHeight: 44)
-        .disabled(isStarting || alarm.isScheduling)
-        .accessibilityIdentifier("reviewAnotherNapPlan")
+      Button("Plan another rest") {
+        dismissedCheckpointID = entry.id
+        if let catalog, let reviewCatalog {
+          seedSelection(in: catalog, reviewCatalog: reviewCatalog)
+        }
+      }.buttonStyle(RestButtonStyle()).accessibilityIdentifier("acknowledgeRecoveredRest")
+      historyButton
     }
+  }
+
+  private var existingAlarmPage: some View {
+    VStack(alignment: .leading, spacing: 24) {
+      RestHeading(
+        "Your alarm\nis still set.",
+        subtitle: "Your earlier wake alarm remains separate from playback.")
+      trackedAlarmContent
+      Text("Your listening history is ready for another time.").foregroundStyle(RestStyle.secondary)
+      historyButton
+    }
+  }
+
+  private var historyButton: some View {
+    Button("View listening history") {
+      if !isHome { dismiss() }
+      onShowHistory()
+    }.frame(minHeight: 44).accessibilityIdentifier("viewRestHistory")
   }
 
   private func runContent(_ plan: NapPlan?) -> some View {
@@ -670,14 +827,28 @@ struct NapPlanReviewView: View {
         }
       } else {
         if !run.records.isEmpty {
-          Text("Played through in this rest: \(run.records.filter(\.isCompleted).count) session(s)")
-            .font(.subheadline).foregroundStyle(RestStyle.secondary)
+          RestCard(title: "This rest") {
+            ForEach(Array(run.records.enumerated()), id: \.offset) { _, record in
+              VStack(alignment: .leading, spacing: 6) {
+                Text(record.plannedSession.session.title).font(.headline.weight(.medium))
+                Text(record.isCompleted ? "Played through" : "Partly played")
+                  .foregroundStyle(RestStyle.secondary)
+              }
+            }
+            Text(
+              "Played through in this rest: \(run.records.filter(\.isCompleted).count) session(s)"
+            )
+            .font(.footnote).foregroundStyle(RestStyle.secondary)
             .accessibilityIdentifier("napRunCompletionCount")
+          }
         }
         if alarm.hasTrackedAlarm { trackedAlarmContent }
-        Button("Plan another rest") { resetPlan() }
-          .buttonStyle(RestButtonStyle(secondary: true))
-          .accessibilityIdentifier("reviewAnotherNapPlan")
+        Button(alarm.hasTrackedAlarm ? "Keep alarm · return to Rest" : "Back to Rest") {
+          resetPlan()
+        }
+        .buttonStyle(RestButtonStyle(secondary: true))
+        .accessibilityIdentifier("reviewAnotherNapPlan")
+        historyButton
       }
     }
   }
@@ -686,11 +857,11 @@ struct NapPlanReviewView: View {
     switch run.phase {
     case .waiting: "Get comfortable."
     case .narrating: run.currentNarrationTitle ?? "A thought to follow."
-    case .paused, .interrupted: "Take your time."
+    case .paused, .interrupted: "A moment of quiet."
     case .ambience: "Let the rain stay."
     case .resting: "Nothing else to do."
     case .finished: "Take your time."
-    case .stopped: "Another time is fine."
+    case .stopped: "Pick it up\nanother time."
     case .failed: "A moment to reset."
     case .idle: "A little time to drift."
     }
@@ -753,6 +924,9 @@ struct NapPlanReviewView: View {
     startedPlanID = nil
     reviewError = nil
     runError = nil
+    showsAlarmPrimer = false
+    startFailure = nil
+    applyChangedDefaults(force: true)
     if isHome, let catalog, let reviewCatalog {
       seedSelection(in: catalog, reviewCatalog: reviewCatalog)
     }
@@ -802,6 +976,7 @@ struct NapPlanReviewView: View {
   private func startConfirmed(_ confirmed: NapPlanReview) async {
     guard !isStarting else { return }
     isStarting = true
+    startFailure = nil
     defer { isStarting = false }
     guard canStart() else {
       runError = "Stop the feasibility audio and cancel its test alarm before starting a Nap Plan."
@@ -838,6 +1013,7 @@ struct NapPlanReviewView: View {
       startedPlanID = confirmed.plan.id
       runError = nil
     } catch let error as NapRunError {
+      startFailure = error
       let message =
         switch error {
         case .staleStart: "The approved start passed. Review a new Nap Plan."
@@ -918,52 +1094,4 @@ struct NapPlanReviewView: View {
 private struct SessionOption {
   let journey: Journey
   let session: Session
-}
-
-/// Only the bundled, validated session metadata is presented here.
-private struct SessionDetailView: View {
-  let prepared: PreparedSession
-  let journey: Journey
-  @Environment(\.dismiss) private var dismiss
-
-  var body: some View {
-    NavigationStack {
-      ScrollView {
-        VStack(alignment: .leading, spacing: 24) {
-          Text(journey.title).font(.subheadline).foregroundStyle(RestStyle.secondary)
-          RestHeading(prepared.session.title, subtitle: prepared.summary)
-          RestCard(title: "This session") {
-            LabeledContent(
-              "Narration", value: ListeningHistoryView.duration(prepared.session.estimatedDuration))
-            LabeledContent("Detail", value: "Enthusiast")
-            Label("Ready offline", systemImage: "checkmark")
-          }
-          RestCard(title: "Sources · for when you’re awake") {
-            ForEach(prepared.sources, id: \.id) { source in
-              Link(destination: source.url) {
-                VStack(alignment: .leading, spacing: 6) {
-                  Text(source.title).font(.headline.weight(.medium))
-                  Label(source.publisher, systemImage: "arrow.up.right")
-                    .font(.subheadline).foregroundStyle(RestStyle.secondary)
-                }
-                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-              }
-              .accessibilityHint("Opens this source in your browser")
-            }
-          }
-          Text("You can leave this for tomorrow.")
-            .font(.footnote).foregroundStyle(RestStyle.secondary)
-        }
-        .padding(RestStyle.pageInset)
-      }
-      .restScreen()
-      .navigationTitle("About this session")
-      .navigationBarTitleDisplayMode(.inline)
-      .toolbar {
-        ToolbarItem(placement: .confirmationAction) {
-          Button("Done") { dismiss() }.accessibilityIdentifier("dismissSessionDetail")
-        }
-      }
-    }
-  }
 }

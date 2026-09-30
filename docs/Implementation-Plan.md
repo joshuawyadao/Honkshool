@@ -7,14 +7,19 @@ Turn the approved Quiet curiosity atlas into connected, functional native pages.
 - Out: inventing unavailable journeys, alternate detail scripts or voices; download/delete controls for immutable bundled audio; changing verified timing, alarm ownership, history evidence, or automatic replay rules; public release, PR or merge. Branch-selection UI is driven only by actual catalog destinations; future assets remain explicitly unavailable.
 
 ## Action items
-[ ] Add functional session chooser/detail, journey library/detail, and source-linked session notes with valid Resume/Replay selections from current catalog and history.
-[ ] Add persistent rest defaults, current detail and bundled-audio pages, and a user-initiated bounded narration preview that stops on exit/background/interruption and cannot compete with a rest or Lab run.
-[ ] Rebuild Rest setup to match the approved compact hierarchy, with dedicated time and sound sheets that apply only explicit choices and preserve cancellation.
-[ ] Complete the review, alarm-access, ready, active/quiet, ended, existing-alarm and failed-start presentations; connect return/history actions without reusing consumed plans.
-[ ] Wire new pages into Settings and Rest, preserve root ownership of playback/alarm/history, and add shared components only where they improve consistency.
-[ ] Add/update tests for selection and preference persistence, preview lifecycle, modal cancellation, immutable review and recovery; preserve the existing safety assertions and test isolation.
+[x] Add functional session chooser/detail, journey library/detail, and source-linked session notes with valid Resume/Replay selections from current catalog and history.
+[x] Add persistent rest defaults, current detail and bundled-audio pages, and a user-initiated bounded narration preview that stops on exit/background/interruption and cannot compete with a rest or Lab run.
+[x] Rebuild Rest setup to match the approved compact hierarchy, with dedicated time and sound sheets that apply only explicit choices and preserve cancellation.
+[x] Complete the review, alarm-access, ready, active/quiet, ended, existing-alarm and failed-start presentations; connect return/history actions without reusing consumed plans.
+[x] Wire new pages into Settings and Rest, preserve root ownership of playback/alarm/history, and add shared components only where they improve consistency.
+[x] Add/update tests for selection and preference persistence, preview lifecycle, modal cancellation, immutable review and recovery; preserve the existing safety assertions and test isolation.
 [ ] Verify builds, repository checks, focused and broader iOS tests, plus native screenshots against the atlas in daylight, evening, and larger text; repair contract-review findings.
 [ ] Update the design guide, product/status/usage docs and a durable screen implementation map; record validation, commit reviewable checkpoints and push the completed branch.
+
+## Validation in progress
+- Integrated Debug build-for-testing and Release simulator build passed; all 40 repository checks passed.
+- Focused UI/controller tests are running. Final recovery and large-text refinements still need the next compiled test run; broader simulator tests and screenshot review remain open.
+- Apple contract review findings about blocked library actions and history-error resume paths are repaired and rechecked.
 
 ## Open questions
 - None. Build the illustrated pages against available content; expanded catalog and alternate narration assets require their own preparation work and must not appear playable here.

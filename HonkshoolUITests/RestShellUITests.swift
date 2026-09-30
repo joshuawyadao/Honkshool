@@ -28,6 +28,7 @@ final class RestShellUITests: XCTestCase {
     app.buttons["openSettings"].tap()
     XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
     attachScreen("Settings")
+    scrollTo(app.buttons["openFeasibilityLab"], in: app)
     app.buttons["openFeasibilityLab"].tap()
     XCTAssertTrue(app.navigationBars["Feasibility Lab"].waitForExistence(timeout: 5))
   }
@@ -35,6 +36,7 @@ final class RestShellUITests: XCTestCase {
   func testLabPlaybackStateSurvivesTabChanges() {
     let app = launch(reset: true)
     app.buttons["openSettings"].tap()
+    scrollTo(app.buttons["openFeasibilityLab"], in: app)
     app.buttons["openFeasibilityLab"].tap()
     let start = app.buttons["startTest"]
     scrollTo(start, in: app)

@@ -19,19 +19,18 @@ final class NapPlanReviewUITests: XCTestCase {
         "HONKSHOOL_UI_TEST_AUDIO": "0",
       ])
       defer { app.terminate() }
-      let duration = app.buttons["napPlanDuration"]
-      scrollTo(duration, in: app)
-      duration.tap()
-      app.buttons["5 minutes"].tap()
+      chooseDuration(5, in: app)
       openTimeOptions(in: app)
       let custom = app.steppers["napPlanCustomDuration"]
       scrollTo(custom, in: app)
       for _ in 0..<4 { custom.buttons["napPlanCustomDuration-Decrement"].tap() }
+      app.buttons["applyNapTime"].tap()
 
       let sound = app.buttons["napPlanSound"]
       scrollTo(sound, in: app)
       sound.tap()
       app.buttons["Gentle rain"].tap()
+      app.buttons["applyNapSound"].tap()
       let alarm = app.switches["napPlanAlarm"]
       scrollTo(alarm, in: app)
       alarm.tap()
@@ -157,7 +156,9 @@ final class NapPlanReviewUITests: XCTestCase {
     let content = app.buttons["napPlanContent"]
     scrollTo(content, in: app)
     content.tap()
-    app.buttons["How a Car Works · Air, Fuel, and Spark"].tap()
+    let second = app.buttons["chooseSession-air-fuel-and-spark"]
+    scrollTo(second, in: app)
+    second.tap()
     let review = app.buttons["reviewNapPlan"]
     scrollTo(review, in: app)
     review.tap()
@@ -200,6 +201,7 @@ final class NapPlanReviewUITests: XCTestCase {
     scrollTo(sound, in: app)
     sound.tap()
     app.buttons["Gentle rain"].tap()
+    app.buttons["applyNapSound"].tap()
     XCTAssertTrue(app.staticTexts["napPlanSoundFallbackDisclosure"].exists)
 
     let review = app.buttons["reviewNapPlan"]
@@ -235,6 +237,7 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertFalse(app.buttons["Gentle rain"].exists)
     XCTAssertTrue(app.buttons["Silence"].exists)
     app.buttons["Silence"].tap()
+    app.buttons["applyNapSound"].tap()
     let review = app.buttons["reviewNapPlan"]
     scrollTo(review, in: app)
     review.tap()
@@ -292,10 +295,7 @@ final class NapPlanReviewUITests: XCTestCase {
 
   func testShortWindowReviewsSilenceOnlyAndNoAlarm() {
     let app = launchReview()
-    let duration = app.buttons["napPlanDuration"]
-    scrollTo(duration, in: app)
-    duration.tap()
-    app.buttons["5 minutes"].tap()
+    chooseDuration(5, in: app)
     let alarm = app.switches["napPlanAlarm"]
     scrollTo(alarm, in: app)
     alarm.tap()
@@ -329,10 +329,7 @@ final class NapPlanReviewUITests: XCTestCase {
     let reopen = app.buttons["reviewAnotherNapPlan"]
     scrollTo(reopen, in: app)
     reopen.tap()
-    let anotherDuration = app.buttons["napPlanDuration"]
-    scrollTo(anotherDuration, in: app)
-    anotherDuration.tap()
-    app.buttons["5 minutes"].tap()
+    chooseDuration(5, in: app)
     let anotherAlarm = app.switches["napPlanAlarm"]
     scrollTo(anotherAlarm, in: app)
     anotherAlarm.tap()
@@ -354,6 +351,7 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertTrue(app.datePickers["napPlanExactWakeTime"].waitForExistence(timeout: 5))
     XCTAssertFalse(app.buttons["napPlanDuration"].exists)
     XCTAssertTrue(app.datePickers["napPlanExactWakeTime"].label.contains("Wake time"))
+    app.buttons["applyNapTime"].tap()
     let review = app.buttons["reviewNapPlan"]
     scrollTo(review, in: app)
     review.tap()
@@ -408,6 +406,7 @@ final class NapPlanReviewUITests: XCTestCase {
     let exact = app.switches["napPlanUseExactWakeTime"]
     scrollTo(exact, in: app)
     exact.tap()
+    app.buttons["applyNapTime"].tap()
     let review = app.buttons["reviewNapPlan"]
     scrollTo(review, in: app)
     review.tap()
@@ -444,7 +443,7 @@ final class NapPlanReviewUITests: XCTestCase {
     let details = app.buttons["napPlanSessionDetail"]
     scrollTo(details, in: app)
     details.tap()
-    XCTAssertTrue(app.navigationBars["About this session"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["Turning Fuel Into Motion"].exists)
     XCTAssertFalse(app.buttons["stopNapRun"].exists)
     app.buttons["dismissSessionDetail"].tap()
@@ -489,8 +488,20 @@ final class NapPlanReviewUITests: XCTestCase {
     app.launchEnvironment.merge(additionalEnvironment) { _, new in new }
     app.launch()
     XCTAssertTrue(app.navigationBars["Honkshool"].waitForExistence(timeout: 5))
+    if additionalEnvironment["HONKSHOOL_UI_TEST_SEED_HISTORY"] == "1" {
+      let acknowledge = app.buttons["acknowledgeRecoveredRest"]
+      XCTAssertTrue(acknowledge.waitForExistence(timeout: 5))
+      acknowledge.tap()
+    }
     XCTAssertTrue(app.buttons["reviewNapPlan"].waitForExistence(timeout: 5))
     return app
+  }
+
+  private func chooseDuration(_ minutes: Int, in app: XCUIApplication) {
+    openTimeOptions(in: app)
+    app.buttons["napPlanDuration"].tap()
+    app.buttons["\(minutes) minutes"].tap()
+    app.buttons["applyNapTime"].tap()
   }
 
   private func openTimeOptions(in app: XCUIApplication) {
@@ -504,7 +515,7 @@ final class NapPlanReviewUITests: XCTestCase {
       guard element.isHittable else { return false }
       let review = app.buttons["reviewNapPlan"]
       // XCTest can report a partially obscured picker as hittable, then tap the footer.
-      if review.exists && element.identifier != "reviewNapPlan" {
+      if review.exists && review.isHittable && element.identifier != "reviewNapPlan" {
         return element.frame.maxY < review.frame.minY
       }
       return true
