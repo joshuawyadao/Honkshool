@@ -13,7 +13,7 @@ The console's background-audio test and test alarm are separate diagnostic tools
 ## Choose, review, and start
 
 1. **Choose content.** Under **Start with**, choose one of the two prepared sessions in **How a Car Works**. Starting with the first can include the second when the window allows. The reviewed route is the authority for what will actually play.
-2. **Choose your rest window.** Pick a duration, a custom duration, or an exact wake time. The window includes settling, narration, and any remaining rest; it is not a measure of time asleep. The current chooser uses the selected window and narration estimates to determine what fits; its settling and drift allowances are zero.
+2. **Choose your rest window.** Pick a duration, a custom duration, or an exact wake time. The window includes settling, narration, and any remaining rest; it is not a measure of time asleep. The selected window and narration estimates determine what fits.
 3. **Choose the rest sound.** **Silence** is the default. **Gentle rain** is offered when its bundled audio and provenance validate. If no complete narration fits, the plan can use only the selected rest sound. Honkshool does not speed up narration to squeeze it in.
 4. **Choose the alarm.** Turn **Request a wake alarm** on if you want a system wake alarm at the fixed deadline. With it off, Honkshool schedules no wake alarm for that plan; set another alarm if you need one.
 5. **Review.** Tap **Review Nap Plan** and check the planned start, fixed wake deadline, full narration route, sound, and alarm choice. Confirm any shorter alternatives or journey transitions before starting; the current bundled catalog is one ordered two-session journey.

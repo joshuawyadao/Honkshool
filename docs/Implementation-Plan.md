@@ -15,8 +15,9 @@ Make the public repository understandable to first-time readers and contributors
 - [x] Add a documentation index and focused getting-started, user, troubleshooting, and privacy guides, checked against the implemented screens and service contracts.
 - [x] Document developer setup, module/script ownership and validation; reconcile CONTRIBUTING, SECURITY, project overview, trial, and feasibility guidance without rewriting historical evidence.
 - [x] Validate relative links and anchors, SVG structure/rendering and legibility, command/config accuracy, and public-data boundaries; run `./scripts/verify-repository.sh`. No new tests or app test rerun is needed locally because executable behavior does not change; retain hosted full iOS checks.
-- [ ] Complete independent Apple-contract and Brooks diff review, resolve confirmed documentation issues, and save coherent local checkpoints.
-- [ ] Push all checkpoints, open the PR, request Codex review, observe hosted Repository Verify and iOS Unit and UI Tests to terminal results, and leave the PR unmerged.
+- [x] Complete independent Apple-contract and Brooks diff review, resolve confirmed documentation issues, and save coherent local checkpoints.
+- [x] Push checkpoints and open [PR #13](https://github.com/joshuawyadao/Honkshool/pull/13), based on project-checkup PR #12; request Codex review.
+- [ ] Observe hosted Repository Verify, iOS Unit and UI Tests, and Codex review to terminal results; record final results in the PR description and leave it unmerged.
 
 ## Open questions
 
@@ -36,3 +37,8 @@ Make the public repository understandable to first-time readers and contributors
 - Independent Apple-contract review identified six documentation corrections to finish: History entry/action labels and location, zero-default chooser allowances, unavailable-resume guidance, the test-alarm stored fields, and the SVG cutoff description. A reported broken physical-device-matrix anchor is non-actionable: the heading exists and the link/anchor checker passes. These are documentation-only fixes within this plan.
 
 - Applied all six confirmed Apple-contract corrections. Final local gate: 48 tests passed in 6.59 seconds. Fourteen shell examples parse without execution; public links/anchors and SVG structure pass. No test files were added because this change alters documentation only.
+
+- Brooks PR Review: sampled the 17 related Markdown/SVG files against the stack base; no actionable R1–R6 finding (100/100). No executable code changed, so Quick Test Check is inapplicable. High-risk installation, alarm/audio, history, privacy, and evidence statements were checked against current code. The current chooser explanation now omits internal allowance configuration that users cannot change.
+- PR #13 opened as a draft and Codex review requested. Hosted jobs skip drafts; mark ready after the local review checkpoint to run both jobs. Final hosted status belongs in the PR description so updating this historical plan does not trigger another identical iOS run.
+
+- GitHub Codex review returned a terminal usage-limit response rather than reviewing the change. This remains a review blocker, not a clean review. Resume by requesting `@codex review` on PR #13 after review capacity is available. Local independent review and Brooks review are complete; hosted jobs are still required.
