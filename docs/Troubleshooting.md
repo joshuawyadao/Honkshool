@@ -25,7 +25,7 @@ Use the visible app or Xcode message first. This is an experimental build, so ke
 | The approved start passed | Review the updated deadline and route, confirm again, and tap **Start resting** before the new approved start. Do not assume the old confirmation is still valid. |
 | Alarm access is denied or scheduling fails | The alarm-enabled plan cannot start. Check the app's alarm permission in iOS Settings and review again, or deliberately turn off **Request a wake alarm** and review an alarm-free plan. |
 | Audio failed after an alarm was scheduled | The alarm can still be active. Read the status and cancel it explicitly if no longer wanted. |
-| The review has no narration | The selected complete narration may not fit after the plan's allowances. Choose a longer rest window or accept the reviewed rain/silence-only plan. |
+| The review has no narration | The selected complete narration may not fit within the selected window. Choose a longer rest window or accept the reviewed rain/silence-only plan. |
 | The run ends when you lock the phone | Keep the app foregrounded until approved narration/rain starts. Silence-only plans with no narration can be locked after the visible rest-until-deadline state. Review again after a premature background exit; check any remaining alarm. |
 
 ## Listening and history
@@ -38,7 +38,7 @@ Use the visible app or Xcode message first. This is an experimental build, so ke
 | Stop did not stop the wake alarm | Expected: **Stop playback** controls audio. Explicitly **Cancel wake alarm** and check its result. |
 | A session is marked partial | Audio did not reach the session's actual end. A deadline or manual Stop can leave partial progress; duration estimates do not count as completion. |
 | A rain-only nap is absent from narration history | Expected: rain and silence do not create narration attempts or completed-session progress. |
-| Resume is unavailable after a content change | A saved position must match the current script revision and prepared audio. Use the offered start-from-beginning action and review a new plan. |
+| Resume is unavailable after a content change | A saved position must match the current script revision and prepared audio. Choose the current session in a fresh Nap Plan, or use **Replay from start** if shown. Playback still requires available prepared audio and a new review. |
 | History reports a load or save error | Use **Retry saving** when offered. Active audio and alarms remain separate, but recent progress may not be saved. Preserve the store for diagnosis; reinstalling is not a supported repair/export workflow. |
 | Reopening the app is silent | Expected: history and alarm state reconcile, but playback requires an explicit new review and start. |
 

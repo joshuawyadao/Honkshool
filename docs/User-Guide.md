@@ -6,14 +6,14 @@ This guide describes the current experimental build. Honkshool helps you rest wi
 
 ## Find the ordinary listening flow
 
-The app opens on **Feasibility Lab**. Scroll to **Nap Plan** and tap **Choose and review a Nap Plan**. **Listening History** is another entry on that screen.
+The app opens on **Feasibility Lab**. Scroll to **Nap Plan** and tap **Choose and review a Nap Plan**. The **Listening history and Continue** link opens saved narration history.
 
 The console's background-audio test and test alarm are separate diagnostic tools. Stop feasibility audio and cancel its test alarm before starting a Nap Plan. The app blocks overlapping use and explains what needs to stop.
 
 ## Choose, review, and start
 
 1. **Choose content.** Under **Start with**, choose one of the two prepared sessions in **How a Car Works**. Starting with the first can include the second when the window allows. The reviewed route is the authority for what will actually play.
-2. **Choose your rest window.** Pick a duration, a custom duration, or an exact wake time. The window includes settling, narration, and any remaining rest; it is not a measure of time asleep. The chooser's settling and drift allowances affect how much narration fits.
+2. **Choose your rest window.** Pick a duration, a custom duration, or an exact wake time. The window includes settling, narration, and any remaining rest; it is not a measure of time asleep. The current chooser uses the selected window and narration estimates to determine what fits; its settling and drift allowances are zero.
 3. **Choose the rest sound.** **Silence** is the default. **Gentle rain** is offered when its bundled audio and provenance validate. If no complete narration fits, the plan can use only the selected rest sound. Honkshool does not speed up narration to squeeze it in.
 4. **Choose the alarm.** Turn **Request a wake alarm** on if you want a system wake alarm at the fixed deadline. With it off, Honkshool schedules no wake alarm for that plan; set another alarm if you need one.
 5. **Review.** Tap **Review Nap Plan** and check the planned start, fixed wake deadline, full narration route, sound, and alarm choice. Confirm any shorter alternatives or journey transitions before starting; the current bundled catalog is one ordered two-session journey.
@@ -48,13 +48,13 @@ The planned deadline stays fixed even if you pause or start late. Playback never
 
 ## Continue a journey or revisit a session
 
-Open **Listening History** from Feasibility Lab or the Nap Plan screen. It shows locally saved narration attempts and journey progress.
+Return to Feasibility Lab and tap **Listening history and Continue**. It shows locally saved narration attempts and journey progress.
 
 | Action | Meaning |
 | --- | --- |
-| **Continue** | Select the next incomplete session in the journey, using its latest valid partial position when available. |
-| **Resume** | Start from an available verified position in a partial session. |
-| **Replay** | Start that session from the beginning and keep earlier listening history. |
+| **Continue listening** | Select the next incomplete session in the journey, using its latest valid partial position when available. |
+| **Resume from…** | Start from an available verified position in a partial session. |
+| **Replay from start** | Start that session from the beginning and keep earlier listening history. |
 
 Every action opens a new Nap Plan review. Reopening the app never starts audio by itself. A session advances progress only when playback reaches its actual end; reaching the plan's deadline can leave it partial. Rain-only and silence-only plans create no narration progress.
 

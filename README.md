@@ -50,7 +50,7 @@ The app still opens on an experimental test console. Its **Background audio** an
 | Pause or continue listening | **Pause playback** / **Resume playback** | The fixed deadline stays the same. |
 | End listening early | **Stop playback** | Audio stops; a scheduled wake alarm stays active. |
 | Remove the wake alarm | **Cancel wake alarm** after playback stops, or **Cancel Nap Plan wake alarm** on Feasibility Lab | Cancels the separately tracked alarm. Check the displayed result. |
-| Listen again later | **Listening History** → **Continue**, **Resume**, or **Replay** | Opens a fresh plan for review; nothing starts by itself. |
+| Listen again later | **Listening history and Continue** → **Continue listening**, **Resume from…**, or **Replay from start** | Opens a fresh plan for review; nothing starts by itself. |
 
 Audio is intended to end at the fixed deadline even when no alarm is requested. App execution and system scheduling can affect timing; automated passes are not a guarantee of waking. See [current evidence and limitations](docs/Project-Overview.md#current-state).
 

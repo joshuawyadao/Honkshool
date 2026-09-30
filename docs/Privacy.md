@@ -12,7 +12,7 @@ This describes the current source implementation, not a promise about a future r
 | Session, journey, script, and prepared-render identity; timing and playback position | Part of local history; ensures a saved position matches the content that actually played |
 | Preferred feasibility rest duration | Local app preferences, reused by the console |
 | Nap Plan alarm ID, plan ID, and deadline | Local preferences, so the app can reconcile a system alarm after reopening |
-| Separate feasibility test-alarm identity/state | Local preferences; kept distinct from Nap Plan alarms |
+| Separate feasibility test-alarm ID and original date | Local preferences; kept distinct from Nap Plan alarms. Current state is reconciled from iOS |
 | Scheduled alarm | Managed by iOS AlarmKit after authorization; remains separate from the audio run |
 | Feasibility diagnostic events | In-memory controller events shown in the app; any screenshots or externally captured logs can still contain sensitive details |
 
