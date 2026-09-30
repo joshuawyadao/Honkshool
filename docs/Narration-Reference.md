@@ -6,7 +6,7 @@
 
 Natural, human-sounding delivery takes priority over a numerically slow rate. Aim for a calm documentary or narrative essay: connected speech, clear technical pronunciation, natural emphasis, and space between ideas. The selected Kokoro setting slows the model's predicted durations before synthesis; it does not stretch a finished waveform or apply consonant processing.
 
-F, the Aaron full-session render, and all Apple premium comparisons remain historical references. D-001's direct AVSpeechSynthesizer spike proved important device behavior, but D-023 supersedes it as the production narration direction because AVSpeechSynthesizer does not produce the accepted George output. D-024 now uses preparation-time Kokoro generation and bundled AVFoundation playback for the curated prototype; physical-iPhone playback evidence is still required.
+F, the Aaron full-session render, and all Apple premium comparisons remain historical references. D-001's direct AVSpeechSynthesizer spike proved important device behavior, but D-023 supersedes it as the production narration direction because AVSpeechSynthesizer does not produce the accepted George output. D-024 now uses preparation-time Kokoro generation and bundled AVFoundation playback for the curated prototype. The later [audio preparation record](Audio-Preparation.md) and [production device evidence](Feasibility-Spike.md#production-gentle-rain-acceptance-on-the-target-iphone) own bundled-render and device status; this audition record does not establish full-session comfort or the remaining direct observations.
 
 ## Accepted passage
 

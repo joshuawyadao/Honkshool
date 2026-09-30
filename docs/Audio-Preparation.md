@@ -77,6 +77,8 @@ The provenance records the observed render, not a promise of byte-identical outp
 
 For the original Turning Fuel Into Motion session, run `python3 scripts/make-george-review-reel.py` from the repository root to create an ignored 86.125-second WAV in `outputs/`. It copies the first complete synthesis chunk of the opening and middle paragraphs and the complete ending paragraph from the verified bundled file, with the existing one-second paragraph gap between sections. The script checks the source SHA-256 and WAV format; it does not resynthesize, speed up, filter, or change the selected voice. This lets the owner judge representative pronunciation and cadence without sitting through the full session. It cannot prove that every word in the remaining audio is comfortable.
 
+The reel command preserves existing files, including aliases of its source. If the default output already exists, choose a fresh path with `--output outputs/review/George-Review-2.wav`. Source format validation precedes publication, and exclusive creation prevents overwriting a destination that appears after the initial check.
+
 ## Historical Aaron full narration audition
 
 The audition renders all 13 paragraphs of **Turning Fuel Into Motion**, session `turning-fuel-into-motion`, script revision `1`, from the [prepared catalog](../Honkshool/Resources/PreparedCatalog.json). Paragraph text is unchanged. The complete spoken script has 10,824 UTF-16 code units and SHA-256 `7e44406d9d07d90463ffcceb977be64cbb43cbd6fe50524e769b3ce34af56f52`.

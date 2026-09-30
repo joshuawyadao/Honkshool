@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import array
+import contextlib
 import hashlib
 import importlib.util
+import io
 import json
 import math
 from pathlib import Path
@@ -12,6 +14,7 @@ import sys
 import tempfile
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 import wave
 
 
@@ -25,6 +28,10 @@ spec.loader.exec_module(prepare_rain)
 narration_spec = importlib.util.spec_from_file_location("prepare_narration", NARRATION_SCRIPT)
 prepare_narration = importlib.util.module_from_spec(narration_spec)
 narration_spec.loader.exec_module(prepare_narration)
+reel_spec = importlib.util.spec_from_file_location(
+    "review_reel", PROJECT_ROOT / "scripts/make-george-review-reel.py")
+review_reel = importlib.util.module_from_spec(reel_spec)
+reel_spec.loader.exec_module(review_reel)
 
 
 def rms(samples):
@@ -254,6 +261,75 @@ class NarrationPublicationGuardTests(unittest.TestCase):
                                                "--provenance", provenance)
                     self.assertNotEqual(result.returncode, 0)
                     self.assertIn("paths overlap", result.stderr)
+
+
+class ReviewReelTests(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
+        self.source = self.root / "source.wav"
+        self.pcm = b"".join(value.to_bytes(2, "little", signed=True)
+                            for value in range(28))
+        with wave.open(str(self.source), "wb") as audio:
+            audio.setparams((1, 2, 8000, 28, "NONE", "not compressed"))
+            audio.writeframes(self.pcm)
+        self.original = self.source.read_bytes()
+        self.provenance = self.root / "provenance.json"
+        self.record = {
+            "outputFile": self.source.name,
+            "outputSHA256": hashlib.sha256(self.original).hexdigest(),
+            "paragraphs": [
+                {"frames": 4, "chunks": [{"frames": 2}]},
+                {"frames": 6, "chunks": [{"frames": 3}]},
+                {"frames": 8, "chunks": [{"frames": 4}]},
+            ],
+            "paragraphGapFrames": 3, "leadingFrames": 2,
+            "frames": 28, "sampleRate": 8000, "channels": 1,
+        }
+        self.provenance.write_text(json.dumps(self.record))
+
+    def run_reel(self, output):
+        with patch.object(review_reel, "RESOURCES", self.root), \
+             patch.object(review_reel, "PROVENANCE", self.provenance), \
+             patch.object(sys, "argv", ["review-reel", "--output", str(output)]), \
+             contextlib.redirect_stdout(io.StringIO()):
+            review_reel.main()
+
+    def test_reel_copies_selected_pcm_and_gaps_without_changing_source(self):
+        output = self.root / "new" / "reel.wav"
+        self.run_reel(output)
+        with wave.open(str(output), "rb") as reel:
+            self.assertEqual((reel.getnchannels(), reel.getsampwidth(),
+                              reel.getframerate(), reel.getnframes()), (1, 2, 8000, 19))
+            expected = (self.pcm[4:8] + bytes(6) + self.pcm[18:24]
+                        + bytes(6) + self.pcm[36:52])
+            self.assertEqual(reel.readframes(19), expected)
+        self.assertEqual(self.source.read_bytes(), self.original)
+
+    def test_reel_preserves_existing_output_and_source_aliases(self):
+        existing = self.root / "existing.wav"
+        existing.write_bytes(b"previous review must survive")
+        symlink = self.root / "symlink.wav"
+        symlink.symlink_to(self.source)
+        hardlink = self.root / "hardlink.wav"
+        hardlink.hardlink_to(self.source)
+        for output in (existing, self.source, symlink, hardlink, self.provenance):
+            with self.subTest(output=output.name):
+                before = output.read_bytes()
+                with self.assertRaises(FileExistsError):
+                    self.run_reel(output)
+                self.assertEqual(output.read_bytes(), before)
+                self.assertEqual(self.source.read_bytes(), self.original)
+
+    def test_reel_rejects_source_format_mismatch_before_creating_output(self):
+        self.record["sampleRate"] = 9000
+        self.provenance.write_text(json.dumps(self.record))
+        output = self.root / "new.wav"
+        with self.assertRaisesRegex(ValueError, "format differs"):
+            self.run_reel(output)
+        self.assertFalse(output.exists())
+        self.assertEqual(self.source.read_bytes(), self.original)
 
 
 class PreparedNarrationTests(unittest.TestCase):

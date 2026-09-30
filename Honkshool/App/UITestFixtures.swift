@@ -35,6 +35,7 @@ enum SpikePreferences {
     static let planContentUnavailableEnvironmentKey = "HONKSHOOL_UI_TEST_PLAN_CONTENT_UNAVAILABLE"
     static let planRainUnavailableEnvironmentKey = "HONKSHOOL_UI_TEST_PLAN_RAIN_UNAVAILABLE"
     static let seedHistoryEnvironmentKey = "HONKSHOOL_UI_TEST_SEED_HISTORY"
+    static let savedMinutesEnvironmentKey = "HONKSHOOL_UI_TEST_SAVED_MINUTES"
 
     private static let alarmID = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
     private static let storedAlarmIDKey = "feasibilityAlarmID"
@@ -84,6 +85,12 @@ enum SpikePreferences {
         defaults.removeObject(forKey: storedAlarmDateKey)
         defaults.removeObject(forKey: "napPlanAlarmReceipt")
         defaults.set(RestDurationPolicy.initialSavedMinutes, forKey: "preferredRestMinutes")
+      }
+
+      if let raw = ProcessInfo.processInfo.environment[savedMinutesEnvironmentKey],
+        let minutes = Int(raw)
+      {
+        defaults.set(minutes, forKey: "preferredRestMinutes")
       }
 
       guard scenario?.startsWithTrackedAlarm == true else { return }

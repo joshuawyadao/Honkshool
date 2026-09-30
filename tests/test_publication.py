@@ -2,12 +2,24 @@ from __future__ import annotations
 
 import re
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 from urllib.parse import unquote
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
+def public_repository_files(root: Path) -> list[Path]:
+    """Include published and candidate files without walking ignored private trees."""
+    result = subprocess.run(
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+        cwd=root, check=True, capture_output=True,
+    )
+    paths = {root / name.decode("utf-8") for name in result.stdout.split(b"\0") if name}
+    return sorted(path for path in paths if path.is_file())
 
 
 class PublicRepositoryTests(unittest.TestCase):
@@ -223,8 +235,8 @@ class PublicRepositoryTests(unittest.TestCase):
         broken: list[str] = []
         link_pattern = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
 
-        for markdown in PROJECT_ROOT.rglob("*.md"):
-            if ".git" in markdown.parts:
+        for markdown in public_repository_files(PROJECT_ROOT):
+            if markdown.suffix != ".md":
                 continue
             content = markdown.read_text(encoding="utf-8")
             for target in link_pattern.findall(content):
@@ -257,18 +269,9 @@ class PublicRepositoryTests(unittest.TestCase):
         }
         offenders: list[str] = []
 
-        for path in PROJECT_ROOT.rglob("*"):
-            if ".git" in path.parts or not path.is_file():
-                continue
+        for path in public_repository_files(PROJECT_ROOT):
             if path.name in forbidden_names or path.suffix.lower() in forbidden_suffixes:
-                relative = str(path.relative_to(PROJECT_ROOT))
-                ignored = subprocess.run(
-                    ["git", "check-ignore", "--quiet", relative],
-                    cwd=PROJECT_ROOT,
-                    check=False,
-                ).returncode == 0
-                if not ignored:
-                    offenders.append(relative)
+                offenders.append(str(path.relative_to(PROJECT_ROOT)))
 
         self.assertEqual(offenders, [])
 
@@ -287,6 +290,62 @@ class PublicRepositoryTests(unittest.TestCase):
                 offenders.append(str(path.relative_to(PROJECT_ROOT)))
 
         self.assertEqual(offenders, [])
+
+
+class PublicationScopeTests(unittest.TestCase):
+    def setUp(self) -> None:
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.git("init", "--quiet")
+        (self.root / ".gitignore").write_text(
+            "/local-data/\n/outputs/\n.venv/\n*.key\n/ignored-public.md\n")
+        (self.root / "README.md").write_text("# Public fixture\n")
+
+    def git(self, *arguments: str) -> None:
+        subprocess.run(["git", *arguments], cwd=self.root, check=True,
+                       capture_output=True)
+
+    def run_gate(self, method: str) -> unittest.TestResult:
+        result = unittest.TestResult()
+        with patch(__name__ + ".PROJECT_ROOT", self.root):
+            PublicRepositoryTests(method).run(result)
+        self.assertEqual(result.errors, [], "The gate must evaluate its inputs without errors")
+        return result
+
+    def test_ignored_private_and_generated_markdown_cannot_break_public_gate(self):
+        for directory in ("local-data", "outputs", ".venv"):
+            path = self.root / directory / "notes.md"
+            path.parent.mkdir()
+            path.write_text("[private note](missing.md)\n")
+        result = self.run_gate("test_markdown_relative_links_resolve")
+        self.assertTrue(result.wasSuccessful(), result.failures)
+
+    def test_nonignored_untracked_document_with_broken_link_still_fails(self):
+        (self.root / "new public.md").write_text("[reference](missing.md)\n")
+        result = self.run_gate("test_markdown_relative_links_resolve")
+        self.assertEqual(len(result.failures), 1)
+        self.assertIn("new public.md", result.failures[0][1])
+
+    def test_tracked_document_is_checked_even_when_its_name_matches_ignore_rule(self):
+        (self.root / "ignored-public.md").write_text("[reference](missing.md)\n")
+        self.git("add", "--force", "ignored-public.md")
+        result = self.run_gate("test_markdown_relative_links_resolve")
+        self.assertEqual(len(result.failures), 1)
+        self.assertIn("ignored-public.md", result.failures[0][1])
+
+    def test_tracked_ignored_name_artifact_is_still_rejected(self):
+        (self.root / "synthetic.key").write_text("synthetic fixture, not a credential\n")
+        self.git("add", "--force", "synthetic.key")
+        result = self.run_gate("test_working_tree_has_no_unignored_private_or_generated_artifacts")
+        self.assertEqual(len(result.failures), 1)
+        self.assertIn("synthetic.key", result.failures[0][1])
+
+    def test_untracked_nonignored_sensitive_artifact_is_still_rejected(self):
+        (self.root / "synthetic.pem").write_text("synthetic fixture, not a credential\n")
+        result = self.run_gate("test_working_tree_has_no_unignored_private_or_generated_artifacts")
+        self.assertEqual(len(result.failures), 1)
+        self.assertIn("synthetic.pem", result.failures[0][1])
 
 
 if __name__ == "__main__":
