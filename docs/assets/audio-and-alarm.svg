@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="400" viewBox="0 0 880 400" role="img" aria-labelledby="title desc">
+  <title id="title">Audio and alarm have separate controls</title>
+  <desc id="desc">Both follow the reviewed fixed deadline. The audio lane is narration then rain or silence, with audio ending at the deadline. Stop playback ends audio early. A requested, successfully scheduled system wake alarm stays active when audio is stopped. Cancel wake alarm separately to remove it. Conceptual diagram, not a timing guarantee.</desc>
+  <rect width="880" height="400" rx="24" fill="#f4f3f8"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" fill="#242238">
+    <text x="34" y="48" font-size="27" font-weight="700">One deadline. Two separate controls.</text>
+    <text x="34" y="78" font-size="17" fill="#534f65">Conceptual timing · optional alarm shown after successful scheduling</text>
+    <text x="192" y="123" font-size="17" fill="#534f65">Approved start</text>
+    <text x="822" y="123" font-size="17" text-anchor="end" fill="#534f65">Fixed deadline</text>
+    <path d="M808 134 V285" stroke="#5b4d8a" stroke-width="2" stroke-dasharray="6 5"/>
+    <text x="34" y="173" font-size="22" font-weight="700">Audio</text>
+    <rect x="192" y="142" width="302" height="52" rx="10" fill="#5b4d8a"/>
+    <rect x="502" y="142" width="292" height="52" rx="10" fill="#e2e9e5" stroke="#a9bfb4"/>
+    <text x="343" y="174" text-anchor="middle" font-size="21" fill="#fff">Narration</text>
+    <text x="648" y="174" text-anchor="middle" font-size="21">Rain or silence</text>
+    <text x="34" y="256" font-size="22" font-weight="700">Wake alarm</text>
+    <rect x="192" y="225" width="602" height="52" rx="10" fill="#e5efeb" stroke="#a9bfb4"/>
+    <text x="493" y="258" text-anchor="middle" font-size="21">Scheduled in iOS · stays active if audio stops</text>
+    <rect x="28" y="303" width="402" height="73" rx="12" fill="#fff" stroke="#d9d5e5"/>
+    <text x="48" y="332" font-size="20" font-weight="700">Stop playback</text>
+    <text x="48" y="359" font-size="18" fill="#534f65">Ends audio. Does not cancel the alarm.</text>
+    <rect x="450" y="303" width="402" height="73" rx="12" fill="#fff" stroke="#d9d5e5"/>
+    <text x="470" y="332" font-size="20" font-weight="700">Cancel wake alarm</text>
+    <text x="470" y="359" font-size="18" fill="#534f65">Separately removes the scheduled alarm.</text>
+  </g>
+</svg>

@@ -10,9 +10,9 @@ Make the public repository understandable to first-time readers and contributors
 ## Action items
 
 - [x] Inventory tracked source, tests, scripts, configuration, and existing product/domain/content/feasibility/trial documentation; inspect current Git and PR state.
-- [ ] Commit this resolved plan before editing public guidance.
-- [ ] Rewrite README around availability, a visual first-nap flow, bundled content, controls, and clear links; add original accessible SVG diagrams with text equivalents.
-- [ ] Add a documentation index and focused getting-started, user, troubleshooting, and privacy guides, checked against the implemented screens and service contracts.
+- [x] Commit this resolved plan before editing public guidance.
+- [x] Rewrite README around availability, a visual first-nap flow, bundled content, controls, and clear links; add original accessible SVG diagrams with text equivalents.
+- [x] Add a documentation index and focused getting-started, user, troubleshooting, and privacy guides, checked against the implemented screens and service contracts.
 - [ ] Document developer setup, module/script ownership and validation; reconcile CONTRIBUTING, SECURITY, project overview, trial, and feasibility guidance without rewriting historical evidence.
 - [ ] Validate relative links and anchors, SVG structure/rendering and legibility, command/config accuracy, and public-data boundaries; run `./scripts/verify-repository.sh`. No new tests or app test rerun is needed locally because executable behavior does not change; retain hosted full iOS checks.
 - [ ] Complete independent Apple-contract and Brooks diff review, resolve confirmed documentation issues, and save coherent local checkpoints.
@@ -27,3 +27,6 @@ Make the public repository understandable to first-time readers and contributors
 - Baseline: clean working tree at `25953f9`; existing project-checkup PR #12 remains open. Documentation PR will be stacked on that branch.
 - Existing Python gate checks public links, privacy patterns, assets and repository contracts. Supplemental one-off checks will cover graphics and anchors without adding tests that merely mirror prose.
 - Public content review excludes ignored personal notes, logs, generated reports and local signing configuration.
+
+- First documentation slice: README and two original SVGs now introduce the actual Nap Plan flow and separate audio/alarm controls. Added installation, use, troubleshooting, privacy, and contributor guides plus an audience-based index. Rendered SVGs at native and 390-pixel widths: no clipping; adjacent README text carries the same instructions at narrow widths.
+- Local verification: all 48 repository tests passed; 229 public local links/anchors and both self-contained SVG title/description structures passed supplemental checks. No application, test, or bundled audio changes.
