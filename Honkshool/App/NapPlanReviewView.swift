@@ -377,7 +377,7 @@ struct NapPlanReviewView: View {
       if let reviewError { errorLabel(reviewError, id: "napPlanError") }
       if !canStart() {
         Text(
-          "End the experimental audio and cancel its test alarm in Settings → Feasibility Lab before starting a rest."
+          "End the experimental audio and cancel its test alarm in Settings → Advanced → Feasibility Lab before starting a rest."
         )
         .font(.footnote).foregroundStyle(RestStyle.secondary)
       }

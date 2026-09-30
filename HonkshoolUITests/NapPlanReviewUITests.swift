@@ -500,14 +500,23 @@ final class NapPlanReviewUITests: XCTestCase {
   }
 
   private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {
+    func isClearOfPinnedReview() -> Bool {
+      guard element.isHittable else { return false }
+      let review = app.buttons["reviewNapPlan"]
+      // XCTest can report a partially obscured picker as hittable, then tap the footer.
+      if review.exists && element.identifier != "reviewNapPlan" {
+        return element.frame.maxY < review.frame.minY
+      }
+      return true
+    }
     for _ in 0..<12 {
-      if element.isHittable { return }
+      if isClearOfPinnedReview() { return }
       app.swipeUp()
     }
     for _ in 0..<12 {
-      if element.isHittable { return }
+      if isClearOfPinnedReview() { return }
       app.swipeDown()
     }
-    XCTAssertTrue(element.isHittable)
+    XCTAssertTrue(isClearOfPinnedReview())
   }
 }

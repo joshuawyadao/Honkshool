@@ -13,13 +13,19 @@ Establish the approved Quiet curiosity / Rest first previews as Honkshool’s du
 [x] Apply the design to session selection/detail, duration and sound choices, complete immutable plan review, explicit confirmation/start, active/paused/quiet/ended states, and existing-alarm/error recovery.
 [x] Restyle history and checkpoint/unavailable states, preserving verified timestamps, completion evidence, and fresh Resume/Replay reviews.
 [x] Update navigation/UI regression tests and add meaningful coverage for the new shell, welcome, session details, and cross-tab active-run/alarm lifetime; retain existing safety assertions.
-[ ] Run repository checks, targeted iOS tests, the complete iOS suite, Release build, and simulator visual checks in light/dark and larger text; review timing/alarm/privacy contracts and repair findings.
-[ ] Update status and usage documentation, record validation, commit coherent checkpoints, and push the completed branch.
+[x] Run repository checks, targeted iOS tests, the complete iOS suite, Release build, and simulator visual checks in light/dark and larger text; review timing/alarm/privacy contracts and repair findings.
+[x] Update status and usage documentation, record validation, commit coherent checkpoints, and push the completed branch.
 
 ## Open questions
 - None. The approved overview establishes the design direction; implementation of future content capabilities remains phased as already labeled in the overview.
 
-## Validation progress
-- Debug build-for-testing and Release simulator build passed; repository checks passed (40 cases).
-- Targeted contract and UI checks found four accessibility/navigation failures; repairs passed all six follow-up cases, including consumed-confirmation protection and larger text.
-- Apple-platform review findings were repaired and rechecked. Full-suite and dark-appearance validation are in progress.
+## Validation results
+- Repository checks: all 40 passed; Markdown links and diff whitespace checks passed.
+- Debug build-for-testing and the final Release simulator build passed.
+- Complete iOS 26.5 / iPhone 17 Pro run: 239 passed, two sound-picker UI failures, six intentional physical-device skips. The UI helper had treated a picker partly behind the pinned review action as tappable; it now requires controls to be fully above that action.
+- Final dark-appearance follow-up on the completed sources reran every Nap Plan and Rest shell UI case plus authorization and playback/Stop Lab cases: 21 passed, zero failed, one intentional physical-only skip. Both failed sound cases passed. Across the full and follow-up runs, all 241 simulator cases have passing evidence; the six device-only cases remain skipped.
+- New `RestShellUITests` covers welcome persistence, navigation, service lifetime across tabs, and larger text. Existing Nap Plan, history, and Lab UI tests retain their safety assertions; the controller test verifies the displayed plan survives Stop and clears on reset.
+- Native simulator screenshots were inspected in daylight and evening, including larger accessibility text. The Lab button/text contrast issue found during inspection was fixed with shared components/tokens and included in the final follow-up. Checked body-on-background, secondary-on-card, and primary-action pairs measured at least 6:1 contrast.
+- Apple-platform review findings about saved-place wording and consumed History confirmations were repaired and rechecked. No deadline, alarm ownership, completion-evidence, or privacy contract change was required.
+- No new physical-device audio, alarm, headphone, or comfort acceptance is claimed. Future expanded journeys, detail/voice variants, and download management remain specifications, not enabled features.
+- Local checkpoints: resolved plan `c0d120c`, coherent implementation `6d273ef`; final verification and repairs are saved with this plan on `codex/app-icon`.

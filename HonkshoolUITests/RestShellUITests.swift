@@ -7,6 +7,7 @@ final class RestShellUITests: XCTestCase {
     var app = launch(reset: true, showWelcome: true)
     let continueButton = app.buttons["dismissQuietWelcome"]
     XCTAssertTrue(continueButton.waitForExistence(timeout: 5))
+    attachScreen("Welcome")
     continueButton.tap()
     XCTAssertTrue(app.tabBars.buttons["Rest"].waitForExistence(timeout: 5))
     XCTAssertFalse(app.buttons["dismissQuietWelcome"].exists)
@@ -20,11 +21,13 @@ final class RestShellUITests: XCTestCase {
   func testHistoryAndSettingsAreReachableFromRest() {
     let app = launch(reset: true)
     XCTAssertTrue(app.tabBars.buttons["Rest"].waitForExistence(timeout: 5))
+    attachScreen("Rest")
     app.tabBars.buttons["History"].tap()
     XCTAssertTrue(app.navigationBars["History"].waitForExistence(timeout: 5))
     app.tabBars.buttons["Rest"].tap()
     app.buttons["openSettings"].tap()
     XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
+    attachScreen("Settings")
     app.buttons["openFeasibilityLab"].tap()
     XCTAssertTrue(app.navigationBars["Feasibility Lab"].waitForExistence(timeout: 5))
   }
@@ -35,6 +38,7 @@ final class RestShellUITests: XCTestCase {
     app.buttons["openFeasibilityLab"].tap()
     let start = app.buttons["startTest"]
     scrollTo(start, in: app)
+    attachScreen("Feasibility Lab")
     start.tap()
     XCTAssertTrue(app.staticTexts["playbackPhase"].label.contains("Narrating"))
 

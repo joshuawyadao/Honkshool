@@ -231,7 +231,7 @@ struct FeasibilityConsoleView: View {
           Label("Choose and review a Nap Plan", systemImage: "checklist")
             .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.borderedProminent)
+        .buttonStyle(RestButtonStyle(secondary: true))
         .controlSize(.large)
         .accessibilityIdentifier("openNapPlanReview")
         .disabled(napRun.hasActiveRun)
@@ -346,14 +346,14 @@ struct FeasibilityConsoleView: View {
       VStack(alignment: .leading, spacing: 8) {
         Text(SampleContent.journeyTitle)
           .font(.caption)
-          .foregroundStyle(.secondary)
+          .foregroundStyle(RestStyle.secondary)
         Text(SampleContent.sessionTitle)
           .font(.title3.weight(.semibold))
         Text(
           "The complete prepared session uses Kokoro George at the accepted calm-documentary cadence."
         )
         .font(.subheadline)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(RestStyle.secondary)
       }
     }
   }
@@ -442,7 +442,7 @@ struct FeasibilityConsoleView: View {
           "This is a rest window, not an estimate or promise of actual sleep time."
         )
         .font(.footnote)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(RestStyle.secondary)
       }
     }
   }
@@ -479,14 +479,14 @@ struct FeasibilityConsoleView: View {
 
         Text(alarm.statusMessage)
           .font(.footnote)
-          .foregroundStyle(.secondary)
+          .foregroundStyle(RestStyle.secondary)
           .accessibilityIdentifier("alarmMessage")
 
         HStack {
           Button("Authorize") {
             Task { await alarm.requestAuthorization() }
           }
-          .buttonStyle(.borderedProminent)
+          .buttonStyle(RestButtonStyle(secondary: true))
           .accessibilityIdentifier("authorizeAlarm")
 
           Button("60-second test") {
@@ -537,7 +537,7 @@ struct FeasibilityConsoleView: View {
           .accessibilityIdentifier("playbackMessage")
         Text(runMessage)
           .font(.footnote)
-          .foregroundStyle(.secondary)
+          .foregroundStyle(RestStyle.secondary)
           .accessibilityIdentifier("runMessage")
 
         Button {
@@ -546,7 +546,7 @@ struct FeasibilityConsoleView: View {
           Label("Schedule and start test", systemImage: "play.fill")
             .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.borderedProminent)
+        .buttonStyle(RestButtonStyle())
         .controlSize(.large)
         .disabled(isStarting || alarm.isScheduling || !audio.canStartNewRun)
         .accessibilityIdentifier("startTest")
@@ -570,7 +570,7 @@ struct FeasibilityConsoleView: View {
           "Starting plays the bundled George narration and activates an exclusive playback session, so existing music or podcasts should stop. Skipping and seeking are disabled; iOS may still display their controls."
         )
         .font(.footnote)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(RestStyle.secondary)
       }
     }
   }
@@ -743,6 +743,6 @@ private struct DurationButton: View {
       .frame(maxWidth: .infinity)
     }
     .buttonStyle(.bordered)
-    .tint(selected ? .accentColor : .secondary)
+    .tint(selected ? RestStyle.ink : RestStyle.secondary)
   }
 }

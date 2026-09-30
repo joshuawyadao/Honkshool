@@ -65,7 +65,7 @@ Prefer no motion. If a transition helps orientation, keep it short and respect R
 
 ## Atlas coverage and capability boundary
 
-The [approved atlas](../design/quiet-curiosity/screen-atlas.html) groups its numbered examples as follows. The first 24 depict the core flow and important states, not 24 independent features; actual copy and timing come from runtime state. The later eight are **future concepts**, and #33 is an existing developer utility in a quieter proposed location.
+The [approved atlas](../design/quiet-curiosity/screen-atlas.html) groups its numbered examples as follows. The first 24 depict the core flow and important states, not 24 independent features; actual copy and timing come from runtime state. Screens 25–31 explore future content and browsing capabilities, with current metadata called out below. Screens 32–33 establish the implemented Settings screen and its Advanced section for the existing Feasibility Lab.
 
 | Atlas screens | Scope and contract |
 | --- | --- |
@@ -76,7 +76,7 @@ The [approved atlas](../design/quiet-curiosity/screen-atlas.html) groups its num
 | 25–27 Journey library, journey detail, branch choice | Future expanded 5–8-session journeys and branch navigation. The current catalog has only two prepared sessions; these screens must not advertise unprepared sessions as playable. |
 | 28 Session notes and sources | Source-linked metadata exists now; a richer browsing presentation is illustrated for future exploration. It can be surfaced for current prepared content without adding narration or network access. |
 | 29–31 Detail for next time, offline library, voice preview | Future capabilities. First prototype has Enthusiast detail, bundled/offline audio, and George `0.86`; alternate detail levels, download management, and voice selection need prepared assets and measured timing before controls become functional. |
-| 32 Quiet settings | Proposed routine settings surface; it must stay short and retain the Rest-first path. Only actual preferences may be exposed. |
+| 32 Quiet settings | Implemented information screen for local history, appearance, rest defaults, and Advanced access. Keep it short and retain the Rest-first path; any additional preference controls remain future work until supported. |
 | 33 Feasibility Lab | Existing experimental controls, moved away from routine navigation but preserved for device testing. |
 
 The atlas is a reference for style and hierarchy, not a mandate to ship speculative features during the current UI pass. Map each screen to an implemented capability before enabling its controls. Do not imply accounts, cloud sync, live research, arbitrary topic generation, downloads, alternative voices, or extra content currently exist.
