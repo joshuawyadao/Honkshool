@@ -20,6 +20,9 @@ cd "$PROJECT_ROOT"
 test_result_directory=$(mktemp -d "${TMPDIR:-/tmp}/honkshool-test-results.XXXXXX")
 test_result_path="$test_result_directory/TestResults.xcresult"
 printf 'Test results: %s\n' "$test_result_path"
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  printf 'result_directory=%s\n' "$test_result_directory" >> "$GITHUB_OUTPUT"
+fi
 
 if DEVELOPER_DIR="$HONKSHOOL_XCODE_PATH" xcodebuild -quiet \
   -project Honkshool.xcodeproj \

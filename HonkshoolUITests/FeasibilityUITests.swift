@@ -67,11 +67,7 @@ final class FeasibilityUITests: XCTestCase {
     XCTAssertFalse(app.switches["requireAlarm"].isEnabled)
     XCTAssertFalse(app.switches["ambienceEnabled"].isEnabled)
     XCTAssertFalse(app.switches["useExactWakeTime"].isEnabled)
-    let scheduled = XCTNSPredicateExpectation(
-      predicate: NSPredicate(format: "label == %@", "Phase, Narrating"),
-      object: app.staticTexts["playbackPhase"]
-    )
-    XCTAssertEqual(XCTWaiter.wait(for: [scheduled], timeout: 15), .completed)
+    assertLabel(app.staticTexts["playbackPhase"], equals: "Phase, Narrating", timeout: 15)
     assertLabel(
       app.staticTexts["runMessage"],
       equals: "Alarm scheduled before playback. Lock the screen and observe the test."
@@ -327,11 +323,21 @@ final class FeasibilityUITests: XCTestCase {
     )
   }
 
-  private func assertLabel(_ element: XCUIElement, equals label: String) {
+  private func assertLabel(
+    _ element: XCUIElement, equals label: String, timeout: TimeInterval = 5,
+    file: StaticString = #filePath, line: UInt = #line
+  ) {
     let expectation = XCTNSPredicateExpectation(
       predicate: NSPredicate(format: "label == %@", label), object: element
     )
-    XCTAssertEqual(XCTWaiter.wait(for: [expectation], timeout: 5), .completed)
+    let result = XCTWaiter.wait(for: [expectation], timeout: timeout)
+    if result != .completed {
+      let observed = element.exists ? element.label : "<element missing>"
+      XCTFail(
+        "Expected label '\(label)', observed '\(observed)' (wait result: \(result.rawValue)).",
+        file: file, line: line
+      )
+    }
   }
 
   private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {

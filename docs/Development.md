@@ -80,6 +80,8 @@ Physical-device cases are separately gated and skipped in ordinary simulator run
 
 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) defines the **Repository Verify** workflow with two jobs: **Repository Verify** on Ubuntu runs `./scripts/verify-repository.sh`, and **iOS Unit and UI Tests** on macOS runs `./scripts/test-ios.sh` with failure diagnostics enabled. Both jobs run for non-draft pull requests and manual `workflow_dispatch` runs. Draft pull requests skip both jobs; marking one ready for review starts them. Physical-device opt-in tests are not CI acceptance evidence.
 
+Failed CI runs retain the simulator `.xcresult` bundle as an Actions artifact for seven days. Download it from the failed run to inspect assertion locations, UI activity, and screenshots in Xcode. The test script publishes its fresh result directory through the standard `GITHUB_OUTPUT` file when available. Artifacts contain synthetic simulator test data; do not upload personal-device result bundles. Feasibility label failures report the expected and observed label at the original assertion call site; timeouts and behavioral expectations remain unchanged.
+
 ## Offline audio tools
 
 These scripts are preparation and review tools, not app runtime dependencies. [Audio Preparation](Audio-Preparation.md) is the canonical guide for exact inputs, model/cache requirements, provenance, measurement, and publication decisions.
