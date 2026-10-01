@@ -1,24 +1,20 @@
 # Plan
 
-Resolve the six confirmed findings in the September 30 accessibility review while preserving Quiet curiosity and the existing playback, alarm, and history contracts. Verify the affected controls and largest-text layouts, save the feature branch, and install the signed update on the connected iPhone.
+Prepare PR #14 for merge by integrating the latest main branch, preserving the approved Quiet curiosity interface and the project-checkup fixes, and addressing actionable review or CI feedback. Keep the app's audio, alarm, history, and accessibility contracts intact.
 
 ## Scope
-- In: adaptive duration presets; readable stacked timing and metadata at accessibility text sizes; contrasting error text; contextual session/journey/history action labels; section heading traits; complete sound descriptions; focused regressions and simulator screenshots; durable design and resolution documentation; commit/push on `codex/app-icon`; in-place install and launch on the connected iPhone 18 Pro Max.
-- Out: redesign, new content or capabilities, changes to timing/alarm/history behavior, speculative fixes for the audit's separate verification risks, enabling VoiceOver or scheduling alarms on the user's phone, PR/merge/public release. Raw generated audit exports remain local in accordance with repository guidance.
+- In: merge conflicts with main; current public guides and diagrams; confirmed Brooks/Codex feedback; narrow CI fixes; relevant tests; review and check evidence; commits and push on codex/app-icon.
+- Out: new product capabilities, unrelated refactors, changing physical acceptance claims, publishing private audit artifacts, and merging the PR.
 
 ## Action items
-- [x] Confirm affected views, existing UI selectors, signing/device path, and guidance in `docs/Design-Language.md`, the local accessibility report, and `docs/Feasibility-Spike.md`.
-- [x] Adapt shared duration choices and reviewed/confirmed timing rows to the largest text size without shrinking text or changing plan values.
-- [x] Add readable semantic error colors and fix shared section headings and sound descriptions.
-- [x] Give repeated session, journey, and history controls distinct accessible names and entry headings; coordinate disjoint source ownership with a bounded builder.
-- [x] Add focused UI regressions for AX5 preset readability, complete review/ready timing, labels and selection state, review heading placement, and add a contrast regression using the resolved colors; retain current flow assertions.
-- [x] Run focused tests, relevant broader UI tests, repository/format checks, and signed device build; inspect compact-phone daylight/evening AX5 screenshots and review the final changes for Apple-platform regressions.
-- [x] Update the design guide, a tracked accessibility resolution record, the local audit status, and device verification notes with evidence and remaining manual checks; checkpoint coherent changes.
-- [x] Install and launch the verified signed app on the connected iPhone without removing its data, then finish the save-branch commit/push and report installation and validation results.
+- [x] Inspect the main-branch checkup and documentation PR, current design/screen/accessibility guidance, affected UI fixtures, and hosted checks.
+- [x] Checkpoint this resolved plan before implementation.
+- [ ] Merge main, preserving repaired Lab duration persistence and failure diagnostics alongside shared Rest navigation and fixtures.
+- [ ] Reconcile README, CONTRIBUTING, current user/developer/architecture guides and diagrams with the approved functional pages while retaining setup, privacy, and historical evidence.
+- [ ] Run repository checks, formatting, and focused restored-duration/navigation regressions; preserve existing assertions and adapt tests only where the UI contract changed.
+- [ ] Finish Brooks and Apple-contract review, classify Codex findings, and fix each actionable cluster with focused validation and saved commits.
+- [ ] Push and wait for current-head Repository Verify and iOS Unit and UI Tests; investigate failures using retained diagnostics without weakening assertions.
+- [ ] Record final validation and any manual limits, verify fresh review/CI/mergeability state, and leave the PR unmerged.
 
 ## Open questions
-- None. The connected iPhone 18 Pro Max is the installation target. Use the existing signing configuration and app identifier; keep real-device assistive-technology and alarm acceptance limitations explicit.
-
-## Results
-
-All six findings are implemented in `06e521b`. Compact daylight/evening AX5 flows, contextual labels, resolved contrast and hosted History errors passed. The broader regression run passed 243 tests with six intentional physical-only skips; all 40 repository checks and strict formatting passed. The signed Release build was installed in place and launched on iPhone 18 Pro Max / iOS 27.0. The [resolution record](Accessibility-Refresh.md) retains the evidence scope, internal test warnings, and manual VoiceOver acceptance limits. Raw exports remain local.
+- None. All actionable PR feedback and conflict fixes are authorized. Public docs must distinguish implemented pages from future atlas concepts. Raw original audit artifacts remain local.
