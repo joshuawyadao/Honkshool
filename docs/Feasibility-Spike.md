@@ -328,6 +328,12 @@ The device run also reported AVAudioSession main-thread activation/deactivation 
 - [ ] **Narration-to-rain and comfort:** Use a normal plan or a valid saved Resume near the end of the George file. Verify the session reaches its natural end, rain starts without an attention prompt, and the relative level and repeated loop feel suitable. Stop early if uncomfortable; do not label a brief transition as full-session comfort.
 - [ ] **History and relaunch:** During narration, stop or exit after a verified checkpoint, then relaunch. Check the earlier partial and Resume into a fresh review without automatic audio. Later, after narration completes into rain, verify exactly one completed narration record and no rain-only history entry. A pending system alarm must retain its own identity across playback Stop and relaunch.
 
+## Quiet curiosity accessibility update
+
+On 2026-09-30, the signed Release app from `06e521b` was installed in place and launched normally on the connected iPhone 18 Pro Max / iOS 27.0. The update contains all six accessibility audit fixes: adaptive large-text choices and timing, readable error colors, contextual action names, heading traits, and complete sound descriptions. Installation used the existing app identifier and signing configuration without uninstalling or resetting the app.
+
+The [accessibility refresh record](Accessibility-Refresh.md) documents compact-simulator layout/flow checks, resolved-color measurements, error-view rendering, regression results, and remaining manual acceptance. This installation/launch result is not a spoken VoiceOver, locked-screen, or audible alarm test. Earlier physical audio/alarm observations and pending acceptance above retain their original scope.
+
 ## Recording results
 
 For each test, record only:
