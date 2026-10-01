@@ -72,10 +72,14 @@ struct RestTimeSheet: View {
 }
 
 struct RestDurationChoices: View {
+  @Environment(\.dynamicTypeSize) private var dynamicTypeSize
   @Binding var minutes: Int
   var identifierPrefix = "napPlanPreset"
   var body: some View {
-    LazyVGrid(columns: [GridItem(.adaptive(minimum: 54))], spacing: 8) {
+    LazyVGrid(
+      columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 120 : 54))],
+      spacing: 8
+    ) {
       ForEach(RestDurationPolicy.recommendedMinutes, id: \.self) { value in
         Button {
           minutes = value
@@ -169,7 +173,8 @@ struct RestSoundSheet: View {
         Image(systemName: selection == id ? "checkmark.circle.fill" : "circle")
       }.frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
     }
-    .accessibilityLabel(title)
+    .accessibilityLabel("\(title). \(subtitle)")
+    .accessibilityIdentifier(title)
     .accessibilityAddTraits(selection == id ? .isSelected : [])
   }
 }

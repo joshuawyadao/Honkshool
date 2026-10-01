@@ -26,6 +26,7 @@ struct RestCard<Content: View>: View {
         }
         .font(.subheadline.weight(.medium))
         .foregroundStyle(RestStyle.secondary)
+        .accessibilityAddTraits(.isHeader)
       }
       content
     }
@@ -56,6 +57,52 @@ struct RestHeading: View {
           .fixedSize(horizontal: false, vertical: true)
       }
     }
+  }
+}
+
+/// Preserve native metadata rows at standard sizes; give both fields the full
+/// card width at accessibility sizes without reducing the user's chosen font.
+struct RestLabeledContentStyle: LabeledContentStyle {
+  @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+  func makeBody(configuration: Configuration) -> some View {
+    if dynamicTypeSize.isAccessibilitySize {
+      VStack(alignment: .leading, spacing: 8) {
+        configuration.label
+        configuration.content
+      }
+      .fixedSize(horizontal: false, vertical: true)
+      .frame(maxWidth: .infinity, alignment: .leading)
+      .accessibilityElement(children: .combine)
+    } else {
+      LabeledContent {
+        configuration.content
+      } label: {
+        configuration.label
+      }
+      .labeledContentStyle(.automatic)
+    }
+  }
+}
+
+/// Date and time get separate lines at large sizes, but remain one spoken value.
+struct RestTimingRow: View {
+  @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+  let title: String
+  let date: Date
+
+  var body: some View {
+    let spokenValue = date.formatted(date: .abbreviated, time: .standard)
+    LabeledContent(title) {
+      Text(
+        dynamicTypeSize.isAccessibilitySize
+          ? date.formatted(date: .abbreviated, time: .omitted) + "\n"
+            + date.formatted(date: .omitted, time: .standard)
+          : spokenValue
+      )
+      .fixedSize(horizontal: false, vertical: true)
+    }
+    .accessibilityLabel("\(title), \(spokenValue)")
   }
 }
 

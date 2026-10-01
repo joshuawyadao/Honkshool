@@ -19,20 +19,23 @@ Use semantic colors that adapt to the system appearance. The design atlas's refe
 | Inset well | `#EAE5DC` | `#203752` | Secondary choices or information |
 | Primary text | `#172B49` | `#F5F0E7` | Titles and essential state |
 | Secondary text | `#53637A` | `#B4C1D4` | Explanations and metadata |
+| Error text | `#A53C34` | `#F2AAA0` | Readable error body text and footnotes |
 | Divider | `#D7D8D5` | `#344B66` | Sparse separation within lists |
 | Quiet notice | `#E3EAF0` | `#203B58` | Recoverable status and guidance |
 | Primary action | `#E1B066` | `#E1B066` | One clear next action |
 | Text on primary action | `#152844` | `#152844` | Readable button label |
 
-The app icon's midnight navy `#0B2550` is the identity anchor. Amber is an action cue, not a decorative glow. Use system semantic colors for errors, warnings, selection, and accessibility states; test contrast in both appearances. Do not use gradients, saturated status color, bright badges, or moving color as the default rest surface.
+The app icon's midnight navy `#0B2550` is the identity anchor. Amber is an action cue, not a decorative glow. Use `RestStyle.error` for error text, paired with explicit wording or a symbol. Its resolved colors exceed 4.5:1 on the page, card, well, and quiet-notice surfaces in both appearances and Increase Contrast. Use native selection and accessibility states; verify any new color pairing. Do not use gradients, saturated status color, bright badges, or moving color as the default rest surface.
 
 ### Type, space, and shape
 
 - Use SF Rounded for short page titles and card titles; use SF Pro/system body text for longer reading and controls. Keep weights restrained, typically regular or medium.
-- Support Dynamic Type with native text styles and layouts that grow vertically. Do not encode critical meaning only in tiny uppercase labels or iconography.
+- Support Dynamic Type with native text styles and layouts that grow vertically. At accessibility sizes, widen duration cells so numbers stay together, stack metadata labels above values, and give dates and times separate visual lines. Preserve the complete spoken value; never shorten a fixed deadline to make it fit. Do not encode critical meaning only in tiny uppercase labels or iconography.
 - Use an 8-point spacing rhythm. Give the main title and primary action generous breathing room; prefer a small number of calm groups to a dense dashboard.
 - Use 16–24-point corners for controls, wells, and cards. The icon can have its own artwork shape; let iOS mask the installed app icon.
 - Make interactive targets at least 44 by 44 points, preserve VoiceOver order, use native controls where appropriate, and honor Reduce Motion. Test light/dark, larger text, narrow phones, and long localized labels.
+
+- Mark page and meaningful section/card titles as accessibility headings. Repeated actions must name their session or journey while retaining the visible action as their spoken prefix; history actions also identify the dated attempt. Sound choices announce the description and selected state. Decorative goose artwork and thought dots stay hidden from assistive technology.
 
 ### Goose signature
 
@@ -83,7 +86,7 @@ The atlas is a reference for style and hierarchy, not a mandate to ship speculat
 
 ## Implementation and review checklist
 
-The shared palette lives in `Honkshool/Shared/RestStyle.swift` and is used by the app and its alarm extension. Native components live in `Honkshool/App/RestDesign.swift`: `RestCard`, `RestHeading`, `RestButtonStyle`, `GooseMark`, `ThoughtDots`, and `restScreen()`. Reuse these for new screens.
+The shared palette lives in `Honkshool/Shared/RestStyle.swift` and is used by the app and its alarm extension. Native components live in `Honkshool/App/RestDesign.swift`: `RestCard`, `RestHeading`, `RestButtonStyle`, `RestLabeledContentStyle`, `RestTimingRow`, `GooseMark`, `ThoughtDots`, and `restScreen()`. Reuse these for new screens.
 
 Build shared semantic colors, typography, spacing, card, button, heading, and goose components before styling individual views. Keep domain and playback state as the source of truth; visual components only present it. For each new or changed screen, check the following:
 
@@ -95,3 +98,5 @@ Build shared semantic colors, typography, spacing, card, button, heading, and go
 6. Does every enabled control correspond to an implemented capability?
 
 Changes to the app's visual direction should update this guide and relevant tokens/components together. New screens should inherit Quiet curiosity by default. A deliberate owner-requested departure should be recorded in the [decision log](Decision-Log.md).
+
+The [accessibility refresh record](Accessibility-Refresh.md) maps the September 30 audit findings to the implementation, regression coverage, and remaining device acceptance.

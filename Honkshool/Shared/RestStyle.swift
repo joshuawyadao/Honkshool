@@ -11,7 +11,8 @@ enum RestStyle {
   static let quiet = adaptive(0xE3EAF0, 0x203B58)
   static let accent = Color(red: 225 / 255, green: 176 / 255, blue: 102 / 255)
   static let onAccent = Color(red: 21 / 255, green: 40 / 255, blue: 68 / 255)
-  static let error = Color(uiColor: .systemRed)
+  // Small error text must remain readable on every rest surface in both appearances.
+  static let error = adaptive(0xA53C34, 0xF2AAA0)
   static let pageInset: CGFloat = 20
   static let cardRadius: CGFloat = 24
 

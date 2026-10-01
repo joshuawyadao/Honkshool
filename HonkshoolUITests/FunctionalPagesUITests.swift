@@ -85,7 +85,9 @@ final class FunctionalPagesUITests: XCTestCase {
     app.navigationBars.buttons.firstMatch.tap()
     tap("openJourneyLibrary", in: app)
     capture("Journey library")
-    app.buttons["View journey"].tap()
+    XCTAssertEqual(
+      app.buttons["viewJourney-how-a-car-works"].label, "View journey: How a Car Works")
+    app.buttons["viewJourney-how-a-car-works"].tap()
     XCTAssertTrue(app.navigationBars["How a Car Works"].waitForExistence(timeout: 5))
     capture("Journey detail")
     let plan = app.buttons["Plan your next rest"]
@@ -145,7 +147,7 @@ final class FunctionalPagesUITests: XCTestCase {
     XCTAssertFalse(app.buttons["previewGeorge"].isEnabled)
     app.navigationBars.buttons.firstMatch.tap()
     tap("openJourneyLibrary", in: app)
-    app.buttons["View journey"].tap()
+    app.buttons["viewJourney-how-a-car-works"].tap()
     XCTAssertFalse(app.buttons["Plan your next rest"].isEnabled)
     let details = app.buttons["About Turning Fuel Into Motion"]
     scrollTo(details, in: app)

@@ -157,6 +157,7 @@ struct NapPlanReviewView: View {
       }
     }
     .restScreen()
+    .labeledContentStyle(RestLabeledContentStyle())
     .navigationTitle(isHome ? "Honkshool" : "Nap Plan")
     .navigationBarTitleDisplayMode(.inline)
     .onAppear {
@@ -514,16 +515,12 @@ struct NapPlanReviewView: View {
       RestCard(title: "Rest ends at") {
         Text(review.plan.deadline.formatted(date: .omitted, time: .shortened))
           .font(.system(.largeTitle, design: .rounded).weight(.medium))
-        LabeledContent("Fixed wake deadline") {
-          Text(review.plan.deadline.formatted(date: .abbreviated, time: .standard))
-        }
-        .font(.footnote).foregroundStyle(RestStyle.secondary)
-        .accessibilityIdentifier("napPlanDeadline")
-        LabeledContent("Planned rest start") {
-          Text(review.plan.start.formatted(date: .abbreviated, time: .standard))
-        }
-        .font(.subheadline)
-        .accessibilityIdentifier("napPlanPlannedStart")
+        RestTimingRow(title: "Fixed wake deadline", date: review.plan.deadline)
+          .font(.footnote).foregroundStyle(RestStyle.secondary)
+          .accessibilityIdentifier("napPlanDeadline")
+        RestTimingRow(title: "Planned rest start", date: review.plan.start)
+          .font(.subheadline)
+          .accessibilityIdentifier("napPlanPlannedStart")
         LabeledContent(
           "Wake alarm",
           value: review.plan.wakeAlarm == nil ? "Not requested" : "Requested at deadline"
@@ -906,14 +903,10 @@ struct NapPlanReviewView: View {
 
   private func confirmedTiming(_ plan: NapPlan) -> some View {
     VStack(alignment: .leading, spacing: 8) {
-      LabeledContent("Fixed wake deadline") {
-        Text(plan.deadline.formatted(date: .abbreviated, time: .standard))
-      }
-      .accessibilityIdentifier("napPlanConfirmedDeadline")
-      LabeledContent("Planned rest start") {
-        Text(plan.start.formatted(date: .abbreviated, time: .standard))
-      }
-      .accessibilityIdentifier("napPlanConfirmedStart")
+      RestTimingRow(title: "Fixed wake deadline", date: plan.deadline)
+        .accessibilityIdentifier("napPlanConfirmedDeadline")
+      RestTimingRow(title: "Planned rest start", date: plan.start)
+        .accessibilityIdentifier("napPlanConfirmedStart")
     }
     .font(.footnote).foregroundStyle(RestStyle.secondary)
   }

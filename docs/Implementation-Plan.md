@@ -7,11 +7,11 @@ Resolve the six confirmed findings in the September 30 accessibility review whil
 - Out: redesign, new content or capabilities, changes to timing/alarm/history behavior, speculative fixes for the audit's separate verification risks, enabling VoiceOver or scheduling alarms on the user's phone, PR/merge/public release. Raw generated audit exports remain local in accordance with repository guidance.
 
 ## Action items
-[ ] Confirm affected views, existing UI selectors, signing/device path, and guidance in `docs/Design-Language.md`, the local accessibility report, and `docs/Feasibility-Spike.md`.
-[ ] Adapt shared duration choices and reviewed/confirmed timing rows to the largest text size without shrinking text or changing plan values.
-[ ] Add readable semantic error colors and fix shared section headings and sound descriptions.
-[ ] Give repeated session, journey, and history controls distinct accessible names and entry headings; coordinate disjoint source ownership with a bounded builder.
-[ ] Add focused UI regressions for AX5 preset readability, complete review/ready timing, labels, selection state and headings, plus a contrast regression using the resolved colors; retain current flow assertions.
+[x] Confirm affected views, existing UI selectors, signing/device path, and guidance in `docs/Design-Language.md`, the local accessibility report, and `docs/Feasibility-Spike.md`.
+[x] Adapt shared duration choices and reviewed/confirmed timing rows to the largest text size without shrinking text or changing plan values.
+[x] Add readable semantic error colors and fix shared section headings and sound descriptions.
+[x] Give repeated session, journey, and history controls distinct accessible names and entry headings; coordinate disjoint source ownership with a bounded builder.
+[x] Add focused UI regressions for AX5 preset readability, complete review/ready timing, labels and selection state, review heading placement, and add a contrast regression using the resolved colors; retain current flow assertions.
 [ ] Run focused tests, relevant broader UI tests, repository/format checks, and signed device build; inspect compact-phone daylight/evening AX5 screenshots and review the final changes for Apple-platform regressions.
 [ ] Update the design guide, a tracked accessibility resolution record, the local audit status, and device verification notes with evidence and remaining manual checks; checkpoint coherent changes.
 [ ] Install and launch the verified signed app on the connected iPhone without removing its data, then finish the save-branch commit/push and report installation and validation results.

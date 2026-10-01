@@ -101,6 +101,14 @@ struct ListeningHistoryView: View {
           if let next = ListeningHistoryNavigation.next(
             in: catalog, history: store.history, isNarrationAvailable: isNarrationAvailable)
           {
+            let nextTitle = catalog.sessions[next.sessionID]?.session.title ?? "this session"
+            let latestDate = store.entries
+              .filter {
+                $0.record.plannedSession.journeyID == next.journeyID
+                  && $0.record.plannedSession.session.id == next.sessionID
+              }
+              .map { $0.record.endedAt }
+              .max()
             RestCard(title: "Ready to continue", systemImage: "play.circle") {
               if let title = catalog.sessions[next.sessionID]?.session.title {
                 Text("Up next: \(title)")
@@ -116,6 +124,12 @@ struct ListeningHistoryView: View {
               }
               .buttonStyle(RestButtonStyle())
               .disabled(!canStart)
+              .accessibilityLabel(
+                "Continue listening: \(nextTitle)"
+                  + (latestDate.map {
+                    ", last played \($0.formatted(date: .abbreviated, time: .shortened))"
+                  } ?? "")
+              )
               .accessibilityIdentifier("historyContinue")
             }
           } else if ListeningHistoryNavigation.allAvailableJourneysCompleted(
@@ -179,6 +193,7 @@ struct ListeningHistoryView: View {
     return RestCard {
       Text(record.plannedSession.session.title)
         .font(.system(.title2, design: .rounded).weight(.medium))
+        .accessibilityAddTraits(.isHeader)
       Text(
         entry.isCheckpoint
           ? "Last verified checkpoint" : record.isCompleted ? "Played through" : "Partly played"
@@ -201,6 +216,9 @@ struct ListeningHistoryView: View {
         }
         .buttonStyle(RestButtonStyle(secondary: true))
         .disabled(!canStart)
+        .accessibilityLabel(
+          "Resume from \(Self.position(resume.resumePoint)) in \(record.plannedSession.session.title), \(record.endedAt.formatted(date: .abbreviated, time: .shortened))"
+        )
         .accessibilityIdentifier("historyResume")
       } else if record.resumePoint != nil {
         Text(
@@ -214,6 +232,9 @@ struct ListeningHistoryView: View {
         NavigationLink("Replay from start") { reviewDestination(replay) }
           .buttonStyle(RestButtonStyle(secondary: true))
           .disabled(!canStart)
+          .accessibilityLabel(
+            "Replay from start: \(record.plannedSession.session.title), \(record.endedAt.formatted(date: .abbreviated, time: .shortened))"
+          )
           .accessibilityIdentifier("historyReplay")
       }
     }

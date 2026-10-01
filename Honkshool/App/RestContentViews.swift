@@ -68,6 +68,7 @@ struct RestSessionPickerView: View {
       Text(prepared.session.title)
         .font(.system(.title2, design: .rounded).weight(.medium))
         .fixedSize(horizontal: false, vertical: true)
+        .accessibilityAddTraits(.isHeader)
       Text(
         "\(RestContentHistory.duration(prepared.session.estimatedDuration)) · \(RestContentHistory.status(latest, saved: saved, available: available))"
       )
@@ -78,17 +79,22 @@ struct RestSessionPickerView: View {
           onChoose(saved)
         }
         .buttonStyle(RestButtonStyle())
+        .accessibilityLabel(
+          "Continue from \(ListeningHistoryView.position(saved.resumePoint)) in \(prepared.session.title)"
+        )
         .accessibilityIdentifier("chooseSession-\(prepared.session.id)")
         Button("Choose from the beginning") {
           onChoose(SessionSelection(journeyID: journey.id, sessionID: prepared.session.id))
         }
         .buttonStyle(RestButtonStyle(secondary: true))
+        .accessibilityLabel("Choose from the beginning: \(prepared.session.title)")
       } else {
         Button("Choose this session") {
           onChoose(SessionSelection(journeyID: journey.id, sessionID: prepared.session.id))
         }
         .buttonStyle(RestButtonStyle())
         .disabled(!available)
+        .accessibilityLabel("Choose this session: \(prepared.session.title)")
         .accessibilityIdentifier("chooseSession-\(prepared.session.id)")
       }
       NavigationLink {
@@ -99,6 +105,7 @@ struct RestSessionPickerView: View {
         Label("About this session", systemImage: "arrow.right")
           .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
       }
+      .accessibilityLabel("About this session: \(prepared.session.title)")
       .accessibilityIdentifier("sessionDetails-\(prepared.session.id)")
     }
   }
@@ -162,6 +169,7 @@ struct RestSessionDetailView: View {
           }
           .buttonStyle(RestButtonStyle())
           .disabled(!canChoose)
+          .accessibilityLabel("Use your saved place in \(prepared.session.title)")
           .accessibilityIdentifier("sessionUseSavedPlace")
         }
         Button("Choose from the beginning") {
@@ -169,6 +177,7 @@ struct RestSessionDetailView: View {
         }
         .buttonStyle(RestButtonStyle(secondary: validResumePoint != nil))
         .disabled(!isAvailable || !canChoose)
+        .accessibilityLabel("Choose from the beginning: \(prepared.session.title)")
         .accessibilityIdentifier("sessionChooseBeginning")
         NavigationLink {
           RestSessionNotesView(prepared: prepared)
@@ -289,6 +298,7 @@ struct RestLibraryView: View {
           RestCard {
             Text(journey.title)
               .font(.system(.title2, design: .rounded).weight(.medium))
+              .accessibilityAddTraits(.isHeader)
             Text(
               "\(historyStore.history.completedSessionIDs(in: journey.id).count) of \(journey.sessionIDs.count) played through"
             )
@@ -299,6 +309,8 @@ struct RestLibraryView: View {
               Label("View journey", systemImage: "arrow.right")
                 .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
             }
+            .accessibilityLabel("View journey: \(journey.title)")
+            .accessibilityIdentifier("viewJourney-\(journey.id)")
           }
         }
       }
@@ -345,6 +357,7 @@ struct RestLibraryView: View {
               VStack(alignment: .leading, spacing: 8) {
                 Text("\(index + 1). \(prepared.session.title)")
                   .font(.body.weight(.medium))
+                  .accessibilityAddTraits(.isHeader)
                 Text(
                   completed.contains(sessionID)
                     ? "Played"
