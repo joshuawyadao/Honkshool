@@ -100,18 +100,43 @@ final class NapPlanReviewUITests: XCTestCase {
       resume.tap()
       XCTAssertTrue(status.label.contains("Gentle rain resumed"))
 
+      let foregroundWindow = app.windows.firstMatch
+      let foregroundFrame = foregroundWindow.frame
       XCUIDevice.shared.press(.home)
       XCTAssertTrue(app.wait(for: .runningBackground, timeout: 5))
       // This spans a complete bundled loop while the real app is backgrounded.
       Thread.sleep(forTimeInterval: 12)
       XCTAssertEqual(app.state, .runningBackground)
       app.activate()
+      XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
+      // On device, activation can return while the window is still zooming in.
+      // A hittable control in that transient frame can receive a missed tap.
+      let restoredWindow = XCTNSPredicateExpectation(
+        predicate: NSPredicate { _, _ in
+          let frame = foregroundWindow.frame
+          return abs(frame.minX - foregroundFrame.minX) < 1
+            && abs(frame.minY - foregroundFrame.minY) < 1
+            && abs(frame.width - foregroundFrame.width) < 1
+            && abs(frame.height - foregroundFrame.height) < 1
+        }, object: foregroundWindow)
+      XCTAssertEqual(XCTWaiter.wait(for: [restoredWindow], timeout: 5), .completed)
       XCTAssertTrue(status.label.contains("Gentle rain resumed"))
       XCTAssertEqual(app.staticTexts["napPlanConfirmedDeadline"].label, originalDeadline)
       scrollTo(pause, in: app)
       pause.tap()
+      let pausedStatus = status.label
+      let pauseObservation = XCTAttachment(
+        string:
+          "Status after foreground Pause: \(pausedStatus); Pause exists: \(pause.exists); Resume exists: \(resume.exists)."
+      )
+      pauseObservation.name = "Physical post-background pause state"
+      pauseObservation.lifetime = .keepAlways
+      add(pauseObservation)
+      XCTAssertTrue(pausedStatus.contains("Paused"), "Pause did not take effect: \(pausedStatus)")
       scrollTo(resume, in: app)
       resume.tap()
+
+      XCTAssertTrue(status.label.contains("Gentle rain resumed"))
 
       let finished = XCTNSPredicateExpectation(
         predicate: NSPredicate(
