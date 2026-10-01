@@ -67,11 +67,7 @@ final class FeasibilityUITests: XCTestCase {
     XCTAssertFalse(app.switches["requireAlarm"].isEnabled)
     XCTAssertFalse(app.switches["ambienceEnabled"].isEnabled)
     XCTAssertFalse(app.switches["useExactWakeTime"].isEnabled)
-    let scheduled = XCTNSPredicateExpectation(
-      predicate: NSPredicate(format: "label == %@", "Phase, Narrating"),
-      object: app.staticTexts["playbackPhase"]
-    )
-    XCTAssertEqual(XCTWaiter.wait(for: [scheduled], timeout: 15), .completed)
+    assertLabel(app.staticTexts["playbackPhase"], equals: "Phase, Narrating", timeout: 15)
     assertLabel(
       app.staticTexts["runMessage"],
       equals: "Alarm scheduled before playback. Lock the screen and observe the test."
@@ -262,9 +258,33 @@ final class FeasibilityUITests: XCTestCase {
     XCTAssertTrue(app.datePickers["exactWakeTime"].waitForExistence(timeout: 5))
   }
 
+  func testRestoredSavedDurationIsClampedBeforeItCanBeSelected() {
+    for (storedMinutes, boundedMinutes) in [(240, 180), (1, 5)] {
+      var app = launch(alarm: .authorized, savedMinutes: storedMinutes)
+      let saved = app.buttons["Saved, \(boundedMinutes) min"]
+      XCTAssertTrue(saved.waitForExistence(timeout: 5))
+      XCTAssertFalse(app.buttons["Saved, \(storedMinutes) min"].exists)
+      XCTAssertTrue(app.steppers["Custom: \(boundedMinutes) minutes"].waitForExistence(timeout: 5))
+
+      let recommended = app.buttons["20 min"]
+      scrollTo(recommended, in: app)
+      recommended.tap()
+      XCTAssertTrue(app.steppers["Custom: 20 minutes"].waitForExistence(timeout: 5))
+
+      scrollTo(saved, in: app)
+      saved.tap()
+      XCTAssertTrue(app.steppers["Custom: \(boundedMinutes) minutes"].waitForExistence(timeout: 5))
+      app.terminate()
+
+      app = launch(alarm: .authorized, reset: false)
+      XCTAssertTrue(app.buttons["Saved, \(boundedMinutes) min"].waitForExistence(timeout: 5))
+      app.terminate()
+    }
+  }
+
   private func launch(
     alarm: AlarmScenario, reset: Bool = true, failAudioActivation: Bool = false,
-    failCatalogLoading: Bool = false
+    failCatalogLoading: Bool = false, savedMinutes: Int? = nil
   ) -> XCUIApplication {
     let app = XCUIApplication()
     app.launchArguments = ["-ui-testing"]
@@ -275,6 +295,9 @@ final class FeasibilityUITests: XCTestCase {
       "HONKSHOOL_UI_TEST_AUDIO_FAILURE": failAudioActivation ? "1" : "0",
       "HONKSHOOL_UI_TEST_CATALOG_FAILURE": failCatalogLoading ? "1" : "0",
     ]
+    if let savedMinutes {
+      app.launchEnvironment["HONKSHOOL_UI_TEST_SAVED_MINUTES"] = String(savedMinutes)
+    }
     app.launch()
     let settings = app.buttons["openSettings"]
     XCTAssertTrue(settings.waitForExistence(timeout: 5))
@@ -308,11 +331,21 @@ final class FeasibilityUITests: XCTestCase {
     )
   }
 
-  private func assertLabel(_ element: XCUIElement, equals label: String) {
+  private func assertLabel(
+    _ element: XCUIElement, equals label: String, timeout: TimeInterval = 5,
+    file: StaticString = #filePath, line: UInt = #line
+  ) {
     let expectation = XCTNSPredicateExpectation(
       predicate: NSPredicate(format: "label == %@", label), object: element
     )
-    XCTAssertEqual(XCTWaiter.wait(for: [expectation], timeout: 5), .completed)
+    let result = XCTWaiter.wait(for: [expectation], timeout: timeout)
+    if result != .completed {
+      let observed = element.exists ? element.label : "<element missing>"
+      XCTFail(
+        "Expected label '\(label)', observed '\(observed)' (wait result: \(result.rawValue)).",
+        file: file, line: line
+      )
+    }
   }
 
   private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {

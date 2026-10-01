@@ -32,98 +32,27 @@ The complete asset is 34,926,044 bytes versus 327,212,226 bytes for the pinned m
 
 ## Local setup
 
-Requirements:
+Follow [Getting started](Getting-Started.md) for the maintained requirements, simulator launch, private signing, bundle identifiers, and device-trust steps. Use [Development](Development.md#verification) for portable checks, simulator builds/tests, and destination overrides. These guides supersede the duplicated setup recipes previously kept here.
 
-- Xcode 26.6 or newer with an iOS 26 SDK;
-- the matching iOS Simulator/platform component installed in Xcode;
-- an iPhone running iOS 26 or newer;
-- an Apple development team available to Xcode; and
-- bundle identifiers `com.joshuawyadao.Honkshool` and `com.joshuawyadao.Honkshool.AlarmWidget` available to that team.
-
-The command-line developer directory on this Mac currently points to Command Line Tools. Opening the project in Xcode uses the full toolchain. For terminal builds without changing the machine-wide setting, prefix commands with:
-
-```sh
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
-```
-
-The shared Xcode configuration loads `Config/Local.xcconfig` when it exists. Create that ignored file once per checkout:
-
-```sh
-cp Config/Local.xcconfig.example Config/Local.xcconfig
-```
-
-Replace `YOUR_TEAM_ID` with the 10-character Team ID shown in Xcode under **Settings → Apple Accounts**. Do not commit the local file. The repository stores only the placeholder template; it does not store a development-team identifier, device identifier, provisioning profile, certificate, or account detail.
-
-If Xcode reports that the bundled iOS platform is not installed, use **Xcode → Settings → Components** or install the currently available component from Terminal:
-
-```sh
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
-  xcodebuild -downloadPlatform iOS
-```
-
-For a newly connected phone:
-
-1. Unlock the iPhone, connect it by cable, and accept any **Trust This Computer** prompt.
-2. Open `Honkshool.xcodeproj`, select the shared `Honkshool` scheme and the phone as the run destination, then press Run once. Xcode can register the phone and prepare device support through automatic signing.
-3. When Xcode requests it, enable **Settings → Privacy & Security → Developer Mode** on the iPhone, accept the restart, unlock it, and confirm **Turn On**.
-4. Keep the phone unlocked and connected, then press Run again. Accept the iPhone prompt to trust the developer if iOS presents one.
-
-Developer Mode and device trust are security settings controlled on the iPhone; they cannot be silently enabled by this project.
-
-After the first successful Xcode run, a signed command-line build can be reproduced without exposing the team or device identifier:
+For a signed generic device build after completing Xcode setup:
 
 ```sh
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
   xcodebuild -quiet \
-  -project Honkshool.xcodeproj \
-  -scheme Honkshool \
-  -configuration Debug \
-  -sdk iphoneos \
+  -project Honkshool.xcodeproj -scheme Honkshool \
+  -configuration Debug -sdk iphoneos \
   -destination 'generic/platform=iOS' \
   -derivedDataPath /tmp/HonkshoolDeviceDerivedData \
-  -allowProvisioningUpdates \
-  build
+  -allowProvisioningUpdates build
 ```
+
+This builds with your local signing setup; it does not install or launch on a phone. Keep credentials, team/device identifiers, and profiles private.
 
 ## Compile-time verification
 
-Simulator-SDK build without signing:
+For an unsigned generic device build, use the same project/scheme with `-sdk iphoneos`, `-destination 'generic/platform=iOS'`, and `CODE_SIGNING_ALLOWED=NO build`, omitting `-allowProvisioningUpdates`. For simulator compilation without running tests, follow [Development](Development.md#verification).
 
-```sh
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
-  xcodebuild -project Honkshool.xcodeproj \
-  -scheme Honkshool \
-  -sdk iphonesimulator \
-  -destination 'generic/platform=iOS Simulator' \
-  -derivedDataPath /tmp/HonkshoolDerivedData \
-  CODE_SIGNING_ALLOWED=NO build
-```
-
-Generic physical-device build without signing:
-
-```sh
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
-  xcodebuild -project Honkshool.xcodeproj \
-  -scheme Honkshool \
-  -sdk iphoneos \
-  -destination 'generic/platform=iOS' \
-  -derivedDataPath /tmp/HonkshoolDeviceDerivedData \
-  CODE_SIGNING_ALLOWED=NO build
-```
-
-Compile the unit-test bundle when no compatible simulator runtime is installed:
-
-```sh
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
-  xcodebuild -project Honkshool.xcodeproj \
-  -scheme Honkshool \
-  -sdk iphonesimulator \
-  -destination 'generic/platform=iOS Simulator' \
-  -derivedDataPath /tmp/HonkshoolTestDerivedData \
-  CODE_SIGNING_ALLOWED=NO build-for-testing
-```
-
-Compile success is not evidence that background narration or an alarm is reliable.
+Compile success is not evidence that background narration or an alarm is reliable. The dated results below record the toolchains and test counts used at each milestone; they are historical evidence, not a current suite-size requirement.
 
 ## Current validation status
 

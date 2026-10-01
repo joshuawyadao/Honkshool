@@ -1,23 +1,41 @@
 # Honkshool
 
 [![Repository Verify](https://github.com/joshuawyadao/Honkshool/actions/workflows/ci.yml/badge.svg)](https://github.com/joshuawyadao/Honkshool/actions/workflows/ci.yml)
-[![Project status: feasibility spike](https://img.shields.io/badge/status-feasibility%20spike-6f42c1)](docs/Project-Overview.md)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Project status: experimental prototype](https://img.shields.io/badge/status-experimental%20prototype-5b4d8a)](docs/Project-Overview.md)
+[![Code license: MIT](https://img.shields.io/badge/code%20license-MIT-blue.svg)](LICENSE)
 
-Honkshool is an early-stage iPhone app for calm, uninterrupted factual narration during naps and bedtime. Its primary purpose is helping the listener relax and fall asleep; exposure to interesting information is secondary.
+**Calm stories about how things work, with time left to rest.**
 
-> **Project status:** Feasibility spike plus an early Nap Plan playback flow; there is no supported release. The Rest-first interface follows the approved [Quiet curiosity design language](docs/Design-Language.md); the experimental console remains available under Settings → Advanced. The Nap Plan flow can choose and confirm a fixed route, schedule and verify a requested system wake alarm, then start bundled narration or accepted Gentle rain at its approved start and stop audio at its fixed deadline. Silence remains the default and fallback. Keep the app foregrounded until approved playback begins; then the phone can be locked. For a silence-only plan with no narration, wait instead for the visible rest-until-deadline state at the approved start; the phone may then be locked. Stopping playback does not cancel the separately managed wake alarm. Runs save verified narration checkpoints and partial/completed attempts locally; rain creates no narration history. Listening History offers Continue, Resume, and Replay through a fresh Nap Plan review; reopening never starts audio automatically. Automated iPhone checks passed for rain looping and controls, narration-to-rain history, the real wake alarm and cutoff, and the app’s one-minute rain plan with background and relaunch. Locked controls, actual headphone disconnection, and longer listening comfort remain unverified for this production rain flow.
+Honkshool is an early-stage iPhone app for calm, uninterrupted factual narration during naps and bedtime. Choose a topic and a rest window, approve what will play, then listen as narration gives way to rain or silence. Relaxation comes first; interesting information is secondary.
 
-The intended flow is simple:
+The app opens on **Rest**, with **History** nearby and the experimental **Feasibility Lab** under **Settings → Advanced**. Its interface follows the approved [Quiet curiosity design language](docs/Design-Language.md). A Nap Plan uses a reviewed fixed route and deadline; an optional system wake alarm is scheduled and verified separately from audio. Silence is the default and fallback. Runs save verified narration checkpoints locally; rain and silence create no narration history. Reopening never starts audio automatically.
 
-> Open app → choose content → choose nap duration → review the Nap Plan → start resting.
+> **Project status:** Feasibility spike plus an early Nap Plan playback flow; there is no supported release. This repository provides source code for contributors and willing testers. Installation currently requires a Mac and Xcode; there is no public App Store or TestFlight installation path documented here.
+
+[Set up the prototype](docs/Getting-Started.md) · [Use the app](docs/User-Guide.md) · [Troubleshooting](docs/Troubleshooting.md) · [All documentation](docs/README.md)
+
+## What can I listen to?
+
+The bundled **How a Car Works** journey has two original, citation-backed sessions, spoken by the prepared Kokoro George voice:
+
+| Session | Narration length | Topic |
+| --- | --- | --- |
+| **1. Turning Fuel Into Motion** | About 12 minutes | How an engine turns fuel into movement |
+| **2. Air, Fuel, and Spark** | About 13 minutes | How air, fuel, and ignition work together |
+
+A longer plan can include both sessions. A short window may contain only rain or silence; the review tells you exactly what fits. Narration plays at its prepared pace. **The rest window is the whole plan, not a promise of time asleep.**
+
+- **Offline playback:** narration and Gentle rain are bundled with the app. No account or streaming service is needed.
+- **Your rest sound:** Silence is the default. Gentle rain appears when its bundled file validates; unavailable rain falls back visibly to silence.
+- **Optional wake alarm:** request an iOS system alarm for the plan's fixed deadline. Alarm-enabled playback is blocked if permission or scheduling fails.
+- **Local listening history:** Continue, Resume, or Replay by reviewing a new plan. Reopening the app never starts audio automatically.
 
 Honkshool describes sessions as **played**. It does not claim subconscious learning, guaranteed retention, therapy, or treatment of insomnia or another medical condition.
 
 ## Why this repository is public
 
 - Keep product and engineering decisions reviewable from the beginning.
-- Make privacy, security, and contribution expectations explicit before application code arrives.
+- Make privacy, security, and contribution expectations explicit as the app evolves.
 - Give future work a consistent issue, pull-request, documentation, and verification workflow.
 - Avoid implying that unfinished software is ready for end users.
 
@@ -46,42 +64,52 @@ LICENSE                     MIT license
 
 The app opens on Rest, with History nearby and the diagnostic Feasibility Lab under Settings → Advanced. Follow the [device test guide](docs/Feasibility-Spike.md) before drawing conclusions from the spike. Rest offers two ordered prepared automotive sessions—Turning Fuel Into Motion and Air, Fuel, and Spark—with detail and source-linked notes. Time and sound sheets apply only when confirmed, and every selection leads through a fresh route review before playback. Silence is the default; Gentle rain appears when the accepted bundled file and provenance validate. Rain can fill a short plan without narration or follow a completed session; an unavailable or failed rain loop visibly leaves rest in silence without asking the listener to act mid-nap. Settings includes Rest defaults for the next unreviewed plan, the current two-session journey, a verified offline inventory, information about the sole Enthusiast detail level, and an explicit 12-second George preview. The preview writes no history and is unavailable during an active rest or Feasibility Lab audio. Additional journeys, branch destinations, detail variants, voices, and download/delete controls remain unprepared.
 
-## Automated validation
+## Your first Nap Plan
 
-On a Mac with Xcode 26 and an installed iOS 26 simulator, run the complete unit and UI suite with one command:
+![Four steps: open Rest, choose a prepared session and rest options, review and confirm the plan, then start resting and keep the app open until playback begins.](docs/assets/first-nap.svg)
+
+1. Open Honkshool on the **Rest** tab. If this is your first launch, dismiss the welcome screen. Tap **Change session** to choose one of the two prepared sessions.
+2. Choose a rest duration or use **More options** for an exact wake time. Set **After narration** to **Silence** or available **Gentle rain**, and choose whether **Wake alarm** is on.
+3. Tap **Review nap plan**. Check the planned start, fixed wake deadline, complete narration route, sound, and alarm choice; tap **Confirm this plan** or **Confirm quiet plan**.
+4. Tap **Start resting** before the approved start passes. Keep Honkshool on screen until narration or rain begins, then you can lock the phone. For a silence-only plan with no narration, wait for the visible rest-until-deadline state instead.
+
+The diagnostic **Feasibility Lab** is under **Settings → Advanced**. Its background-audio and test-alarm controls are separate from Nap Plans. The [user guide](docs/User-Guide.md) walks through Rest, History, controls, and interrupted runs.
+
+## Audio and the wake alarm are separate
+
+![Audio and alarm have separate controls: Stop playback ends audio, while the optional scheduled wake alarm remains active until explicitly cancelled. Both use the reviewed fixed deadline.](docs/assets/audio-and-alarm.svg)
+
+| I want to… | Use… | What happens |
+| --- | --- | --- |
+| Pause or continue listening | **Pause playback** / **Resume playback** | The fixed deadline stays the same. |
+| End listening early | **Stop playback** | Audio stops; a scheduled wake alarm stays active. |
+| Remove the wake alarm | **Cancel wake alarm** after playback stops, or **Cancel Nap Plan wake alarm** in Settings → Advanced → Feasibility Lab | Cancels the separately tracked alarm. Check the displayed result. |
+| Listen again later | **History** tab → **Continue listening**, **Resume from…**, or **Replay from start** | Opens a fresh plan for review; nothing starts by itself. |
+
+Audio is intended to end at the fixed deadline even when no alarm is requested. App execution and system scheduling can affect timing; automated passes are not a guarantee of waking. See [current evidence and limitations](docs/Project-Overview.md#current-state).
+
+## Try it or contribute
+
+You need **Xcode 26.6 or newer with compatible iOS platform support**. The app targets **iOS 26 or newer**. A simulator is enough to explore the UI; a signed build on an iPhone is needed for real audio and alarm evaluation.
 
 ```sh
+git clone https://github.com/joshuawyadao/Honkshool.git
+cd Honkshool
+open Honkshool.xcodeproj
+```
+
+Follow [Getting started](docs/Getting-Started.md) to select a simulator or configure private device signing. Bundled audio is already included; you do not need to generate narration or install an AI model.
+
+For repository checks and the complete simulator suite:
+
+```sh
+./scripts/verify-repository.sh
 ./scripts/test-ios.sh
 ```
 
-The script defaults to the latest iPhone 17 Pro simulator. Set `HONKSHOOL_TEST_DESTINATION` to any compatible Xcode destination when needed. Pull requests run the same suite on a read-only GitHub-hosted macOS 26 runner in addition to the portable repository checks.
+The first command uses shell, Python's standard library, and Git. The second needs full Xcode and an installed simulator. See [Development](docs/Development.md) for destination overrides, the source map, test boundaries, and offline preparation tools. Read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change.
 
-Routine UI tests use debug-only simulated alarm states, deterministic speech, and isolated preferences that leave real alarm tracking and saved defaults untouched. They never request real AlarmKit permission or schedule a system alarm. An opt-in physical UI case uses real rain and clocks with isolated storage to check controls, background-state continuity, deadline completion, and relaunch. Separately gated physical-device tests use actual bundled audio and AlarmKit to check looping rain, narration completion and saved history, and alarm/cutoff timing; see the [unattended device test guide](docs/Feasibility-Spike.md#production-gentle-rain-acceptance-on-the-target-iphone).
-
-## Start contributing
-
-1. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md).
-2. Check existing issues before proposing work.
-3. Create a focused branch from `main`.
-4. Keep behavior changes, tests, and documentation in the same pull request.
-5. Run the repository gate before opening a pull request:
-
-   ```sh
-   ./scripts/verify-repository.sh
-   ```
-
-The verification gate has no third-party runtime dependencies; it uses the system shell, Python standard library, and Git.
-
-## Privacy and security
-
-- Do not commit credentials, tokens, certificates, private configuration, personal exports, local databases, logs, or generated reports.
-- Local environment files and common secret-bearing formats are excluded by [.gitignore](.gitignore).
-- Use synthetic data in tests and public issue reproductions.
-- Report vulnerabilities through the private process in [SECURITY.md](SECURITY.md), not a public issue.
-
-GitHub secret scanning, push protection, Dependabot security updates, and private vulnerability reporting are enabled for the public repository.
-
-## Current roadmap
+## What is still experimental?
 
 1. Completed feasibility validation on the target iPhone: narration, background audio, tested interruptions, Lock Screen controls, AlarmKit, and the larger-text snooze layout (2026-09-15). Squash-merged through PR #2 as `45dcc71`; this remains an experimental console.
 2. Implemented and tested the framework-independent Nap Plan, journey, progress, and history rules, squash-merged through PR #3 as `c5025ad`; see the [domain contract](docs/Nap-Planning-Domain.md). Fixed deadlines and short-window fallback follow approved D-004/D-009.
@@ -90,12 +118,13 @@ GitHub secret scanning, push protection, Dependabot security updates, and privat
 5. Added Air, Fuel, and Spark as the second prepared George session, merged through PR #10 as `19f4339`. Continue follows completion evidence to the next session or its saved partial position; a long plan can approve both sessions before playback. The next milestone is an approximately ten-nap personal validation trial. The [trial guide](docs/Ten-Nap-Trial.md) provides setup, a blank private-log template, and decision criteria; actual use and deferred manual audio observations remain pending.
 6. Approved the 33-screen Quiet curiosity direction and applied its Rest-first shell, plan/recovery flow, and History. The current catalog supports functional session and journey browsing, source notes, packaged-audio inventory, Rest defaults, and a bounded George preview. The [screen implementation map](docs/Screen-Implementation-Map.md) separates those routes from the atlas's unprepared extra content and choices; release and device acceptance remain separate from the recorded simulator UI validation.
 
-See the [living project implementation plan](docs/Project-Implementation-Plan.md) for acceptance criteria and branch sequence. Questions that gate a phase are recorded in the [decision log](docs/Decision-Log.md), not left implicit in code.
 
-## Contributing
+The next milestone is the [approximately ten-nap personal trial](docs/Ten-Nap-Trial.md). More content, branching navigation, and additional prepared voices remain later work. See the [project overview](docs/Project-Overview.md) and [durable roadmap](docs/Project-Implementation-Plan.md) for details. The replaceable task plan lives in [docs/Implementation-Plan.md](docs/Implementation-Plan.md).
 
-Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before participating. Conduct concerns and security vulnerabilities have separate private reporting paths; do not include sensitive details in public issues.
+## Privacy, help, and reuse
 
-## License
+The app has no backend, account, analytics, or app-managed cloud sync. Listening history and preferences are stored locally; alarm scheduling uses iOS. There is currently no in-app history delete/export control. Read [Privacy and local data](docs/Privacy.md) for storage, backups, and reset limits.
 
-Code is released under the [MIT License](LICENSE). The bundled rain recording uses CC0 1.0; see its [source and preparation record](docs/Audio-Preparation.md#rain-candidate-and-provenance).
+Use [Troubleshooting](docs/Troubleshooting.md) for setup or playback problems. Report ordinary bugs through [GitHub issues](https://github.com/joshuawyadao/Honkshool/issues), using synthetic examples and redacted details. Report vulnerabilities privately through [SECURITY.md](SECURITY.md). Community expectations are in the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+Code and the original documentation diagrams use the [MIT License](LICENSE). The rain recording uses CC0 1.0. The two generated George recordings have separate model/source and preparation records; see [audio provenance](docs/Audio-Preparation.md) and [content sources](docs/Content-Catalog.md) before reusing assets. The code-license badge does not describe third-party source material.
