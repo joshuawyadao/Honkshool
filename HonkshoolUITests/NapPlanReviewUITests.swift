@@ -5,6 +5,22 @@ final class NapPlanReviewUITests: XCTestCase {
     continueAfterFailure = false
   }
 
+  func testCustomOneMinuteDurationPersistsAfterApplyingTimeChoices() {
+    let app = launchReview()
+    chooseOneMinuteDuration(in: app)
+    openTimeOptions(in: app)
+    XCTAssertTrue(app.buttons["napPlanDuration"].label.contains("1 minutes"))
+  }
+
+  func testCustomOneMinuteDurationPersistsAtLargestTextSize() {
+    let app = launchReview(additionalArguments: [
+      "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+    ])
+    chooseOneMinuteDuration(in: app)
+    openTimeOptions(in: app)
+    XCTAssertTrue(app.buttons["napPlanDuration"].label.contains("1 minutes"))
+  }
+
   func testPhysicalRainControlsBackgroundDeadlineAndEmptyHistoryOnRelaunch() throws {
     guard ProcessInfo.processInfo.environment["HONKSHOOL_REAL_RAIN_TEST"] == "1" else {
       throw XCTSkip("Opt in on a connected physical iPhone for real rain playback.")
@@ -19,12 +35,7 @@ final class NapPlanReviewUITests: XCTestCase {
         "HONKSHOOL_UI_TEST_AUDIO": "0",
       ])
       defer { app.terminate() }
-      chooseDuration(5, in: app)
-      openTimeOptions(in: app)
-      let custom = app.steppers["napPlanCustomDuration"]
-      scrollTo(custom, in: app)
-      for _ in 0..<4 { custom.buttons["napPlanCustomDuration-Decrement"].tap() }
-      app.buttons["applyNapTime"].tap()
+      chooseOneMinuteDuration(in: app)
 
       let sound = app.buttons["napPlanSound"]
       scrollTo(sound, in: app)
@@ -475,9 +486,11 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertFalse(app.staticTexts["napPlanConfirmation"].exists)
   }
 
-  private func launchReview(additionalEnvironment: [String: String] = [:]) -> XCUIApplication {
+  private func launchReview(
+    additionalEnvironment: [String: String] = [:], additionalArguments: [String] = []
+  ) -> XCUIApplication {
     let app = XCUIApplication()
-    app.launchArguments = ["-ui-testing"]
+    app.launchArguments = ["-ui-testing"] + additionalArguments
     app.launchEnvironment = [
       "HONKSHOOL_UI_TEST_ALARM": "authorized",
       "HONKSHOOL_UI_TEST_AUDIO": "1",
@@ -502,6 +515,19 @@ final class NapPlanReviewUITests: XCTestCase {
     openTimeOptions(in: app)
     app.buttons["napPlanDuration"].tap()
     app.buttons["\(minutes) minutes"].tap()
+    app.buttons["applyNapTime"].tap()
+  }
+
+  private func chooseOneMinuteDuration(in app: XCUIApplication) {
+    chooseDuration(5, in: app)
+    openTimeOptions(in: app)
+    let custom = app.steppers["napPlanCustomDuration"]
+    // The Stepper container can be visible without being a hittable target.
+    // Reach the native decrement button that the user actually presses.
+    let decrement = custom.buttons["napPlanCustomDuration-Decrement"]
+    scrollTo(decrement, in: app)
+    for _ in 0..<4 { decrement.tap() }
+    XCTAssertEqual(custom.value as? String, "1")
     app.buttons["applyNapTime"].tap()
   }
 

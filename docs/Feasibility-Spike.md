@@ -263,6 +263,16 @@ On 2026-09-30, the signed Release app from `06e521b` was installed in place and 
 
 The [accessibility refresh record](Accessibility-Refresh.md) documents compact-simulator layout/flow checks, resolved-color measurements, error-view rendering, regression results, and remaining manual acceptance. This installation/launch result is not a spoken VoiceOver, locked-screen, or audible alarm test. Earlier physical audio/alarm observations and pending acceptance above retain their original scope.
 
+## Merged Rest-first build device acceptance — 2026-10-01
+
+The clean merged source `e22edca` built with Xcode 27.0 for the iPhone 18 Pro Max / iOS 27.0. The signed Debug test build passed all four selected production audio/history/alarm cases with zero failures or skips: real narration and alarm cutoff; a synthetic near-end narration Resume through natural completion into rain with persisted partial/completed history; rain looping with pause/resume/Stop and no narration history; and a real alarm with rain cutoff. The last case observed alarm alerting and rain stopped about 0.02 seconds after the fixed deadline using 100 ms polling. Its assertions also verified that stopping the waiting run preserved its alarm and that a reloaded service retained the same identity. Each test cleaned up its own alarm and isolated storage.
+
+The physical rain UI case failed twice before playback while requiring the custom-duration Stepper container itself to be hittable. The recorded interface showed the Time sheet and its controls. A focused simulator regression passed at normal text size on iOS 26.5 and iOS 27.0, while the largest-text iOS 27 case reproduced the setup failure. The test now scrolls to the Stepper's interactive Decrement button and verifies the resulting one-minute value. Both normal and largest-text iOS 27 regressions passed after that change. They share the physical case's setup and verify that the value persists after applying and reopening Time choices. The physical case retains its existing real-clock, background, deadline, history, and no-autoplay assertions.
+
+The corrected full physical UI rerun remains pending: the phone locked before the diagnostic follow-up could launch. This does not turn the earlier physical UI failures into passes. The signed Release app built from clean `e22edca` passed signature verification and installed in place with the existing app identifier; its ordinary launch was blocked by the locked phone. No production app code changed during this follow-up. Raw results, recordings, signing output, and build provenance remain in ignored local storage.
+
+These automated checks do not establish locked-screen controls, audible alarm loudness, actual headphone-disconnection behavior, relative narration/rain comfort, full-session comfort, or spoken VoiceOver quality. Those direct observations remain pending.
+
 ## Recording results
 
 For each test, record only:
