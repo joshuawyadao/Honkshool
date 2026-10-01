@@ -100,6 +100,18 @@ final class FunctionalPagesUITests: XCTestCase {
       app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Ready offline")).count >= 2
     )
     capture("Offline library")
+    tap("recheckBundledAudio", in: app)
+    let recheck = app.buttons["recheckBundledAudio"]
+    let recheckFinished = XCTNSPredicateExpectation(
+      predicate: NSPredicate(format: "isEnabled == true"), object: recheck)
+    XCTAssertEqual(XCTWaiter.wait(for: [recheckFinished], timeout: 5), .completed)
+    XCTAssertTrue(app.staticTexts["Turning Fuel Into Motion"].waitForExistence(timeout: 5))
+    XCTAssertTrue(
+      app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Ready offline")).count >= 2
+    )
+    app.navigationBars.buttons.firstMatch.tap()
+    tap("openOfflineLibrary", in: app)
+    XCTAssertTrue(app.staticTexts["Turning Fuel Into Motion"].waitForExistence(timeout: 5))
     app.navigationBars.buttons.firstMatch.tap()
     tap("openJourneyLibrary", in: app)
     capture("Journey library")

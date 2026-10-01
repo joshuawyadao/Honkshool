@@ -68,6 +68,7 @@
 		1E0000000000000000000106 /* RestPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000206 /* RestPreferencesTests.swift */; };
 		1F0000000000000000000101 /* RestAccessibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0000000000000000000201 /* RestAccessibilityTests.swift */; };
 		1E0000000000000000000107 /* NarrationPreviewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000207 /* NarrationPreviewTests.swift */; };
+		1E0000000000000000000109 /* AudioInventoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000209 /* AudioInventoryTests.swift */; };
 		1E0000000000000000000108 /* FunctionalPagesUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000208 /* FunctionalPagesUITests.swift */; };
 /* End PBXBuildFile section */
 
@@ -175,6 +176,7 @@
 		1E0000000000000000000206 /* RestPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/RestPreferencesTests.swift; sourceTree = SOURCE_ROOT; };
 		1F0000000000000000000201 /* RestAccessibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/RestAccessibilityTests.swift; sourceTree = SOURCE_ROOT; };
 		1E0000000000000000000207 /* NarrationPreviewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/NarrationPreviewTests.swift; sourceTree = SOURCE_ROOT; };
+		1E0000000000000000000209 /* AudioInventoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/AudioInventoryTests.swift; sourceTree = SOURCE_ROOT; };
 		1E0000000000000000000208 /* FunctionalPagesUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolUITests/FunctionalPagesUITests.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -291,6 +293,7 @@
 			isa = PBXGroup;
 			children = (
 				1E0000000000000000000207 /* NarrationPreviewTests.swift */,
+				1E0000000000000000000209 /* AudioInventoryTests.swift */,
 				1E0000000000000000000206 /* RestPreferencesTests.swift */,
 				1F0000000000000000000201 /* RestAccessibilityTests.swift */,
 				180000000000000000000004 /* ListeningHistoryNavigationTests.swift */,
@@ -556,6 +559,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1E0000000000000000000107 /* NarrationPreviewTests.swift in Sources */,
+				1E0000000000000000000109 /* AudioInventoryTests.swift in Sources */,
 				1E0000000000000000000106 /* RestPreferencesTests.swift in Sources */,
 				1F0000000000000000000101 /* RestAccessibilityTests.swift in Sources */,
 				E10000000000000000000005 /* NapPlaybackTests.swift in Sources */,

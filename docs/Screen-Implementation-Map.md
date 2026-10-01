@@ -45,3 +45,5 @@ The two prepared sessions are **Turning Fuel Into Motion** and **Air, Fuel, and 
 This route map does not change the existing acceptance record: simulator and focused target-iPhone checks cover portions of audio, rain, alarm, and history behavior; complete locked-control, headphone, and extended listening-comfort observations are still pending. See [Project overview](Project-Overview.md) and the [device test guide](Feasibility-Spike.md).
 
 Settings summaries, Rest defaults, and a fresh plan use the same normalized sound preference and verified availability. If saved rain is unavailable, the displayed effective choice is Silence; the stored preference is retained for an installation where it validates again.
+
+The offline inventory verifies packaged audio on a background task. A quiet checking message leaves navigation responsive, Recheck is unavailable until the current scan completes, and leaving the page cancels the request so its result cannot overwrite a later visit.

@@ -101,6 +101,8 @@ struct RestDefaultsView: View {
 struct BundledAudioView: View {
   let catalog: PreparedCatalog
   @State private var inventory: [AudioInventoryItem] = []
+  @State private var scanRequestID = UUID()
+  @State private var isChecking = false
 
   var body: some View {
     ScrollView {
@@ -108,6 +110,12 @@ struct BundledAudioView: View {
         RestHeading(
           "Ready on this phone",
           subtitle: "Prepared audio is included with Honkshool for offline rest.")
+        if isChecking {
+          Text("Checking bundled audio…")
+            .font(.footnote)
+            .foregroundStyle(RestStyle.secondary)
+            .accessibilityIdentifier("inventoryChecking")
+        }
         RestCard(title: "Narration", systemImage: "waveform") {
           ForEach(inventory.filter { $0.kind == .narration }) { item in
             inventoryRow(item)
@@ -118,8 +126,10 @@ struct BundledAudioView: View {
             inventoryRow(item)
           }
         }
-        Button("Recheck bundled audio") { recheck() }
+        Button("Recheck bundled audio") { scanRequestID = UUID() }
           .buttonStyle(RestButtonStyle(secondary: true))
+          .disabled(isChecking)
+          .accessibilityIdentifier("recheckBundledAudio")
         Text("These recordings are part of the app. There is nothing to download or remove here.")
           .font(.footnote)
           .foregroundStyle(RestStyle.secondary)
@@ -131,7 +141,14 @@ struct BundledAudioView: View {
     .restScreen()
     .navigationTitle("Bundled audio")
     .navigationBarTitleDisplayMode(.inline)
-    .onAppear(perform: recheck)
+    .task(id: scanRequestID) {
+      let requestID = scanRequestID
+      isChecking = true
+      let result = await AudioInventoryScanner.scanAsync(catalog: catalog)
+      guard !Task.isCancelled, scanRequestID == requestID, let result else { return }
+      inventory = result
+      isChecking = false
+    }
   }
 
   private func inventoryRow(_ item: AudioInventoryItem) -> some View {
@@ -144,12 +161,46 @@ struct BundledAudioView: View {
     .frame(maxWidth: .infinity, alignment: .leading)
     .accessibilityElement(children: .combine)
   }
+}
 
-  private func recheck() {
+struct AudioInventoryItem: Identifiable, Equatable, Sendable {
+  enum Kind: Equatable, Sendable { case narration, ambience }
+  let id: String
+  let title: String
+  let kind: Kind
+  let available: Bool
+  let bytes: Int64?
+
+  var detail: String {
+    guard available else { return "Unavailable or could not be verified" }
+    guard let bytes else { return "Ready offline" }
+    return "Ready offline · \(ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file))"
+  }
+}
+
+enum AudioInventoryScanner {
+  /// Only the final immutable inventory crosses back to the view actor.
+  static func scanAsync(
+    catalog: PreparedCatalog,
+    using scan: @escaping @Sendable (PreparedCatalog) -> [AudioInventoryItem] = {
+      AudioInventoryScanner.scan(catalog: $0)
+    }
+  ) async -> [AudioInventoryItem]? {
+    let worker = Task.detached(priority: .utility) { scan(catalog) }
+    return await withTaskCancellationHandler {
+      let result = await worker.value
+      return Task<Never, Never>.isCancelled ? nil : result
+    } onCancel: {
+      worker.cancel()
+    }
+  }
+
+  nonisolated static func scan(catalog: PreparedCatalog) -> [AudioInventoryItem] {
     let sessionIDs = catalog.journeys.flatMap(\.sessionIDs)
     var seen: Set<Session.ID> = []
     var result: [AudioInventoryItem] = []
     for id in sessionIDs where seen.insert(id).inserted {
+      guard !Task<Never, Never>.isCancelled else { return result }
       guard let prepared = catalog.sessions[id] else { continue }
       let url = try? prepared.narrationURL()
       let verified: Bool
@@ -161,36 +212,24 @@ struct BundledAudioView: View {
       } else {
         verified = false
       }
+      guard !Task<Never, Never>.isCancelled else { return result }
       result.append(
         AudioInventoryItem(
           id: id, title: prepared.session.title, kind: .narration,
           available: verified, bytes: verified ? url.flatMap(fileSize) : nil))
     }
+    guard !Task<Never, Never>.isCancelled else { return result }
     let rainURL = try? PreparedAmbience.resolve(id: PreparedAmbience.gentleRainID)
+    guard !Task<Never, Never>.isCancelled else { return result }
     result.append(
       AudioInventoryItem(
         id: PreparedAmbience.gentleRainID, title: "Gentle rain", kind: .ambience,
         available: rainURL != nil, bytes: rainURL.flatMap(fileSize)))
-    inventory = result
+    return result
   }
 
-  private func fileSize(_ url: URL) -> Int64? {
+  private nonisolated static func fileSize(_ url: URL) -> Int64? {
     (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize.map(Int64.init)
-  }
-}
-
-private struct AudioInventoryItem: Identifiable {
-  enum Kind { case narration, ambience }
-  let id: String
-  let title: String
-  let kind: Kind
-  let available: Bool
-  let bytes: Int64?
-
-  var detail: String {
-    guard available else { return "Unavailable or could not be verified" }
-    guard let bytes else { return "Ready offline" }
-    return "Ready offline · \(ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file))"
   }
 }
 
