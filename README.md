@@ -118,7 +118,6 @@ The first command uses shell, Python's standard library, and Git. The second nee
 5. Added Air, Fuel, and Spark as the second prepared George session, merged through PR #10 as `19f4339`. Continue follows completion evidence to the next session or its saved partial position; a long plan can approve both sessions before playback. The next milestone is an approximately ten-nap personal validation trial. The [trial guide](docs/Ten-Nap-Trial.md) provides setup, a blank private-log template, and decision criteria; actual use and deferred manual audio observations remain pending.
 6. Approved the 33-screen Quiet curiosity direction and applied its Rest-first shell, plan/recovery flow, and History. The current catalog supports functional session and journey browsing, source notes, packaged-audio inventory, Rest defaults, and a bounded George preview. The [screen implementation map](docs/Screen-Implementation-Map.md) separates those routes from the atlas's unprepared extra content and choices; release and device acceptance remain separate from the recorded simulator UI validation.
 
-
 The next milestone is the [approximately ten-nap personal trial](docs/Ten-Nap-Trial.md). More content, branching navigation, and additional prepared voices remain later work. See the [project overview](docs/Project-Overview.md) and [durable roadmap](docs/Project-Implementation-Plan.md) for details. The replaceable task plan lives in [docs/Implementation-Plan.md](docs/Implementation-Plan.md).
 
 ## Privacy, help, and reuse

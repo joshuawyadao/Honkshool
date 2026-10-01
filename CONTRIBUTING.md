@@ -32,7 +32,6 @@ Honkshool is an experimental iPhone app with no supported release. Start with th
 
 5. Describe the user-visible outcome, privacy and security implications, verification performed, any check you could not run, and known limitations in the pull request.
 
-
 ## Public-data rules
 
 Use synthetic examples and fixtures. Do not commit credentials, tokens, certificates, personal exports, private configuration, local databases, logs, generated reports, or audio preparation caches. Redact local usernames, device identifiers, and machine-specific paths from screenshots and command output. The [development guide](docs/Development.md#maintaining-public-documentation) explains how to keep documentation safe for this public repository.
