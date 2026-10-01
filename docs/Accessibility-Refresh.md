@@ -34,6 +34,14 @@ Xcode reported internal priority-inversion warnings during `SpikeModelsTests`; n
 
 The Apple-platform source review found no timing, alarm, history, or navigation regression. No domain, persistence, playback, permission, or scheduling implementation was changed.
 
+## Largest-text preset follow-up — 2026-10-01
+
+The merged-build iPhone 18 Pro Max / iOS 27.0 simulator run exposed a further accessibility defect at AX5: the 60-minute preset was visibly rendered in the adaptive grid's incomplete second row but absent from the accessibility tree. The unchanged full duration/sound case and a minimized first-scroll probe both failed. Explicit accessibility containment did not restore the missing child.
+
+`RestDurationChoices` now uses eager `Grid` rows for its four choices. `ViewThatFits` preserves the available-width column selection, existing minimum widths, spacing, native scaling, and each button's action, label, identifier, and selected trait. The minimized probe then found the 60-minute button and passed. This follows Apple's [guidance on regular and lazy grids](https://developer.apple.com/documentation/swiftui/grid): a regular grid creates its children immediately, which is appropriate for this small fixed set.
+
+The full flow also exposed a test-helper issue in the Sound sheet: XCTest reported the offscreen rain choice hittable and tapped below the pinned Done button. The helper now requires the target's center to enter the usable content area and scrolls back when the target is above it. The existing regression retains all label, single-line height, target-height, applied-selection, and sound-description checks, and additionally selects 60 minutes in both locations and verifies one accessibility element per preset identifier.
+
 ## Remaining acceptance
 
 The fixes do not establish spoken VoiceOver quality merely because accessibility labels exist. On the updated iPhone, check heading-rotor movement, announcement order, and the dated History actions with VoiceOver; also try Voice Control or Switch Control if used. These settings are not enabled remotely as part of installation. Physical alarm loudness, locked-screen behavior, listening comfort, and prior audio acceptance items remain separate in the [feasibility record](Feasibility-Spike.md).

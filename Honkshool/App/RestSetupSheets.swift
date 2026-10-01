@@ -76,32 +76,59 @@ struct RestDurationChoices: View {
   @Binding var minutes: Int
   var identifierPrefix = "napPlanPreset"
   var body: some View {
-    LazyVGrid(
-      columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 120 : 54))],
-      spacing: 8
-    ) {
-      ForEach(RestDurationPolicy.recommendedMinutes, id: \.self) { value in
-        Button {
-          minutes = value
-        } label: {
-          Text("\(value)")
-            .font(.body.weight(minutes == value ? .semibold : .regular))
-            .frame(maxWidth: .infinity, minHeight: 44)
-            .background(
-              minutes == value ? RestStyle.quiet : RestStyle.well,
-              in: RoundedRectangle(cornerRadius: 12)
-            )
-            .overlay {
-              RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(minutes == value ? RestStyle.secondary : .clear, lineWidth: 1)
+    // Four choices need no lazy loading. Eager rows keep every visible preset
+    // in the accessibility tree, including an incomplete final row.
+    ViewThatFits(in: .horizontal) {
+      choices(columns: 4)
+      choices(columns: 3)
+      choices(columns: 2)
+      choices(columns: 1)
+    }
+  }
+
+  private func choices(columns: Int) -> some View {
+    let values = RestDurationPolicy.recommendedMinutes
+    return Grid(horizontalSpacing: 8, verticalSpacing: 8) {
+      ForEach(0..<((values.count + columns - 1) / columns), id: \.self) { row in
+        GridRow {
+          ForEach(0..<columns, id: \.self) { column in
+            let index = row * columns + column
+            if values.indices.contains(index) {
+              choice(values[index])
+            } else {
+              Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
+                .accessibilityHidden(true)
             }
+          }
         }
-        .accessibilityLabel("\(value) minutes")
-        .accessibilityIdentifier("\(identifierPrefix)-\(value)")
-        .accessibilityAddTraits(minutes == value ? .isSelected : [])
       }
     }
   }
+
+  private func choice(_ value: Int) -> some View {
+    Button {
+      minutes = value
+    } label: {
+      Text("\(value)")
+        .font(.body.weight(minutes == value ? .semibold : .regular))
+        .frame(
+          minWidth: dynamicTypeSize.isAccessibilitySize ? 120 : 54,
+          maxWidth: .infinity, minHeight: 44
+        )
+        .background(
+          minutes == value ? RestStyle.quiet : RestStyle.well,
+          in: RoundedRectangle(cornerRadius: 12)
+        )
+        .overlay {
+          RoundedRectangle(cornerRadius: 12)
+            .strokeBorder(minutes == value ? RestStyle.secondary : .clear, lineWidth: 1)
+        }
+    }
+    .accessibilityLabel("\(value) minutes")
+    .accessibilityIdentifier("\(identifierPrefix)-\(value)")
+    .accessibilityAddTraits(minutes == value ? .isSelected : [])
+  }
+
 }
 
 struct RestSoundSheet: View {

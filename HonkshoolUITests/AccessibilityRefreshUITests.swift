@@ -11,6 +11,8 @@ final class AccessibilityRefreshUITests: XCTestCase {
     XCTAssertTrue(review.isHittable)
     assertSingleLinePresets("napPlanPreset", in: app)
     capture("AX5 Rest duration choices")
+    app.buttons["napPlanPreset-60"].tap()
+    XCTAssertTrue(app.buttons["napPlanPreset-60"].isSelected)
     app.buttons["napPlanPreset-30"].tap()
     XCTAssertTrue(app.buttons["napPlanPreset-30"].isSelected)
     let options = app.buttons["napPlanTimeOptions"]
@@ -18,6 +20,8 @@ final class AccessibilityRefreshUITests: XCTestCase {
     options.tap()
     assertSingleLinePresets("napTimePreset", in: app)
     capture("AX5 Time duration choices")
+    app.buttons["napTimePreset-60"].tap()
+    XCTAssertTrue(app.buttons["napTimePreset-60"].isSelected)
     app.buttons["napTimePreset-45"].tap()
     XCTAssertTrue(app.buttons["napTimePreset-45"].isSelected)
     app.buttons["applyNapTime"].tap()
@@ -124,6 +128,7 @@ final class AccessibilityRefreshUITests: XCTestCase {
     for minutes in [20, 30, 45, 60] {
       let button = app.buttons["\(prefix)-\(minutes)"]
       scrollTo(button, in: app)
+      XCTAssertEqual(app.buttons.matching(identifier: "\(prefix)-\(minutes)").count, 1)
       XCTAssertEqual(button.label, "\(minutes) minutes")
       // Two-line digits measured almost twice this height in the original audit.
       XCTAssertLessThan(button.frame.height, lineHeight * 1.5, "Duration digits must stay together")
@@ -152,7 +157,6 @@ final class AccessibilityRefreshUITests: XCTestCase {
 
   private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {
     for _ in 0..<16 {
-      if element.isHittable { return }
       // Keep the gesture inside content rather than the pinned primary action.
       var bottom = app.frame.height - 140
       for id in ["reviewNapPlan", "startNapRun", "applyNapTime", "applyNapSound"] {
@@ -161,11 +165,17 @@ final class AccessibilityRefreshUITests: XCTestCase {
       }
       let top: CGFloat = 145
       bottom = max(top + 80, bottom)
+      // A sheet control can report hittable while its tap point is below the
+      // pinned footer. Its center must reach the usable content viewport.
+      let frame = element.exists ? element.frame : nil
+      if let frame, element.isHittable, (top...bottom).contains(frame.midY) { return }
+      let scrollBack = frame.map { $0.midY < top } ?? false
       let origin = app.coordinate(withNormalizedOffset: .zero)
-      origin.withOffset(CGVector(dx: app.frame.width * 0.7, dy: bottom))
+      origin.withOffset(CGVector(dx: app.frame.width * 0.7, dy: scrollBack ? top : bottom))
         .press(
           forDuration: 0.05,
-          thenDragTo: origin.withOffset(CGVector(dx: app.frame.width * 0.7, dy: top)))
+          thenDragTo: origin.withOffset(
+            CGVector(dx: app.frame.width * 0.7, dy: scrollBack ? bottom : top)))
     }
     XCTFail("Element is not reachable: \(element)")
   }

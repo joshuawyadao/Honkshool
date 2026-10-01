@@ -8,12 +8,18 @@ Resolve the largest-text simulator failure in the duration and sound accessibili
 
 ## Action items
 - [x] Read the accessibility record, development test commands, Quiet curiosity guidance, and existing failure evidence; identify affected tests and production layout boundaries.
-- [ ] Checkpoint the resolved plan before implementation.
-- [ ] Reproduce the focused AX5 duration/sound failure on iPhone 18 Pro Max / iOS 27, capture relevant control and gesture geometry, and test ranked hypotheses one at a time.
-- [ ] Repair the demonstrated cause while retaining preset label, one-line height, minimum target size, selection, applied-value, and complete sound-description assertions. Use the existing case as the regression; extend it only where needed to cover the failed interaction.
-- [ ] Run the focused regression and all `AccessibilityRefreshUITests` on the failing destination, then verify the duration/sound flow on the compact iPhone SE / iOS 26.5 baseline. Run broader tests if production code or shared test infrastructure changes.
+- [x] Checkpoint the resolved plan before implementation (`9a11814`).
+- [x] Reproduce the focused AX5 duration/sound failure on iPhone 18 Pro Max / iOS 27, capture relevant control and gesture geometry, and test ranked hypotheses one at a time.
+- [x] Repair the demonstrated cause while retaining preset label, one-line height, minimum target size, selection, applied-value, and complete sound-description assertions. Use the existing case as the regression; add unique-preset and actual 60-minute selection checks in Rest and Time.
+- [ ] Run the focused regression and all `AccessibilityRefreshUITests` on the failing destination, then verify the duration/sound flow on the compact iPhone SE / iOS 26.5 baseline. Run the complete simulator suite if production code or shared test infrastructure changes.
 - [ ] Remove diagnostic instrumentation and update `docs/Accessibility-Refresh.md` and `docs/Feasibility-Spike.md` with the cause, final evidence, and unchanged manual acceptance limits.
 - [ ] Run strict formatting, all repository checks, and diff checks; review the scoped correction, commit completed work, and push `codex/device-acceptance-ui`.
 
 ## Open questions
 - None. The prior full suite and unchanged focused rerun both failed at `napPlanPreset-60`; the existing physical app installation and owner observations are outside this simulator task.
+
+## Diagnosis evidence
+- The unchanged focused case failed again at the same preset. A minimized launch → first scroll → reachability probe also failed. Its accessibility tree contains only the first three presets while the recording shows the fourth on screen; further upward swipes cannot recover the missing element.
+- Explicit accessibility containment failed the same minimized probe and was removed. Replacing the four-choice lazy grid with eager `Grid` rows restored the fourth button and passed that probe. `ViewThatFits` keeps the existing 4/3/2/1-column adaptation, minimum widths, spacing, actions, and traits. The final regression uses the original full flow with stronger selection and uniqueness assertions; temporary hierarchy instrumentation was removed.
+- The full flow then passed both duration grids and reached a later sound-selection failure. The recording and synthesized event locate the tap below the pinned Done footer while Gentle rain remained offscreen. The scrolling helper must require the target center inside its usable content band, even when XCTest reports it hittable, and support returning to controls above the viewport. The remaining original flow is a 20-second reproduction with a specific missed tap; retain it as the regression for this helper correction.
+- All three final accessibility UI cases passed on iPhone 18 Pro Max / iOS 27.0 after both corrections. Strict Swift formatting and 51 repository checks passed. The compact baseline and complete simulator suite remain pending at this implementation checkpoint.
