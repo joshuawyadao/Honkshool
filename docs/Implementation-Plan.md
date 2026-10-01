@@ -13,9 +13,10 @@ Complete the merged-build iPhone acceptance run and repair the reproducible phys
 - [x] Inspect the current control hierarchy, correct the test selector or sheet navigation at the demonstrated failure, and retain all deadline, background, history, and no-autoplay assertions.
 - [x] Exercise the custom-duration setup in ordinary simulator tests at normal and largest text sizes so the physical-only path cannot silently lose this coverage.
 - [x] Run the complete simulator suite, focused regressions, formatting, and repository verification; investigate failures without weakening assertions. Preserve the separate reproduced accessibility failure below as unresolved.
-- [ ] Run the corrected physical UI case after the owner unlocks the phone; the signed test build is ready.
+- [x] Run the corrected physical UI case after the owner unlocks the phone. Duration setup, first controls, and background return passed; the later Pause tap did not change the visible playing state.
+- [ ] Diagnose the post-background Pause tap with immediate status/control evidence and rerun the full physical case without removing its control or deadline assertions.
 - [x] Record sanitized evidence and remaining human observations in `docs/Feasibility-Spike.md`, install the signed merged Release app in place, and retain raw results only in ignored local data.
-- [ ] Launch the installed Release app normally after the owner unlocks the phone; gather direct listening and Lock Screen observations only when provided.
+- [x] Restore and launch the installed Release app normally after unlocking. Direct listening and Lock Screen observations remain pending until provided.
 - [x] Review the final test diff and checkpoint the correction. Save the final evidence update and push the focused branch with the validation limits explicit.
 
 ## Open questions
@@ -29,3 +30,4 @@ Complete the merged-build iPhone acceptance run and repair the reproducible phys
 - All 51 repository checks, strict Swift formatting, and diff checks passed. The merged Release app installed in place; the phone subsequently blocked ordinary launch and further physical tests because it was locked. Direct observations and the corrected physical UI rerun remain pending.
 - The complete iOS 27 simulator run reported 274 passes, one failure, and six intentional physical-only skips. Both new cases passed. The unchanged largest-text duration/sound test failed because `napPlanPreset-60` was reported unreachable, and a focused unchanged rerun failed the same way. The recording shows the preset, so a production interaction defect is not established. This separate accessibility finding remains unresolved; the full suite is not green.
 - Independent Apple-contract review found no issue in the narrow test correction: all physical playback/deadline/history assertions remain, and one-minute selection is checked directly. No raw diagnostics, personal observations, or signing data are committed.
+- On the unlocked phone, the corrected physical test reached real rain, first pause/resume, 12 seconds in the background, and the same deadline on return. Its second Pause tap left the visible status at “Gentle rain resumed” with Pause still shown; the deadline was still in the future. The test eventually failed searching for Resume. Capture that state directly rather than allowing scrolling to obscure the original failure. The normal merged Release app was restored and launched successfully afterward.
