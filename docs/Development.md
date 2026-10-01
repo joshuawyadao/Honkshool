@@ -12,7 +12,7 @@ The repository includes [Config/Local.xcconfig.example](../Config/Local.xcconfig
 
 | Location | Responsibility |
 | --- | --- |
-| [`Honkshool/App/`](../Honkshool/App/) | SwiftUI entry point, feasibility console, Nap Plan review, Listening History, and Debug UI-test fixtures. |
+| [`Honkshool/App/`](../Honkshool/App/) | SwiftUI Rest/History shell, Settings and Feasibility Lab, Nap Plan review, prepared-content pages, listening history, preview, and Debug UI-test fixtures. |
 | [`Honkshool/Domain/`](../Honkshool/Domain/) | Nap planning, playback, content, and spike state rules. |
 | [`Honkshool/Services/`](../Honkshool/Services/) | Alarm, audio, ambience, run control, and local history adapters. |
 | [`Honkshool/Content/`](../Honkshool/Content/) and [`Honkshool/Resources/`](../Honkshool/Resources/) | Prepared catalog definitions, bundled audio, and provenance. |
@@ -21,7 +21,7 @@ The repository includes [Config/Local.xcconfig.example](../Config/Local.xcconfig
 | [`tests/`](../tests/) | Portable Python publication and audio-asset checks. |
 | [`scripts/`](../scripts/) | Verification, simulator tests, and offline preparation tools. |
 
-The [architecture guide](Architecture.md) explains the main boundaries; the [Nap Planning domain contract](Nap-Planning-Domain.md) covers planning rules. The [project overview](Project-Overview.md) and [decision log](Decision-Log.md) track current status and accepted choices.
+The [architecture guide](Architecture.md) explains the main boundaries; the [Nap Planning domain contract](Nap-Planning-Domain.md) covers planning rules. The [Quiet curiosity design language](Design-Language.md) and [screen implementation map](Screen-Implementation-Map.md) cover current UI composition and capability limits. The [project overview](Project-Overview.md) and [decision log](Decision-Log.md) track current status and accepted choices.
 
 ## Verification
 
@@ -97,6 +97,6 @@ Use fresh output paths, inspect provenance and measurements, and follow the cont
 
 ## Maintaining public documentation
 
-Update the canonical document nearest a changed behavior: [Getting started](Getting-Started.md) for setup, [User guide](User-Guide.md) for app use, [Architecture](Architecture.md) for boundaries, [Audio Preparation](Audio-Preparation.md) for generated content, and [Feasibility Spike](Feasibility-Spike.md) for test evidence. The [documentation index](README.md) points readers to the rest. Keep the durable [project implementation plan](Project-Implementation-Plan.md) distinct from the replaceable [current task plan](Implementation-Plan.md).
+Update the canonical document nearest a changed behavior: [Getting started](Getting-Started.md) for setup, [User guide](User-Guide.md) for app use, [Design Language](Design-Language.md) and [Screen Implementation Map](Screen-Implementation-Map.md) for the Rest-first interface, [Architecture](Architecture.md) for boundaries, [Audio Preparation](Audio-Preparation.md) for generated content, and [Feasibility Spike](Feasibility-Spike.md) for test evidence. The [documentation index](README.md) points readers to the rest. Keep the durable [project implementation plan](Project-Implementation-Plan.md) distinct from the replaceable [current task plan](Implementation-Plan.md).
 
 Document only observed outcomes; label pending device or listening checks as pending. Use synthetic fixtures and redacted examples. Keep local usernames, absolute machine paths, device identifiers, personal listening logs, private exports, credentials, and generated reports out of public Markdown and screenshots. Check relative links from the file that contains them and run the repository gate before submitting a pull request.

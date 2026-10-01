@@ -74,13 +74,16 @@ struct ListeningHistoryView: View {
 
   var body: some View {
     ScrollView {
-      VStack(alignment: .leading, spacing: 16) {
+      VStack(alignment: .leading, spacing: 20) {
+        RestHeading("At your own pace.", subtitle: "Return to what played, whenever you like.")
         if let error = store.errorMessage {
-          Label(error, systemImage: "exclamationmark.triangle")
-            .foregroundStyle(.red)
-            .accessibilityIdentifier("historySaveError")
-          Button("Retry saving") { store.retrySave() }
-            .accessibilityIdentifier("retryHistorySave")
+          RestCard(title: "Listening history", systemImage: "exclamationmark.triangle") {
+            Text(error)
+              .foregroundStyle(RestStyle.error)
+              .accessibilityIdentifier("historySaveError")
+            Button("Retry saving") { store.retrySave() }
+              .accessibilityIdentifier("retryHistorySave")
+          }
         }
         if let loadError {
           ContentUnavailableView(
@@ -98,11 +101,19 @@ struct ListeningHistoryView: View {
           if let next = ListeningHistoryNavigation.next(
             in: catalog, history: store.history, isNarrationAvailable: isNarrationAvailable)
           {
-            VStack(alignment: .leading, spacing: 8) {
+            let nextTitle = catalog.sessions[next.sessionID]?.session.title ?? "this session"
+            let latestDate = store.entries
+              .filter {
+                $0.record.plannedSession.journeyID == next.journeyID
+                  && $0.record.plannedSession.session.id == next.sessionID
+              }
+              .map { $0.record.endedAt }
+              .max()
+            RestCard(title: "Ready to continue", systemImage: "play.circle") {
               if let title = catalog.sessions[next.sessionID]?.session.title {
                 Text("Up next: \(title)")
                   .font(.subheadline)
-                  .foregroundStyle(.secondary)
+                  .foregroundStyle(RestStyle.secondary)
                   .accessibilityIdentifier("historyNextSession")
               }
               NavigationLink {
@@ -111,33 +122,44 @@ struct ListeningHistoryView: View {
                 Label("Continue listening", systemImage: "arrow.right.circle.fill")
                   .frame(maxWidth: .infinity)
               }
-              .buttonStyle(.borderedProminent)
+              .buttonStyle(RestButtonStyle())
               .disabled(!canStart)
+              .accessibilityLabel(
+                "Continue listening: \(nextTitle)"
+                  + (latestDate.map {
+                    ", last played \($0.formatted(date: .abbreviated, time: .shortened))"
+                  } ?? "")
+              )
               .accessibilityIdentifier("historyContinue")
             }
           } else if ListeningHistoryNavigation.allAvailableJourneysCompleted(
             in: catalog, history: store.history)
           {
-            Text(
-              "Available journey complete. New prepared content will appear here when available."
-            )
-            .foregroundStyle(.secondary)
-            .accessibilityIdentifier("historyJourneyComplete")
+            RestCard(title: "Available journey played through", systemImage: "checkmark.circle") {
+              Text("New prepared content will appear here when available.")
+                .foregroundStyle(RestStyle.secondary)
+                .accessibilityIdentifier("historyJourneyComplete")
+            }
           } else {
             Text("The next incomplete session is not currently available to play.")
-              .foregroundStyle(.secondary)
+              .foregroundStyle(RestStyle.secondary)
               .accessibilityIdentifier("historyContinueUnavailable")
           }
           ForEach(catalog.journeys, id: \.id) { journey in
-            Text(
-              "\(journey.title): \(store.history.completedSessionIDs(in: journey.id).count) of \(journey.sessionIDs.count) completed"
-            )
-            .font(.subheadline)
-            .accessibilityIdentifier("historyJourneyProgress")
+            RestCard(title: journey.title, systemImage: "book") {
+              Text(
+                "\(store.history.completedSessionIDs(in: journey.id).count) of \(journey.sessionIDs.count) played through"
+              )
+              .font(.subheadline)
+              .foregroundStyle(RestStyle.secondary)
+              .accessibilityIdentifier("historyJourneyProgress")
+            }
           }
           if store.entries.isEmpty {
-            ContentUnavailableView(
-              "No listening history yet", systemImage: "clock.arrow.circlepath")
+            RestCard(title: "Nothing played yet", systemImage: "moon") {
+              Text("After a rest, you can return to what you heard here.")
+                .foregroundStyle(RestStyle.secondary)
+            }
           } else {
             ForEach(store.entries) { entry in
               entryCard(entry, catalog: catalog)
@@ -148,10 +170,12 @@ struct ListeningHistoryView: View {
         }
       }
       .frame(maxWidth: .infinity, alignment: .leading)
-      .padding()
+      .padding(.horizontal, RestStyle.pageInset)
+      .padding(.vertical, 24)
     }
-    .background(Color(.systemGroupedBackground))
-    .navigationTitle("Listening History")
+    .restScreen()
+    .navigationTitle("History")
+    .navigationBarTitleDisplayMode(.inline)
     .task {
       guard catalog == nil && loadError == nil else { return }
       do { catalog = try PreparedCatalog.load() } catch {
@@ -166,39 +190,54 @@ struct ListeningHistoryView: View {
       record, in: catalog, isNarrationAvailable: isNarrationAvailable)
     let replay = ListeningHistoryNavigation.replay(
       record, in: catalog, isNarrationAvailable: isNarrationAvailable)
-    return VStack(alignment: .leading, spacing: 8) {
-      Text(record.plannedSession.session.title).font(.headline)
+    return RestCard {
+      Text(record.plannedSession.session.title)
+        .font(.system(.title2, design: .rounded).weight(.medium))
+        .accessibilityAddTraits(.isHeader)
       Text(
         entry.isCheckpoint
-          ? "Last verified checkpoint" : record.isCompleted ? "Completed" : "Partial"
+          ? "Last verified checkpoint" : record.isCompleted ? "Played through" : "Partly played"
       )
       .accessibilityIdentifier("historyOutcome")
-      Text(record.endedAt.formatted(date: .abbreviated, time: .shortened))
+      Text(
+        (entry.isCheckpoint ? "Saved at " : "")
+          + record.endedAt.formatted(date: .abbreviated, time: .shortened)
+      )
+      .foregroundStyle(RestStyle.secondary)
+      if let captured = record.checkpointCapturedAt {
+        Text("Position verified at \(captured.formatted(date: .abbreviated, time: .shortened))")
+          .font(.footnote).foregroundStyle(RestStyle.secondary)
+      }
       Text("Actually played: \(Self.duration(record.playedDuration))")
         .accessibilityIdentifier("historyPlayedDuration")
       if let resume {
         NavigationLink("Resume from \(Self.position(resume.resumePoint))") {
           reviewDestination(resume)
         }
+        .buttonStyle(RestButtonStyle(secondary: true))
         .disabled(!canStart)
+        .accessibilityLabel(
+          "Resume from \(Self.position(resume.resumePoint)) in \(record.plannedSession.session.title), \(record.endedAt.formatted(date: .abbreviated, time: .shortened))"
+        )
         .accessibilityIdentifier("historyResume")
       } else if record.resumePoint != nil {
         Text(
           "This checkpoint cannot resume because its content changed or is unavailable. You can start a new review when current audio is available."
         )
         .font(.footnote)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(RestStyle.secondary)
         .accessibilityIdentifier("historyResumeUnavailable")
       }
       if let replay {
         NavigationLink("Replay from start") { reviewDestination(replay) }
+          .buttonStyle(RestButtonStyle(secondary: true))
           .disabled(!canStart)
+          .accessibilityLabel(
+            "Replay from start: \(record.plannedSession.session.title), \(record.endedAt.formatted(date: .abbreviated, time: .shortened))"
+          )
           .accessibilityIdentifier("historyReplay")
       }
     }
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .padding()
-    .background(.background, in: RoundedRectangle(cornerRadius: 18))
   }
 
   static func duration(_ seconds: TimeInterval) -> String {

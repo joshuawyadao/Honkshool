@@ -2,6 +2,10 @@
 
 The Foundation-only types in `Honkshool/Domain/NapContent.swift`, `NapPlan.swift`, `NapPlanReview.swift`, and `NapPlayback.swift` implement planning, review, and playback evidence. They have no SwiftUI, SwiftData, AVFoundation, or AlarmKit dependencies. `NapRunController` executes confirmed plans using prepared audio; `NapPlanAlarmService` owns optional production wake alarms; `ListeningHistoryStore` owns SwiftData persistence behind the small `NapHistoryRecording` boundary. The feasibility console keeps its separate spike alarm service.
 
+The current SwiftUI root is `FeasibilityConsoleView`, which now hosts the shared **Rest** and **History** tabs and moves diagnostic controls under **Settings → Advanced → Feasibility Lab**. This shell name is historical; the production Nap Plan and local history share one `NapRunController`, `NapPlanAlarmService`, and `ListeningHistoryStore`. `Honkshool/Shared/RestStyle.swift` defines the adaptive design tokens; `Honkshool/App/RestDesign.swift` supplies reusable presentation components under the [approved design language](Design-Language.md).
+
+`NapRunController.presentationPlan` is a read-only snapshot for displaying the current or most recent run. It can remain visible after Stop, but `resetPresentation()` clears it when a new plan is chosen; it is never restored as an executable approval. The review view clears a consumed confirmation when another tab resets a finished run, so returning to an older screen cannot expose a second Start for the same plan. Relaunch still requires a fresh review and explicit start.
+
 ## Inputs and identity
 
 - `Session` has a catalog-supplied stable ID, content revision, title, and positive finite duration estimate in seconds. Estimates are configurable; 12–15 minutes is not a domain constant. Titles and estimates can change without changing identity. Change the revision when the script or its resume positions change.

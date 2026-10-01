@@ -54,6 +54,22 @@
 		190000000000000000000002 /* NapAmbiencePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000000000000000000002 /* NapAmbiencePlayer.swift */; };
 		190000000000000000000003 /* PreparedAmbienceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000000000000000000003 /* PreparedAmbienceTests.swift */; };
 		190000000000000000000004 /* NapAmbiencePlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000000000000000000004 /* NapAmbiencePlayerTests.swift */; };
+		1B0000000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1C0000000000000000000001 /* Assets.xcassets */; };
+		1D0000000000000000000001 /* RestDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0000000000000000000002 /* RestDesign.swift */; };
+		1D0000000000000000000003 /* RestShellUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0000000000000000000004 /* RestShellUITests.swift */; };
+		1F0000000000000000000102 /* AccessibilityRefreshUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0000000000000000000202 /* AccessibilityRefreshUITests.swift */; };
+		1D0000000000000000000005 /* RestStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0000000000000000000007 /* RestStyle.swift */; };
+		1D0000000000000000000006 /* RestStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0000000000000000000007 /* RestStyle.swift */; };
+		1E0000000000000000000101 /* RestSetupSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000201 /* RestSetupSheets.swift */; };
+		1E0000000000000000000102 /* RestContentViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000202 /* RestContentViews.swift */; };
+		1E0000000000000000000103 /* RestPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000203 /* RestPreferences.swift */; };
+		1E0000000000000000000104 /* RestPreparationViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000204 /* RestPreparationViews.swift */; };
+		1E0000000000000000000105 /* NarrationPreviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000205 /* NarrationPreviewController.swift */; };
+		1E0000000000000000000106 /* RestPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000206 /* RestPreferencesTests.swift */; };
+		1F0000000000000000000101 /* RestAccessibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0000000000000000000201 /* RestAccessibilityTests.swift */; };
+		1E0000000000000000000107 /* NarrationPreviewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000207 /* NarrationPreviewTests.swift */; };
+		1E0000000000000000000109 /* AudioInventoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000209 /* AudioInventoryTests.swift */; };
+		1E0000000000000000000108 /* FunctionalPagesUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000208 /* FunctionalPagesUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -147,6 +163,21 @@
 		1A0000000000000000000002 /* NapAmbiencePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/Services/NapAmbiencePlayer.swift; sourceTree = SOURCE_ROOT; };
 		1A0000000000000000000003 /* PreparedAmbienceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/PreparedAmbienceTests.swift; sourceTree = SOURCE_ROOT; };
 		1A0000000000000000000004 /* NapAmbiencePlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/NapAmbiencePlayerTests.swift; sourceTree = SOURCE_ROOT; };
+		1C0000000000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1D0000000000000000000002 /* RestDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/App/RestDesign.swift; sourceTree = SOURCE_ROOT; };
+		1D0000000000000000000004 /* RestShellUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolUITests/RestShellUITests.swift; sourceTree = SOURCE_ROOT; };
+		1F0000000000000000000202 /* AccessibilityRefreshUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolUITests/AccessibilityRefreshUITests.swift; sourceTree = SOURCE_ROOT; };
+		1D0000000000000000000007 /* RestStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/Shared/RestStyle.swift; sourceTree = SOURCE_ROOT; };
+		1E0000000000000000000201 /* RestSetupSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/App/RestSetupSheets.swift; sourceTree = SOURCE_ROOT; };
+		1E0000000000000000000202 /* RestContentViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/App/RestContentViews.swift; sourceTree = SOURCE_ROOT; };
+		1E0000000000000000000203 /* RestPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/App/RestPreferences.swift; sourceTree = SOURCE_ROOT; };
+		1E0000000000000000000204 /* RestPreparationViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/App/RestPreparationViews.swift; sourceTree = SOURCE_ROOT; };
+		1E0000000000000000000205 /* NarrationPreviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/Services/NarrationPreviewController.swift; sourceTree = SOURCE_ROOT; };
+		1E0000000000000000000206 /* RestPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/RestPreferencesTests.swift; sourceTree = SOURCE_ROOT; };
+		1F0000000000000000000201 /* RestAccessibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/RestAccessibilityTests.swift; sourceTree = SOURCE_ROOT; };
+		1E0000000000000000000207 /* NarrationPreviewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/NarrationPreviewTests.swift; sourceTree = SOURCE_ROOT; };
+		1E0000000000000000000209 /* AudioInventoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/AudioInventoryTests.swift; sourceTree = SOURCE_ROOT; };
+		1E0000000000000000000208 /* FunctionalPagesUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolUITests/FunctionalPagesUITests.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -207,10 +238,16 @@
 		A70000000000000000000003 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				1E0000000000000000000204 /* RestPreparationViews.swift */,
+				1E0000000000000000000203 /* RestPreferences.swift */,
+				1E0000000000000000000202 /* RestContentViews.swift */,
+				1E0000000000000000000201 /* RestSetupSheets.swift */,
 				180000000000000000000002 /* ListeningHistoryView.swift */,
 				A20000000000000000000001 /* HonkshoolApp.swift */,
 				A20000000000000000000002 /* FeasibilityConsoleView.swift */,
 				120000000000000000000002 /* NapPlanReviewView.swift */,
+				1D0000000000000000000002 /* RestDesign.swift */,
+				1D0000000000000000000007 /* RestStyle.swift */,
 				C00000000000000000000002 /* UITestFixtures.swift */,
 			);
 			path = App;
@@ -241,6 +278,7 @@
 		A70000000000000000000006 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				1E0000000000000000000205 /* NarrationPreviewController.swift */,
 				180000000000000000000001 /* ListeningHistoryStore.swift */,
 				A20000000000000000000005 /* AudioSpikeController.swift */,
 				A20000000000000000000006 /* AlarmSpikeService.swift */,
@@ -254,6 +292,10 @@
 		A70000000000000000000007 /* HonkshoolTests */ = {
 			isa = PBXGroup;
 			children = (
+				1E0000000000000000000207 /* NarrationPreviewTests.swift */,
+				1E0000000000000000000209 /* AudioInventoryTests.swift */,
+				1E0000000000000000000206 /* RestPreferencesTests.swift */,
+				1F0000000000000000000201 /* RestAccessibilityTests.swift */,
 				180000000000000000000004 /* ListeningHistoryNavigationTests.swift */,
 				180000000000000000000003 /* ListeningHistoryStoreTests.swift */,
 				140000000000000000000002 /* NapRunControllerTests.swift */,
@@ -283,6 +325,7 @@
 		A70000000000000000000009 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				1C0000000000000000000001 /* Assets.xcassets */,
 				A20000000000000000000007 /* Info.plist */,
 				F20000000000000000000004 /* GentleRain.wav */,
 				F20000000000000000000005 /* GentleRain-Provenance.json */,
@@ -308,6 +351,9 @@
 			isa = PBXGroup;
 			children = (
 				180000000000000000000005 /* ListeningHistoryUITests.swift */,
+				1D0000000000000000000004 /* RestShellUITests.swift */,
+				1F0000000000000000000202 /* AccessibilityRefreshUITests.swift */,
+				1E0000000000000000000208 /* FunctionalPagesUITests.swift */,
 				B0000000000000000000000A /* HonkshoolAlarmMetadata.swift */,
 				D00000000000000000000004 /* AlarmLockScreenLayout.swift */,
 				B0000000000000000000000B /* HonkshoolAlarmWidget.swift */,
@@ -439,6 +485,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B0000000000000000000001 /* Assets.xcassets in Resources */,
 				F10000000000000000000004 /* GentleRain.wav in Resources */,
 				F10000000000000000000005 /* GentleRain-Provenance.json in Resources */,
 				F10000000000000000000006 /* Turning-Fuel-Into-Motion-George.wav in Resources */,
@@ -477,10 +524,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E0000000000000000000105 /* NarrationPreviewController.swift in Sources */,
+				1E0000000000000000000104 /* RestPreparationViews.swift in Sources */,
+				1E0000000000000000000103 /* RestPreferences.swift in Sources */,
+				1E0000000000000000000102 /* RestContentViews.swift in Sources */,
+				1E0000000000000000000101 /* RestSetupSheets.swift in Sources */,
 				E10000000000000000000003 /* NapPlayback.swift in Sources */,
 				E10000000000000000000002 /* NapPlan.swift in Sources */,
 				110000000000000000000001 /* NapPlanReview.swift in Sources */,
 				110000000000000000000002 /* NapPlanReviewView.swift in Sources */,
+				1D0000000000000000000001 /* RestDesign.swift in Sources */,
+				1D0000000000000000000005 /* RestStyle.swift in Sources */,
 				E10000000000000000000001 /* NapContent.swift in Sources */,
 				A10000000000000000000001 /* HonkshoolApp.swift in Sources */,
 				A10000000000000000000002 /* FeasibilityConsoleView.swift in Sources */,
@@ -504,6 +558,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E0000000000000000000107 /* NarrationPreviewTests.swift in Sources */,
+				1E0000000000000000000109 /* AudioInventoryTests.swift in Sources */,
+				1E0000000000000000000106 /* RestPreferencesTests.swift in Sources */,
+				1F0000000000000000000101 /* RestAccessibilityTests.swift in Sources */,
 				E10000000000000000000005 /* NapPlaybackTests.swift in Sources */,
 				F10000000000000000000002 /* PreparedCatalogTests.swift in Sources */,
 				190000000000000000000003 /* PreparedAmbienceTests.swift in Sources */,
@@ -527,6 +585,7 @@
 				D00000000000000000000001 /* AlarmLockScreenLayout.swift in Sources */,
 				B00000000000000000000002 /* HonkshoolAlarmMetadata.swift in Sources */,
 				B00000000000000000000003 /* HonkshoolAlarmWidget.swift in Sources */,
+				1D0000000000000000000006 /* RestStyle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -537,6 +596,9 @@
 				B00000000000000000000004 /* FeasibilityUITests.swift in Sources */,
 				110000000000000000000004 /* NapPlanReviewUITests.swift in Sources */,
 				170000000000000000000005 /* ListeningHistoryUITests.swift in Sources */,
+				1D0000000000000000000003 /* RestShellUITests.swift in Sources */,
+				1F0000000000000000000102 /* AccessibilityRefreshUITests.swift in Sources */,
+				1E0000000000000000000108 /* FunctionalPagesUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -631,6 +693,7 @@
 		AC0000000000000000000003 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -653,6 +716,7 @@
 		AC0000000000000000000004 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";

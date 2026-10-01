@@ -7,7 +7,7 @@ Honkshool is an experimental iPhone app with source installation and a small off
 | Guide | Use it for |
 | --- | --- |
 | [Getting started](Getting-Started.md) | Requirements, simulator launch, private signing, and installing a development build |
-| [User guide](User-Guide.md) | Choosing a Nap Plan, confirming and starting, audio/alarm controls, and history |
+| [User guide](User-Guide.md) | Rest and History tabs, plan review and start, audio/alarm controls, and recovery |
 | [Troubleshooting](Troubleshooting.md) | Installation, expired plans, permission failures, audio, and history problems |
 | [Privacy and local data](Privacy.md) | Stored data, system permissions, backups, and current deletion/export limits |
 | [Ten-nap personal trial](Ten-Nap-Trial.md) | Evaluate ordinary use and keep observations private |
@@ -30,6 +30,9 @@ Honkshool is an experimental iPhone app with source installation and a small off
 | Document | Owns |
 | --- | --- |
 | [Project overview](Project-Overview.md) | Implemented state, evidence limits, and the next milestone |
+| [Quiet curiosity design language](Design-Language.md) | Approved visual and interaction rules for current and future screens |
+| [Screen implementation map](Screen-Implementation-Map.md) | Functional routes and states versus future atlas examples |
+| [Accessibility refresh](Accessibility-Refresh.md) | Findings addressed, verification, and device checks still pending |
 | [Product brief](Product-Brief.md) | Intended experience, claim boundaries, and first-release scope; some features remain future work |
 | [Project implementation plan](Project-Implementation-Plan.md) | Durable phased roadmap and acceptance criteria |
 | [Decision log](Decision-Log.md) | Accepted choices, their reasons, and open acceptance checks |

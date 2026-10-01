@@ -299,6 +299,14 @@ final class FeasibilityUITests: XCTestCase {
       app.launchEnvironment["HONKSHOOL_UI_TEST_SAVED_MINUTES"] = String(savedMinutes)
     }
     app.launch()
+    let settings = app.buttons["openSettings"]
+    XCTAssertTrue(settings.waitForExistence(timeout: 5))
+    settings.tap()
+    let lab = app.buttons["openFeasibilityLab"]
+    XCTAssertTrue(lab.waitForExistence(timeout: 5))
+    scrollTo(lab, in: app)
+    lab.tap()
+    XCTAssertTrue(app.navigationBars["Feasibility Lab"].waitForExistence(timeout: 5))
     return app
   }
 

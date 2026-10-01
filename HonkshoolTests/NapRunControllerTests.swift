@@ -175,6 +175,28 @@ final class NapRunControllerTests: XCTestCase {
     return try PreparedCatalog(data: JSONSerialization.data(withJSONObject: document))
   }
 
+  func testPresentationSnapshotSurvivesStopAndResetDoesNotRestartPlayback() throws {
+    let catalog = try PreparedCatalog.load()
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let player = RunFakePlayer()
+    let run = controller(clock: clock, scheduler: scheduler, player: player)
+    let approved = try review(catalog: catalog, now: clock.now)
+    XCTAssertNil(run.presentationPlan)
+    try run.start(review: approved, catalog: catalog)
+    XCTAssertEqual(run.presentationPlan, approved.plan)
+    scheduler.advance(to: approved.plan.start)
+    XCTAssertEqual(run.currentNarrationTitle, approved.plan.route.first?.session.title)
+    run.stop()
+    XCTAssertEqual(run.presentationPlan?.deadline, approved.plan.deadline)
+    XCTAssertNil(run.currentNarrationTitle)
+    let playCount = player.playCount
+    run.resetPresentation()
+    XCTAssertNil(run.presentationPlan)
+    XCTAssertEqual(run.phase, .idle)
+    XCTAssertEqual(player.playCount, playCount)
+  }
+
   func testPauseAndBackgroundSaveVerifiedCheckpointsWithoutEndingRun() throws {
     let catalog = try PreparedCatalog.load()
     let clock = RunTestClock()

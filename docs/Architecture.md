@@ -39,18 +39,18 @@ The planning domain never imports SwiftUI, SwiftData, AVFoundation, or AlarmKit.
 | `Services/NapRunController`, `NapAmbiencePlayer` | Approved playback, controls, interruptions, fixed cutoff and checkpoints | Explicit resume after interruption/output loss; stale callbacks cannot restart a stopped run. Rain creates no narration history. |
 | `Services/NapPlanAlarmService` | Production wake-alarm identity, schedule/readback, reconciliation and cancellation | An alarm-requested run requires matching verified evidence. Playback Stop preserves the separately scheduled alarm. |
 | `Services/ListeningHistoryStore` | Local SwiftData transactions, checkpoint replacement, recovery and retry | Completion alone advances progress. Errors remain visible and do not replace a failed store with an empty one. |
-| `App` | Dependency composition, user review, controls and history navigation | Reopening never starts audio; Continue/Resume/Replay require a fresh review. |
+| `App` | Dependency composition, Rest and History navigation, user review, Settings and diagnostic access | Reopening never starts audio; Continue/Resume/Replay require a fresh review. |
 | `Shared` and `HonkshoolAlarmWidget` | Alarm metadata/intents and system-hosted presentation | The widget shares narrow alarm types rather than app navigation or history state. |
 
 The [domain contract](Nap-Planning-Domain.md) defines timing and persistence details. The [decision log](Decision-Log.md) owns product choices such as alarm ownership and offline preparation.
 
 ## Feasibility and ordinary use
 
-The app currently opens the Feasibility Lab, which also owns the production runtime objects and links to Nap Plan review and listening history. Feasibility audio and alarms remain separate from production Nap Plans; merging their implementations would conflate their different contracts and stored alarm identities.
+The app opens on the Rest tab, with History as the other tab. Settings opens from Rest and places Feasibility Lab under Advanced. The root view retains the production run, alarm, and history objects across both tabs and the Settings route. Feasibility audio and alarms remain separate from production Nap Plans; their contracts and stored alarm identities differ. The bounded narration preview uses verified bundled audio and stops when its page closes.
 
-The console bounds saved rest defaults to 5–180 minutes when loading them. An out-of-range stored value is repaired before it is displayed or selected, so the Saved button, custom value, and calculated wake deadline agree.
+The Feasibility Lab bounds its saved test duration to 5–180 minutes. Separately, Rest defaults are bounded to 1–180 minutes and apply to the next unreviewed plan; a confirmed plan keeps its reviewed timing and sound.
 
-The September 2026 checkup found no confirmed dependency cycle or need for broad restructuring. A dedicated ordinary entry could improve navigation if the personal trial demonstrates friction. It would relocate presentation and must preserve runtime ownership; the [roadmap](Project-Implementation-Plan.md) defers home-screen redesign until there is that evidence.
+The September 2026 checkup found no confirmed dependency cycle or need for broad restructuring. The later Rest-first UI moved ordinary navigation while keeping runtime ownership at the app root. The [screen implementation map](Screen-Implementation-Map.md) identifies each reachable state and its source view.
 
 ## Test seams and verification
 

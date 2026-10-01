@@ -6,11 +6,31 @@ Honkshool is an experimental iPhone app with no supported release. Start with th
 
 ## Proposing a change
 
-1. Search existing issues and pull requests. Open an issue before choosing a framework, adding a network service or persistent storage, requesting a new permission, or changing privacy behavior.
-2. Create a descriptive branch from `main` and keep the pull request focused on one outcome.
-3. Add or update focused tests when executable behavior changes. Update the relevant [documentation](docs/README.md) when behavior, architecture, installation, data handling, verification, or supported environments change.
-4. Run the [repository gate and applicable iOS tests](docs/Development.md#verification) before opening the pull request. Explain any check you could not run.
-5. Describe the user-visible outcome, privacy and security implications, verification performed, and known limitations in the pull request.
+1. Read the [project overview](docs/Project-Overview.md) and search existing issues and pull requests.
+   For UI changes, also read the approved [Quiet curiosity design language](docs/Design-Language.md) and [screen atlas](design/quiet-curiosity/screen-atlas.html). It is the default for current and future screens unless the owner explicitly changes it; the atlas's future examples do not imply shipped features.
+2. Open an issue before choosing a framework, adding a network service, introducing persistent storage, requesting new permissions, or changing privacy behavior.
+3. Keep each pull request focused on one coherent outcome.
+
+## Development workflow
+
+1. Fork or clone the repository and create a descriptive branch from `main`.
+2. Add or update focused tests when executable behavior changes.
+3. Update the relevant [documentation](docs/README.md) when behavior, architecture, data handling, operations, installation, or supported environments change.
+4. Run the complete repository gate:
+
+   ```sh
+   ./scripts/verify-repository.sh
+   ```
+
+   Changes to the experimental iOS target should also pass the complete automated simulator suite:
+
+   ```sh
+   ./scripts/test-ios.sh
+   ```
+
+   The [feasibility spike guide](docs/Feasibility-Spike.md) documents destination overrides, completed physical acceptance, and when to repeat affected locked-screen audio, hardware-routing, or AlarmKit checks. Simulator success is not physical-device acceptance evidence.
+
+5. Describe the user-visible outcome, privacy and security implications, verification performed, any check you could not run, and known limitations in the pull request.
 
 ## Public-data rules
 

@@ -95,6 +95,16 @@ final class NapRunController: NSObject, ObservableObject {
   @Published private(set) var records: [PlaybackRecord] = []
   @Published private(set) var latestVerifiedCheckpoint: NapRunCheckpoint?
   @Published private(set) var lastRunPlanID: String?
+  /// Read-only presentation snapshot survives Stop so every tab shows the same fixed timing.
+  @Published private(set) var presentationPlan: NapPlan?
+
+  var currentNarrationTitle: String? {
+    guard let presentationPlan,
+      [.narrating, .paused, .interrupted].contains(phase),
+      presentationPlan.route.indices.contains(records.count)
+    else { return nil }
+    return presentationPlan.route[records.count].session.title
+  }
 
   private struct PreparedRouteItem {
     let planned: PlannedSession
@@ -234,6 +244,7 @@ final class NapRunController: NSObject, ObservableObject {
     restFailureMessage =
       review.plan.fallback != .silence && resolvedRain == nil
       ? "The selected rest sound is unavailable. Rest continues in silence." : nil
+    presentationPlan = review.plan
     lastRunPlanID = review.plan.id
     records = []
     latestVerifiedCheckpoint = nil
@@ -395,6 +406,7 @@ final class NapRunController: NSObject, ObservableObject {
     records = []
     latestVerifiedCheckpoint = nil
     lastRunPlanID = nil
+    presentationPlan = nil
     phase = .idle
     statusMessage = "Ready to start a reviewed plan."
   }

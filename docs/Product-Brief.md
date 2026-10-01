@@ -8,6 +8,8 @@ The product replaces a fragile routine of browsing YouTube for suitable long-for
 
 > Open app → choose content → choose nap duration → review the Nap Plan → start resting.
 
+The owner approved a [Rest-first design language](Design-Language.md) on 2026-09-30 for this flow and future screens. Open on a calm Rest home, keep History readily available, and make settling in possible with only a few decisions. The approved [screen atlas](../design/quiet-curiosity/screen-atlas.html) illustrates the hierarchy and recovery states; its future journey, voice, detail, and offline-management screens require their underlying capabilities before they can become live choices.
+
 ## Claim boundaries
 
 Honkshool must not claim or imply that a listener:

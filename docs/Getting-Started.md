@@ -30,8 +30,8 @@ Contributors can clone their own fork instead. In Xcode, select the shared **Hon
 
 1. Select an installed iPhone simulator running iOS 26 or newer as the run destination.
 2. Press **Run** (Command-R).
-3. The app opens on **Feasibility Lab**. Scroll to **Nap Plan** and choose **Choose and review a Nap Plan**.
-4. Follow the [user guide](User-Guide.md). Start with **Request a wake alarm** turned off when exploring without a physical alarm test.
+3. Dismiss the first-launch welcome screen to reach **Rest**. Choose a session and review the plan. **History** is the other tab; **Feasibility Lab** is under **Settings → Advanced**.
+4. Follow the [user guide](User-Guide.md). Turn **Wake alarm** off when exploring without a physical alarm test.
 
 You do not need to set a development-team identifier for an unsigned simulator build. For command-line builds and automated tests, use [Development](Development.md#verification).
 
@@ -48,7 +48,7 @@ You do not need to set a development-team identifier for an unsigned simulator b
 3. Select the **Honkshool** project and check **Signing & Capabilities** for the app and **HonkshoolAlarmWidget** targets. Automatic signing must resolve for your team. The repository uses `com.joshuawyadao.Honkshool` and `com.joshuawyadao.Honkshool.AlarmWidget`; those identifiers may not be available to another team. For a personal fork, use a unique app identifier and an extension identifier beneath it, such as `com.example.yourname.Honkshool` and `com.example.yourname.Honkshool.AlarmWidget`. Keep personal signing edits out of unrelated pull requests. Apple explains [App ID registration](https://developer.apple.com/help/account/identifiers/register-an-app-id/).
 4. Connect and unlock the iPhone. Accept **Trust This Computer** if prompted. Select the phone as Xcode's run destination and press **Run**.
 5. If requested, enable **Settings → Privacy & Security → Developer Mode** on the phone, complete its restart/confirmation, and run again. Follow Apple's [Developer Mode instructions](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device). Accept any developer-trust prompt on the phone.
-6. When the app launches, use **Choose and review a Nap Plan**. An alarm-enabled start requests iOS alarm permission if needed. Approve it only if you want Honkshool to schedule the selected wake alarm.
+6. When the app launches, dismiss the welcome screen if shown and use **Rest** to choose and review a plan. An alarm-enabled start requests iOS alarm permission if needed. Approve it only if you want Honkshool to schedule the selected wake alarm.
 
 Signing failures are setup problems, not evidence that playback failed. Check Xcode's specific message and the [troubleshooting guide](Troubleshooting.md#build-and-installation). A development build is not a supported distribution channel; Xcode and your signing profile govern its continued availability.
 
