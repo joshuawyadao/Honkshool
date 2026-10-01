@@ -15,7 +15,10 @@ enum RestPreferences {
   private static let soundKey = "defaultRestSoundID"
   private static let alarmKey = "defaultRestWakeAlarm"
 
-  static func load(defaults: UserDefaults? = nil) -> RestDefaults {
+  static func load(
+    defaults: UserDefaults? = nil,
+    availableAmbienceIDs: Set<String> = [PreparedAmbience.gentleRainID]
+  ) -> RestDefaults {
     let defaults = defaults ?? SpikePreferences.defaults
     let duration: Int
     if let number = defaults.object(forKey: durationKey) as? NSNumber,
@@ -36,7 +39,9 @@ enum RestPreferences {
     }
     return RestDefaults(
       durationMinutes: duration,
-      soundID: sound == PreparedAmbience.gentleRainID ? sound : nil,
+      soundID: sound.flatMap {
+        $0 == PreparedAmbience.gentleRainID && availableAmbienceIDs.contains($0) ? $0 : nil
+      },
       wakeAlarm: alarm)
   }
 

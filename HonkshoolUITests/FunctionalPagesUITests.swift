@@ -71,6 +71,24 @@ final class FunctionalPagesUITests: XCTestCase {
     XCTAssertTrue(app.descendants(matching: .any)["napPlanRouteItem-1"].exists)
   }
 
+  func testSettingsSoundSummaryMatchesAvailablePlanDefault() {
+    var app = launch()
+    tap("openSettings", in: app)
+    tap("openRestDefaults", in: app)
+    tap("defaultRestSound", in: app)
+    app.buttons["Gentle rain"].tap()
+    tap("saveRestDefaults", in: app)
+    XCTAssertEqual(app.staticTexts["settingsRestSound"].label, "After narration, Gentle rain")
+    app.terminate()
+
+    app = launch(reset: false, environment: ["HONKSHOOL_UI_TEST_PLAN_RAIN_UNAVAILABLE": "1"])
+    tap("openSettings", in: app)
+    XCTAssertEqual(app.staticTexts["settingsRestSound"].label, "After narration, Silence")
+    app.navigationBars.buttons.firstMatch.tap()
+    tap("reviewNapPlan", in: app)
+    XCTAssertEqual(app.staticTexts["napPlanPostNarrationSound"].label, "After narration, Silence")
+  }
+
   func testLibraryNavigatesIntoFreshPlanAndOfflineInventoryIsReal() {
     let app = launch()
     tap("openSettings", in: app)

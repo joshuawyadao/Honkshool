@@ -91,9 +91,9 @@ struct RestDefaultsView: View {
     .navigationTitle("Rest defaults")
     .navigationBarTitleDisplayMode(.inline)
     .onAppear {
-      draft = RestPreferences.load()
-      rainAvailable = PreparedAmbience.availableIDs().contains(PreparedAmbience.gentleRainID)
-      if !rainAvailable { draft.soundID = nil }
+      let availableSounds = PreparedAmbience.availableIDs()
+      rainAvailable = availableSounds.contains(PreparedAmbience.gentleRainID)
+      draft = RestPreferences.load(availableAmbienceIDs: availableSounds)
     }
   }
 }

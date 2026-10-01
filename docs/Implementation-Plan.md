@@ -11,7 +11,7 @@ Prepare PR #14 for merge by integrating the latest main branch, preserving the a
 - [x] Checkpoint this resolved plan before implementation.
 - [x] Merge main, preserving repaired Lab duration persistence and failure diagnostics alongside shared Rest navigation and fixtures.
 - [x] Reconcile README, CONTRIBUTING, current user/developer/architecture guides and diagrams with the approved functional pages while retaining setup, privacy, and historical evidence.
-- [ ] Run repository checks, formatting, and focused restored-duration/navigation regressions; preserve existing assertions and adapt tests only where the UI contract changed.
+- [x] Run repository checks, formatting, and focused restored-duration/navigation regressions; preserve existing assertions and adapt tests only where the UI contract changed.
 - [ ] Finish Brooks and Apple-contract review, classify Codex findings, and fix each actionable cluster with focused validation and saved commits.
 - [ ] Push and wait for current-head Repository Verify and iOS Unit and UI Tests; investigate failures using retained diagnostics without weakening assertions.
 - [ ] Record final validation and any manual limits, verify fresh review/CI/mergeability state, and leave the PR unmerged.
@@ -21,7 +21,7 @@ Prepare PR #14 for merge by integrating the latest main branch, preserving the a
 
 ## Codex feedback queue
 
-- [ ] Comment 4151809411: derive Settings sound from normalized preferences and verified availability; cover available, missing, and unknown sound values and retain live saved-default updates.
+- [x] Comment 4151809411: derive Settings sound from normalized preferences and verified availability; cover available, missing, and unknown sound values and retain live saved-default updates.
 - [ ] Comment 4151809417: move bundled-audio scanning off the main actor with cancellation and stale-result guards; cover verified inventory and cancelled work, and verify page navigation/recheck.
 
 ## Historical main-branch plan
@@ -59,3 +59,7 @@ The following is the incoming PR #12 task record, retained for context. Its merg
 > - Independent review caught and corrected the artifact root: upload the fresh parent directory so the downloaded archive retains TestResults.xcresult. Three portable regression cases verify successful result publication, failed-test exit preservation, and unreadable-summary exit preservation.
 >
 > - Diagnostic slice validation: both affected simulator tests passed with the updated helper; all 51 portable tests passed. Brooks diff review found no additional actionable decay or test-quality concern. No production code changed; hosted current-head validation remains required.
+
+## Current PR verification
+
+The merged interface passed 12 focused simulator cases (saved Lab bounds, Rest navigation and functional pages). The sound-summary fix passed four preference unit tests and two UI cases, including live Settings refresh and unavailable-rain fallback; all 51 portable checks and strict changed-Swift formatting pass. Full hosted validation and the asynchronous inventory fix remain pending.

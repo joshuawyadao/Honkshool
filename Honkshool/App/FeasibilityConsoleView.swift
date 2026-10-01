@@ -39,12 +39,7 @@ struct FeasibilityConsoleView: View {
   @State private var showingSettings = false
   @State private var browsingCatalog: PreparedCatalog?
   @State private var browsingError: String?
-  @AppStorage("restDefaultDurationMinutes", store: SpikePreferences.defaults)
-  private var defaultRestMinutes = 20
-  @AppStorage("defaultRestSoundID", store: SpikePreferences.defaults)
-  private var defaultSoundID = ""
-  @AppStorage("defaultRestWakeAlarm", store: SpikePreferences.defaults)
-  private var defaultWakeAlarm = true
+  @State private var settingsDefaults = RestDefaults.initial
   @State private var showingWelcome = false
   @State private var evaluatedWelcome = false
   @AppStorage("hasSeenQuietWelcome", store: SpikePreferences.defaults)
@@ -144,14 +139,17 @@ struct FeasibilityConsoleView: View {
           NavigationLink {
             RestDefaultsView()
           } label: {
-            settingsRow("Rest defaults", value: "\(defaultRestMinutes) min")
+            settingsRow("Rest defaults", value: "\(settingsDefaults.durationMinutes) min")
           }.accessibilityIdentifier("openRestDefaults")
           LabeledContent(
-            "After narration", value: defaultSoundID.isEmpty ? "Silence" : "Gentle rain"
+            "After narration",
+            value: settingsDefaults.soundID.map(PreparedAmbience.displayName) ?? "Silence"
           )
+          .accessibilityIdentifier("settingsRestSound")
           .font(.subheadline).foregroundStyle(RestStyle.secondary)
           LabeledContent(
-            "Wake alarm", value: defaultWakeAlarm ? "On for new plans" : "Off for new plans"
+            "Wake alarm",
+            value: settingsDefaults.wakeAlarm ? "On for new plans" : "Off for new plans"
           )
           .font(.subheadline).foregroundStyle(RestStyle.secondary)
           Text(
@@ -190,6 +188,14 @@ struct FeasibilityConsoleView: View {
     }
     .restScreen().navigationTitle("Settings").navigationBarTitleDisplayMode(.inline)
     .task { if browsingCatalog == nil { loadBrowsingCatalog() } }
+    .onAppear {
+      #if DEBUG
+        let availableSounds = UITestFixtures.planReviewAmbienceIDs
+      #else
+        let availableSounds = PreparedAmbience.availableIDs()
+      #endif
+      settingsDefaults = RestPreferences.load(availableAmbienceIDs: availableSounds)
+    }
   }
 
   private func preparedSettings(_ catalog: PreparedCatalog) -> some View {

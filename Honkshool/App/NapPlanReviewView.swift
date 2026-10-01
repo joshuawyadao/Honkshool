@@ -262,11 +262,12 @@ struct NapPlanReviewView: View {
     guard !run.hasActiveRun, reviewState.confirmed == nil, reviewState.reviewed == nil else {
       return
     }
-    let defaults = RestPreferences.load(defaults: SpikePreferences.defaults)
+    let defaults = RestPreferences.load(
+      defaults: SpikePreferences.defaults, availableAmbienceIDs: availableAmbienceIDs)
     guard force || appliedDefaults != defaults else { return }
     appliedDefaults = defaults
     durationMinutes = defaults.durationMinutes
-    selectedSoundID = defaults.soundID.flatMap { availableAmbienceIDs.contains($0) ? $0 : nil }
+    selectedSoundID = defaults.soundID
     alarmEnabled = defaults.wakeAlarm
     usesExactWakeTime = false
   }

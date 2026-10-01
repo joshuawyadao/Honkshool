@@ -51,6 +51,27 @@ final class RestPreferencesTests: XCTestCase {
   }
 
   @MainActor
+  func testEffectiveSoundUsesAvailabilityWithoutErasingSavedPreference() throws {
+    let defaults = try makeDefaults()
+    defer { defaults.removePersistentDomain(forName: defaultsSuiteName) }
+    defaults.set(PreparedAmbience.gentleRainID, forKey: "defaultRestSoundID")
+
+    XCTAssertNil(RestPreferences.load(defaults: defaults, availableAmbienceIDs: []).soundID)
+    XCTAssertEqual(defaults.string(forKey: "defaultRestSoundID"), PreparedAmbience.gentleRainID)
+    XCTAssertEqual(
+      RestPreferences.load(
+        defaults: defaults, availableAmbienceIDs: [PreparedAmbience.gentleRainID]
+      ).soundID,
+      PreparedAmbience.gentleRainID)
+
+    defaults.set("unknown-legacy-sound", forKey: "defaultRestSoundID")
+    XCTAssertNil(
+      RestPreferences.load(
+        defaults: defaults, availableAmbienceIDs: ["unknown-legacy-sound"]
+      ).soundID)
+  }
+
+  @MainActor
   func testLabDurationRemainsIndependentOfRestDefaults() throws {
     let defaults = try makeDefaults()
     defer { defaults.removePersistentDomain(forName: defaultsSuiteName) }
