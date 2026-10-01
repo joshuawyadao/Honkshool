@@ -280,7 +280,11 @@ struct NarrationVoiceView: View {
             .font(.title3.weight(.medium))
           Text("George reads the prepared narration in a warm, unhurried voice.")
             .foregroundStyle(RestStyle.secondary)
-          if preview.isPlaying {
+          if preview.isPreparing {
+            Button("Cancel preview") { preview.stop() }
+              .buttonStyle(RestButtonStyle(secondary: true))
+              .accessibilityIdentifier("cancelVoicePreview")
+          } else if preview.isPlaying {
             Button("Stop preview") { preview.stop() }
               .buttonStyle(RestButtonStyle(secondary: true))
               .accessibilityIdentifier("stopVoicePreview")

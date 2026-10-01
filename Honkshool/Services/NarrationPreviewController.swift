@@ -39,26 +39,42 @@ final class BundledNarrationPreviewPlayer: NSObject, NarrationPreviewPlaying, AV
   }
 }
 
+enum NarrationPreviewVerification: Sendable {
+  case verified(URL)
+  case unavailable
+  case mismatch
+}
+
 /// A short, user-initiated sample. It never writes history or schedules an alarm.
 @MainActor
 final class NarrationPreviewController: ObservableObject {
   typealias Scheduler = @MainActor (TimeInterval, @escaping @MainActor () -> Void) -> (() -> Void)
 
   @Published private(set) var isPlaying = false
+  @Published private(set) var isPreparing = false
   @Published private(set) var status = "Ready to preview George."
 
+  private let verify: @Sendable (PreparedSession) -> NarrationPreviewVerification
+  private let isForeground: @MainActor () -> Bool
   private let makePlayer: @MainActor (URL) throws -> NarrationPreviewPlaying
   private let activate: @MainActor () throws -> Void
   private let deactivate: @MainActor () -> Void
   private let schedule: Scheduler
   private let notifications: NotificationCenter
   private var player: NarrationPreviewPlaying?
+  private var preparation: Task<Void, Never>?
   private var cancelLimit: (() -> Void)?
   private var observers: [NSObjectProtocol] = []
   private var ownsAudioActivation = false
   private var generation = 0
 
   init(
+    verify: @escaping @Sendable (PreparedSession) -> NarrationPreviewVerification = {
+      NarrationPreviewController.verifyBundledAudio($0)
+    },
+    isForeground: @escaping @MainActor () -> Bool = {
+      UIApplication.shared.applicationState == .active
+    },
     makePlayer: @escaping @MainActor (URL) throws -> NarrationPreviewPlaying = {
       try BundledNarrationPreviewPlayer(url: $0)
     },
@@ -80,6 +96,8 @@ final class NarrationPreviewController: ObservableObject {
     },
     notifications: NotificationCenter = .default
   ) {
+    self.verify = verify
+    self.isForeground = isForeground
     self.makePlayer = makePlayer
     self.activate = activate
     self.deactivate = deactivate
@@ -90,40 +108,86 @@ final class NarrationPreviewController: ObservableObject {
   /// The first published session is the only approved preview source.
   func start(catalog: PreparedCatalog, canPreview: Bool) {
     guard canPreview else {
-      if isPlaying {
+      if isPreparing || isPlaying {
         stop(reason: "Preview stopped because another audio session began.")
       } else {
         status = "Finish the current rest or Feasibility Lab audio before previewing."
       }
       return
     }
+    guard !isPreparing, !isPlaying else { return }
+    guard isForeground() else {
+      status = "Preview stopped."
+      return
+    }
     guard let prepared = catalog.sessions["turning-fuel-into-motion"],
-      let asset = prepared.narrationAsset
+      prepared.narrationAsset != nil
     else {
       status = "George’s bundled recording is unavailable."
       return
     }
-    do {
-      let url = try prepared.narrationURL()
-      let hash = SHA256.hash(data: try Data(contentsOf: url, options: .mappedIfSafe))
-        .map { String(format: "%02x", $0) }.joined()
-      guard hash == asset.sha256 else {
-        status = "George’s bundled recording could not be verified."
+
+    generation += 1
+    let activeGeneration = generation
+    isPreparing = true
+    status = "Checking George’s bundled recording."
+    installObservers()
+    let verify = self.verify
+    preparation = Task { [weak self] in
+      let worker = Task.detached(priority: .utility) { verify(prepared) }
+      let result = await withTaskCancellationHandler {
+        await worker.value
+      } onCancel: {
+        worker.cancel()
+      }
+      guard let self, !Task.isCancelled, self.generation == activeGeneration else { return }
+      self.preparation = nil
+      self.isPreparing = false
+      self.removeObservers()
+      guard self.isForeground() else {
+        self.status = "Preview stopped."
         return
       }
-      startVerified(url: url, canPreview: canPreview)
+      switch result {
+      case .verified(let url):
+        self.startVerified(url: url, canPreview: true)
+      case .unavailable:
+        self.status = "George’s bundled recording is unavailable."
+      case .mismatch:
+        self.status = "George’s bundled recording could not be verified."
+      }
+    }
+  }
+
+  nonisolated private static func verifyBundledAudio(
+    _ prepared: PreparedSession
+  ) -> NarrationPreviewVerification {
+    guard !Task<Never, Never>.isCancelled else { return .unavailable }
+    do {
+      let url = try prepared.narrationURL()
+      guard !Task<Never, Never>.isCancelled else { return .unavailable }
+      let bytes = try Data(contentsOf: url, options: .mappedIfSafe)
+      guard !Task<Never, Never>.isCancelled else { return .unavailable }
+      let hash = SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined()
+      return hash == prepared.narrationAsset?.sha256 ? .verified(url) : .mismatch
     } catch {
-      status = "George’s bundled recording is unavailable."
+      return .unavailable
     }
   }
 
   /// Internal seam permits bounded playback tests without activating system audio.
   func startVerified(url: URL, canPreview: Bool) {
     guard canPreview else {
-      if isPlaying { stop(reason: "Preview stopped because another audio session began.") }
+      if isPreparing || isPlaying {
+        stop(reason: "Preview stopped because another audio session began.")
+      }
       return
     }
-    guard !isPlaying else { return }
+    guard !isPreparing, !isPlaying else { return }
+    guard isForeground() else {
+      stop(reason: "Preview stopped.")
+      return
+    }
     generation += 1
     let activeGeneration = generation
     do {
@@ -162,16 +226,23 @@ final class NarrationPreviewController: ObservableObject {
 
   func stop(reason: String = "Preview stopped.") {
     generation += 1
+    preparation?.cancel()
+    preparation = nil
+    isPreparing = false
     cancelLimit?()
     cancelLimit = nil
     player?.stop()
     player = nil
-    observers.forEach(notifications.removeObserver)
-    observers.removeAll()
+    removeObservers()
     if ownsAudioActivation { deactivate() }
     ownsAudioActivation = false
     isPlaying = false
     status = reason
+  }
+
+  private func removeObservers() {
+    observers.forEach(notifications.removeObserver)
+    observers.removeAll()
   }
 
   private func installObservers() {
@@ -183,7 +254,7 @@ final class NarrationPreviewController: ObservableObject {
         guard let raw = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
           raw == AVAudioSession.InterruptionType.began.rawValue
         else { return }
-        Task { @MainActor in
+        MainActor.assumeIsolated {
           guard self?.generation == activeGeneration else { return }
           self?.stop(reason: "Audio was interrupted. Preview stopped.")
         }
@@ -195,7 +266,7 @@ final class NarrationPreviewController: ObservableObject {
         guard let raw = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt,
           raw == AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue
         else { return }
-        Task { @MainActor in
+        MainActor.assumeIsolated {
           guard self?.generation == activeGeneration else { return }
           self?.stop(reason: "Audio output disconnected. Preview stopped.")
         }
@@ -207,7 +278,7 @@ final class NarrationPreviewController: ObservableObject {
       observers.append(
         notifications.addObserver(forName: name, object: nil, queue: .main) {
           [weak self] _ in
-          Task { @MainActor in
+          MainActor.assumeIsolated {
             guard self?.generation == activeGeneration else { return }
             self?.stop(reason: "Preview stopped.")
           }

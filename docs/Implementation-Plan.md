@@ -12,7 +12,7 @@ Prepare PR #14 for merge by integrating the latest main branch, preserving the a
 - [x] Merge main, preserving repaired Lab duration persistence and failure diagnostics alongside shared Rest navigation and fixtures.
 - [x] Reconcile README, CONTRIBUTING, current user/developer/architecture guides and diagrams with the approved functional pages while retaining setup, privacy, and historical evidence.
 - [x] Run repository checks, formatting, and focused restored-duration/navigation regressions; preserve existing assertions and adapt tests only where the UI contract changed.
-- [ ] Finish Brooks and Apple-contract review, classify Codex findings, and fix each actionable cluster with focused validation and saved commits.
+- [x] Finish Brooks and Apple-contract review, classify Codex findings, and fix each actionable cluster with focused validation and saved commits.
 - [ ] Push and wait for current-head Repository Verify and iOS Unit and UI Tests; investigate failures using retained diagnostics without weakening assertions.
 - [ ] Record final validation and any manual limits, verify fresh review/CI/mergeability state, and leave the PR unmerged.
 
@@ -24,7 +24,7 @@ Prepare PR #14 for merge by integrating the latest main branch, preserving the a
 - [x] Comment 4151809411: derive Settings sound from normalized preferences and verified availability; cover available, missing, and unknown sound values and retain live saved-default updates.
 - [x] Comment 4151809417: move bundled-audio scanning off the main actor with cancellation and stale-result guards; cover verified inventory and cancelled work, and verify page navigation/recheck.
 
-- [ ] Comment 4151925030: move George preview verification off the main actor; expose a quiet preparing state and cancellable request, keep player/audio-session work on the main actor, and invalidate preparation on Stop, departure, background/interruption, or loss of eligibility. Add delayed-verification, cancellation/stale-request and verification-failure tests, then rerun preview UI, Release, and repository checks.
+- [x] Comment 4151925030: move George preview verification off the main actor; expose a quiet preparing state and cancellable request, keep player/audio-session work on the main actor, and invalidate preparation on Stop, departure, background/interruption, or loss of eligibility. Add delayed-verification, cancellation/stale-request and verification-failure tests, then rerun preview UI, Release, and repository checks.
 
 ## Historical main-branch plan
 
@@ -65,3 +65,5 @@ The following is the incoming PR #12 task record, retained for context. Its merg
 ## Current PR verification
 
 The merged interface passed 12 focused simulator cases (saved Lab bounds, Rest navigation and functional pages). The sound-summary fix passed four preference unit tests and two UI cases, including live Settings refresh and unavailable-rain fallback; all 51 portable checks and strict changed-Swift formatting pass. The asynchronous inventory fix passed three unit cases and the extended Recheck/reopen UI case; its final Sendable closure passed the three unit cases again. An unsigned Release simulator build and the 51-test repository gate pass. The final hosted checks, refreshed Codex review, and mergeability are live gates after this commit, recorded on PR #14 and in the local review ledger rather than claimed in advance here.
+
+The follow-up preview correction passed all 13 selected tests (11 preview unit cases and two voice/active-rest UI cases), strict formatting, the unsigned Release simulator build, and all 51 portable tests. Preparation is cancellable before audio activation and cannot finish into a background or invalidated preview. The initial test compile error was corrected; no behavioral assertion or timeout was weakened. Fresh hosted checks and Codex review must run on this new commit.
