@@ -279,6 +279,12 @@ The signed Release app built from clean `e22edca` passed signature verification 
 
 These automated checks do not establish locked-screen controls, audible alarm loudness, actual headphone-disconnection behavior, relative narration/rain comfort, full-session comfort, or spoken VoiceOver quality. Those direct observations remain pending.
 
+## Largest-text simulator repair — 2026-10-01
+
+The remaining `AccessibilityRefreshUITests` failure above led to a confirmed accessibility-tree defect: at AX5, the 60-minute preset was visible in the lazy grid's incomplete final row but missing from its accessible controls. Eager adaptive rows now expose all four native preset buttons in both Rest and Time. The original regression also verifies that each preset appears once and that 60 minutes can actually be selected. The sound-selection portion required a separate test-helper correction for an offscreen tap below Done; controlled, bidirectional gestures and actual footer/tab-bar boundaries also keep compact-screen targets reachable.
+
+All three focused accessibility cases passed on the large iOS 27 simulator; after compact helper refinements, all three passed on the iPhone SE (3rd generation) / iOS 26.5. The complete iOS 27 suite is being rerun for the final correction. This follow-up does not relabel the earlier 274-pass/one-failure run. The [accessibility follow-up](Accessibility-Refresh.md#largest-text-preset-follow-up--2026-10-01) records the diagnosis and retained assertions. Physical audio results above retain their original build provenance; this simulator task does not install a new phone build or establish spoken VoiceOver quality.
+
 ## Recording results
 
 For each test, record only:

@@ -13,6 +13,7 @@ final class AccessibilityRefreshUITests: XCTestCase {
     capture("AX5 Rest duration choices")
     app.buttons["napPlanPreset-60"].tap()
     XCTAssertTrue(app.buttons["napPlanPreset-60"].isSelected)
+    scrollTo(app.buttons["napPlanPreset-30"], in: app)
     app.buttons["napPlanPreset-30"].tap()
     XCTAssertTrue(app.buttons["napPlanPreset-30"].isSelected)
     let options = app.buttons["napPlanTimeOptions"]
@@ -22,6 +23,7 @@ final class AccessibilityRefreshUITests: XCTestCase {
     capture("AX5 Time duration choices")
     app.buttons["napTimePreset-60"].tap()
     XCTAssertTrue(app.buttons["napTimePreset-60"].isSelected)
+    scrollTo(app.buttons["napTimePreset-45"], in: app)
     app.buttons["napTimePreset-45"].tap()
     XCTAssertTrue(app.buttons["napTimePreset-45"].isSelected)
     app.buttons["applyNapTime"].tap()
@@ -158,7 +160,9 @@ final class AccessibilityRefreshUITests: XCTestCase {
   private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {
     for _ in 0..<16 {
       // Keep the gesture inside content rather than the pinned primary action.
-      var bottom = app.frame.height - 140
+      var bottom = app.frame.maxY - 20
+      let tabBar = app.tabBars.firstMatch
+      if tabBar.exists && tabBar.isHittable { bottom = min(bottom, tabBar.frame.minY - 20) }
       for id in ["reviewNapPlan", "startNapRun", "applyNapTime", "applyNapSound"] {
         let button = app.buttons[id]
         if button.exists && button.isHittable { bottom = min(bottom, button.frame.minY - 30) }
@@ -170,12 +174,18 @@ final class AccessibilityRefreshUITests: XCTestCase {
       let frame = element.exists ? element.frame : nil
       if let frame, element.isHittable, (top...bottom).contains(frame.midY) { return }
       let scrollBack = frame.map { $0.midY < top } ?? false
+      let distance = min(
+        (bottom - top) * 0.7,
+        max(44, frame.map { abs($0.midY - (top + bottom) / 2) } ?? (bottom - top)))
+      let startY = scrollBack ? top : bottom
+      let endY = startY + (scrollBack ? distance : -distance)
       let origin = app.coordinate(withNormalizedOffset: .zero)
-      origin.withOffset(CGVector(dx: app.frame.width * 0.7, dy: scrollBack ? top : bottom))
+      origin.withOffset(CGVector(dx: app.frame.width * 0.7, dy: startY))
         .press(
           forDuration: 0.05,
           thenDragTo: origin.withOffset(
-            CGVector(dx: app.frame.width * 0.7, dy: scrollBack ? bottom : top)))
+            CGVector(dx: app.frame.width * 0.7, dy: endY)),
+          withVelocity: .slow, thenHoldForDuration: 0.2)
     }
     XCTFail("Element is not reachable: \(element)")
   }
