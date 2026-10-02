@@ -76,12 +76,13 @@ struct NapPlan: Equatable, Sendable {
   let routeEndReason: RouteEndReason
   let narrationStart: Date
   let driftDuration: TimeInterval
+  let isTimer: Bool
 
   fileprivate init(
     id: String, start: Date, deadline: Date, wakeAlarm: Date?, route: [PlannedSession],
     transitions: [JourneyTransition], segments: [PlanSegment], fallback: RestSound,
     usedShorterAlternative: Bool, routeEndReason: RouteEndReason, narrationStart: Date,
-    driftDuration: TimeInterval
+    driftDuration: TimeInterval, isTimer: Bool
   ) {
     self.id = id
     self.start = start
@@ -95,6 +96,17 @@ struct NapPlan: Equatable, Sendable {
     self.routeEndReason = routeEndReason
     self.narrationStart = narrationStart
     self.driftDuration = driftDuration
+    self.isTimer = isTimer
+  }
+
+  /// A timer may start after brief setup, but no more than five percent of its
+  /// chosen window or five seconds. The wake deadline never moves.
+  func canStartTimer(at date: Date) -> Bool {
+    guard isTimer, date.timeIntervalSinceReferenceDate.isFinite,
+      date >= start, date < deadline
+    else { return false }
+    let allowance = min(5, deadline.timeIntervalSince(start) * 0.05)
+    return date.timeIntervalSince(start) <= allowance
   }
 
   /// Actual narration may finish early or consume the planned drift/rest budget.
@@ -116,6 +128,41 @@ struct NapPlan: Equatable, Sendable {
 }
 
 enum NapPlanner {
+  /// A rest timer begins at creation, after any alarm authorization prompt.
+  /// The runtime allows a short setup window but never moves this deadline.
+  static func makeTimer(
+    id: String, window: NapWindow, sound: RestSound, alarmEnabled: Bool, now: Date,
+    availableAmbienceIDs: Set<String>
+  ) throws -> NapPlan {
+    guard !id.isEmpty else { throw NapDomainError.invalidIdentity }
+    guard now.timeIntervalSinceReferenceDate.isFinite else {
+      throw NapDomainError.invalidDeadline
+    }
+    let deadline: Date
+    switch window {
+    case .duration(let duration):
+      guard duration.isFinite, duration > 0 else { throw NapDomainError.invalidDuration }
+      deadline = now.addingTimeInterval(duration)
+    case .wakeTime(let date):
+      deadline = date
+    }
+    guard deadline.timeIntervalSinceReferenceDate.isFinite, deadline > now else {
+      throw NapDomainError.invalidDeadline
+    }
+    let fallback: RestSound
+    if case .ambience(let soundID) = sound, availableAmbienceIDs.contains(soundID) {
+      fallback = sound
+    } else {
+      fallback = .silence
+    }
+    return NapPlan(
+      id: id, start: now, deadline: deadline,
+      wakeAlarm: alarmEnabled ? deadline : nil, route: [], transitions: [],
+      segments: [PlanSegment(kind: .rest(fallback), start: now, end: deadline)],
+      fallback: fallback, usedShorterAlternative: false, routeEndReason: .windowFilled,
+      narrationStart: now, driftDuration: 0, isTimer: true)
+  }
+
   static func makePlan(
     id: String, request: NapRequest, startingAt start: Date, now: Date,
     catalog: NapCatalog, availableAmbienceIDs: Set<String> = []
@@ -194,7 +241,7 @@ enum NapPlanner {
       id: id, start: start, deadline: deadline, wakeAlarm: request.alarmEnabled ? deadline : nil,
       route: selection.route, transitions: transitions, segments: segments, fallback: fallback,
       usedShorterAlternative: usedAlternative, routeEndReason: selection.reason,
-      narrationStart: narrationStart, driftDuration: drift)
+      narrationStart: narrationStart, driftDuration: drift, isTimer: false)
   }
 
   private static func validateTransitions(

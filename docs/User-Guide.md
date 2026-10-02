@@ -6,13 +6,23 @@ This guide describes the current experimental build. Honkshool helps you rest wi
 
 ## Find the ordinary listening flow
 
-The app opens on **Rest** after the first-launch welcome. **History** is the other tab, and **Settings** opens from Rest. Choose a prepared session, set a rest window and sound, review the exact plan, and explicitly start.
+The app opens on **Rest** after the first-launch welcome. **History** is the other tab, and **Settings** opens from Rest. Choose a duration, Silence or Gentle rain, and whether to use a wake alarm on the same screen, then tap **Start resting**.
 
 The experimental **Feasibility Lab** is under **Settings → Advanced**. Its background-audio test and test alarm are separate diagnostic tools. Stop feasibility audio and cancel its test alarm before starting a Nap Plan. The app blocks overlapping use and explains what needs to stop.
 
-## Choose, review, and start
+## Start a nap timer
 
-1. **Choose content.** Rest suggests a prepared session in **How a Car Works**. Tap **Change session** to choose the first or second session. Starting with the first can include the second when the window allows. The reviewed route is the authority for what will actually play.
+1. Choose a duration on **Rest**. Expand **Custom duration or wake time** for other durations or an exact ending time; these choices stay on the same screen.
+2. Choose **Silence** or available **Gentle rain**, and set **Wake alarm** on or off.
+3. Tap **Start resting**. If needed, iPhone asks for alarm permission. Once a requested alarm is verified, rain begins immediately, or the app shows silent rest. There is no separate review, confirmation page, or one-minute waiting period for a timer.
+
+Saved Rest defaults apply. The duration begins after any alarm-permission prompt; brief alarm setup uses part of that window. The ending time then stays fixed. Setup longer than five seconds (three seconds for a one-minute timer) blocks a new start; a tracked alarm remains available to cancel. Keep the screen open until rest begins. If you leave during setup, return and explicitly start again after handling any tracked alarm. A timer contains no narration and creates no listening history.
+
+## Plan a narrated rest
+
+Tap **Plan a narrated rest** below the timer choices. Narrated sessions retain their full route review:
+
+1. **Choose content.** The narrated flow suggests a prepared session in **How a Car Works**. Tap **Change session** to choose the first or second session. Starting with the first can include the second when the window allows. The reviewed route is the authority for what will actually play.
 2. **Choose your rest window.** Pick a duration on Rest, or tap **More options** for a custom duration or exact wake time. The window includes settling, narration, and any remaining rest; it is not a measure of time asleep. The selected window and narration estimates determine what fits.
 3. **Choose the rest sound.** Tap **After narration** for **Silence** (the default) or **Gentle rain** when its bundled audio and provenance validate. If no complete narration fits, the plan can use only the selected rest sound. Honkshool does not speed up narration to squeeze it in.
 4. **Choose the alarm.** Leave **Wake alarm** on if you want a system wake alarm at the fixed deadline, or turn it off. With it off, Honkshool schedules no wake alarm for that plan; set another alarm if you need one.
@@ -23,11 +33,13 @@ An alarm-enabled start first asks for alarm access if needed, schedules the alar
 
 ## When can I lock the phone?
 
-Keep Honkshool in the foreground until the approved narration or rain begins. This includes any initial silent settling period before narration. Then you can lock the phone.
+For a **nap timer**, wait until Gentle rain is playing or the silent-rest status appears, then lock the phone. Silence has no media playback or Lock Screen audio controls.
+
+For a **narrated plan**, keep Honkshool in the foreground until the approved narration or rain begins. This includes any initial silent settling period before narration. Then you can lock the phone.
 
 For a **silence-only plan with no narration**, wait for the visible rest-until-deadline state at the approved start. You can then lock the phone even though there is no audio to hear.
 
-Leaving the app too early ends the pending run and requires a new review. An alarm already scheduled for it can remain active. If rain fails, a visible status explains the fallback to silence; if that happens before narration while the app is backgrounded, the run ends rather than relying on a later silent background start.
+Leaving a narrated plan too early ends the pending run and requires a new review. An alarm already scheduled for it can remain active. If rain fails, a visible status explains the fallback to silence; if that happens before narration while the app is backgrounded, the run ends rather than relying on a later silent background start.
 
 ## Control audio and alarms
 
@@ -36,7 +48,7 @@ Leaving the app too early ends the pending run and requires a new review. An ala
 | **Pause playback** | Pauses audio. The deadline and scheduled alarm do not move. |
 | **Resume playback** | Explicitly resumes when allowed, within the remaining window. |
 | **Stop playback** | Ends the run's audio. A narration attempt can be saved as partial. It leaves the wake alarm active. |
-| **Cancel wake alarm** | Available on the confirmed plan after the run is inactive; cancels the separately tracked wake alarm. |
+| **Cancel wake alarm** | Available after the run is inactive; cancels the separately tracked wake alarm. |
 | **Cancel Nap Plan wake alarm** | Cancels the tracked plan alarm from **Settings → Advanced → Feasibility Lab**. Check the resulting status. |
 | **Change your plan** or **Plan another rest** | Returns to choices for a fresh review; an old tracked alarm must still be cleared before starting. |
 

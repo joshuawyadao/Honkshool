@@ -5,6 +5,22 @@ final class NapPlanReviewUITests: XCTestCase {
     continueAfterFailure = false
   }
 
+  func testCustomOneMinuteDurationPersistsAfterApplyingTimeChoices() {
+    let app = launchReview()
+    chooseOneMinuteDuration(in: app)
+    openTimeOptions(in: app)
+    XCTAssertTrue(app.buttons["napPlanDuration"].label.contains("1 minutes"))
+  }
+
+  func testCustomOneMinuteDurationPersistsAtLargestTextSize() {
+    let app = launchReview(additionalArguments: [
+      "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+    ])
+    chooseOneMinuteDuration(in: app)
+    openTimeOptions(in: app)
+    XCTAssertTrue(app.buttons["napPlanDuration"].label.contains("1 minutes"))
+  }
+
   func testPhysicalRainControlsBackgroundDeadlineAndEmptyHistoryOnRelaunch() throws {
     guard ProcessInfo.processInfo.environment["HONKSHOOL_REAL_RAIN_TEST"] == "1" else {
       throw XCTSkip("Opt in on a connected physical iPhone for real rain playback.")
@@ -19,12 +35,7 @@ final class NapPlanReviewUITests: XCTestCase {
         "HONKSHOOL_UI_TEST_AUDIO": "0",
       ])
       defer { app.terminate() }
-      chooseDuration(5, in: app)
-      openTimeOptions(in: app)
-      let custom = app.steppers["napPlanCustomDuration"]
-      scrollTo(custom, in: app)
-      for _ in 0..<4 { custom.buttons["napPlanCustomDuration-Decrement"].tap() }
-      app.buttons["applyNapTime"].tap()
+      chooseOneMinuteDuration(in: app)
 
       let sound = app.buttons["napPlanSound"]
       scrollTo(sound, in: app)
@@ -73,6 +84,7 @@ final class NapPlanReviewUITests: XCTestCase {
         let another = app.buttons["reviewAnotherNapPlan"]
         scrollTo(another, in: app)
         another.tap()
+        openNarratedPlan(in: app)
       }
       XCTAssertTrue(status.label.contains("Gentle rain is playing"))
       let startObservation = XCTAttachment(
@@ -89,18 +101,43 @@ final class NapPlanReviewUITests: XCTestCase {
       resume.tap()
       XCTAssertTrue(status.label.contains("Gentle rain resumed"))
 
+      let foregroundWindow = app.windows.firstMatch
+      let foregroundFrame = foregroundWindow.frame
       XCUIDevice.shared.press(.home)
       XCTAssertTrue(app.wait(for: .runningBackground, timeout: 5))
       // This spans a complete bundled loop while the real app is backgrounded.
       Thread.sleep(forTimeInterval: 12)
       XCTAssertEqual(app.state, .runningBackground)
       app.activate()
+      XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
+      // On device, activation can return while the window is still zooming in.
+      // A hittable control in that transient frame can receive a missed tap.
+      let restoredWindow = XCTNSPredicateExpectation(
+        predicate: NSPredicate { _, _ in
+          let frame = foregroundWindow.frame
+          return abs(frame.minX - foregroundFrame.minX) < 1
+            && abs(frame.minY - foregroundFrame.minY) < 1
+            && abs(frame.width - foregroundFrame.width) < 1
+            && abs(frame.height - foregroundFrame.height) < 1
+        }, object: foregroundWindow)
+      XCTAssertEqual(XCTWaiter.wait(for: [restoredWindow], timeout: 5), .completed)
       XCTAssertTrue(status.label.contains("Gentle rain resumed"))
       XCTAssertEqual(app.staticTexts["napPlanConfirmedDeadline"].label, originalDeadline)
       scrollTo(pause, in: app)
       pause.tap()
+      let pausedStatus = status.label
+      let pauseObservation = XCTAttachment(
+        string:
+          "Status after foreground Pause: \(pausedStatus); Pause exists: \(pause.exists); Resume exists: \(resume.exists)."
+      )
+      pauseObservation.name = "Physical post-background pause state"
+      pauseObservation.lifetime = .keepAlways
+      add(pauseObservation)
+      XCTAssertTrue(pausedStatus.contains("Paused"), "Pause did not take effect: \(pausedStatus)")
       scrollTo(resume, in: app)
       resume.tap()
+
+      XCTAssertTrue(status.label.contains("Gentle rain resumed"))
 
       let finished = XCTNSPredicateExpectation(
         predicate: NSPredicate(
@@ -330,6 +367,7 @@ final class NapPlanReviewUITests: XCTestCase {
     let reopen = app.buttons["reviewAnotherNapPlan"]
     scrollTo(reopen, in: app)
     reopen.tap()
+    openNarratedPlan(in: app)
     chooseDuration(5, in: app)
     let anotherAlarm = app.switches["napPlanAlarm"]
     scrollTo(anotherAlarm, in: app)
@@ -475,9 +513,11 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertFalse(app.staticTexts["napPlanConfirmation"].exists)
   }
 
-  private func launchReview(additionalEnvironment: [String: String] = [:]) -> XCUIApplication {
+  private func launchReview(
+    additionalEnvironment: [String: String] = [:], additionalArguments: [String] = []
+  ) -> XCUIApplication {
     let app = XCUIApplication()
-    app.launchArguments = ["-ui-testing"]
+    app.launchArguments = ["-ui-testing"] + additionalArguments
     app.launchEnvironment = [
       "HONKSHOOL_UI_TEST_ALARM": "authorized",
       "HONKSHOOL_UI_TEST_AUDIO": "1",
@@ -494,14 +534,35 @@ final class NapPlanReviewUITests: XCTestCase {
       XCTAssertTrue(acknowledge.waitForExistence(timeout: 5))
       acknowledge.tap()
     }
+    openNarratedPlan(in: app)
     XCTAssertTrue(app.buttons["reviewNapPlan"].waitForExistence(timeout: 5))
     return app
+  }
+
+  private func openNarratedPlan(in app: XCUIApplication) {
+    let plan = app.buttons["planNarratedRest"]
+    XCTAssertTrue(plan.waitForExistence(timeout: 5))
+    scrollTo(plan, in: app)
+    plan.tap()
   }
 
   private func chooseDuration(_ minutes: Int, in app: XCUIApplication) {
     openTimeOptions(in: app)
     app.buttons["napPlanDuration"].tap()
     app.buttons["\(minutes) minutes"].tap()
+    app.buttons["applyNapTime"].tap()
+  }
+
+  private func chooseOneMinuteDuration(in app: XCUIApplication) {
+    chooseDuration(5, in: app)
+    openTimeOptions(in: app)
+    let custom = app.steppers["napPlanCustomDuration"]
+    // The Stepper container can be visible without being a hittable target.
+    // Reach the native decrement button that the user actually presses.
+    let decrement = custom.buttons["napPlanCustomDuration-Decrement"]
+    scrollTo(decrement, in: app)
+    for _ in 0..<4 { decrement.tap() }
+    XCTAssertEqual(custom.value as? String, "1")
     app.buttons["applyNapTime"].tap()
   }
 
@@ -516,8 +577,12 @@ final class NapPlanReviewUITests: XCTestCase {
       guard element.isHittable else { return false }
       let review = app.buttons["reviewNapPlan"]
       // XCTest can report a partially obscured picker as hittable, then tap the footer.
-      if review.exists && review.isHittable && element.identifier != "reviewNapPlan" {
-        return element.frame.maxY < review.frame.minY
+      let timerStart = app.buttons["startRestTimer"]
+      let pinnedAction = review.exists && review.isHittable ? review : timerStart
+      if pinnedAction.exists && pinnedAction.isHittable
+        && element.identifier != pinnedAction.identifier
+      {
+        return element.frame.maxY < pinnedAction.frame.minY
       }
       return true
     }

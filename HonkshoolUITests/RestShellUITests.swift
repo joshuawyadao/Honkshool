@@ -59,6 +59,8 @@ final class RestShellUITests: XCTestCase {
       arguments: [
         "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityL",
       ])
+    scrollTo(app.buttons["planNarratedRest"], in: app)
+    app.buttons["planNarratedRest"].tap()
     let review = app.buttons["reviewNapPlan"]
     XCTAssertTrue(review.waitForExistence(timeout: 5))
     XCTAssertTrue(review.isHittable)
@@ -90,6 +92,137 @@ final class RestShellUITests: XCTestCase {
     attachScreen("Ready — accessibility text")
   }
 
+  func testTimerStartsRainDirectlyAndKeepsVerifiedAlarmAfterStop() {
+    let app = launch(reset: true)
+    let start = app.buttons["startRestTimer"]
+    XCTAssertTrue(start.waitForExistence(timeout: 5))
+    XCTAssertTrue(start.isHittable)
+    XCTAssertFalse(app.buttons["reviewNapPlan"].exists)
+    app.buttons["timerPreset-30"].tap()
+    scrollTo(app.buttons["timerRain"], in: app)
+    app.buttons["timerRain"].tap()
+    XCTAssertTrue(app.buttons["timerRain"].isSelected)
+    attachScreen("Quick timer — ready")
+    start.tap()
+    let status = app.staticTexts["napRunStatus"]
+    XCTAssertTrue(status.waitForExistence(timeout: 5))
+    XCTAssertTrue(status.label.contains("Gentle rain is playing"), status.label)
+    XCTAssertFalse(app.buttons["confirmNapPlan"].exists)
+    XCTAssertFalse(app.staticTexts["napPlanConfirmedStart"].exists)
+    let deadline = app.staticTexts["napPlanConfirmedDeadline"].label
+    scrollTo(app.staticTexts["napPlanAlarmStatus"], in: app)
+    XCTAssertTrue(app.staticTexts["napPlanAlarmStatus"].label.contains("scheduled"))
+    attachScreen("Quick timer — rain playing")
+    app.tabBars.buttons["History"].tap()
+    XCTAssertFalse(app.buttons["historyResume"].exists)
+    app.tabBars.buttons["Rest"].tap()
+    XCTAssertEqual(app.staticTexts["napPlanConfirmedDeadline"].label, deadline)
+    scrollTo(app.buttons["stopNapRun"], in: app)
+    app.buttons["stopNapRun"].tap()
+    scrollTo(app.buttons["cancelNapPlanAlarm"], in: app)
+    XCTAssertTrue(app.buttons["cancelNapPlanAlarm"].isEnabled)
+    app.buttons["cancelNapPlanAlarm"].tap()
+    scrollTo(app.buttons["reviewAnotherNapPlan"], in: app)
+    app.buttons["reviewAnotherNapPlan"].tap()
+    XCTAssertTrue(start.waitForExistence(timeout: 5))
+  }
+
+  func testTimerAlarmDenialKeepsChoicesAndDoesNotStartPlayback() {
+    let app = launch(reset: true, alarm: "denied")
+    let start = app.buttons["startRestTimer"]
+    XCTAssertTrue(start.waitForExistence(timeout: 5))
+    start.tap()
+    let error = app.staticTexts["timerStartError"]
+    XCTAssertTrue(error.waitForExistence(timeout: 5))
+    XCTAssertTrue(error.label.contains("Playback hasn’t started"))
+    XCTAssertFalse(app.buttons["stopNapRun"].exists)
+    XCTAssertTrue(app.buttons["openAlarmSettings"].exists)
+    scrollTo(app.switches["timerWakeAlarm"], in: app)
+    app.switches["timerWakeAlarm"].tap()
+    start.tap()
+    XCTAssertTrue(app.staticTexts["napRunStatus"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["napRunStatus"].label.contains("silence"))
+    scrollTo(app.buttons["stopNapRun"], in: app)
+    app.buttons["stopNapRun"].tap()
+  }
+
+  func testTimerScheduleFailureRetainsCancellationWithoutClaimingAlarmIsSet() {
+    let app = launch(reset: true, alarm: "schedule-failure")
+    XCTAssertTrue(app.buttons["startRestTimer"].waitForExistence(timeout: 5))
+    app.buttons["startRestTimer"].tap()
+    XCTAssertTrue(app.staticTexts["timerStartError"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["timerStartError"].label.contains("Playback hasn’t started"))
+    XCTAssertTrue(app.staticTexts["Check your\nwake alarm."].exists)
+    XCTAssertFalse(app.buttons["stopNapRun"].exists)
+    scrollTo(app.buttons["cancelNapPlanAlarm"], in: app)
+    app.buttons["cancelNapPlanAlarm"].tap()
+    XCTAssertTrue(app.buttons["startRestTimer"].waitForExistence(timeout: 5))
+    XCTAssertFalse(app.staticTexts["timerStartError"].exists)
+  }
+
+  func testLeavingTimerDuringPermissionDoesNotStartOnReturn() {
+    let app = launch(reset: true, alarm: "delayed-authorization")
+    XCTAssertTrue(app.buttons["startRestTimer"].waitForExistence(timeout: 5))
+    app.buttons["startRestTimer"].tap()
+    XCTAssertTrue(app.staticTexts["timerPreparing"].waitForExistence(timeout: 5))
+    XCTAssertFalse(app.buttons["startRestTimer"].isEnabled)
+    app.tabBars.buttons["History"].tap()
+    XCTAssertTrue(app.navigationBars["History"].waitForExistence(timeout: 5))
+    app.tabBars.buttons["Rest"].tap()
+    let error = app.staticTexts["timerStartError"]
+    XCTAssertTrue(error.waitForExistence(timeout: 15))
+    XCTAssertTrue(error.label.contains("Rest hasn’t started"))
+    XCTAssertFalse(app.buttons["stopNapRun"].exists)
+    XCTAssertFalse(app.buttons["cancelNapPlanAlarm"].exists)
+    XCTAssertTrue(app.buttons["startRestTimer"].isEnabled)
+  }
+
+  func testTimerCustomAndExactTimingStayOnRestScreen() {
+    let app = launch(reset: true)
+    XCTAssertTrue(app.buttons["startRestTimer"].waitForExistence(timeout: 5))
+    let more = app.buttons["timerMoreOptions"]
+    scrollTo(more, in: app)
+    more.tap()
+    let decrement = app.steppers["timerCustomDuration"].buttons["timerCustomDuration-Decrement"]
+    scrollTo(decrement, in: app)
+    decrement.tap()
+    XCTAssertEqual(app.steppers["timerCustomDuration"].value as? String, "19")
+    scrollTo(app.switches["timerExactTime"], in: app)
+    app.switches["timerExactTime"].tap()
+    XCTAssertTrue(app.datePickers["timerWakeTime"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.navigationBars["Honkshool"].exists)
+    XCTAssertTrue(app.buttons["startRestTimer"].isHittable)
+    XCTAssertFalse(app.buttons["confirmNapPlan"].exists)
+  }
+
+  func testLargestTextQuickTimerKeepsChoicesAndStartReachable() {
+    let app = launch(
+      reset: true,
+      arguments: [
+        "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+      ])
+    let start = app.buttons["startRestTimer"]
+    XCTAssertTrue(start.waitForExistence(timeout: 5))
+    XCTAssertTrue(start.isHittable)
+    scrollTo(app.buttons["timerPreset-60"], in: app)
+    app.buttons["timerPreset-60"].tap()
+    XCTAssertTrue(app.buttons["timerPreset-60"].isSelected)
+    attachScreen("AX5 quick timer duration")
+    scrollTo(app.buttons["timerRain"], in: app)
+    app.buttons["timerRain"].tap()
+    XCTAssertTrue(app.buttons["timerRain"].isSelected)
+    scrollTo(app.switches["timerWakeAlarm"], in: app)
+    app.switches["timerWakeAlarm"].tap()
+    XCTAssertEqual(app.switches["timerWakeAlarm"].value as? String, "0")
+    attachScreen("AX5 quick timer sound and alarm")
+    XCTAssertTrue(start.isHittable)
+    start.tap()
+    XCTAssertTrue(app.staticTexts["napRunStatus"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["napRunStatus"].label.contains("Gentle rain is playing"))
+    scrollTo(app.buttons["stopNapRun"], in: app)
+    app.buttons["stopNapRun"].tap()
+  }
+
   private func attachScreen(_ name: String) {
     let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
     attachment.name = name
@@ -97,13 +230,15 @@ final class RestShellUITests: XCTestCase {
     add(attachment)
   }
 
-  private func launch(reset: Bool, showWelcome: Bool = false, arguments: [String] = [])
+  private func launch(
+    reset: Bool, showWelcome: Bool = false, arguments: [String] = [], alarm: String = "authorized"
+  )
     -> XCUIApplication
   {
     let app = XCUIApplication()
     app.launchArguments = ["-ui-testing"] + arguments
     app.launchEnvironment = [
-      "HONKSHOOL_UI_TEST_ALARM": "authorized",
+      "HONKSHOOL_UI_TEST_ALARM": alarm,
       "HONKSHOOL_UI_TEST_AUDIO": "1",
       "HONKSHOOL_UI_TEST_RESET": reset ? "1" : "0",
       "HONKSHOOL_UI_TEST_SHOW_WELCOME": showWelcome ? "1" : "0",
@@ -113,10 +248,25 @@ final class RestShellUITests: XCTestCase {
   }
 
   private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {
-    for _ in 0..<12 {
-      if element.isHittable { return }
-      app.swipeUp()
+    let window = app.windows.firstMatch
+    let frame = window.frame
+    func visible() -> Bool {
+      let center = element.frame.midY
+      let footer = ["startRestTimer", "reviewNapPlan", "startNapRun"].map { app.buttons[$0] }
+        .filter { $0.exists && $0.isHittable }.map { $0.frame.minY }.min()
+      let bottom = min(footer ?? frame.maxY, app.tabBars.firstMatch.frame.minY)
+      return element.isHittable && center > frame.minY + 100 && center < bottom - 12
     }
-    XCTAssertTrue(element.isHittable)
+    for direction in [true, false] {
+      for _ in 0..<16 {
+        if visible() { return }
+        let from = window.coordinate(
+          withNormalizedOffset: CGVector(dx: 0.5, dy: direction ? 0.65 : 0.3))
+        let to = window.coordinate(
+          withNormalizedOffset: CGVector(dx: 0.5, dy: direction ? 0.3 : 0.65))
+        from.press(forDuration: 0.1, thenDragTo: to, withVelocity: .slow, thenHoldForDuration: 0.2)
+      }
+    }
+    XCTAssertTrue(visible())
   }
 }

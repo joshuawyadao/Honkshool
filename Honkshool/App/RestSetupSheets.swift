@@ -76,32 +76,59 @@ struct RestDurationChoices: View {
   @Binding var minutes: Int
   var identifierPrefix = "napPlanPreset"
   var body: some View {
-    LazyVGrid(
-      columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 120 : 54))],
-      spacing: 8
-    ) {
-      ForEach(RestDurationPolicy.recommendedMinutes, id: \.self) { value in
-        Button {
-          minutes = value
-        } label: {
-          Text("\(value)")
-            .font(.body.weight(minutes == value ? .semibold : .regular))
-            .frame(maxWidth: .infinity, minHeight: 44)
-            .background(
-              minutes == value ? RestStyle.quiet : RestStyle.well,
-              in: RoundedRectangle(cornerRadius: 12)
-            )
-            .overlay {
-              RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(minutes == value ? RestStyle.secondary : .clear, lineWidth: 1)
+    // Four choices need no lazy loading. Eager rows keep every visible preset
+    // in the accessibility tree, including an incomplete final row.
+    ViewThatFits(in: .horizontal) {
+      choices(columns: 4)
+      choices(columns: 3)
+      choices(columns: 2)
+      choices(columns: 1)
+    }
+  }
+
+  private func choices(columns: Int) -> some View {
+    let values = RestDurationPolicy.recommendedMinutes
+    return Grid(horizontalSpacing: 8, verticalSpacing: 8) {
+      ForEach(0..<((values.count + columns - 1) / columns), id: \.self) { row in
+        GridRow {
+          ForEach(0..<columns, id: \.self) { column in
+            let index = row * columns + column
+            if values.indices.contains(index) {
+              choice(values[index])
+            } else {
+              Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
+                .accessibilityHidden(true)
             }
+          }
         }
-        .accessibilityLabel("\(value) minutes")
-        .accessibilityIdentifier("\(identifierPrefix)-\(value)")
-        .accessibilityAddTraits(minutes == value ? .isSelected : [])
       }
     }
   }
+
+  private func choice(_ value: Int) -> some View {
+    Button {
+      minutes = value
+    } label: {
+      Text("\(value)")
+        .font(.body.weight(minutes == value ? .semibold : .regular))
+        .frame(
+          minWidth: dynamicTypeSize.isAccessibilitySize ? 120 : 54,
+          maxWidth: .infinity, minHeight: 44
+        )
+        .background(
+          minutes == value ? RestStyle.quiet : RestStyle.well,
+          in: RoundedRectangle(cornerRadius: 12)
+        )
+        .overlay {
+          RoundedRectangle(cornerRadius: 12)
+            .strokeBorder(minutes == value ? RestStyle.secondary : .clear, lineWidth: 1)
+        }
+    }
+    .accessibilityLabel("\(value) minutes")
+    .accessibilityIdentifier("\(identifierPrefix)-\(value)")
+    .accessibilityAddTraits(minutes == value ? .isSelected : [])
+  }
+
 }
 
 struct RestSoundSheet: View {
@@ -176,5 +203,87 @@ struct RestSoundSheet: View {
     .accessibilityLabel("\(title). \(subtitle)")
     .accessibilityIdentifier(title)
     .accessibilityAddTraits(selection == id ? .isSelected : [])
+  }
+}
+
+/// Everyday timer choices stay inline; only optional custom timing expands.
+struct RestTimerChoices: View {
+  @Binding var minutes: Int
+  @Binding var usesExactWakeTime: Bool
+  @Binding var wakeTime: Date
+  @Binding var soundID: String?
+  @Binding var alarmEnabled: Bool
+  let availableIDs: Set<String>
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 20) {
+      RestCard(title: "Time to rest · minutes") {
+        if usesExactWakeTime {
+          RestTimingRow(title: "Rest until", date: wakeTime)
+        } else {
+          RestDurationChoices(minutes: $minutes, identifierPrefix: "timerPreset")
+          if !RestDurationPolicy.recommendedMinutes.contains(minutes) {
+            Text("\(minutes) minutes").accessibilityIdentifier("timerCustomSummary")
+          }
+        }
+        DisclosureGroup {
+          VStack(alignment: .leading, spacing: 12) {
+            Toggle("Rest until an exact time", isOn: $usesExactWakeTime)
+              .accessibilityIdentifier("timerExactTime")
+            if usesExactWakeTime {
+              DatePicker(
+                "Wake time", selection: $wakeTime, displayedComponents: [.date, .hourAndMinute]
+              )
+              .accessibilityIdentifier("timerWakeTime")
+            } else {
+              Stepper("\(minutes) minutes", value: $minutes, in: 1...180)
+                .accessibilityIdentifier("timerCustomDuration")
+            }
+          }.padding(.top, 12)
+        } label: {
+          Text("Custom duration or wake time")
+            .accessibilityIdentifier("timerMoreOptions")
+        }
+      }
+      RestCard(title: "Rest sound") {
+        soundChoice("Silence", description: "Nothing more to hear.", id: nil)
+        if availableIDs.contains(PreparedAmbience.gentleRainID) {
+          soundChoice(
+            "Gentle rain", description: "A soft, steady background.",
+            id: PreparedAmbience.gentleRainID)
+        } else {
+          Text("Gentle rain is unavailable. You can still rest in silence.")
+            .font(.subheadline).foregroundStyle(RestStyle.secondary)
+        }
+        Divider()
+        Toggle("Wake alarm", isOn: $alarmEnabled)
+          .accessibilityIdentifier("timerWakeAlarm")
+      }
+      Text(
+        alarmEnabled
+          ? "Your wake alarm is verified before rest begins. Keep this screen open until then."
+          : "No alarm will sound. Rest quietly until the displayed ending time."
+      )
+      .font(.subheadline).foregroundStyle(RestStyle.secondary)
+      if soundID != nil {
+        Text("Rain starts with your timer. If it becomes unavailable, rest continues in silence.")
+          .font(.footnote).foregroundStyle(RestStyle.secondary)
+      }
+    }
+  }
+
+  private func soundChoice(_ title: String, description: String, id: String?) -> some View {
+    Button {
+      soundID = id
+    } label: {
+      HStack {
+        Text(title)
+        Spacer(minLength: 8)
+        Image(systemName: soundID == id ? "checkmark.circle.fill" : "circle")
+      }.frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+    }
+    .accessibilityLabel("\(title). \(description)")
+    .accessibilityIdentifier(id == nil ? "timerSilence" : "timerRain")
+    .accessibilityAddTraits(soundID == id ? .isSelected : [])
   }
 }

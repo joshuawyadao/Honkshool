@@ -151,6 +151,12 @@ This preparation extends the earlier evidence without superseding the owner's ac
 - **D-014/D-017 — Bounded expansion before the personal trial:** After merging the rain implementation, the owner selected the two-session journey as the next separate feature branch. Add Air, Fuel, and Spark after Turning Fuel Into Motion, retaining the accepted George `0.86` preparation settings, existing first-session identity/audio, reviewed route, and completion-based history. Broader journey controls and catalog expansion are deferred until the approximately ten-nap trial supplies evidence. This changes delivery order without changing the product boundary.
 - **Acceptance boundary:** Source review, exact offline asset construction, and automated progression/resume/deadline checks support implementation readiness. Full-session comfort, rain level, locked controls, and real headphone-disconnection observations remain deferred to manual use; no new voice or subjective acceptance is inferred.
 
+## Quick timer entry, 2026-10-01
+
+- **Owner-requested flow simplification:** The owner found the pages and waiting period excessive for setting a nap timer and playing background sound. Rest now opens with duration, Silence or Gentle rain, and wake alarm together, followed by one explicit **Start resting** action. **Plan a narrated rest** preserves the route-review flow as a secondary choice.
+- **Timing and approval:** Timer Start approves the visible choices. Alarm permission comes before creating the fixed deadline; alarm verification comes before immediate audio. A setup allowance of at most five seconds or 5% of duration, whichever is smaller, applies only to timers. Narrated plans keep their reviewed route, separate confirmation, and scheduled start. Reopening or returning after leaving during setup never starts playback automatically.
+- **Existing guarantees:** Rain failure is visible silence; timers create no narration history. Stop does not cancel a separately tracked system alarm. No subjective audio or physical Lock Screen acceptance is inferred from this simplification.
+
 ## Deferred beyond the first prototype
 
 These are intentionally outside the first prototype and should not block the current roadmap:
