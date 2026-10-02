@@ -5,6 +5,7 @@ struct NapPlanReviewView: View {
   private static let plannedStartLead: TimeInterval = 60
   @Environment(\.openURL) private var openURL
   @Environment(\.dismiss) private var dismiss
+  @Environment(\.scenePhase) private var scenePhase
   @ObservedObject private var run: NapRunController
   @ObservedObject private var alarm: NapPlanAlarmService
   @ObservedObject private var historyStore: ListeningHistoryStore
@@ -47,6 +48,9 @@ struct NapPlanReviewView: View {
   @State private var startedPlanID: String?
   @State private var isStarting = false
   @State private var isVisible = false
+  @State private var plansNarration = false
+  @State private var timerStartID: UUID?
+  @State private var pendingTimer: NapPlan?
 
   init(
     run: NapRunController,
@@ -99,12 +103,14 @@ struct NapPlanReviewView: View {
               && (isHome || run.lastRunPlanID == reviewState.confirmed?.plan.id))
           {
             runContent(run.presentationPlan)
-          } else if isHome && alarm.hasTrackedAlarm && reviewState.confirmed == nil {
+          } else if isHome && alarm.hasTrackedAlarm && reviewState.confirmed == nil && !isStarting {
             existingAlarmPage
           } else if isHome, run.phase == .idle, reviewState.reviewed == nil,
             let entry = recoveryEntry
           {
             checkpointRecovery(entry)
+          } else if isHome && !plansNarration {
+            timerChoices
           } else if let loadError {
             ContentUnavailableView(
               "Content unavailable", systemImage: "book.closed", description: Text(loadError)
@@ -136,9 +142,18 @@ struct NapPlanReviewView: View {
         proxy.scrollTo("planTop", anchor: .top)
       }
       .onChange(of: run.phase) { _, _ in proxy.scrollTo("planTop", anchor: .top) }
+      .onChange(of: plansNarration) { _, _ in proxy.scrollTo("planTop", anchor: .top) }
+      .onChange(of: runError) { _, _ in proxy.scrollTo("planTop", anchor: .top) }
     }
     .safeAreaInset(edge: .bottom) {
-      if !run.hasActiveRun, !(isHome && run.phase != .idle), reviewState.reviewed == nil,
+      if isHome, !plansNarration, run.phase == .idle,
+        !alarm.hasTrackedAlarm || isStarting, recoveryEntry == nil
+      {
+        timerStartAction
+          .padding(.horizontal, RestStyle.pageInset)
+          .padding(.vertical, 12)
+          .background(RestStyle.background)
+      } else if !run.hasActiveRun, !(isHome && run.phase != .idle), reviewState.reviewed == nil,
         reviewState.confirmed == nil, !alarm.hasTrackedAlarm, recoveryEntry == nil, let catalog,
         let reviewCatalog
       {
@@ -160,13 +175,30 @@ struct NapPlanReviewView: View {
     .labeledContentStyle(RestLabeledContentStyle())
     .navigationTitle(isHome ? "Honkshool" : "Nap Plan")
     .navigationBarTitleDisplayMode(.inline)
+    .toolbar {
+      ToolbarItem(placement: .topBarLeading) {
+        if isHome, plansNarration, reviewState.reviewed == nil, run.phase == .idle {
+          Button("Nap timer", systemImage: "chevron.left") {
+            plansNarration = false
+            runError = nil
+          }
+          .accessibilityIdentifier("showNapTimer")
+        }
+      }
+    }
     .onAppear {
       isVisible = true
       clearConsumedReviewIfNeeded()
       applyChangedDefaults()
     }
     .onChange(of: run.lastRunPlanID) { _, _ in clearConsumedReviewIfNeeded() }
-    .onDisappear { isVisible = false }
+    .onDisappear {
+      isVisible = false
+      timerStartID = nil
+    }
+    .onChange(of: scenePhase) { _, phase in
+      if phase == .background { timerStartID = nil }
+    }
     .sheet(item: $activeSheet) { sheet in
       NavigationStack { setupSheet(sheet) }
         .presentationDragIndicator(.visible)
@@ -270,6 +302,124 @@ struct NapPlanReviewView: View {
     selectedSoundID = defaults.soundID
     alarmEnabled = defaults.wakeAlarm
     usesExactWakeTime = false
+  }
+
+  private var timerChoices: some View {
+    VStack(alignment: .leading, spacing: 20) {
+      RestHeading("Time for a nap.")
+      if let runError { errorLabel(runError, id: "timerStartError") }
+      if alarm.authorization == .denied, alarmEnabled {
+        Text("Allow alarms in iPhone Settings, or turn Wake alarm off to rest without one.")
+          .foregroundStyle(RestStyle.secondary)
+        Button("Open iPhone Settings") {
+          if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+        }.frame(minHeight: 44).accessibilityIdentifier("openAlarmSettings")
+      }
+      RestTimerChoices(
+        minutes: $durationMinutes, usesExactWakeTime: $usesExactWakeTime,
+        wakeTime: $exactWakeTime, soundID: $selectedSoundID, alarmEnabled: $alarmEnabled,
+        availableIDs: availableAmbienceIDs
+      )
+      .disabled(isStarting)
+      if let pendingTimer, isStarting {
+        RestTimingRow(title: "Rest ends at", date: pendingTimer.deadline)
+          .accessibilityIdentifier("timerPendingDeadline")
+      }
+      if !canStart() {
+        Text(
+          "End the experimental audio and cancel its test alarm in Settings → Advanced → Feasibility Lab before starting a rest."
+        )
+        .foregroundStyle(RestStyle.secondary)
+      }
+      Button("Plan a narrated rest", systemImage: "book.closed") {
+        plansNarration = true
+        runError = nil
+      }
+      .frame(minHeight: 44)
+      .disabled(isStarting)
+      .accessibilityIdentifier("planNarratedRest")
+    }
+  }
+
+  private var timerStartAction: some View {
+    VStack(spacing: 8) {
+      if isStarting {
+        Text(pendingTimer == nil ? "Preparing your rest…" : "Verifying your wake alarm…")
+          .font(.subheadline).foregroundStyle(RestStyle.secondary)
+          .accessibilityIdentifier("timerPreparing")
+      }
+      Button("Start resting") { Task { await startTimer() } }
+        .buttonStyle(RestButtonStyle())
+        .disabled(isStarting || alarm.isScheduling || !canStart())
+        .accessibilityIdentifier("startRestTimer")
+    }
+  }
+
+  private func startTimer() async {
+    guard !isStarting, !alarm.isScheduling, !alarm.hasTrackedAlarm, !run.hasActiveRun,
+      canStart(), isVisible, scenePhase == .active
+    else { return }
+    // Snapshot the explicit choices before any system permission or scheduling await.
+    let window: NapWindow =
+      usesExactWakeTime
+      ? .wakeTime(exactWakeTime) : .duration(TimeInterval(durationMinutes * 60))
+    let sound = selectedSoundID.map(RestSound.ambience(id:)) ?? .silence
+    let requestsAlarm = alarmEnabled
+    let requestID = UUID()
+    timerStartID = requestID
+    isStarting = true
+    runError = nil
+    pendingTimer = nil
+    defer {
+      isStarting = false
+      timerStartID = nil
+    }
+    if requestsAlarm, !(await alarm.authorize()) {
+      runError = "Your wake alarm isn’t set. Playback hasn’t started. \(alarm.statusMessage)"
+      return
+    }
+    guard timerStartIsCurrent(requestID) else {
+      runError = "Rest hasn’t started. Return to this screen and tap Start resting when ready."
+      return
+    }
+    do {
+      // Permission time does not consume the requested duration. From here, the deadline is fixed.
+      let plan = try NapPlanner.makeTimer(
+        id: makeID(), window: window, sound: sound, alarmEnabled: requestsAlarm,
+        now: .now, availableAmbienceIDs: availableAmbienceIDs)
+      pendingTimer = plan
+      var receipt: ScheduledNapAlarm?
+      if requestsAlarm {
+        guard let scheduled = await alarm.schedule(for: plan), alarm.isScheduled(scheduled) else {
+          runError = "Playback hasn’t started. \(alarm.statusMessage)"
+          return
+        }
+        receipt = scheduled
+      }
+      guard timerStartIsCurrent(requestID) else {
+        runError =
+          requestsAlarm
+          ? "Playback hasn’t started. The wake alarm remains tracked; cancel it separately if needed."
+          : "Rest hasn’t started. Tap Start resting when ready."
+        return
+      }
+      try run.startTimer(plan: plan, scheduledAlarm: receipt)
+      pendingTimer = nil
+    } catch {
+      let reason =
+        (error as? NapRunError) == .staleStart
+        ? "Setup took too long. Start a new timer when ready."
+        : (error is NapDomainError)
+          ? "Choose a duration or wake time in the future."
+          : "Audio could not start. Check your output and try again."
+      runError =
+        "Rest hasn’t started. \(reason)"
+        + (alarm.hasTrackedAlarm ? " Cancel the tracked wake alarm before trying again." : "")
+    }
+  }
+
+  private func timerStartIsCurrent(_ id: UUID) -> Bool {
+    timerStartID == id && isVisible && scenePhase == .active && canStart() && !run.hasActiveRun
   }
 
   private func choices(_ catalog: PreparedCatalog, reviewCatalog: NapCatalog) -> some View {
@@ -777,8 +927,12 @@ struct NapPlanReviewView: View {
   private var existingAlarmPage: some View {
     VStack(alignment: .leading, spacing: 24) {
       RestHeading(
-        "Your alarm\nis still set.",
-        subtitle: "Your earlier wake alarm remains separate from playback.")
+        alarm.alarmStatus.phase == .unavailable
+          ? "Check your\nwake alarm." : "Your alarm\nis still set.",
+        subtitle: alarm.alarmStatus.phase == .unavailable
+          ? "The alarm could not be verified. Cancel it before starting another rest."
+          : "Your earlier wake alarm remains separate from playback.")
+      if let runError { errorLabel(runError, id: "timerStartError") }
       trackedAlarmContent
       Text("Your listening history is ready for another time.").foregroundStyle(RestStyle.secondary)
       historyButton
@@ -811,9 +965,11 @@ struct NapPlanReviewView: View {
         RestCard(title: run.hasActiveRun ? "Rest ends at" : "Planned ending time") {
           deadlineText(plan.deadline)
           confirmedTiming(plan)
-          LabeledContent("After narration", value: soundName(plan.fallback))
-            .font(.subheadline)
-            .accessibilityIdentifier("napPlanConfirmedSound")
+          LabeledContent(
+            plan.isTimer ? "Rest sound" : "After narration", value: soundName(plan.fallback)
+          )
+          .font(.subheadline)
+          .accessibilityIdentifier("napPlanConfirmedSound")
           Text(plan.wakeAlarm == nil ? "No wake alarm was requested." : alarm.statusMessage)
             .font(.subheadline).foregroundStyle(RestStyle.secondary)
             .accessibilityIdentifier("napPlanAlarmStatus")
@@ -906,8 +1062,10 @@ struct NapPlanReviewView: View {
     VStack(alignment: .leading, spacing: 8) {
       RestTimingRow(title: "Fixed wake deadline", date: plan.deadline)
         .accessibilityIdentifier("napPlanConfirmedDeadline")
-      RestTimingRow(title: "Planned rest start", date: plan.start)
-        .accessibilityIdentifier("napPlanConfirmedStart")
+      if !plan.isTimer {
+        RestTimingRow(title: "Planned rest start", date: plan.start)
+          .accessibilityIdentifier("napPlanConfirmedStart")
+      }
     }
     .font(.footnote).foregroundStyle(RestStyle.secondary)
   }
@@ -927,6 +1085,8 @@ struct NapPlanReviewView: View {
 
   private func resetPlan() {
     run.resetPresentation()
+    plansNarration = false
+    pendingTimer = nil
     reviewState = NapPlanReviewState()
     startedPlanID = nil
     reviewError = nil
@@ -1029,6 +1189,7 @@ struct NapPlanReviewView: View {
         case .invalidCheckpoint: "The approved audio checkpoint is unavailable. Review a new plan."
         case .audioUnavailable: "Audio could not start. Review a new plan after checking output."
         case .alreadyRunning: "A Nap Plan is already running."
+        case .invalidTimerPlan: "This timer needs new choices before it can start."
         }
       runError =
         alarm.hasTrackedAlarm

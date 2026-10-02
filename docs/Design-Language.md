@@ -43,15 +43,15 @@ The approved [thought-bubble sleeping goose](App-Icon.md) is an occasional, stat
 
 ## Navigation and component patterns
 
-**Rest first.** The everyday root is Rest with History close at hand. The default path is Continue or choose a session → choose a rest window and sound → review the exact plan → confirm → Start resting. Keep the experimental Feasibility Lab under Settings → Advanced. As the catalog grows, Journeys may become a meaningful browsing destination, but the current two-session catalog should not turn the bedtime entry into a library to explore.
+**Rest first.** The everyday root is Rest with History close at hand. The default path is choose duration, sound, and wake alarm on Rest → Start resting. A secondary **Plan a narrated rest** action opens session selection → rest window and sound → review the exact route → confirm → Start resting. Keep the experimental Feasibility Lab under Settings → Advanced. As the catalog grows, Journeys may become a meaningful browsing destination, but the current two-session catalog should not turn the bedtime entry into a library to explore.
 
 | Pattern | Implementation rule |
 | --- | --- |
-| Rest home | One prominent next action, saved place or current session, and short choices. An active wake alarm takes precedence over making another plan. |
+| Rest home | Inline timer duration, sound, and wake alarm with one prominent Start resting action. Narration is a secondary choice. An active wake alarm takes precedence over making another plan. |
 | Cards and inset wells | Cards group one decision or one record; wells explain a secondary state. Avoid several equally weighted cards fighting for attention. |
 | Primary and secondary actions | Use one amber primary action per decision point. Secondary actions are quiet filled or text controls. Destructive or alarm-changing actions name their consequence. |
-| Time and deadline | Show the local wake time clearly, with start, duration, and alarm state nearby. Use tabular numerals for times; include date when crossing midnight could confuse. The reviewed deadline remains fixed. |
-| Plan review | Show the ordered route, narration estimate, any remainder as rain or silence, post-narration behavior, and alarm before explicit confirmation. If the route changes or a start expires, require another review. |
+| Time and deadline | Show the local wake time clearly, with start, duration, and alarm state nearby. Use tabular numerals for times; include date when crossing midnight could confuse. The timer deadline is fixed after any permission prompt; narrated plans retain their reviewed fixed deadline. |
+| Plan review | Narrated plans show the ordered route, narration estimate, any remainder as rain or silence, post-narration behavior, and alarm before explicit confirmation. If the route changes or a start expires, require another review. |
 | Rest screen | Minimize content to current state, fixed end time, alarm state, and pause/resume/Stop when applicable. No live waveform, progress pressure, changing prompts, or branch choice. The phone can be put down. |
 | History | Use “Played,” “Partially played,” and “Last verified checkpoint.” Continue, Resume, and Replay lead to a fresh plan review; reopening does not play audio. |
 | Errors and recovery | State exactly what happened, whether audio and the alarm are active, and the one next step. Remain calm and truthful: a failed rain loop becomes visible silence; an unavailable requested alarm blocks playback. |
@@ -73,8 +73,8 @@ The [approved atlas](../design/quiet-curiosity/screen-atlas.html) groups its num
 | Atlas screens | Scope and contract |
 | --- | --- |
 | 1–4 Welcome, Rest home, Choose, Session detail | Rest-first shell and available two-session catalog. Only prepared local sessions may be selectable. Session facts and sources come from bundled metadata. |
-| 5–9 Time, Sound, Review, Alarm permission, Ready | Native timing choices; Silence default, verified Gentle rain when available; fixed full-route review; alarm authorization/scheduling before an alarm-requested start; separate Confirm and Start. |
-| 10–16 Waiting, Playing, Paused, Quiet, Finished, Stopped, Rain unavailable | Keep foreground until approved audio starts or silence-only rest begins at its approved start. Deadline stays fixed; Stop leaves any wake alarm active; narration history follows actual playback evidence. |
+| 5–9 Time, Sound, Review, Alarm permission, Ready | The timer combines timing, sound, and alarm on Rest with one Start action. Narrated plans keep native timing choices; Silence default, verified Gentle rain when available; fixed full-route review; alarm authorization/scheduling before an alarm-requested start; separate Confirm and Start. |
+| 10–16 Waiting, Playing, Paused, Quiet, Finished, Stopped, Rain unavailable | Timers start after alarm verification without a scheduled wait. Narrated plans keep foreground until approved audio starts or silence-only rest begins at its approved start. Deadline stays fixed; Stop leaves any wake alarm active; narration history follows actual playback evidence. |
 | 17–24 History, invalid saved place, alarm denial, existing alarm, short quiet plan, rain failure, unexpected exit, expired start | Recovery shows evidence and an explicit next step. Resume requires valid revision/render identity and fresh review; no autoplay or invented completion. Existing alarms must be handled before another plan. |
 | 25–27 Journey library, journey detail, branch choice | Settings opens a real journey library and ordered detail for the current two-session **How a Car Works** journey. A branch choice is absent because the bundled catalog has no next-journey destination; future transition approval requires a validated real catalog entry. |
 | 28 Session notes and sources | Session detail opens a readable page with the bundled summary, paragraphs, citation metadata, and source links. Citations never enter spoken audio. |

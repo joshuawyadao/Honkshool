@@ -84,6 +84,7 @@ final class NapPlanReviewUITests: XCTestCase {
         let another = app.buttons["reviewAnotherNapPlan"]
         scrollTo(another, in: app)
         another.tap()
+        openNarratedPlan(in: app)
       }
       XCTAssertTrue(status.label.contains("Gentle rain is playing"))
       let startObservation = XCTAttachment(
@@ -366,6 +367,7 @@ final class NapPlanReviewUITests: XCTestCase {
     let reopen = app.buttons["reviewAnotherNapPlan"]
     scrollTo(reopen, in: app)
     reopen.tap()
+    openNarratedPlan(in: app)
     chooseDuration(5, in: app)
     let anotherAlarm = app.switches["napPlanAlarm"]
     scrollTo(anotherAlarm, in: app)
@@ -532,8 +534,16 @@ final class NapPlanReviewUITests: XCTestCase {
       XCTAssertTrue(acknowledge.waitForExistence(timeout: 5))
       acknowledge.tap()
     }
+    openNarratedPlan(in: app)
     XCTAssertTrue(app.buttons["reviewNapPlan"].waitForExistence(timeout: 5))
     return app
+  }
+
+  private func openNarratedPlan(in app: XCUIApplication) {
+    let plan = app.buttons["planNarratedRest"]
+    XCTAssertTrue(plan.waitForExistence(timeout: 5))
+    scrollTo(plan, in: app)
+    plan.tap()
   }
 
   private func chooseDuration(_ minutes: Int, in app: XCUIApplication) {
@@ -567,8 +577,12 @@ final class NapPlanReviewUITests: XCTestCase {
       guard element.isHittable else { return false }
       let review = app.buttons["reviewNapPlan"]
       // XCTest can report a partially obscured picker as hittable, then tap the footer.
-      if review.exists && review.isHittable && element.identifier != "reviewNapPlan" {
-        return element.frame.maxY < review.frame.minY
+      let timerStart = app.buttons["startRestTimer"]
+      let pinnedAction = review.exists && review.isHittable ? review : timerStart
+      if pinnedAction.exists && pinnedAction.isHittable
+        && element.identifier != pinnedAction.identifier
+      {
+        return element.frame.maxY < pinnedAction.frame.minY
       }
       return true
     }

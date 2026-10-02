@@ -2,20 +2,20 @@
 
 The [approved atlas](../design/quiet-curiosity/screen-atlas.html) establishes layout and tone. This map describes the functional iPhone routes and states in the current Rest-first implementation. An atlas number is a visual reference, not a claim that its illustrative content, timing, or every control exists. Actual choices come from the bundled catalog, verified audio, plan, history, and alarm state. The first 24 entries often share one stateful view rather than separate screens.
 
-**Everyday route:** Rest tab → choose a prepared session, rest window, and sound → review the exact route and fixed ending → confirm → explicitly start. History is the other tab. Settings opens from Rest; its content pages are for browsing before rest. No page starts narration simply by opening it.
+**Everyday route:** Rest tab → choose duration, sound, and wake alarm inline → Start resting. **Plan a narrated rest** opens the separate prepared-session → review → confirm → start route. History is the other tab. Settings opens from Rest; its content pages are for browsing before rest. No page starts narration simply by opening it.
 
 | Atlas | Reachable route or state | Current implementation and boundary |
 | --- | --- | --- |
 | 01 `screen-welcome` | First-launch welcome cover; dismiss to Rest. | `FeasibilityConsoleView.swift` (`welcomeScreen`); informational introduction. |
-| 02 `screen-home` | Rest tab, idle choices or current rest state. | `FeasibilityConsoleView.swift` → `NapPlanReviewView.swift`; one primary review path. |
-| 03 `screen-choose` | Rest → Change session sheet. | `RestContentViews.swift` (`RestSessionPickerView`); the two currently prepared sessions only, with validated saved-place or beginning selection. |
-| 04 `screen-session` | Rest → About this session, or picker → About this session. | `RestContentViews.swift` (`RestSessionDetailView`); catalog summary, estimate, saved point, availability, and explicit selection. |
-| 05 `screen-time` | Rest → More options sheet. | `RestSetupSheets.swift` (`RestTimeSheet`); duration or exact wake time. Cancel/dismiss keeps prior choices; Apply updates the unreviewed draft. |
-| 06 `screen-sound` | Rest → After narration sheet. | `RestSetupSheets.swift` (`RestSoundSheet`); Silence or verified Gentle rain. Cancel/dismiss keeps prior choice. |
-| 07 `screen-review` | Rest → Review nap plan. | `NapPlanReviewView.swift` (`reviewContent`); actual ordered route, deadline, rest sound, and alarm before confirmation. |
-| 08 `screen-permission` | Confirmed alarm plan → Start resting with undetermined AlarmKit access. | `NapPlanReviewView.swift` (`alarmAccessContent`) then the system permission request; alarm must be scheduled and verified before playback. |
-| 09 `screen-ready` | Rest → Confirm this plan. | `NapPlanReviewView.swift` (`confirmedContent`); Start resting remains a separate action. |
-| 10 `screen-waiting` | Started plan before approved audio or visible silence-only rest starts. | `NapPlanReviewView.swift` (`runContent`), driven by `NapRunController`; keep the app foregrounded until that state advances. |
+| 02 `screen-home` | Rest tab, idle choices or current rest state. | `FeasibilityConsoleView.swift` → `NapPlanReviewView.swift`; inline timer choices and one Start action; a secondary narration path. |
+| 03 `screen-choose` | Rest → Plan a narrated rest → Change session sheet. | `RestContentViews.swift` (`RestSessionPickerView`); the two currently prepared sessions only, with validated saved-place or beginning selection. |
+| 04 `screen-session` | Narrated choices → About this session, or picker → About this session. | `RestContentViews.swift` (`RestSessionDetailView`); catalog summary, estimate, saved point, availability, and explicit selection. |
+| 05 `screen-time` | Narrated choices → More options sheet. | `RestSetupSheets.swift` (`RestTimeSheet`); duration or exact wake time. Cancel/dismiss keeps prior choices; Apply updates the unreviewed draft. |
+| 06 `screen-sound` | Narrated choices → After narration sheet. | `RestSetupSheets.swift` (`RestSoundSheet`); Silence or verified Gentle rain. Cancel/dismiss keeps prior choice. |
+| 07 `screen-review` | Narrated choices → Review nap plan. | `NapPlanReviewView.swift` (`reviewContent`); actual ordered route, deadline, rest sound, and alarm before confirmation. |
+| 08 `screen-permission` | Timer Start resting or confirmed narrated Start resting with undetermined AlarmKit access. | Timers request system permission inline; narrated plans use `alarmAccessContent` then the system permission request; alarm must be scheduled and verified before playback. |
+| 09 `screen-ready` | Narrated review → Confirm this plan. | `NapPlanReviewView.swift` (`confirmedContent`); Start resting remains a separate action. |
+| 10 `screen-waiting` | Narrated plan before approved audio or visible silence-only rest starts. Timers have no scheduled waiting period. | `NapPlanReviewView.swift` (`runContent`), driven by `NapRunController`; keep the app foregrounded until that state advances. |
 | 11 `screen-playing` | Active narration. | `NapPlanReviewView.swift` (`runContent`); fixed deadline and actual playback status. |
 | 12 `screen-paused` | Pause or audio interruption during a run. | `NapPlanReviewView.swift` (`runContent`); explicit resume when available. |
 | 13 `screen-quiet` | Planned quiet or rain after narration, or silence-only rest. | `NapPlanReviewView.swift` (`runContent`); fixed deadline, no attention-demanding prompt. |
@@ -24,7 +24,7 @@ The [approved atlas](../design/quiet-curiosity/screen-atlas.html) establishes la
 | 16 `screen-fallback` | Gentle rain unavailable before planning or during review. | `RestSetupSheets.swift` and `NapPlanReviewView.swift`; show Silence as the available or reviewed fallback. |
 | 17 `screen-history` | History tab. | `ListeningHistoryView.swift`; Continue, valid Resume, and Replay open a fresh review. |
 | 18 `screen-saved-place` | History entry whose checkpoint cannot resume against current content/audio. | `ListeningHistoryView.swift`, also reflected in `RestContentViews.swift`; record remains visible and current audio may be chosen from the beginning. |
-| 19 `screen-alarm-failure` | Alarm-requested start fails permission or scheduling. | `NapPlanReviewView.swift` (`blockedStartContent`); playback has not started; Settings/retry/change-plan actions are explicit. |
+| 19 `screen-alarm-failure` | Alarm-requested start fails permission or scheduling. | `NapPlanReviewView.swift` (`blockedStartContent` for narration, inline error or tracked-alarm recovery for timers); playback has not started; Settings/retry/change-plan actions are explicit. |
 | 20 `screen-existing-alarm` | Rest reopened with a tracked wake alarm. | `NapPlanReviewView.swift` (`existingAlarmPage`, `trackedAlarmContent`); cancel the old alarm before another plan. |
 | 21 `screen-short-plan` | Reviewed route contains no narration that fits. | `NapPlanReviewView.swift` (`reviewContent`); the actual selected rain or silence runs to the fixed deadline after confirmation and Start. |
 | 22 `screen-rain-fallback` | Rain fails during active rest. | `NapPlanReviewView.swift` (`runContent`); visible silent rest, unchanged deadline and wake alarm. |

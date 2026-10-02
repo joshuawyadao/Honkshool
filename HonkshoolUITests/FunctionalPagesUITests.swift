@@ -5,10 +5,11 @@ final class FunctionalPagesUITests: XCTestCase {
 
   func testTimeAndSoundDraftsCancelWithoutChangingThePlan() {
     let app = launch()
+    openNarratedPlan(in: app)
     XCTAssertTrue(app.switches["napPlanAlarm"].isHittable)
     XCTAssertLessThan(
       app.switches["napPlanAlarm"].frame.maxY, app.buttons["reviewNapPlan"].frame.minY)
-    capture("Rest home")
+    capture("Narrated rest choices")
     app.buttons["napPlanTimeOptions"].tap()
     app.buttons["napTimePreset-60"].tap()
     capture("Time to rest")
@@ -34,6 +35,7 @@ final class FunctionalPagesUITests: XCTestCase {
     app.tabBars.buttons["History"].tap()
     app.tabBars.buttons["Rest"].tap()
     XCTAssertFalse(app.buttons["acknowledgeRecoveredRest"].exists)
+    openNarratedPlan(in: app)
     tap("napPlanContent", in: app)
     capture("Choose a session")
     tap("sessionDetails-turning-fuel-into-motion", in: app)
@@ -64,6 +66,7 @@ final class FunctionalPagesUITests: XCTestCase {
     tap("saveRestDefaults", in: app)
     app.terminate()
     app = launch(reset: false)
+    openNarratedPlan(in: app)
     tap("reviewNapPlan", in: app)
     XCTAssertEqual(
       app.staticTexts["napPlanPostNarrationSound"].label, "After narration, Gentle rain")
@@ -85,6 +88,7 @@ final class FunctionalPagesUITests: XCTestCase {
     tap("openSettings", in: app)
     XCTAssertEqual(app.staticTexts["settingsRestSound"].label, "After narration, Silence")
     app.navigationBars.buttons.firstMatch.tap()
+    openNarratedPlan(in: app)
     tap("reviewNapPlan", in: app)
     XCTAssertEqual(app.staticTexts["napPlanPostNarrationSound"].label, "After narration, Silence")
   }
@@ -145,6 +149,7 @@ final class FunctionalPagesUITests: XCTestCase {
 
   func testFirstAlarmExplainsAccessBeforeScheduling() {
     let app = launch(environment: ["HONKSHOOL_UI_TEST_ALARM": "not-determined"])
+    openNarratedPlan(in: app)
     tap("reviewNapPlan", in: app)
     tap("confirmNapPlan", in: app)
     XCTAssertTrue(app.buttons["startNapRun"].isHittable)
@@ -163,11 +168,15 @@ final class FunctionalPagesUITests: XCTestCase {
     XCTAssertFalse(app.buttons["reviewNapPlan"].exists)
     capture("Existing wake alarm")
     tap("cancelNapPlanAlarm", in: app)
+    XCTAssertTrue(app.buttons["startRestTimer"].waitForExistence(timeout: 5))
+    XCTAssertFalse(app.buttons["reviewNapPlan"].exists)
+    openNarratedPlan(in: app)
     XCTAssertTrue(app.buttons["reviewNapPlan"].waitForExistence(timeout: 5))
   }
 
   func testLibraryAndVoicePreviewRespectAnActiveRest() {
     let app = launch()
+    openNarratedPlan(in: app)
     tap("reviewNapPlan", in: app)
     tap("confirmNapPlan", in: app)
     tap("startNapRun", in: app)
@@ -209,11 +218,18 @@ final class FunctionalPagesUITests: XCTestCase {
     button.tap()
   }
 
+  private func openNarratedPlan(in app: XCUIApplication) {
+    tap("planNarratedRest", in: app)
+    XCTAssertTrue(app.buttons["reviewNapPlan"].waitForExistence(timeout: 5))
+  }
+
   private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {
     func reachable() -> Bool {
       guard element.isHittable else { return false }
-      let footer = app.buttons["reviewNapPlan"]
-      return !footer.isHittable || element.identifier == "reviewNapPlan"
+      let review = app.buttons["reviewNapPlan"]
+      let timerStart = app.buttons["startRestTimer"]
+      let footer = review.exists && review.isHittable ? review : timerStart
+      return !footer.isHittable || element.identifier == footer.identifier
         || element.frame.maxY < footer.frame.minY
     }
     for _ in 0..<10 {

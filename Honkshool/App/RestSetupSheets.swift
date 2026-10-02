@@ -205,3 +205,83 @@ struct RestSoundSheet: View {
     .accessibilityAddTraits(selection == id ? .isSelected : [])
   }
 }
+
+/// Everyday timer choices stay inline; only optional custom timing expands.
+struct RestTimerChoices: View {
+  @Binding var minutes: Int
+  @Binding var usesExactWakeTime: Bool
+  @Binding var wakeTime: Date
+  @Binding var soundID: String?
+  @Binding var alarmEnabled: Bool
+  let availableIDs: Set<String>
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 20) {
+      RestCard(title: "Time to rest · minutes") {
+        if usesExactWakeTime {
+          RestTimingRow(title: "Rest until", date: wakeTime)
+        } else {
+          RestDurationChoices(minutes: $minutes, identifierPrefix: "timerPreset")
+          if !RestDurationPolicy.recommendedMinutes.contains(minutes) {
+            Text("\(minutes) minutes").accessibilityIdentifier("timerCustomSummary")
+          }
+        }
+        DisclosureGroup("Custom duration or wake time") {
+          VStack(alignment: .leading, spacing: 12) {
+            Toggle("Rest until an exact time", isOn: $usesExactWakeTime)
+              .accessibilityIdentifier("timerExactTime")
+            if usesExactWakeTime {
+              DatePicker(
+                "Wake time", selection: $wakeTime, displayedComponents: [.date, .hourAndMinute]
+              )
+              .accessibilityIdentifier("timerWakeTime")
+            } else {
+              Stepper("\(minutes) minutes", value: $minutes, in: 1...180)
+                .accessibilityIdentifier("timerCustomDuration")
+            }
+          }.padding(.top, 12)
+        }
+        .accessibilityIdentifier("timerMoreOptions")
+      }
+      RestCard(title: "Rest sound") {
+        soundChoice("Silence", description: "Nothing more to hear.", id: nil)
+        if availableIDs.contains(PreparedAmbience.gentleRainID) {
+          soundChoice(
+            "Gentle rain", description: "A soft, steady background.",
+            id: PreparedAmbience.gentleRainID)
+        } else {
+          Text("Gentle rain is unavailable. You can still rest in silence.")
+            .font(.subheadline).foregroundStyle(RestStyle.secondary)
+        }
+        Divider()
+        Toggle("Wake alarm", isOn: $alarmEnabled)
+          .accessibilityIdentifier("timerWakeAlarm")
+      }
+      Text(
+        alarmEnabled
+          ? "Your wake alarm is verified before rest begins. Keep this screen open until then."
+          : "No alarm will sound. Rest quietly until the displayed ending time."
+      )
+      .font(.subheadline).foregroundStyle(RestStyle.secondary)
+      if soundID != nil {
+        Text("Rain starts with your timer. If it becomes unavailable, rest continues in silence.")
+          .font(.footnote).foregroundStyle(RestStyle.secondary)
+      }
+    }
+  }
+
+  private func soundChoice(_ title: String, description: String, id: String?) -> some View {
+    Button {
+      soundID = id
+    } label: {
+      HStack {
+        Text(title)
+        Spacer(minLength: 8)
+        Image(systemName: soundID == id ? "checkmark.circle.fill" : "circle")
+      }.frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+    }
+    .accessibilityLabel("\(title). \(description)")
+    .accessibilityIdentifier(id == nil ? "timerSilence" : "timerRain")
+    .accessibilityAddTraits(soundID == id ? .isSelected : [])
+  }
+}

@@ -153,7 +153,7 @@ struct FeasibilityConsoleView: View {
           )
           .font(.subheadline).foregroundStyle(RestStyle.secondary)
           Text(
-            "Every rest is reviewed before it starts. Changes here apply to your next unreviewed plan."
+            "Changes here apply to your next timer or unreviewed narrated plan."
           )
           .font(.footnote).foregroundStyle(RestStyle.secondary)
         }
@@ -270,9 +270,11 @@ struct FeasibilityConsoleView: View {
         Text("Room to rest.\nA thought to follow.")
           .font(.system(.largeTitle, design: .rounded).weight(.medium))
           .foregroundStyle(RestStyle.ink)
-        Text("Gentle narration for a little downtime. Pick something to hear, then settle in.")
-          .font(.body)
-          .foregroundStyle(RestStyle.secondary)
+        Text(
+          "Set a nap timer with gentle rain or silence. Add a narrated session when you want a thought to follow."
+        )
+        .font(.body)
+        .foregroundStyle(RestStyle.secondary)
         Spacer()
         Button("Choose your first rest") {
           hasSeenQuietWelcome = true

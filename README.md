@@ -8,7 +8,7 @@
 
 Honkshool is an early-stage iPhone app for calm, uninterrupted factual narration during naps and bedtime. Choose a topic and a rest window, approve what will play, then listen as narration gives way to rain or silence. Relaxation comes first; interesting information is secondary.
 
-The app opens on **Rest**, with **History** nearby and the experimental **Feasibility Lab** under **Settings → Advanced**. Its interface follows the approved [Quiet curiosity design language](docs/Design-Language.md). A Nap Plan uses a reviewed fixed route and deadline; an optional system wake alarm is scheduled and verified separately from audio. Silence is the default and fallback. Runs save verified narration checkpoints locally; rain and silence create no narration history. Reopening never starts audio automatically.
+The app opens on **Rest**, with **History** nearby and the experimental **Feasibility Lab** under **Settings → Advanced**. Its interface follows the approved [Quiet curiosity design language](docs/Design-Language.md). Rest offers a one-screen nap timer; narrated Nap Plans use a reviewed fixed route and deadline; an optional system wake alarm is scheduled and verified separately from audio. Silence is the default and fallback. Runs save verified narration checkpoints locally; rain and silence create no narration history. Reopening never starts audio automatically.
 
 > **Project status:** Feasibility spike plus an early Nap Plan playback flow; there is no supported release. This repository provides source code for contributors and willing testers. Installation currently requires a Mac and Xcode; there is no public App Store or TestFlight installation path documented here.
 
@@ -62,16 +62,17 @@ SECURITY.md                 Private vulnerability-reporting policy
 LICENSE                     MIT license
 ```
 
-The app opens on Rest, with History nearby and the diagnostic Feasibility Lab under Settings → Advanced. Follow the [device test guide](docs/Feasibility-Spike.md) before drawing conclusions from the spike. Rest offers two ordered prepared automotive sessions—Turning Fuel Into Motion and Air, Fuel, and Spark—with detail and source-linked notes. Time and sound sheets apply only when confirmed, and every selection leads through a fresh route review before playback. Silence is the default; Gentle rain appears when the accepted bundled file and provenance validate. Rain can fill a short plan without narration or follow a completed session; an unavailable or failed rain loop visibly leaves rest in silence without asking the listener to act mid-nap. Settings includes Rest defaults for the next unreviewed plan, the current two-session journey, a verified offline inventory, information about the sole Enthusiast detail level, and an explicit 12-second George preview. The preview writes no history and is unavailable during an active rest or Feasibility Lab audio. Additional journeys, branch destinations, detail variants, voices, and download/delete controls remain unprepared.
+The app opens on Rest, with History nearby and the diagnostic Feasibility Lab under Settings → Advanced. Follow the [device test guide](docs/Feasibility-Spike.md) before drawing conclusions from the spike. The default Rest screen offers a timer with sound and an optional wake alarm. **Plan a narrated rest** offers two ordered prepared automotive sessions—Turning Fuel Into Motion and Air, Fuel, and Spark—with detail and source-linked notes. Narrated time and sound sheets apply only when confirmed, and narration selections lead through a fresh route review before playback. Silence is the default; Gentle rain appears when the accepted bundled file and provenance validate. Rain can fill a short plan without narration or follow a completed session; an unavailable or failed rain loop visibly leaves rest in silence without asking the listener to act mid-nap. Settings includes Rest defaults for the next unreviewed plan, the current two-session journey, a verified offline inventory, information about the sole Enthusiast detail level, and an explicit 12-second George preview. The preview writes no history and is unavailable during an active rest or Feasibility Lab audio. Additional journeys, branch destinations, detail variants, voices, and download/delete controls remain unprepared.
 
-## Your first Nap Plan
+## Your first nap timer
 
-![Four steps: open Rest, choose a prepared session and rest options, review and confirm the plan, then start resting and keep the app open until playback begins.](docs/assets/first-nap.svg)
+![Open Rest, choose duration, sound and wake alarm, then Start resting. Keep the app open until rest begins.](docs/assets/first-nap.svg)
 
-1. Open Honkshool on the **Rest** tab. If this is your first launch, dismiss the welcome screen. Tap **Change session** to choose one of the two prepared sessions.
-2. Choose a rest duration or use **More options** for an exact wake time. Set **After narration** to **Silence** or available **Gentle rain**, and choose whether **Wake alarm** is on.
-3. Tap **Review nap plan**. Check the planned start, fixed wake deadline, complete narration route, sound, and alarm choice; tap **Confirm this plan** or **Confirm quiet plan**.
-4. Tap **Start resting** before the approved start passes. Keep Honkshool on screen until narration or rain begins, then you can lock the phone. For a silence-only plan with no narration, wait for the visible rest-until-deadline state instead.
+1. Open **Rest** and choose a duration. Custom duration and exact wake time expand inline.
+2. Choose **Silence** or **Gentle rain**, and whether **Wake alarm** is on.
+3. Tap **Start resting**. Allow alarm access if requested, then keep the app open until rain or silent rest begins. A requested alarm is verified before audio starts; there is no one-minute timer wait.
+
+For the prepared sessions, choose **Plan a narrated rest**. That route retains review, confirmation, and its scheduled start.
 
 The diagnostic **Feasibility Lab** is under **Settings → Advanced**. Its background-audio and test-alarm controls are separate from Nap Plans. The [user guide](docs/User-Guide.md) walks through Rest, History, controls, and interrupted runs.
 

@@ -6,6 +6,7 @@ final class AccessibilityRefreshUITests: XCTestCase {
 
   func testLargestTextDurationChoicesAndSoundDescriptions() {
     let app = launch(largestText: true)
+    openNarratedPlan(in: app)
     let review = app.buttons["reviewNapPlan"]
     XCTAssertTrue(review.waitForExistence(timeout: 5))
     XCTAssertTrue(review.isHittable)
@@ -48,6 +49,7 @@ final class AccessibilityRefreshUITests: XCTestCase {
 
   func testLargestTextTimingSurvivesReviewConfirmationAndStart() {
     let app = launch(largestText: true)
+    openNarratedPlan(in: app)
     XCTAssertTrue(app.buttons["reviewNapPlan"].waitForExistence(timeout: 5))
     app.buttons["reviewNapPlan"].tap()
     let deadline = app.staticTexts["napPlanDeadline"]
@@ -84,6 +86,7 @@ final class AccessibilityRefreshUITests: XCTestCase {
 
   func testRepeatedActionsIdentifyTheirContentAndHistoryDate() {
     var app = launch(largestText: false)
+    openNarratedPlan(in: app)
     XCTAssertTrue(app.buttons["napPlanContent"].waitForExistence(timeout: 5))
     app.buttons["napPlanContent"].tap()
     for (id, title) in [
@@ -138,6 +141,13 @@ final class AccessibilityRefreshUITests: XCTestCase {
     }
   }
 
+  private func openNarratedPlan(in app: XCUIApplication) {
+    let plan = app.buttons["planNarratedRest"]
+    XCTAssertTrue(plan.waitForExistence(timeout: 5))
+    scrollTo(plan, in: app)
+    plan.tap()
+  }
+
   private func launch(largestText: Bool, seedHistory: Bool = false) -> XCUIApplication {
     let app = XCUIApplication()
     app.launchArguments = ["-ui-testing"]
@@ -163,7 +173,9 @@ final class AccessibilityRefreshUITests: XCTestCase {
       var bottom = app.frame.maxY - 20
       let tabBar = app.tabBars.firstMatch
       if tabBar.exists && tabBar.isHittable { bottom = min(bottom, tabBar.frame.minY - 20) }
-      for id in ["reviewNapPlan", "startNapRun", "applyNapTime", "applyNapSound"] {
+      for id in [
+        "startRestTimer", "reviewNapPlan", "startNapRun", "applyNapTime", "applyNapSound",
+      ] {
         let button = app.buttons[id]
         if button.exists && button.isHittable { bottom = min(bottom, button.frame.minY - 30) }
       }

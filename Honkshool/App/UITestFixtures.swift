@@ -177,6 +177,7 @@ enum SpikePreferences {
 
   private enum UITestAlarmScenario: String {
     case notDetermined = "not-determined"
+    case delayedAuthorization = "delayed-authorization"
     case denied
     case authorized
     case scheduleFailure = "schedule-failure"
@@ -189,7 +190,7 @@ enum SpikePreferences {
 
     var authorization: AlarmAuthorizationSnapshot {
       switch self {
-      case .notDetermined: .notDetermined
+      case .notDetermined, .delayedAuthorization: .notDetermined
       case .denied: .denied
       default: .authorized
       }
@@ -248,7 +249,10 @@ enum SpikePreferences {
     }
 
     func requestAuthorization() async throws -> AlarmAuthorizationSnapshot {
-      if scenario == .notDetermined { authorization = .authorized }
+      if scenario == .delayedAuthorization { try await Task.sleep(for: .seconds(8)) }
+      if scenario == .notDetermined || scenario == .delayedAuthorization {
+        authorization = .authorized
+      }
       continuation?.yield(())
       return authorization
     }
