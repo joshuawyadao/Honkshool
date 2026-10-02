@@ -1048,7 +1048,14 @@ struct NapPlanReviewView: View {
           .accessibilityIdentifier("napRunPreviousAlarmGate")
         if alarm.canCancelTrackedAlarm {
           Button("Cancel wake alarm") {
-            if !alarm.cancel() { runError = alarm.statusMessage }
+            if alarm.cancel() {
+              if isHome && !plansNarration {
+                runError = nil
+                pendingTimer = nil
+              }
+            } else {
+              runError = alarm.statusMessage
+            }
           }
           .buttonStyle(RestButtonStyle(secondary: true))
           .disabled(alarm.isScheduling)

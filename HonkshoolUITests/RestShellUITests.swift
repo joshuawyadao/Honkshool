@@ -157,6 +157,7 @@ final class RestShellUITests: XCTestCase {
     scrollTo(app.buttons["cancelNapPlanAlarm"], in: app)
     app.buttons["cancelNapPlanAlarm"].tap()
     XCTAssertTrue(app.buttons["startRestTimer"].waitForExistence(timeout: 5))
+    XCTAssertFalse(app.staticTexts["timerStartError"].exists)
   }
 
   func testLeavingTimerDuringPermissionDoesNotStartOnReturn() {
