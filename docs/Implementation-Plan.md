@@ -24,3 +24,5 @@ Make the everyday Rest screen a quick nap timer with duration, background sound,
 - Initial focused run: 97 tests passed with no failures, covering timer domain/services and Rest screens, including AX5. A subsequent review tightened setup to at most five seconds or 5% of duration and clarified alarm-off/accessibility wording.
 - Full simulator regression is running. Follow-up coverage includes leaving during authorization, inline custom/exact timing, uncertain alarm cancellation, final recovery copy, and compact AX5 layout.
 - Repository verification: 51 checks passed. Changed Swift files pass strict formatting. Independent Apple-platform review findings were addressed; physical audibility and Lock Screen acceptance remain pending.
+
+- Compact follow-up: 50 checks passed. The custom-time disclosure propagated its identifier to child controls; moving that identifier to the disclosure label fixed the regression. Both custom/exact timing and AX5 timer checks passed on rerun. A standard-height narration visibility assertion also failed when deliberately run on the smaller SE viewport; its standard destination remains under verification.

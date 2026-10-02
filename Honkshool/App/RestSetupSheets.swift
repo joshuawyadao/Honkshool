@@ -226,7 +226,7 @@ struct RestTimerChoices: View {
             Text("\(minutes) minutes").accessibilityIdentifier("timerCustomSummary")
           }
         }
-        DisclosureGroup("Custom duration or wake time") {
+        DisclosureGroup {
           VStack(alignment: .leading, spacing: 12) {
             Toggle("Rest until an exact time", isOn: $usesExactWakeTime)
               .accessibilityIdentifier("timerExactTime")
@@ -240,8 +240,10 @@ struct RestTimerChoices: View {
                 .accessibilityIdentifier("timerCustomDuration")
             }
           }.padding(.top, 12)
+        } label: {
+          Text("Custom duration or wake time")
+            .accessibilityIdentifier("timerMoreOptions")
         }
-        .accessibilityIdentifier("timerMoreOptions")
       }
       RestCard(title: "Rest sound") {
         soundChoice("Silence", description: "Nothing more to hear.", id: nil)
