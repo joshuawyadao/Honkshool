@@ -1,30 +1,20 @@
 # Plan
 
-Resolve the largest-text simulator failure in the duration and sound accessibility flow. Use the existing failing UI case and recorded results to distinguish an automation defect from an app layout defect, preserve the accessibility requirements, and validate the correction on large and compact phones.
+Make the everyday Rest screen a quick nap timer with duration, background sound, and an optional wake alarm, followed by one explicit Start resting action. Start rain as soon as a requested alarm is verified; keep narrated session planning as a secondary path with its existing immutable review contract.
 
 ## Scope
-- In: `AccessibilityRefreshUITests` diagnosis and the smallest demonstrated correction; production layout changes only if evidence requires them; updated accessibility and feasibility evidence; simulator validation and branch save.
-- Out: physical-device testing, audio/alarm behavior, new product features, PR creation, and merge.
+- In: one-screen timer setup, immediate sound-only runs, permission and alarm failure recovery, accessible controls, regression tests, and current flow documentation.
+- Out: changes to narration content or its approval rules, automatic playback on reopen, alarm cancellation on playback Stop, and claims of physical listening acceptance.
 
 ## Action items
-- [x] Read the accessibility record, development test commands, Quiet curiosity guidance, and existing failure evidence; identify affected tests and production layout boundaries.
-- [x] Checkpoint the resolved plan before implementation (`9a11814`).
-- [x] Reproduce the focused AX5 duration/sound failure on iPhone 18 Pro Max / iOS 27, capture relevant control and gesture geometry, and test ranked hypotheses one at a time.
-- [x] Repair the demonstrated cause while retaining preset label, one-line height, minimum target size, selection, applied-value, and complete sound-description assertions. Use the existing case as the regression; add unique-preset and actual 60-minute selection checks in Rest and Time.
-- [x] Run the focused regression and all `AccessibilityRefreshUITests` on the failing destination, then verify the duration/sound flow on the compact iPhone SE / iOS 26.5 baseline. Run the complete simulator suite if production code or shared test infrastructure changes.
-- [x] Remove diagnostic instrumentation and update `docs/Accessibility-Refresh.md` and `docs/Feasibility-Spike.md` with the cause, final evidence, and unchanged manual acceptance limits.
-- [x] Run strict formatting, all repository checks, and diff checks; review the scoped correction and commit completed implementation (`02deb3a`, `94d643d`).
-- [x] Prepare the final validation record for commit and publication on `codex/device-acceptance-ui`.
+[x] Map Rest navigation, planning/start timing, alarm scheduling, defaults, and existing UI/service tests; read the design language, domain, user guide, screen map, and development checks.
+[ ] Add an explicit sound-only timer plan and start path with a fixed deadline, no narration records, and verified alarm evidence before audio.
+[ ] Replace ordinary Rest setup with inline duration, sound, and alarm choices plus one Start action; retain narrated plans behind a secondary action and show honest preparation/failure states.
+[ ] Cover permission/scheduling delay, expiry, duplicate starts, background departure, unavailable rain, independent alarms, and unchanged narrated-start rules.
+[ ] Update UI navigation tests and add quick-start, alarm denial, and largest-text timer coverage without weakening existing assertions.
+[ ] Update User Guide, Design Language, Screen Implementation Map, Nap Planning Domain, Decision Log, and relevant onboarding text for the simpler flow.
+[ ] Run focused service/UI tests, full simulator suite, compact largest-text checks, strict Swift formatting, and repository verification; inspect rendered timer screens.
+[ ] Review the completed change, record validation and remaining device observations, commit coherent checkpoints, and push the current branch.
 
 ## Open questions
-- None. The prior full suite and unchanged focused rerun both failed at `napPlanPreset-60`; the existing physical app installation and owner observations are outside this simulator task.
-
-## Diagnosis evidence
-- The unchanged focused case failed again at the same preset. A minimized launch → first scroll → reachability probe also failed. Its accessibility tree contains only the first three presets while the recording shows the fourth on screen; further upward swipes cannot recover the missing element.
-- Explicit accessibility containment failed the same minimized probe and was removed. Replacing the four-choice lazy grid with eager `Grid` rows restored the fourth button and passed that probe. `ViewThatFits` keeps the existing 4/3/2/1-column adaptation, minimum widths, spacing, actions, and traits. The final regression uses the original full flow with stronger selection and uniqueness assertions; temporary hierarchy instrumentation was removed.
-- The full flow then passed both duration grids and reached a later sound-selection failure. The recording and synthesized event locate the tap below the pinned Done footer while Gentle rain remained offscreen. The scrolling helper must require the target center inside its usable content band, even when XCTest reports it hittable, and support returning to controls above the viewport. The remaining original flow is a 20-second reproduction with a specific missed tap; retain it as the regression for this helper correction.
-- All three final accessibility UI cases passed on iPhone 18 Pro Max / iOS 27.0 after both corrections. Strict Swift formatting and 51 repository checks passed. The compact baseline and complete simulator suite remain pending at this implementation checkpoint.
-- The compact run exposed full-band swipe overshoot: the helper repeatedly crossed the 45-minute preset in opposite directions. Limit each drag using target distance and viewport height, and hold at its end to stop momentum. Reposition earlier presets before subsequent taps. Rerun compact acceptance and the full iOS 27 suite after this test-only refinement.
-- Both compact AX5 flows passed with controlled drags. The remaining standard-text session-actions case exposed the helper's fixed 140-point bottom exclusion: a visible last About button lay just below that artificial boundary at the scroll limit. Use actual visible tab-bar and pinned-action bounds, with a small screen-edge margin, so sheets without footers retain their usable area.
-- All three compact cases now pass with the final helper. Duration grids were visually inspected on both large and compact captures. Independent Apple-contract review found no actionable issue; all original assertions remain, and diagnostic instrumentation is removed.
-- The final full iPhone 18 Pro Max / iOS 27.0 suite passed: 275 passed, zero failed, six intentional physical-only skips. This includes all three accessibility cases and both custom-duration regressions. Raw results and recordings remain in ignored local storage; the temporary compact simulator was removed. No new app was installed on the phone, and hands-on audio, Lock Screen, headphone, and spoken VoiceOver acceptance remains separate.
+- None. The quick timer is the default; narration remains an explicit secondary choice. Existing saved duration, sound, and alarm defaults remain effective.
