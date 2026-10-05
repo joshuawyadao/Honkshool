@@ -285,4 +285,31 @@ final class RestActivityCoordinatorTests: XCTestCase {
     XCTAssertTrue(orphanManager.activities.isEmpty)
     XCTAssertEqual(orphanManager.ended, 1)
   }
+
+  func testFixturesLeaveOwnersExistingActivityUntouched() async throws {
+    let date = start
+    let run = makeRun(now: { date })
+    let alarm = try makeAlarm(now: { date })
+    let manager = RestActivityFakeManager()
+    let deadline = date.addingTimeInterval(600)
+    let original = RestActivityRecord(
+      id: "owners-card",
+      attributes: .init(planID: "owners-plan", start: date, deadline: deadline),
+      state: .init(countdownStart: date, deadline: deadline, playback: .ambience, alarm: .scheduled)
+    )
+    manager.activities = [original]
+    let coordinator = RestActivityCoordinator(
+      run: run, alarm: alarm, manager: manager, now: { date }, isFixture: true)
+    let plan = try NapPlanner.makeTimer(
+      id: "fixture", window: .duration(600), sound: .silence, alarmEnabled: false,
+      now: date, availableAmbienceIDs: [])
+    try run.startTimer(plan: plan)
+    await coordinator.waitForPendingWork()
+    run.stop()
+    await coordinator.waitForPendingWork()
+    XCTAssertEqual(manager.activities, [original])
+    XCTAssertEqual(manager.requested, 0)
+    XCTAssertEqual(manager.ended, 0)
+    XCTAssertFalse(manager.updateEntered)
+  }
 }

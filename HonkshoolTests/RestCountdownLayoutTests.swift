@@ -13,10 +13,14 @@ final class RestCountdownLayoutTests: XCTestCase {
         for isStale in [false, true] {
           let view = RestCountdownLayout(presentation: make(playback, isStale: isStale))
             .environment(\.dynamicTypeSize, size)
+            .foregroundStyle(RestStyle.ink)
+            .background(RestStyle.background)
           let renderer = ImageRenderer(content: view)
           renderer.scale = 1
           renderer.proposedSize = ProposedViewSize(width: 371, height: nil)
           let image = try XCTUnwrap(renderer.uiImage)
+          let pixels = try XCTUnwrap(image.cgImage?.dataProvider?.data) as Data
+          XCTAssertGreaterThan(Set(pixels).count, 16, "Reject a blank layout rendering")
           XCTAssertLessThanOrEqual(image.size.height, 160)
           if playback == .paused && !isStale {
             let attachment = XCTAttachment(image: image)

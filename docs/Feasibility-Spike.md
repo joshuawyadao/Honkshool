@@ -291,6 +291,8 @@ The owner’s ordinary quick-timer check reported that rain began after Start an
 
 The follow-up replaces routine custom duration steppers with native hours/minutes wheels, adds checkmarks and clearer switch states, and adds a separate ActivityKit rest-window countdown. The fixed AlarmKit deadline and snooze behavior remain independent. The new card does not treat planned audio as proof of audible playback or stale content as alarm-delivery evidence. New Lock Screen hardware visibility and spoken timer output still require direct observation.
 
+Verification covers 252 passing unit/service tests and all 58 simulator-capable UI cases, combining the complete regression run with focused reruns. Six physical-only cases were intentionally skipped. Two UI interactions initially targeted a compound switch label; captured geometry showed that iOS places the native control beneath that label at accessibility sizes. The tests now target the native control and retain their state, start, and saved-default persistence assertions. Final compact and largest-text wheel checks pass, including one minute and the three-hour boundary. Countdown layouts fit the unchanged 160-point ceiling through the first accessibility size, with cross-day, locale, and time-zone checks. All 51 repository checks, strict formatting, and the signed Release build pass. Test fixtures leave existing owner Live Activities untouched. These results do not establish new physical Lock Screen visibility or spoken countdown output.
+
 ## Recording results
 
 For each test, record only:

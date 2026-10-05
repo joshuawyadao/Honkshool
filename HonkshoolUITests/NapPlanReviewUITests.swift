@@ -594,6 +594,22 @@ final class NapPlanReviewUITests: XCTestCase {
   }
 
   private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {
+    func scroll(up: Bool) {
+      let frame = app.frame
+      let footerIDs = ["reviewNapPlan", "startRestTimer", "startNapRun", "applyNapTime"]
+      let footer = footerIDs.map { app.buttons[$0] }
+        .filter { $0.exists && $0.isHittable }.map { $0.frame.minY }.min()
+      let top = frame.minY + 145
+      let bottom = max(top + 60, min(frame.maxY - 100, (footer ?? frame.maxY) - 20))
+      let origin = app.coordinate(withNormalizedOffset: .zero)
+      // Stay in the content gutter: large pinned actions and native wheels
+      // otherwise consume the gesture instead of scrolling the page.
+      let start = origin.withOffset(CGVector(dx: frame.width * 0.05, dy: up ? bottom : top))
+      let end = origin.withOffset(CGVector(dx: frame.width * 0.05, dy: up ? top : bottom))
+      start.press(
+        forDuration: 0.05, thenDragTo: end, withVelocity: .slow,
+        thenHoldForDuration: 0.2)
+    }
     func isClearOfPinnedReview() -> Bool {
       guard element.isHittable else { return false }
       let review = app.buttons["reviewNapPlan"]
@@ -609,11 +625,11 @@ final class NapPlanReviewUITests: XCTestCase {
     }
     for _ in 0..<12 {
       if isClearOfPinnedReview() { return }
-      app.swipeUp()
+      scroll(up: true)
     }
     for _ in 0..<12 {
       if isClearOfPinnedReview() { return }
-      app.swipeDown()
+      scroll(up: false)
     }
     XCTAssertTrue(isClearOfPinnedReview())
   }

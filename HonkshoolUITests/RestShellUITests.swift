@@ -218,9 +218,13 @@ final class RestShellUITests: XCTestCase {
     scrollTo(app.buttons["timerRain"], in: app)
     app.buttons["timerRain"].tap()
     XCTAssertTrue(app.buttons["timerRain"].isSelected)
-    scrollTo(app.switches["timerWakeAlarm"], in: app)
-    app.switches["timerWakeAlarm"].tap()
-    XCTAssertEqual(app.switches["timerWakeAlarm"].value as? String, "0")
+    let alarm = app.switches["timerWakeAlarm"]
+    // At accessibility sizes iOS can place the native switch below its label.
+    let nativeAlarm = alarm.switches.firstMatch.exists ? alarm.switches.firstMatch : alarm
+    scrollTo(nativeAlarm, in: app)
+    XCTAssertEqual(alarm.value as? String, "1")
+    nativeAlarm.tap()
+    XCTAssertEqual(alarm.value as? String, "0")
     attachScreen("AX5 quick timer sound and alarm")
     XCTAssertTrue(start.isHittable)
     start.tap()

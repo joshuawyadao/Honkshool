@@ -126,22 +126,31 @@ final class RestActivityCoordinator: ObservableObject {
   private let alarm: NapPlanAlarmService
   private let manager: any RestActivityManaging
   private let now: () -> Date
+  private let isFixture: Bool
   private var subscriptions = Set<AnyCancellable>()
   private var pending: Task<Void, Never>?
   private var generation = 0
 
   convenience init(run: NapRunController, alarm: NapPlanAlarmService) {
-    self.init(run: run, alarm: alarm, manager: SystemRestActivityManager(), now: { .now })
+    #if DEBUG
+      let isFixture = UITestFixtures.isEnabled
+    #else
+      let isFixture = false
+    #endif
+    self.init(
+      run: run, alarm: alarm, manager: SystemRestActivityManager(), now: { .now },
+      isFixture: isFixture)
   }
 
   init(
     run: NapRunController, alarm: NapPlanAlarmService,
-    manager: any RestActivityManaging, now: @escaping () -> Date
+    manager: any RestActivityManaging, now: @escaping () -> Date, isFixture: Bool = false
   ) {
     self.run = run
     self.alarm = alarm
     self.manager = manager
     self.now = now
+    self.isFixture = isFixture
     run.$phase.combineLatest(run.$presentationPlan)
       .sink { [weak self] _, _ in self?.reconcile() }
       .store(in: &subscriptions)
@@ -164,6 +173,11 @@ final class RestActivityCoordinator: ObservableObject {
   func waitForPendingWork() async { await pending?.value }
 
   private func applyCurrentState(generation requestedGeneration: Int) async {
+    // Fixtures must not request, update, or end the owner's system activities.
+    guard !isFixture else {
+      availabilityMessage = nil
+      return
+    }
     let current = manager.activities
     let date = now()
     let plan = run.presentationPlan
@@ -226,12 +240,6 @@ final class RestActivityCoordinator: ObservableObject {
       availabilityMessage = "This rest is too long for a Lock Screen countdown."
       return
     }
-    #if DEBUG
-      guard !UITestFixtures.isEnabled else {
-        availabilityMessage = nil
-        return
-      }
-    #endif
     do {
       _ = try manager.request(attributes: desired.attributes, state: desired.state)
       availabilityMessage = nil

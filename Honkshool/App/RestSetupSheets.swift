@@ -160,7 +160,7 @@ struct RestDurationWheels: View {
   }
 
   var body: some View {
-    HStack(spacing: 8) {
+    HStack(alignment: .bottom, spacing: 8) {
       wheel(title: "Hours", identifier: "\(identifierPrefix)Hours") {
         Picker(
           "Hours",
@@ -199,6 +199,7 @@ struct RestDurationWheels: View {
   ) -> some View {
     VStack(spacing: 0) {
       Text(title).font(.subheadline).foregroundStyle(RestStyle.secondary)
+        .multilineTextAlignment(.center)
         .accessibilityHidden(true)
       content()
         .pickerStyle(.wheel)

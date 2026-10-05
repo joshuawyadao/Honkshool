@@ -60,8 +60,11 @@ final class FunctionalPagesUITests: XCTestCase {
     tap("defaultRestSound", in: app)
     app.buttons["Gentle rain"].tap()
     let alarm = app.switches["defaultRestAlarm"]
-    scrollTo(alarm, in: app)
-    alarm.tap()
+    let nativeAlarm = alarm.switches.firstMatch.exists ? alarm.switches.firstMatch : alarm
+    scrollTo(nativeAlarm, in: app)
+    XCTAssertEqual(alarm.value as? String, "1")
+    nativeAlarm.tap()
+    XCTAssertEqual(alarm.value as? String, "0")
     capture("Rest defaults")
     tap("saveRestDefaults", in: app)
     app.terminate()
