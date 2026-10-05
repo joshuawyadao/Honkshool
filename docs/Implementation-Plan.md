@@ -1,28 +1,19 @@
 # Plan
 
-Make specific rest durations easy to set with native hours-and-minutes wheels, clarify sound and switch selection, and show a truthful remaining-rest countdown on the Lock Screen. Preserve the fixed deadline, explicit Start, independent wake alarm, and existing narration rules.
+Repair the blank system-hosted Rest Live Activity and give the active Rest page a prominent remaining-time countdown with clear timer and wake-alarm confirmation. Keep the reviewed deadline fixed and describe playback, rest timing, and verified alarms separately.
 
 ## Scope
-- In: shared custom-duration wheels, explicit selected/On/Off states, a fixed-deadline rest Live Activity, targeted regression and layout checks, current user/design/platform documentation, and the owner's latest device observations.
-- Out: changing alarm delivery or snooze policy, extending a deadline when audio pauses, autoplay, new narration content, scheduled installation, and claiming new Lock Screen acceptance without device observation.
+- In: WidgetKit rendering diagnosis and regression coverage; accessible active-Rest countdown and state wording; canonical user/design/development documentation; signed build and installation after any current rest ends.
+- Out: Changing playback, alarm scheduling, snooze, rest duration, listening acceptance, PR merge, or scheduled automation.
 
 ## Action items
-[x] Map timing/selection controls, native alarm and playback ownership, current widget, UI tests, and the Design Language, User Guide, Development guide, and device evidence.
-[x] Verify the platform countdown contract and define honest states for alarm-free rest, audio pause/Stop, deadline, and relaunch.
-[x] Replace minute steppers in routine timer and narrated time choices with bounded hours/minutes wheel pickers; clarify sound/preset selection and switch states while preserving accessibility semantics.
-[x] Add the remaining-rest Live Activity using the immutable run deadline and accurate alarm status; keep its lifecycle independent from media controls and alarm cancellation.
-[x] Update affected UI tests, add meaningful duration-boundary and countdown lifecycle/layout coverage, and retain existing timer/narration/alarm invariants.
-[x] Update User Guide, Design Language, architecture/widget documentation and device evidence; record rain and alarm observations without inferring cutoff or comfort.
-[x] Run focused UI/service/layout tests, the relevant broader suite, repository verification, strict formatting, and a Release build; inspect normal, dark, compact, and large-text layouts.
-[x] Review the Apple-platform change, record verification and remaining physical checks, commit coherent checkpoints, and push the current branch.
+[ ] Capture the current blank-card symptom and build a repeatable WidgetKit rendering/diagnostic feedback loop; retain personal-device evidence only in ignored local-data.
+[ ] Reproduce and minimize the rendering failure, compare falsifiable causes, and fix the verified rendering boundary with regression coverage.
+[ ] Add a prominent remaining-time countdown and explicit active timer confirmation to the Rest page using admitted run timing; keep waiting, paused, interrupted, stopped, failed, finished, and expired states honest.
+[ ] Cover active countdown, deadline stability, no-alarm and verified-alarm wording, larger text, and narrow-screen behavior with focused unit/layout/UI tests.
+[ ] Update User-Guide, Design-Language, Architecture, Development and Troubleshooting where behavior or validation changes.
+[ ] Run focused regression tests, the full simulator suite, strict Swift formatting and repository checks; verify a signed Release build and retain provenance.
+[ ] Save coherent local checkpoints and push codex/device-acceptance-ui; install in place when the phone is free, launch normally and record hardware observations without inferring them.
 
 ## Open questions
-- None. Duration remains one through 180 whole minutes. Lock Screen presentation may be disabled by system Live Activity settings; rest/alarm behavior must continue correctly in that case.
-
-## Verification notes
-- Apple correctness review tightened silent-settling admission, quick-pause admission and persistent card wording. The native timer retains its numeric accessibility value.
-- Focused wheel tests pass for custom values, one-minute saved defaults, largest-text narration and the three-hour boundary on a compact iPhone SE simulator. Queries use each picker container’s native wheel. Gestures stay inside the content gutter so pinned actions and wheel controls cannot consume page scrolling. Wrapped labels keep both selected wheel rows aligned.
-- All 252 unit/service tests pass; five physical-only unit cases are intentionally skipped. Countdown renderings reject blank output. A 166-point layout at the first accessibility size led to reduced vertical padding while preserving native text sizes and the 160-point ceiling. Fixture isolation now also protects an owner’s existing system activity from updates or cleanup.
-- Repository gate: 51 checks pass; strict formatting passes for all 16 changed Swift files. The signed Release app includes its widget and matches the recorded source manifest.
-- The broader dark-mode suite completed with 307 passes, six physical-only skips and two switch-interaction failures. Captured accessibility geometry shows an adaptive switch beneath its compound label; tests now find and scroll to the native control instead of assuming its position. Both repaired cases and the normal custom-timer regression pass on the original dark-mode destination, with state and persistence assertions retained. Combined final coverage is 252 unit/service tests and all 58 simulator-capable UI cases passing; this combines completed suites and focused reruns rather than claiming that the original failing bundle passed.
-- Inspected normal, dark, compact, and accessibility-size screenshots. Temporary diagnostic instrumentation was removed. The temporary compact simulator was removed, and the original test simulator was returned to light appearance and shutdown. New Lock Screen hardware visibility and spoken output remain unverified.
+- None. Use a calm, prominent native numeric countdown; never extend the fixed deadline or treat the countdown as proof that an alarm sounded.
