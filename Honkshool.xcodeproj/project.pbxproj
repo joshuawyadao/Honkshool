@@ -78,6 +78,7 @@
 		2A0000000000000000000106 /* RestCountdownLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0000000000000000000204 /* RestCountdownLayout.swift */; };
 		2A0000000000000000000107 /* RestCountdownActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0000000000000000000205 /* RestCountdownActivity.swift */; };
 		2A0000000000000000000108 /* RestCountdownLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0000000000000000000206 /* RestCountdownLayoutTests.swift */; };
+		2B0000000000000000000101 /* RestLiveActivityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0000000000000000000201 /* RestLiveActivityUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -192,6 +193,7 @@
 		2A0000000000000000000204 /* RestCountdownLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolAlarmWidget/RestCountdownLayout.swift; sourceTree = SOURCE_ROOT; };
 		2A0000000000000000000205 /* RestCountdownActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolAlarmWidget/RestCountdownActivity.swift; sourceTree = SOURCE_ROOT; };
 		2A0000000000000000000206 /* RestCountdownLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/RestCountdownLayoutTests.swift; sourceTree = SOURCE_ROOT; };
+		2B0000000000000000000201 /* RestLiveActivityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolUITests/RestLiveActivityUITests.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -366,6 +368,7 @@
 			children = (
 				180000000000000000000005 /* ListeningHistoryUITests.swift */,
 				1D0000000000000000000004 /* RestShellUITests.swift */,
+				2B0000000000000000000201 /* RestLiveActivityUITests.swift */,
 				1F0000000000000000000202 /* AccessibilityRefreshUITests.swift */,
 				1E0000000000000000000208 /* FunctionalPagesUITests.swift */,
 				B0000000000000000000000A /* HonkshoolAlarmMetadata.swift */,
@@ -625,6 +628,7 @@
 				110000000000000000000004 /* NapPlanReviewUITests.swift in Sources */,
 				170000000000000000000005 /* ListeningHistoryUITests.swift in Sources */,
 				1D0000000000000000000003 /* RestShellUITests.swift in Sources */,
+				2B0000000000000000000101 /* RestLiveActivityUITests.swift in Sources */,
 				1F0000000000000000000102 /* AccessibilityRefreshUITests.swift in Sources */,
 				1E0000000000000000000108 /* FunctionalPagesUITests.swift in Sources */,
 			);

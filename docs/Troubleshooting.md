@@ -47,3 +47,9 @@ Use the visible app or Xcode message first. This is an experimental build, so ke
 Open a [bug report](https://github.com/joshuawyadao/Honkshool/issues/new?template=bug_report.yml) with the build commit if known, public device model and OS version, which flow you used (Nap Plan or feasibility test), short steps, expected versus observed behavior, and a redacted error message. Describe alarm delivery separately from audio cutoff; mark anything you did not observe as unknown.
 
 Use a synthetic time/example. Exclude device identifiers, team/account details, personal listening history, private paths, raw database files, and unredacted logs or screenshots. Security or private-data issues belong in the [private security reporting process](../SECURITY.md).
+
+## Rest countdown and Live Activities
+
+After **Start resting**, look for **Rest timer running** and **Time remaining** on Rest. These appear only after rest is admitted; wake-alarm status remains separate. Playback pause does not extend the deadline. **Rest time ended** describes elapsed rest time and does not prove audible alarm delivery.
+
+If a Lock Screen card is blank, check the in-app countdown and wake-alarm status. Allow Live Activities for Honkshool, and use the updated build with bounded WidgetKit timer text. A blank or unavailable card does not cancel an admitted rest or its wake alarm. If it persists, record whether the card is empty or absent and whether the in-app timer is running.

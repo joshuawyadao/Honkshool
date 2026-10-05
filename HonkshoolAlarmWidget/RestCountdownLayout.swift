@@ -48,6 +48,7 @@ struct RestCountdownTimer: View {
 }
 
 struct RestCountdownLayout: View {
+  @ScaledMetric(relativeTo: .title) private var timerWidth = 140
   let presentation: RestCountdownPresentation
 
   var body: some View {
@@ -58,7 +59,9 @@ struct RestCountdownLayout: View {
         Spacer(minLength: 8)
         RestCountdownTimer(presentation: presentation)
           .font(.title.monospacedDigit())
-          .fixedSize()
+          // WidgetKit archives timers as flexible text; never request intrinsic size.
+          .frame(width: timerWidth, alignment: .trailing)
+          .multilineTextAlignment(.trailing)
       }
       RestCountdownEnding(deadline: presentation.state.deadline)
         .font(.subheadline)

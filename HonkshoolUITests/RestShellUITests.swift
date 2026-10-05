@@ -107,6 +107,11 @@ final class RestShellUITests: XCTestCase {
     let status = app.staticTexts["napRunStatus"]
     XCTAssertTrue(status.waitForExistence(timeout: 5))
     XCTAssertTrue(status.label.contains("Gentle rain is playing"), status.label)
+    attachCountdownDebug("Quick timer after admission", app: app)
+    XCTAssertTrue(app.staticTexts["restTimerRunning"].exists)
+    let remaining = app.staticTexts["restTimeRemaining"]
+    XCTAssertTrue(remaining.exists)
+    XCTAssertTrue(remaining.label.contains(":"), remaining.label)
     XCTAssertFalse(app.buttons["confirmNapPlan"].exists)
     XCTAssertFalse(app.staticTexts["napPlanConfirmedStart"].exists)
     let deadline = app.staticTexts["napPlanConfirmedDeadline"].label
@@ -117,14 +122,54 @@ final class RestShellUITests: XCTestCase {
     XCTAssertFalse(app.buttons["historyResume"].exists)
     app.tabBars.buttons["Rest"].tap()
     XCTAssertEqual(app.staticTexts["napPlanConfirmedDeadline"].label, deadline)
+    XCTAssertTrue(app.staticTexts["restTimeRemaining"].exists)
+    scrollTo(app.buttons["pauseNapRun"], in: app)
+    app.buttons["pauseNapRun"].tap()
+    XCTAssertTrue(app.staticTexts["restTimerRunning"].exists)
+    XCTAssertTrue(
+      app.staticTexts["restTimerPlaybackNote"].label.contains("Rest time continues"))
+    XCTAssertEqual(app.staticTexts["napPlanConfirmedDeadline"].label, deadline)
     scrollTo(app.buttons["stopNapRun"], in: app)
     app.buttons["stopNapRun"].tap()
+    XCTAssertFalse(app.staticTexts["restTimerRunning"].exists)
+    XCTAssertFalse(app.staticTexts["restTimeRemaining"].exists)
     scrollTo(app.buttons["cancelNapPlanAlarm"], in: app)
     XCTAssertTrue(app.buttons["cancelNapPlanAlarm"].isEnabled)
     app.buttons["cancelNapPlanAlarm"].tap()
     scrollTo(app.buttons["reviewAnotherNapPlan"], in: app)
     app.buttons["reviewAnotherNapPlan"].tap()
     XCTAssertTrue(start.waitForExistence(timeout: 5))
+  }
+
+  func testOneMinuteTimerShowsLiveRemainingTimeAfterAdmission() {
+    let app = launch(reset: true)
+    let more = app.buttons["timerMoreOptions"]
+    scrollTo(more, in: app)
+    more.tap()
+    let minutes = app.pickers["timerCustomDurationMinutes"].pickerWheels.firstMatch
+    scrollTo(minutes, in: app)
+    minutes.adjust(toPickerWheelValue: "1")
+    XCTAssertEqual(minutes.value as? String, "1")
+    scrollTo(app.switches["timerWakeAlarm"], in: app)
+    app.switches["timerWakeAlarm"].tap()
+    XCTAssertFalse(app.staticTexts["restTimerRunning"].exists)
+    app.buttons["startRestTimer"].tap()
+    XCTAssertTrue(app.staticTexts["napRunStatus"].waitForExistence(timeout: 5))
+    attachCountdownDebug("One-minute timer after admission", app: app)
+    XCTAssertTrue(app.staticTexts["restTimerRunning"].waitForExistence(timeout: 5))
+    let remaining = app.staticTexts["restTimeRemaining"]
+    XCTAssertTrue(remaining.exists)
+    XCTAssertTrue(remaining.label.contains(":"), remaining.label)
+    let initialRemaining = remaining.label
+    let ticking = XCTNSPredicateExpectation(
+      predicate: NSPredicate(format: "label != %@", initialRemaining), object: remaining)
+    XCTAssertEqual(XCTWaiter.wait(for: [ticking], timeout: 4), .completed)
+    XCTAssertTrue(app.staticTexts["napPlanConfirmedDeadline"].exists)
+    XCTAssertTrue(app.staticTexts["napPlanAlarmStatus"].label.contains("No wake alarm"))
+    attachScreen("One-minute rest countdown")
+    scrollTo(app.buttons["stopNapRun"], in: app)
+    app.buttons["stopNapRun"].tap()
+    XCTAssertFalse(remaining.exists)
   }
 
   func testTimerAlarmDenialKeepsChoicesAndDoesNotStartPlayback() {
@@ -135,6 +180,8 @@ final class RestShellUITests: XCTestCase {
     let error = app.staticTexts["timerStartError"]
     XCTAssertTrue(error.waitForExistence(timeout: 5))
     XCTAssertTrue(error.label.contains("Playback hasn’t started"))
+    XCTAssertFalse(app.staticTexts["restTimerRunning"].exists)
+    XCTAssertFalse(app.staticTexts["restTimeRemaining"].exists)
     XCTAssertFalse(app.buttons["stopNapRun"].exists)
     XCTAssertTrue(app.buttons["openAlarmSettings"].exists)
     scrollTo(app.switches["timerWakeAlarm"], in: app)
@@ -230,6 +277,9 @@ final class RestShellUITests: XCTestCase {
     start.tap()
     XCTAssertTrue(app.staticTexts["napRunStatus"].waitForExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["napRunStatus"].label.contains("Gentle rain is playing"))
+    attachCountdownDebug("AX5 timer after admission", app: app)
+    XCTAssertTrue(app.staticTexts["restTimeRemaining"].exists)
+    attachScreen("AX5 active rest countdown")
     scrollTo(app.buttons["stopNapRun"], in: app)
     app.buttons["stopNapRun"].tap()
   }
@@ -237,6 +287,27 @@ final class RestShellUITests: XCTestCase {
   private func attachScreen(_ name: String) {
     let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
     attachment.name = name
+    attachment.lifetime = .keepAlways
+    add(attachment)
+  }
+
+  private func attachCountdownDebug(_ name: String, app: XCUIApplication) {
+    attachScreen(name)
+    let identifiers = [
+      "napRunStatus", "restTimerRunning", "restTimerEnded", "restTimeRemaining",
+      "napPlanConfirmedDeadline", "stopNapRun",
+    ]
+    let summary = identifiers.map { identifier in
+      let element = app.descendants(matching: .any)[identifier]
+      let label = element.exists ? element.label : "—"
+      return "\(identifier): exists=\(element.exists), label=\(label)"
+    }
+    let matchingTree = app.debugDescription.split(separator: "\n")
+      .filter { line in identifiers.contains(where: { line.contains($0) }) }
+      .prefix(20)
+      .joined(separator: "\n")
+    let attachment = XCTAttachment(string: (summary + [matchingTree]).joined(separator: "\n"))
+    attachment.name = "\(name) — countdown accessibility"
     attachment.lifetime = .keepAlways
     add(attachment)
   }

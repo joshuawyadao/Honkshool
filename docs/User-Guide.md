@@ -43,6 +43,8 @@ Leaving a narrated plan too early ends the pending run and requires a new review
 
 ## Remaining time on the Lock Screen
 
+After rest begins, the Rest page shows **Rest timer running** and a prominent **Time remaining** countdown. The fixed end time, selected sound, and wake-alarm status remain nearby. Pausing or interrupting playback keeps counting toward the same deadline and says that rest time continues. Waiting for playback admission does not claim a running timer; finished or expired time says **Rest time ended**. Stop removes the running countdown while preserving any separately scheduled wake alarm.
+
 After rest begins, a separate Live Activity shows the remaining rest time, its fixed ending time, rest mode, known pause/Stop state, and verified wake-alarm state. It also works for silent rest and when the wake alarm is off. Pausing audio does not pause this countdown. Stopping playback leaves the card only while the matching future wake alarm is verified; cancelling that alarm removes it. Reopening never resumes audio.
 
 Enable Live Activities for Honkshool in iPhone Settings if the countdown is unavailable. A disabled or failed card does not stop an admitted rest or change its wake alarm. Very long exact-time windows can exceed the system’s eight-hour Live Activity limit. At the deadline a stale card says **Rest window ended**; it does not prove that audio stopped or an alarm sounded while the app was suspended.

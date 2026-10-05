@@ -76,6 +76,12 @@ Routine UI tests use launch-time fixtures compiled only for Debug builds. They s
 
 Physical-device cases are separately gated and skipped in ordinary simulator runs. The test files use `HONKSHOOL_REAL_RAIN_TEST`, `HONKSHOOL_REAL_NAP_PLAN_ALARM_TEST`, and `HONKSHOOL_REAL_ALARM_TEST` as opt-in environment flags; Xcode passes them to its test runner with a `TEST_RUNNER_` prefix. Run them only on a connected, signed iPhone with the required alarm authorization. Follow the exact commands and acceptance notes in [Feasibility Spike](Feasibility-Spike.md#minimal-physical-device-acceptance) and its [production rain section](Feasibility-Spike.md#production-gentle-rain-acceptance-on-the-target-iphone). A passing simulator run does not establish audible quality, headphone disconnection behavior, or Lock Screen control behavior on hardware.
 
+### System-hosted countdown regression
+
+`ImageRenderer` layout tests do not exercise WidgetKit archiving. The timer text in the Lock Screen card uses an explicit, scaled width because widget timer text is horizontally flexible; requesting intrinsic size with `fixedSize()` can leave the hosted content unpainted even when its accessibility labels exist.
+
+Run `RestLiveActivityUITests` only on an isolated simulator, with `TEST_RUNNER_HONKSHOOL_HOSTED_ACTIVITY_TEST=1` and `-only-testing:HonkshoolUITests/RestLiveActivityUITests` in the normal Xcode test command. The case launches the ordinary app, starts a silent rest with the alarm off, opens Notification Center, and verifies both the hosted labels and actual screenshot text. Its teardown stops any remaining rest, including after an assertion failure. Use a disposable simulator because this test exercises that simulator's ordinary preferences and system Live Activities authorization. It is skipped without the opt-in and always skipped on physical devices. Set `-collect-test-diagnostics never` for a quick local diagnostic loop; retain its `.xcresult` evidence locally.
+
 ### CI
 
 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) defines the **Repository Verify** workflow with two jobs: **Repository Verify** on Ubuntu runs `./scripts/verify-repository.sh`, and **iOS Unit and UI Tests** on macOS runs `./scripts/test-ios.sh` with failure diagnostics enabled. Both jobs run for non-draft pull requests and manual `workflow_dispatch` runs. Draft pull requests skip both jobs; marking one ready for review starts them. Physical-device opt-in tests are not CI acceptance evidence.

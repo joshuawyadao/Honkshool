@@ -16,10 +16,10 @@ The [approved atlas](../design/quiet-curiosity/screen-atlas.html) establishes la
 | 08 `screen-permission` | Timer Start resting or confirmed narrated Start resting with undetermined AlarmKit access. | Timers request system permission inline; narrated plans use `alarmAccessContent` then the system permission request; alarm must be scheduled and verified before playback. |
 | 09 `screen-ready` | Narrated review → Confirm this plan. | `NapPlanReviewView.swift` (`confirmedContent`); Start resting remains a separate action. |
 | 10 `screen-waiting` | Narrated plan before approved audio or visible silence-only rest starts. Timers have no scheduled waiting period. | `NapPlanReviewView.swift` (`runContent`), driven by `NapRunController`; keep the app foregrounded until that state advances. |
-| 11 `screen-playing` | Active narration. | `NapPlanReviewView.swift` (`runContent`); fixed deadline and actual playback status. |
-| 12 `screen-paused` | Pause or audio interruption during a run. | `NapPlanReviewView.swift` (`runContent`); explicit resume when available. |
-| 13 `screen-quiet` | Planned quiet or rain after narration, or silence-only rest. | `NapPlanReviewView.swift` (`runContent`); fixed deadline, no attention-demanding prompt. |
-| 14 `screen-finished` | Run reaches its deadline. | `NapPlanReviewView.swift` (`runContent`); completed/partial narration is based on playback evidence. |
+| 11 `screen-playing` | Active narration. | `NapPlanReviewView.swift` (`runContent`); prominent remaining-time countdown after admission, fixed deadline and actual playback status. |
+| 12 `screen-paused` | Pause or audio interruption during a run. | `NapPlanReviewView.swift` (`runContent`); fixed rest countdown continues, playback pause/interruption is separate, and explicit resume is available when allowed. |
+| 13 `screen-quiet` | Planned quiet or rain after narration, or silence-only rest. | `NapPlanReviewView.swift` (`runContent`); prominent remaining-time countdown after admission, fixed deadline, no attention-demanding prompt. |
+| 14 `screen-finished` | Run reaches its deadline. | `NapPlanReviewView.swift` (`runContent`); Rest time ended confirmation; completed/partial narration is based on playback evidence. |
 | 15 `screen-stopped` | Listener stops playback. | `NapPlanReviewView.swift` (`runContent`); any separately scheduled wake alarm remains active until explicitly cancelled. |
 | 16 `screen-fallback` | Gentle rain unavailable before planning or during review. | `RestSetupSheets.swift` and `NapPlanReviewView.swift`; show Silence as the available or reviewed fallback. |
 | 17 `screen-history` | History tab. | `ListeningHistoryView.swift`; Continue, valid Resume, and Replay open a fresh review. |

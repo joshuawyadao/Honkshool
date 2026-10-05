@@ -64,7 +64,8 @@ The September 2026 checkup found no confirmed dependency cycle or need for broad
 - Planner and playback rules accept explicit time and immutable values, so their tests need no real sleep or alarm.
 - Runtime tests replace the clock, scheduler, audio player, and history recorder while asserting observable state and evidence.
 - Alarm tests use the `AlarmSystem` seam; SwiftData tests exercise temporary/in-memory stores, disk reopen, corruption and retry.
-- Integration tests validate actual bundled assets and AVFoundation completion, and render the rest countdown and alarm layouts at larger text sizes.
+- Integration tests validate actual bundled assets and AVFoundation completion, and render the rest countdown and alarm layouts at larger text sizes. An isolated simulator opt-in also exercises the real WidgetKit host and recognizes its screenshot text; accessibility labels alone can remain present when archived text fails to paint.
+- The active Rest page uses the admitted run’s immutable start/deadline for native countdown text. Presentation separates pause/interruption from rest time and changes to ended at the fixed deadline without moving it.
 - UI tests require Debug builds and the `-ui-testing` launch argument. Their isolated preferences/history and simulated alarms protect normal app data. Saved-duration fixtures can exercise invalid restored values without touching ordinary preferences.
 - Physical opt-in tests are separate. Simulator passes do not establish audibility, headphone behavior, Lock Screen control behavior, or subjective comfort.
 

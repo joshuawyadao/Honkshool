@@ -975,8 +975,20 @@ struct NapPlanReviewView: View {
       }
       .padding(.vertical, 24)
       if let plan {
-        RestCard(title: run.hasActiveRun ? "Rest ends at" : "Planned ending time") {
-          deadlineText(plan.deadline)
+        RestCard(title: run.hasActiveRun ? "Your rest timer" : "Planned ending time") {
+          if run.hasPassedPlaybackAdmission {
+            RestCountdown(
+              phase: run.phase, admitted: run.hasPassedPlaybackAdmission,
+              start: plan.start, deadline: plan.deadline)
+          } else {
+            if run.phase == .finished {
+              Text("Rest time ended")
+                .font(.system(.title2, design: .rounded).weight(.medium))
+                .accessibilityAddTraits(.isHeader)
+                .accessibilityIdentifier("restTimerEnded")
+            }
+            deadlineText(plan.deadline)
+          }
           confirmedTiming(plan)
           LabeledContent(
             plan.isTimer ? "Rest sound" : "After narration", value: soundName(plan.fallback)

@@ -304,3 +304,7 @@ For each test, record only:
 - a concise behavior note or reproducible failure.
 
 Phase 0 and the framework-independent Nap Plan core are complete. D-023 selects the George sound, D-024 connects a prepared version to this console, and D-008 selects the prepared Gentle rain candidate for production plans. Production plan review, playback progress, and local history are integrated in the Rest/History shell; diagnostic controls remain in the Feasibility Lab. Focused rain/device acceptance and personal nap validation remain; this console is not a supported product release.
+
+## Empty rest card and in-app timer confirmation — 2026-10-05
+
+The owner reported an empty Rest Live Activity after allowing Live Activities and requested clearer confirmation on the active Rest page. The system-hosted simulator reproduced a card showing only its static title. Accessibility queries still exposed the omitted text, so the regression now recognizes the actual screenshot pixels. With the original intrinsic-size timer, the screenshot assertion failed; the bounded timer layout restores the remaining time, end time, rest state, and alarm state in the hosted card. The active Rest page also adds an admitted timer-running confirmation and prominent countdown toward the unchanged deadline. Physical confirmation of this rendering repair remains pending; earlier rain and wake-alarm observations do not establish the new card's visibility.
