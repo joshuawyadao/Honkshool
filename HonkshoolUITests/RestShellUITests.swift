@@ -278,7 +278,10 @@ final class RestShellUITests: XCTestCase {
     XCTAssertTrue(app.staticTexts["napRunStatus"].waitForExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["napRunStatus"].label.contains("Gentle rain is playing"))
     attachCountdownDebug("AX5 timer after admission", app: app)
-    XCTAssertTrue(app.staticTexts["restTimeRemaining"].exists)
+    let remaining = app.staticTexts["restTimeRemaining"]
+    XCTAssertTrue(remaining.exists)
+    scrollTo(remaining, in: app)
+    XCTAssertTrue(remaining.isHittable)
     attachScreen("AX5 active rest countdown")
     scrollTo(app.buttons["stopNapRun"], in: app)
     app.buttons["stopNapRun"].tap()

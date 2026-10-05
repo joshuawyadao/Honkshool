@@ -12,7 +12,7 @@ Repair the blank system-hosted Rest Live Activity and give the active Rest page 
 [x] Add a prominent remaining-time countdown and explicit active timer confirmation to the Rest page using admitted run timing; keep waiting, paused, interrupted, stopped, failed, finished, and expired states honest.
 [x] Cover active countdown, deadline stability, no-alarm and verified-alarm wording, larger text, and narrow-screen behavior with focused unit/layout/UI tests.
 [x] Update User-Guide, Design-Language, Architecture, Development and Troubleshooting where behavior or validation changes.
-[ ] Run focused regression tests, the full simulator suite, strict Swift formatting and repository checks; verify a signed Release build and retain provenance.
+[x] Run focused regression tests, the full simulator suite, strict Swift formatting and repository checks; verify a signed Release build and retain provenance.
 [ ] Save coherent local checkpoints and push codex/device-acceptance-ui; install in place when the phone is free, launch normally and record hardware observations without inferring them.
 
 ## Open questions
@@ -22,4 +22,4 @@ Repair the blank system-hosted Rest Live Activity and give the active Rest page 
 
 The original widget displayed only its Rest title in the system host. Accessibility-only checks passed despite blank pixels. The hosted screenshot regression fails on the original intrinsic-size timer; using an explicit scaled width follows WidgetKit's flexible timer sizing contract. Keep screenshot and permission diagnostics ignored. The app countdown evaluates the current time on a timeline starting now; starting the schedule at the future deadline caused the first render to claim the rest had ended. Native timer text handles the visible ticking.
 
-The corrected hosted rendering, active countdown, pause/deadline, one-minute ticking and larger-text checks pass together (13 focused tests). Strict formatting and all 51 repository checks pass. The full simulator suite and final signed build/installation remain in progress.
+The corrected hosted rendering, active countdown, pause/deadline, one-minute ticking and larger-text checks pass together (13 focused tests). The full simulator suite passes with 315 tests, zero failures and six intentional physical-only skips. The final strengthened largest-text case also passes after scrolling the counter into view and asserting reachability. Strict formatting and all 51 repository checks pass. The final Release build passes signature verification and its source manifest matches the saved application code. Installation is ready but iOS requires the connected phone's passcode; physical rendering confirmation remains pending.
