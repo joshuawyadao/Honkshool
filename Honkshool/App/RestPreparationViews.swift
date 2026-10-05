@@ -3,11 +3,8 @@ import SwiftUI
 
 struct RestDefaultsView: View {
   @Environment(\.dismiss) private var dismiss
-  @Environment(\.dynamicTypeSize) private var dynamicTypeSize
   @State private var draft = RestDefaults.initial
   @State private var rainAvailable = false
-
-  private let presets = [20, 30, 45, 60]
 
   var body: some View {
     ScrollView {
@@ -16,35 +13,10 @@ struct RestDefaultsView: View {
         RestCard(title: "Rest time", systemImage: "clock") {
           Text("\(draft.durationMinutes) minutes")
             .font(.title3.monospacedDigit().weight(.medium))
-          LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 120 : 72))],
-            spacing: 8
-          ) {
-            ForEach(presets, id: \.self) { minutes in
-              Button {
-                draft.durationMinutes = minutes
-              } label: {
-                Text("\(minutes)m")
-                  .font(.body.weight(draft.durationMinutes == minutes ? .semibold : .regular))
-                  .frame(maxWidth: .infinity, minHeight: 44)
-                  .background(
-                    draft.durationMinutes == minutes ? RestStyle.quiet : RestStyle.well,
-                    in: RoundedRectangle(cornerRadius: 12)
-                  )
-                  .overlay {
-                    RoundedRectangle(cornerRadius: 12)
-                      .strokeBorder(
-                        draft.durationMinutes == minutes ? RestStyle.secondary : .clear,
-                        lineWidth: 1)
-                  }
-              }
-              .accessibilityLabel("\(minutes) minutes")
-              .accessibilityIdentifier("defaultRestPreset-\(minutes)")
-              .accessibilityAddTraits(draft.durationMinutes == minutes ? .isSelected : [])
-            }
-          }
-          Stepper("Custom time", value: $draft.durationMinutes, in: 1...180)
-            .accessibilityIdentifier("defaultRestDuration")
+          RestDurationChoices(
+            minutes: $draft.durationMinutes, identifierPrefix: "defaultRestPreset")
+          RestDurationWheels(
+            minutes: $draft.durationMinutes, identifierPrefix: "defaultRestDuration")
           Text("Choose from 1 to 180 minutes. You can still change each plan before reviewing it.")
             .font(.footnote)
             .foregroundStyle(RestStyle.secondary)
@@ -67,8 +39,17 @@ struct RestDefaultsView: View {
           .foregroundStyle(RestStyle.secondary)
         }
         RestCard(title: "Wake alarm", systemImage: "alarm") {
-          Toggle("Request a wake alarm for new plans", isOn: $draft.wakeAlarm)
-            .accessibilityIdentifier("defaultRestAlarm")
+          Toggle(isOn: $draft.wakeAlarm) {
+            HStack {
+              Text("Request a wake alarm for new plans")
+              Spacer(minLength: 8)
+              Text(draft.wakeAlarm ? "On" : "Off")
+                .foregroundStyle(RestStyle.secondary)
+                .accessibilityHidden(true)
+            }
+          }
+          .tint(RestStyle.accent)
+          .accessibilityIdentifier("defaultRestAlarm")
           Text(
             "Alarm availability is checked when you start a rest. An existing plan keeps its reviewed choice."
           )

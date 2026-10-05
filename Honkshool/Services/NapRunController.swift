@@ -140,6 +140,9 @@ final class NapRunController: NSObject, ObservableObject {
   private var interruptionIsActive = false
   private var appIsForeground = true
   private var waitingForPlayback = false
+
+  /// Silent settling before narration still requires the foreground start gate.
+  var hasPassedPlaybackAdmission: Bool { hasActiveRun && !waitingForPlayback }
   private var activeRunHasWakeAlarm = false
   private var observerTokens: [NSObjectProtocol] = []
   private var remoteCommandTokens: [(MPRemoteCommand, Any)] = []

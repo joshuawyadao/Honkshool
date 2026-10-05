@@ -10,7 +10,7 @@ The [approved atlas](../design/quiet-curiosity/screen-atlas.html) establishes la
 | 02 `screen-home` | Rest tab, idle choices or current rest state. | `FeasibilityConsoleView.swift` → `NapPlanReviewView.swift`; inline timer choices and one Start action; a secondary narration path. |
 | 03 `screen-choose` | Rest → Plan a narrated rest → Change session sheet. | `RestContentViews.swift` (`RestSessionPickerView`); the two currently prepared sessions only, with validated saved-place or beginning selection. |
 | 04 `screen-session` | Narrated choices → About this session, or picker → About this session. | `RestContentViews.swift` (`RestSessionDetailView`); catalog summary, estimate, saved point, availability, and explicit selection. |
-| 05 `screen-time` | Narrated choices → More options sheet. | `RestSetupSheets.swift` (`RestTimeSheet`); duration or exact wake time. Cancel/dismiss keeps prior choices; Apply updates the unreviewed draft. |
+| 05 `screen-time` | Narrated choices → More options sheet. | `RestSetupSheets.swift` (`RestTimeSheet`); native hours/minutes wheels or exact wake time. Cancel/dismiss keeps prior choices; Apply updates the unreviewed draft. |
 | 06 `screen-sound` | Narrated choices → After narration sheet. | `RestSetupSheets.swift` (`RestSoundSheet`); Silence or verified Gentle rain. Cancel/dismiss keeps prior choice. |
 | 07 `screen-review` | Narrated choices → Review nap plan. | `NapPlanReviewView.swift` (`reviewContent`); actual ordered route, deadline, rest sound, and alarm before confirmation. |
 | 08 `screen-permission` | Timer Start resting or confirmed narrated Start resting with undetermined AlarmKit access. | Timers request system permission inline; narrated plans use `alarmAccessContent` then the system permission request; alarm must be scheduled and verified before playback. |
@@ -49,3 +49,5 @@ Settings summaries, Rest defaults, and a fresh plan use the same normalized soun
 The offline inventory verifies packaged audio on a background task. A quiet checking message leaves navigation responsive, Recheck is unavailable until the current scan completes, and leaving the page cancels the request so its result cannot overwrite a later visit.
 
 George preview preparation also verifies its source on a background task before activating audio. Cancel preview, leaving the page, losing eligibility, or a lifecycle interruption invalidates pending preparation; only the current eligible foreground request may begin the bounded sample.
+
+The system-hosted remaining-rest card uses `RestActivityCoordinator` and `RestCountdownActivity`. It appears only after admitted rest/audio begins, counts toward the unchanged deadline through pauses, and keeps a stopped-playback card only for a matching verified future wake alarm. It is separate from the AlarmKit snooze card and does not expose listening history.

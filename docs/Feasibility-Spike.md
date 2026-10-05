@@ -285,6 +285,12 @@ The remaining `AccessibilityRefreshUITests` failure above led to a confirmed acc
 
 All three focused accessibility cases passed on the large iOS 27 simulator; after compact helper refinements, all three passed on the iPhone SE (3rd generation) / iOS 26.5. The final complete iPhone 18 Pro Max / iOS 27.0 suite passed with **275 passed, zero failed, and six intentional physical-only skips**, including all three accessibility cases with the final helper. Strict Swift formatting and all 51 repository checks also passed. This follow-up does not relabel the earlier 274-pass/one-failure run. The [accessibility follow-up](Accessibility-Refresh.md#largest-text-preset-follow-up--2026-10-01) records the diagnosis and retained assertions. Physical audio results above retain their original build provenance; this simulator task did not install a new phone build or establish spoken VoiceOver quality.
 
+## Timer controls and Lock Screen follow-up — 2026-10-05
+
+The owner’s ordinary quick-timer check reported that rain began after Start and the wake alarm went off as expected. That observation establishes audible rain and a heard alarm in that run; rain cutoff, exact delivery deviation, Lock Screen controls, headphone behavior, and longer comfort were not separately reported. The same check found custom minute steppers cumbersome, selected controls unclear, and no visible remaining-rest timer on the Lock Screen.
+
+The follow-up replaces routine custom duration steppers with native hours/minutes wheels, adds checkmarks and clearer switch states, and adds a separate ActivityKit rest-window countdown. The fixed AlarmKit deadline and snooze behavior remain independent. The new card does not treat planned audio as proof of audible playback or stale content as alarm-delivery evidence. New Lock Screen hardware visibility and spoken timer output still require direct observation.
+
 ## Recording results
 
 For each test, record only:

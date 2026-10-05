@@ -50,7 +50,7 @@ Read the [product brief](docs/Product-Brief.md) for the product boundary, the [d
 Honkshool/                  Rest-first app, Feasibility Lab, nap domain, and prepared content
 HonkshoolTests/             Domain, spike-state, and layout tests
 HonkshoolUITests/           Feasibility regressions and Nap Plan review flow
-HonkshoolAlarmWidget/       Alarm snooze Live Activity
+HonkshoolAlarmWidget/       Rest countdown and alarm snooze Live Activities
 Honkshool.xcodeproj/        Shared Xcode project and scheme
 docs/                       Product context, decisions, status, and roadmap
 design/quiet-curiosity/      Approved screen atlas for current and future UI

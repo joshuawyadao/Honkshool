@@ -49,6 +49,9 @@ final class NapPlanAlarmService: ObservableObject {
   }
 
   var hasTrackedAlarm: Bool { tracked != nil || defaults.object(forKey: receiptKey) != nil }
+  /// Read-only identity for truthful Lock Screen presentation. Presence alone
+  /// is not proof that the system alarm is still scheduled.
+  var trackedReceipt: ScheduledNapAlarm? { tracked }
   var canCancelTrackedAlarm: Bool { tracked != nil }
   var needsCountdownReconciliation: Bool {
     hasTrackedAlarm && alarmStatus.phase == .snoozed && alarmStatus.nextAlertDate == nil

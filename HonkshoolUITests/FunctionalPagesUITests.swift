@@ -74,6 +74,28 @@ final class FunctionalPagesUITests: XCTestCase {
     XCTAssertTrue(app.descendants(matching: .any)["napPlanRouteItem-1"].exists)
   }
 
+  func testCustomRestDefaultWheelPersistsOneMinute() {
+    var app = launch()
+    tap("openSettings", in: app)
+    tap("openRestDefaults", in: app)
+    let minutes = app.pickers["defaultRestDurationMinutes"].pickerWheels.firstMatch
+    scrollTo(minutes, in: app)
+    minutes.adjust(toPickerWheelValue: "1")
+    XCTAssertEqual(
+      app.pickers["defaultRestDurationHours"].pickerWheels.firstMatch.value as? String, "0")
+    XCTAssertEqual(minutes.value as? String, "1")
+    tap("saveRestDefaults", in: app)
+    app.terminate()
+
+    app = launch(reset: false)
+    tap("openSettings", in: app)
+    tap("openRestDefaults", in: app)
+    XCTAssertEqual(
+      app.pickers["defaultRestDurationHours"].pickerWheels.firstMatch.value as? String, "0")
+    XCTAssertEqual(
+      app.pickers["defaultRestDurationMinutes"].pickerWheels.firstMatch.value as? String, "1")
+  }
+
   func testSettingsSoundSummaryMatchesAvailablePlanDefault() {
     var app = launch()
     tap("openSettings", in: app)

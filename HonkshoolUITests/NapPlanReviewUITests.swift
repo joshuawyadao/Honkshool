@@ -21,6 +21,23 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertTrue(app.buttons["napPlanDuration"].label.contains("1 minutes"))
   }
 
+  func testCustomDurationWheelsClampToThreeHours() {
+    let app = launchReview()
+    openTimeOptions(in: app)
+    let hours = app.pickers["napPlanCustomDurationHours"].pickerWheels.firstMatch
+    let minutes = app.pickers["napPlanCustomDurationMinutes"].pickerWheels.firstMatch
+    scrollTo(hours, in: app)
+    hours.adjust(toPickerWheelValue: "3")
+    XCTAssertEqual(hours.value as? String, "3")
+    XCTAssertEqual(minutes.value as? String, "0")
+    app.buttons["applyNapTime"].tap()
+    openTimeOptions(in: app)
+    XCTAssertEqual(
+      app.pickers["napPlanCustomDurationHours"].pickerWheels.firstMatch.value as? String, "3")
+    XCTAssertEqual(
+      app.pickers["napPlanCustomDurationMinutes"].pickerWheels.firstMatch.value as? String, "0")
+  }
+
   func testPhysicalRainControlsBackgroundDeadlineAndEmptyHistoryOnRelaunch() throws {
     guard ProcessInfo.processInfo.environment["HONKSHOOL_REAL_RAIN_TEST"] == "1" else {
       throw XCTSkip("Opt in on a connected physical iPhone for real rain playback.")
@@ -548,21 +565,25 @@ final class NapPlanReviewUITests: XCTestCase {
 
   private func chooseDuration(_ minutes: Int, in app: XCUIApplication) {
     openTimeOptions(in: app)
+    scrollTo(app.buttons["napPlanDuration"], in: app)
     app.buttons["napPlanDuration"].tap()
     app.buttons["\(minutes) minutes"].tap()
     app.buttons["applyNapTime"].tap()
   }
 
   private func chooseOneMinuteDuration(in app: XCUIApplication) {
-    chooseDuration(5, in: app)
     openTimeOptions(in: app)
-    let custom = app.steppers["napPlanCustomDuration"]
-    // The Stepper container can be visible without being a hittable target.
-    // Reach the native decrement button that the user actually presses.
-    let decrement = custom.buttons["napPlanCustomDuration-Decrement"]
-    scrollTo(decrement, in: app)
-    for _ in 0..<4 { decrement.tap() }
-    XCTAssertEqual(custom.value as? String, "1")
+    let hours = app.pickers["napPlanCustomDurationHours"].pickerWheels.firstMatch
+    let minutes = app.pickers["napPlanCustomDurationMinutes"].pickerWheels.firstMatch
+    scrollTo(minutes, in: app)
+    hours.adjust(toPickerWheelValue: "0")
+    minutes.adjust(toPickerWheelValue: "1")
+    let wheelImage = XCTAttachment(screenshot: app.screenshot())
+    wheelImage.name = "Narrated custom duration wheels"
+    wheelImage.lifetime = .keepAlways
+    add(wheelImage)
+    XCTAssertEqual(hours.value as? String, "0")
+    XCTAssertEqual(minutes.value as? String, "1")
     app.buttons["applyNapTime"].tap()
   }
 

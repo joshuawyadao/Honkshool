@@ -16,7 +16,7 @@ The repository includes [Config/Local.xcconfig.example](../Config/Local.xcconfig
 | [`Honkshool/Domain/`](../Honkshool/Domain/) | Nap planning, playback, content, and spike state rules. |
 | [`Honkshool/Services/`](../Honkshool/Services/) | Alarm, audio, ambience, run control, and local history adapters. |
 | [`Honkshool/Content/`](../Honkshool/Content/) and [`Honkshool/Resources/`](../Honkshool/Resources/) | Prepared catalog definitions, bundled audio, and provenance. |
-| [`Honkshool/Shared/`](../Honkshool/Shared/) and [`HonkshoolAlarmWidget/`](../HonkshoolAlarmWidget/) | Alarm metadata shared with the Lock Screen widget and the widget UI. |
+| [`Honkshool/Shared/`](../Honkshool/Shared/) and [`HonkshoolAlarmWidget/`](../HonkshoolAlarmWidget/) | Narrow alarm metadata and rest timing attributes shared with the two Lock Screen Live Activities. |
 | [`HonkshoolTests/`](../HonkshoolTests/) and [`HonkshoolUITests/`](../HonkshoolUITests/) | Swift unit, service, layout, and UI tests. |
 | [`tests/`](../tests/) | Portable Python publication and audio-asset checks. |
 | [`scripts/`](../scripts/) | Verification, simulator tests, and offline preparation tools. |

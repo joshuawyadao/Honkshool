@@ -70,6 +70,14 @@
 		1E0000000000000000000107 /* NarrationPreviewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000207 /* NarrationPreviewTests.swift */; };
 		1E0000000000000000000109 /* AudioInventoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000209 /* AudioInventoryTests.swift */; };
 		1E0000000000000000000108 /* FunctionalPagesUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0000000000000000000208 /* FunctionalPagesUITests.swift */; };
+		2A0000000000000000000101 /* RestActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0000000000000000000201 /* RestActivityAttributes.swift */; };
+		2A0000000000000000000102 /* RestActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0000000000000000000201 /* RestActivityAttributes.swift */; };
+		2A0000000000000000000103 /* RestActivityCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0000000000000000000202 /* RestActivityCoordinator.swift */; };
+		2A0000000000000000000104 /* RestActivityCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0000000000000000000203 /* RestActivityCoordinatorTests.swift */; };
+		2A0000000000000000000105 /* RestCountdownLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0000000000000000000204 /* RestCountdownLayout.swift */; };
+		2A0000000000000000000106 /* RestCountdownLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0000000000000000000204 /* RestCountdownLayout.swift */; };
+		2A0000000000000000000107 /* RestCountdownActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0000000000000000000205 /* RestCountdownActivity.swift */; };
+		2A0000000000000000000108 /* RestCountdownLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0000000000000000000206 /* RestCountdownLayoutTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -178,6 +186,12 @@
 		1E0000000000000000000207 /* NarrationPreviewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/NarrationPreviewTests.swift; sourceTree = SOURCE_ROOT; };
 		1E0000000000000000000209 /* AudioInventoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/AudioInventoryTests.swift; sourceTree = SOURCE_ROOT; };
 		1E0000000000000000000208 /* FunctionalPagesUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolUITests/FunctionalPagesUITests.swift; sourceTree = SOURCE_ROOT; };
+		2A0000000000000000000201 /* RestActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/Shared/RestActivityAttributes.swift; sourceTree = SOURCE_ROOT; };
+		2A0000000000000000000202 /* RestActivityCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Honkshool/Services/RestActivityCoordinator.swift; sourceTree = SOURCE_ROOT; };
+		2A0000000000000000000203 /* RestActivityCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/RestActivityCoordinatorTests.swift; sourceTree = SOURCE_ROOT; };
+		2A0000000000000000000204 /* RestCountdownLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolAlarmWidget/RestCountdownLayout.swift; sourceTree = SOURCE_ROOT; };
+		2A0000000000000000000205 /* RestCountdownActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolAlarmWidget/RestCountdownActivity.swift; sourceTree = SOURCE_ROOT; };
+		2A0000000000000000000206 /* RestCountdownLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonkshoolTests/RestCountdownLayoutTests.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -355,6 +369,12 @@
 				1F0000000000000000000202 /* AccessibilityRefreshUITests.swift */,
 				1E0000000000000000000208 /* FunctionalPagesUITests.swift */,
 				B0000000000000000000000A /* HonkshoolAlarmMetadata.swift */,
+				2A0000000000000000000201 /* RestActivityAttributes.swift */,
+				2A0000000000000000000202 /* RestActivityCoordinator.swift */,
+				2A0000000000000000000203 /* RestActivityCoordinatorTests.swift */,
+				2A0000000000000000000204 /* RestCountdownLayout.swift */,
+				2A0000000000000000000205 /* RestCountdownActivity.swift */,
+				2A0000000000000000000206 /* RestCountdownLayoutTests.swift */,
 				D00000000000000000000004 /* AlarmLockScreenLayout.swift */,
 				B0000000000000000000000B /* HonkshoolAlarmWidget.swift */,
 				B0000000000000000000000C /* Info.plist */,
@@ -524,6 +544,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A0000000000000000000101 /* RestActivityAttributes.swift in Sources */,
+				2A0000000000000000000103 /* RestActivityCoordinator.swift in Sources */,
+				2A0000000000000000000105 /* RestCountdownLayout.swift in Sources */,
 				1E0000000000000000000105 /* NarrationPreviewController.swift in Sources */,
 				1E0000000000000000000104 /* RestPreparationViews.swift in Sources */,
 				1E0000000000000000000103 /* RestPreferences.swift in Sources */,
@@ -558,6 +581,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A0000000000000000000104 /* RestActivityCoordinatorTests.swift in Sources */,
+				2A0000000000000000000108 /* RestCountdownLayoutTests.swift in Sources */,
 				1E0000000000000000000107 /* NarrationPreviewTests.swift in Sources */,
 				1E0000000000000000000109 /* AudioInventoryTests.swift in Sources */,
 				1E0000000000000000000106 /* RestPreferencesTests.swift in Sources */,
@@ -582,6 +607,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A0000000000000000000102 /* RestActivityAttributes.swift in Sources */,
+				2A0000000000000000000106 /* RestCountdownLayout.swift in Sources */,
+				2A0000000000000000000107 /* RestCountdownActivity.swift in Sources */,
 				D00000000000000000000001 /* AlarmLockScreenLayout.swift in Sources */,
 				B00000000000000000000002 /* HonkshoolAlarmMetadata.swift in Sources */,
 				B00000000000000000000003 /* HonkshoolAlarmWidget.swift in Sources */,

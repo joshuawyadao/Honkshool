@@ -6,7 +6,8 @@ struct FeasibilityConsoleView: View {
   @StateObject private var audio = AudioSpikeController()
   @StateObject private var alarm = AlarmSpikeService()
   @StateObject private var napRun: NapRunController
-  @StateObject private var napAlarm = NapPlanAlarmService()
+  @StateObject private var napAlarm: NapPlanAlarmService
+  @StateObject private var restActivity: RestActivityCoordinator
   @StateObject private var historyStore: ListeningHistoryStore
 
   init() {
@@ -15,8 +16,12 @@ struct FeasibilityConsoleView: View {
     #else
       let store = ListeningHistoryStore()
     #endif
+    let run = NapRunController(history: store)
+    let napAlarm = NapPlanAlarmService()
     _historyStore = StateObject(wrappedValue: store)
-    _napRun = StateObject(wrappedValue: NapRunController(history: store))
+    _napRun = StateObject(wrappedValue: run)
+    _napAlarm = StateObject(wrappedValue: napAlarm)
+    _restActivity = StateObject(wrappedValue: RestActivityCoordinator(run: run, alarm: napAlarm))
   }
 
   @AppStorage("preferredRestMinutes", store: SpikePreferences.defaults)
@@ -84,6 +89,7 @@ struct FeasibilityConsoleView: View {
       guard scenePhase == .active else { return }
       alarm.refresh()
       napAlarm.refresh()
+      restActivity.reconcile()
     }
     .onChange(of: scenePhase) { _, next in
       napRun.scenePhaseChanged(isActive: next == .active)
@@ -100,6 +106,7 @@ struct FeasibilityConsoleView: View {
       napRun.scenePhaseChanged(isActive: scenePhase == .active)
       alarm.refresh()
       napAlarm.refresh()
+      restActivity.reconcile()
       if !evaluatedWelcome {
         evaluatedWelcome = true
         #if DEBUG
@@ -377,6 +384,7 @@ struct FeasibilityConsoleView: View {
       NapPlanReviewView(
         run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
         isHome: isHome, onShowHistory: showHistory,
+        lockScreenTimerMessage: restActivity.availabilityMessage,
         canStart: {
           (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
             && !alarm.hasTrackedAlarm
@@ -389,6 +397,7 @@ struct FeasibilityConsoleView: View {
       NapPlanReviewView(
         run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
         isHome: isHome, onShowHistory: showHistory,
+        lockScreenTimerMessage: restActivity.availabilityMessage,
         canStart: {
           (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
             && !alarm.hasTrackedAlarm

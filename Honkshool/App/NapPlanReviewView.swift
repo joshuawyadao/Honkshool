@@ -11,6 +11,7 @@ struct NapPlanReviewView: View {
   @ObservedObject private var historyStore: ListeningHistoryStore
   private let isHome: Bool
   private let onShowHistory: () -> Void
+  private let lockScreenTimerMessage: String?
   private let initialSelection: SessionSelection?
   private let canStart: () -> Bool
   private let clock: () -> Date
@@ -59,6 +60,7 @@ struct NapPlanReviewView: View {
     startingAt initialSelection: SessionSelection? = nil,
     isHome: Bool = false,
     onShowHistory: @escaping () -> Void = {},
+    lockScreenTimerMessage: String? = nil,
     canStart: @escaping () -> Bool = { true },
     clock: @escaping () -> Date = { .now },
     confirmationClock: (() -> Date)? = nil,
@@ -71,6 +73,7 @@ struct NapPlanReviewView: View {
   ) {
     self.isHome = isHome
     self.onShowHistory = onShowHistory
+    self.lockScreenTimerMessage = lockScreenTimerMessage
     self.run = run
     self.alarm = alarm
     self.historyStore = historyStore
@@ -511,8 +514,17 @@ struct NapPlanReviewView: View {
           }.frame(minHeight: 44)
         }.accessibilityIdentifier("napPlanSound")
         Divider()
-        Toggle("Wake alarm", isOn: $alarmEnabled)
-          .accessibilityIdentifier("napPlanAlarm")
+        Toggle(isOn: $alarmEnabled) {
+          HStack {
+            Text("Wake alarm")
+            Spacer(minLength: 8)
+            Text(alarmEnabled ? "On" : "Off")
+              .foregroundStyle(RestStyle.secondary)
+              .accessibilityHidden(true)
+          }
+        }
+        .tint(RestStyle.accent)
+        .accessibilityIdentifier("napPlanAlarm")
         if availableAmbienceIDs.isEmpty {
           Text("Gentle rain is unavailable on this device. This plan can still use silence.")
             .font(.footnote).foregroundStyle(RestStyle.secondary)
@@ -552,6 +564,7 @@ struct NapPlanReviewView: View {
                         invalidateReview()
                       })
                   )
+                  .tint(RestStyle.accent)
                   .accessibilityIdentifier("napPlanShorterOption-\(index)")
                 }
               }.padding(.top, 12)
@@ -973,6 +986,11 @@ struct NapPlanReviewView: View {
           Text(plan.wakeAlarm == nil ? "No wake alarm was requested." : alarm.statusMessage)
             .font(.subheadline).foregroundStyle(RestStyle.secondary)
             .accessibilityIdentifier("napPlanAlarmStatus")
+          if let lockScreenTimerMessage {
+            Text(lockScreenTimerMessage)
+              .font(.footnote).foregroundStyle(RestStyle.secondary)
+              .accessibilityIdentifier("restActivityAvailability")
+          }
         }
       }
       if run.canPause {

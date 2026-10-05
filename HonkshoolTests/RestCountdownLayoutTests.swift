@@ -1,0 +1,74 @@
+import SwiftUI
+import XCTest
+
+@testable import Honkshool
+
+@MainActor
+final class RestCountdownLayoutTests: XCTestCase {
+  func testCountdownFitsLockScreenAtLargerTextSizes() throws {
+    for size in [DynamicTypeSize.xLarge, .xxxLarge, .accessibility1] {
+      for playback in [
+        RestActivityAttributes.PlaybackStatus.ambience, .paused, .interrupted, .stopped,
+      ] {
+        for isStale in [false, true] {
+          let view = RestCountdownLayout(presentation: make(playback, isStale: isStale))
+            .environment(\.dynamicTypeSize, size)
+          let renderer = ImageRenderer(content: view)
+          renderer.scale = 1
+          renderer.proposedSize = ProposedViewSize(width: 371, height: nil)
+          let image = try XCTUnwrap(renderer.uiImage)
+          XCTAssertLessThanOrEqual(image.size.height, 160)
+          if playback == .paused && !isStale {
+            let attachment = XCTAttachment(image: image)
+            attachment.name = "Rest countdown — \(size)"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+          }
+        }
+      }
+    }
+  }
+
+  func testPausedAndStoppedPlaybackKeepAlarmStatusDistinct() {
+    XCTAssertEqual(make(.paused).playbackLabel, "Playback paused")
+    XCTAssertEqual(make(.stopped).playbackLabel, "Playback stopped")
+    XCTAssertEqual(make(.stopped).alarmLabel, "Wake alarm set")
+  }
+
+  func testCrossDayEndingFitsWithLocaleAndTimeZoneVariants() throws {
+    let start = Date.now.addingTimeInterval(24 * 60 * 60)
+    let presentation = RestCountdownPresentation(
+      state: .init(
+        countdownStart: start, deadline: start.addingTimeInterval(600),
+        playback: .stopped, alarm: .scheduled), isStale: false)
+    for locale in ["en_US", "en_GB"] {
+      for offset in [-7 * 3600, 0, 12 * 3600] {
+        let view = RestCountdownLayout(presentation: presentation)
+          .environment(\.dynamicTypeSize, .accessibility1)
+          .environment(\.locale, Locale(identifier: locale))
+          .environment(\.timeZone, TimeZone(secondsFromGMT: offset)!)
+        let renderer = ImageRenderer(content: view)
+        renderer.proposedSize = ProposedViewSize(width: 371, height: nil)
+        renderer.scale = 1
+        XCTAssertLessThanOrEqual(try XCTUnwrap(renderer.uiImage).size.height, 160)
+      }
+    }
+  }
+
+  func testStaleCountdownDoesNotClaimAudioStoppedOrAlarmDelivered() {
+    let stale = make(.ambience, isStale: true)
+    XCTAssertEqual(stale.playbackLabel, "Rest window ended")
+    XCTAssertEqual(stale.alarmLabel, "Check wake alarm in app")
+  }
+
+  private func make(
+    _ playback: RestActivityAttributes.PlaybackStatus, isStale: Bool = false
+  ) -> RestCountdownPresentation {
+    let start = Date.now
+    return RestCountdownPresentation(
+      state: .init(
+        countdownStart: start, deadline: start.addingTimeInterval(180 * 60),
+        playback: playback, alarm: .scheduled),
+      isStale: isStale)
+  }
+}

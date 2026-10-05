@@ -12,7 +12,7 @@ The experimental **Feasibility Lab** is under **Settings → Advanced**. Its bac
 
 ## Start a nap timer
 
-1. Choose a duration on **Rest**. Expand **Custom duration or wake time** for other durations or an exact ending time; these choices stay on the same screen.
+1. Choose a duration on **Rest**. Expand **Custom duration or wake time** for native hours-and-minutes wheels (1–180 whole minutes) or an exact ending time; these choices stay on the same screen.
 2. Choose **Silence** or available **Gentle rain**, and set **Wake alarm** on or off.
 3. Tap **Start resting**. If needed, iPhone asks for alarm permission. Once a requested alarm is verified, rain begins immediately, or the app shows silent rest. There is no separate review, confirmation page, or one-minute waiting period for a timer.
 
@@ -23,7 +23,7 @@ Saved Rest defaults apply. The duration begins after any alarm-permission prompt
 Tap **Plan a narrated rest** below the timer choices. Narrated sessions retain their full route review:
 
 1. **Choose content.** The narrated flow suggests a prepared session in **How a Car Works**. Tap **Change session** to choose the first or second session. Starting with the first can include the second when the window allows. The reviewed route is the authority for what will actually play.
-2. **Choose your rest window.** Pick a duration on Rest, or tap **More options** for a custom duration or exact wake time. The window includes settling, narration, and any remaining rest; it is not a measure of time asleep. The selected window and narration estimates determine what fits.
+2. **Choose your rest window.** Pick a duration on Rest, or tap **More options** for hours-and-minutes wheels or an exact wake time. The window includes settling, narration, and any remaining rest; it is not a measure of time asleep. The selected window and narration estimates determine what fits.
 3. **Choose the rest sound.** Tap **After narration** for **Silence** (the default) or **Gentle rain** when its bundled audio and provenance validate. If no complete narration fits, the plan can use only the selected rest sound. Honkshool does not speed up narration to squeeze it in.
 4. **Choose the alarm.** Leave **Wake alarm** on if you want a system wake alarm at the fixed deadline, or turn it off. With it off, Honkshool schedules no wake alarm for that plan; set another alarm if you need one.
 5. **Review.** Tap **Review nap plan** and check the planned start, fixed wake deadline, full narration route, sound, and alarm choice. Choose any shorter alternatives before review; the current bundled catalog is one ordered two-session journey and has no branch destination.
@@ -40,6 +40,12 @@ For a **narrated plan**, keep Honkshool in the foreground until the approved nar
 For a **silence-only plan with no narration**, wait for the visible rest-until-deadline state at the approved start. You can then lock the phone even though there is no audio to hear.
 
 Leaving a narrated plan too early ends the pending run and requires a new review. An alarm already scheduled for it can remain active. If rain fails, a visible status explains the fallback to silence; if that happens before narration while the app is backgrounded, the run ends rather than relying on a later silent background start.
+
+## Remaining time on the Lock Screen
+
+After rest begins, a separate Live Activity shows the remaining rest time, its fixed ending time, rest mode, known pause/Stop state, and verified wake-alarm state. It also works for silent rest and when the wake alarm is off. Pausing audio does not pause this countdown. Stopping playback leaves the card only while the matching future wake alarm is verified; cancelling that alarm removes it. Reopening never resumes audio.
+
+Enable Live Activities for Honkshool in iPhone Settings if the countdown is unavailable. A disabled or failed card does not stop an admitted rest or change its wake alarm. Very long exact-time windows can exceed the system’s eight-hour Live Activity limit. At the deadline a stale card says **Rest window ended**; it does not prove that audio stopped or an alarm sounded while the app was suspended.
 
 ## Control audio and alarms
 

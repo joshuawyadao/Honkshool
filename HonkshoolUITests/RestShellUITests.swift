@@ -183,10 +183,17 @@ final class RestShellUITests: XCTestCase {
     let more = app.buttons["timerMoreOptions"]
     scrollTo(more, in: app)
     more.tap()
-    let decrement = app.steppers["timerCustomDuration"].buttons["timerCustomDuration-Decrement"]
-    scrollTo(decrement, in: app)
-    decrement.tap()
-    XCTAssertEqual(app.steppers["timerCustomDuration"].value as? String, "19")
+    let minutes = app.pickers["timerCustomDurationMinutes"].pickerWheels.firstMatch
+    scrollTo(minutes, in: app)
+    minutes.adjust(toPickerWheelValue: "19")
+    XCTAssertEqual(minutes.value as? String, "19")
+    attachScreen("Custom timer wheels")
+    let hours = app.pickers["timerCustomDurationHours"].pickerWheels.firstMatch
+    hours.adjust(toPickerWheelValue: "3")
+    XCTAssertEqual(hours.value as? String, "3")
+    XCTAssertEqual(minutes.value as? String, "0")
+    hours.adjust(toPickerWheelValue: "0")
+    XCTAssertEqual(minutes.value as? String, "1")
     scrollTo(app.switches["timerExactTime"], in: app)
     app.switches["timerExactTime"].tap()
     XCTAssertTrue(app.datePickers["timerWakeTime"].waitForExistence(timeout: 5))
