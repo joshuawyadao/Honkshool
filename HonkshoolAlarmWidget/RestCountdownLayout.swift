@@ -15,7 +15,7 @@ struct RestCountdownPresentation {
     case .resting: return "Quiet rest started"
     case .paused: return "Playback was paused"
     case .interrupted: return "Playback was interrupted"
-    case .stopped: return "Playback stopped"
+    case .stopped: return "Rest stopped"
     }
   }
 

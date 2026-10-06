@@ -251,6 +251,7 @@ final class NapRunControllerTests: XCTestCase {
     XCTAssertEqual(run.phase, .resting)
     XCTAssertEqual(run.presentationPlan?.deadline, plan.deadline)
     run.stop()
+    XCTAssertTrue(run.statusMessage.hasPrefix("Rest stopped."))
     XCTAssertTrue(run.statusMessage.contains("wake alarm was not cancelled"))
 
     let late = try timer(now: clock.now)
@@ -514,6 +515,7 @@ final class NapRunControllerTests: XCTestCase {
     XCTAssertEqual(run.currentNarrationTitle, approved.plan.route.first?.session.title)
     run.stop()
     XCTAssertEqual(run.presentationPlan?.deadline, approved.plan.deadline)
+    XCTAssertTrue(run.statusMessage.hasPrefix("Playback stopped."))
     XCTAssertNil(run.currentNarrationTitle)
     let playCount = player.playCount
     run.resetPresentation()

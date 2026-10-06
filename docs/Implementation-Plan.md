@@ -22,7 +22,7 @@ Close the concrete PR review gaps in timer admission, last-reported activity sta
 [x] Prepare validated follow-up fixes for separate saves and post-push acknowledgments; continue refreshed review and final required CI in the PR ledger.
 [x] Name the quick timer stop action Stop rest, including silence, and describe its independent wake alarm; preserve narrated Stop playback and the existing control identifier.
 [x] Extend the existing silent countdown and rain/alarm UI cases with truthful stop-label expectations; update User-Guide, run those cases and fast checks, then save and acknowledge the review item.
-[ ] Use a generic Rest stopped label for a retained Live Activity, including silent timers; update the existing stopped/alarm presentation assertion and User-Guide, verify layout and coordinator tests, then save and acknowledge the review item.
+[x] Use a generic Rest stopped label for a retained Live Activity, including silent timers, and matching timer status in the app; update existing stopped/alarm and timer/narration assertions and User-Guide, verify layout, coordinator and focused controller tests, then save and acknowledge the review item.
 
 ## Open questions
 - None. Use the existing admission limit and historical wording; no new product behavior or remote update service is needed.
@@ -50,3 +50,9 @@ Codex review at 0faef18 identifies Stop playback on a player-free silent timer (
 The final stop-label slice passes both existing silent/rain UI cases, including countdown removal and separate alarm cancellation. Quick timers say Stop rest regardless of sound; narrated plans retain Stop playback. All 51 repository checks, strict formatting and whitespace validation pass. Refreshed GitHub review and complete CI remain tracked in the local ledger.
 
 Codex review at 538baf4 identifies the corresponding retained-card label Playback stopped (4199212899) after silence-only rest ends while its verified future alarm remains. Use Rest stopped for all stopped rests rather than adding mode fields; the existing semantic state, countdown and independent alarm policy stay unchanged.
+
+Adjacent inspection found the same false playback claim in the timer controller's post-stop status. Include a timer-specific Rest stopped prefix there while preserving narrated status and the existing alarm note; extend the timer receipt and narrated snapshot tests. All 16 layout/coordinator checks pass on the retained-card label.
+
+All 16 layout/coordinator tests and both focused controller cases pass. The retained card says Rest stopped; in-app timer status uses the same phrase, while narrated status and independent alarm language remain intact. Strict formatting and all 51 repository checks pass. All reported Codex findings are addressed; final required GitHub CI is tracked separately.
+
+The independent bounded review confirms unchanged runtime/alarm behavior and finds the shared timer's diagnostic Stop button in Feasibility Lab still has the old label. Apply the same timer-aware Stop rest wording there and compile the app. No new test case is warranted for this duplicate copy-only control; existing production shared-run UI coverage and final CI still exercise the control behavior.

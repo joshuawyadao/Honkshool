@@ -419,8 +419,11 @@ struct FeasibilityConsoleView: View {
               .accessibilityIdentifier("parentResumeNapRun")
           }
           if napRun.hasActiveRun {
-            Button("Stop playback", role: .destructive) { napRun.stop() }
-              .accessibilityIdentifier("parentStopNapRun")
+            Button(
+              napRun.presentationPlan?.isTimer == true ? "Stop rest" : "Stop playback",
+              role: .destructive
+            ) { napRun.stop() }
+            .accessibilityIdentifier("parentStopNapRun")
           }
         }
         if !napRun.records.isEmpty {

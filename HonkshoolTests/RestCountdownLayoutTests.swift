@@ -94,7 +94,7 @@ final class RestCountdownLayoutTests: XCTestCase {
   func testPausedAndStoppedPlaybackKeepAlarmStatusDistinct() {
     XCTAssertEqual(make(.paused).playbackLabel, "Playback was paused")
     XCTAssertEqual(make(.interrupted).playbackLabel, "Playback was interrupted")
-    XCTAssertEqual(make(.stopped).playbackLabel, "Playback stopped")
+    XCTAssertEqual(make(.stopped).playbackLabel, "Rest stopped")
     XCTAssertEqual(make(.stopped).alarmLabel, "Wake alarm was set")
   }
 

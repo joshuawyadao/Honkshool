@@ -434,12 +434,13 @@ final class NapRunController: NSObject, ObservableObject {
     }
     recordPartialIfPossible(reason: .stopped, token: token)
     let hadWakeAlarm = activeRunHasWakeAlarm
+    let stopped = playback?.plan.isTimer == true ? "Rest stopped." : "Playback stopped."
     clearRun()
     phase = .stopped
     statusMessage =
       hadWakeAlarm
-      ? "Playback stopped. The wake alarm was not cancelled here; check its status separately."
-      : "Playback stopped. No wake alarm was scheduled."
+      ? "\(stopped) The wake alarm was not cancelled here; check its status separately."
+      : "\(stopped) No wake alarm was scheduled."
   }
 
   private var restartInstruction: String {
