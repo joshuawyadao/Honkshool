@@ -61,5 +61,5 @@ The independent bounded review confirms unchanged runtime/alarm behavior and fin
 
 Final CI37515038944 exhausted the iOS job's 40-minute limit. Xcode continued emitting test-launch events through cancellation; the run produced no final assertion summary or retained result bundle. The expanded serial suite needs a larger bounded job budget. Raise only the iOS limit to 60 minutes, update the existing configuration assertion and Development documentation, run repository checks, save, and rerun full CI. Preserve all test selections/assertions, serial execution, pinned actions, read-only permissions and superseded-run cancellation. No new infrastructure or dependency is needed.
 
-- [ ] Update and validate the bounded 60-minute iOS CI budget.
-- [ ] Save the CI slice, rerun exact-head checks and record their terminal outcome in the local ledger.
+- [x] Update and validate the bounded 60-minute iOS CI budget.
+- [x] Prepare the verified CI slice for saving; track exact-head CI and its terminal outcome in the local ledger.
