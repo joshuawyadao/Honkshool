@@ -16,7 +16,7 @@ The experimental **Feasibility Lab** is under **Settings → Advanced**. Its bac
 2. Choose **Silence** or available **Gentle rain**, and set **Wake alarm** on or off.
 3. Tap **Start resting**. If needed, iPhone asks for alarm permission. Once a requested alarm is verified, rain begins immediately, or the app shows silent rest. There is no separate review, confirmation page, or one-minute waiting period for a timer.
 
-Saved Rest defaults apply. The duration begins after any alarm-permission prompt; brief alarm setup uses part of that window. The ending time then stays fixed. Setup longer than five seconds (three seconds for a one-minute timer) blocks a new start; a tracked alarm remains available to cancel. Keep the screen open until rest begins. If you leave during setup, return and explicitly start again after handling any tracked alarm. A timer contains no narration and creates no listening history.
+Saved Rest defaults apply. **Settings → Rest defaults → Rest sound** chooses Silence or Gentle rain for both timers and narrated plans. Timers use the sound as rest begins; narrated plans use it during any quiet time before or after narration. The duration begins after any alarm-permission prompt; brief alarm setup uses part of that window. The ending time then stays fixed. Setup longer than five seconds (three seconds for a one-minute timer) blocks a new start; a tracked alarm remains available to cancel. Keep the screen open until rest begins. If you leave during setup, return and explicitly start again after handling any tracked alarm. A timer contains no narration and creates no listening history.
 
 ## Plan a narrated rest
 
@@ -84,6 +84,6 @@ Saved positions depend on the script revision and exact prepared audio. After a 
 
 ## Current limits
 
-There are two prepared automotive sessions, no content downloads, and no public supported release. **Rest → Settings** includes defaults for the next unreviewed plan, session and journey browsing, source notes, a verified offline inventory, the current Enthusiast detail level, and an explicit 12-second George voice preview. The preview creates no history and is unavailable during active rest or Feasibility Lab audio. Additional journeys, branch destinations, voices, and detail variants remain future work. There is no in-app history delete or export control; see [Privacy and local data](Privacy.md).
+There are two prepared automotive sessions, no content downloads, and no public supported release. **Rest → Settings** includes defaults for the next timer or unreviewed narrated plan, session and journey browsing, source notes, a verified offline inventory, the current Enthusiast detail level, and an explicit 12-second George voice preview. The preview creates no history and is unavailable during active rest or Feasibility Lab audio. Additional journeys, branch destinations, voices, and detail variants remain future work. There is no in-app history delete or export control; see [Privacy and local data](Privacy.md).
 
 Automated device tests are separate from listening acceptance. Relative rain/narration level, longer comfort, production rain Lock Screen controls, and real headphone disconnection remain direct observations to collect. The [trial guide](Ten-Nap-Trial.md) explains how to evaluate ordinary use without putting personal history in public reports.

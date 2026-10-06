@@ -55,7 +55,7 @@ The [domain contract](Nap-Planning-Domain.md) defines timing and persistence det
 
 The app opens on the Rest tab, with History as the other tab. Settings opens from Rest and places Feasibility Lab under Advanced. The root view retains the production run, alarm, and history objects across both tabs and the Settings route. Feasibility audio and alarms remain separate from production Nap Plans; their contracts and stored alarm identities differ. The bounded narration preview uses verified bundled audio and stops when its page closes.
 
-The Feasibility Lab bounds its saved test duration to 5–180 minutes. Separately, Rest defaults are bounded to 1–180 minutes and apply to the next unreviewed plan; a confirmed plan keeps its reviewed timing and sound.
+The Feasibility Lab bounds its saved test duration to 5–180 minutes. Separately, Rest defaults are bounded to 1–180 minutes and apply to the next timer or unreviewed narrated plan; a confirmed plan keeps its reviewed timing and sound. The shared Rest sound starts as timer rest begins and is used during any quiet time before or after narration in narrated plans.
 
 The September 2026 checkup found no confirmed dependency cycle or need for broad restructuring. The later Rest-first UI moved ordinary navigation while keeping runtime ownership at the app root. The [screen implementation map](Screen-Implementation-Map.md) identifies each reachable state and its source view.
 

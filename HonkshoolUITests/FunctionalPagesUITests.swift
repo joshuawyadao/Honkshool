@@ -69,6 +69,9 @@ final class FunctionalPagesUITests: XCTestCase {
     tap("saveRestDefaults", in: app)
     app.terminate()
     app = launch(reset: false)
+    let rain = app.buttons["timerRain"]
+    scrollTo(rain, in: app)
+    XCTAssertTrue(rain.isSelected, "Saved Rest sound also seeds the quick timer")
     openNarratedPlan(in: app)
     tap("reviewNapPlan", in: app)
     XCTAssertEqual(
@@ -106,12 +109,12 @@ final class FunctionalPagesUITests: XCTestCase {
     tap("defaultRestSound", in: app)
     app.buttons["Gentle rain"].tap()
     tap("saveRestDefaults", in: app)
-    XCTAssertEqual(app.staticTexts["settingsRestSound"].label, "After narration, Gentle rain")
+    XCTAssertEqual(app.staticTexts["settingsRestSound"].label, "Rest sound, Gentle rain")
     app.terminate()
 
     app = launch(reset: false, environment: ["HONKSHOOL_UI_TEST_PLAN_RAIN_UNAVAILABLE": "1"])
     tap("openSettings", in: app)
-    XCTAssertEqual(app.staticTexts["settingsRestSound"].label, "After narration, Silence")
+    XCTAssertEqual(app.staticTexts["settingsRestSound"].label, "Rest sound, Silence")
     app.navigationBars.buttons.firstMatch.tap()
     openNarratedPlan(in: app)
     tap("reviewNapPlan", in: app)

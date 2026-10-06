@@ -9,7 +9,7 @@ struct RestDefaultsView: View {
   var body: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 20) {
-        RestHeading("Rest defaults", subtitle: "Start your next plan with choices that feel right.")
+        RestHeading("Rest defaults", subtitle: "Start your next rest with choices that feel right.")
         RestCard(title: "Rest time", systemImage: "clock") {
           Text("\(draft.durationMinutes) minutes")
             .font(.title3.monospacedDigit().weight(.medium))
@@ -17,11 +17,11 @@ struct RestDefaultsView: View {
             minutes: $draft.durationMinutes, identifierPrefix: "defaultRestPreset")
           RestDurationWheels(
             minutes: $draft.durationMinutes, identifierPrefix: "defaultRestDuration")
-          Text("Choose from 1 to 180 minutes. You can still change each plan before reviewing it.")
+          Text("Choose from 1 to 180 minutes. You can still change each rest before starting it.")
             .font(.footnote)
             .foregroundStyle(RestStyle.secondary)
         }
-        RestCard(title: "Sound after narration", systemImage: "waveform") {
+        RestCard(title: "Rest sound", systemImage: "waveform") {
           Picker("Default sound", selection: $draft.soundID) {
             Text("Silence").tag(String?.none)
             if rainAvailable {
@@ -30,6 +30,11 @@ struct RestDefaultsView: View {
           }
           .pickerStyle(.menu)
           .accessibilityIdentifier("defaultRestSound")
+          Text(
+            "Timers use this sound as rest begins. Narrated plans use it during any quiet time before or after narration."
+          )
+          .font(.footnote)
+          .foregroundStyle(RestStyle.secondary)
           Text(
             rainAvailable
               ? "Gentle rain uses the prepared recording stored in the app."

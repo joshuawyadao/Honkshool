@@ -149,7 +149,7 @@ struct FeasibilityConsoleView: View {
             settingsRow("Rest defaults", value: "\(settingsDefaults.durationMinutes) min")
           }.accessibilityIdentifier("openRestDefaults")
           LabeledContent(
-            "After narration",
+            "Rest sound",
             value: settingsDefaults.soundID.map(PreparedAmbience.displayName) ?? "Silence"
           )
           .accessibilityIdentifier("settingsRestSound")

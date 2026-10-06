@@ -3,7 +3,7 @@
 Close the two concrete PR review gaps: apply the existing timer setup limit to failed rain setup before admitting silence, and make locally updated Lock Screen state explicitly historical. Preserve the fixed deadline, separately owned alarm, and current Rest flow.
 
 ## Scope
-- In: Timer silent-fallback admission, deterministic failure regressions, Live Activity snapshot wording, affected layout/hosted checks, User-Guide/Architecture/Nap-Planning-Domain documentation, and PR verification.
+- In: Timer silent-fallback admission, deterministic failure regressions, Live Activity snapshot wording, affected layout/hosted checks, shared Rest sound default labels and UI expectations, canonical User-Guide/Architecture/Nap-Planning-Domain/Design-Language/Screen-Implementation-Map documentation, and PR verification.
 - Out: Push infrastructure, alarm scheduling or cancellation changes, timer extension, device installation/testing, new automation, and PR merge.
 
 ## Action items
@@ -13,9 +13,9 @@ Close the two concrete PR review gaps: apply the existing timer setup limit to f
 [x] Qualify Lock Screen mode/alarm wording as previously reported state and update presentation, layout and hosted expectations.
 [x] Update User-Guide, Architecture and Nap-Planning-Domain for snapshot limits and bounded silent fallback.
 [x] Bound the Lock Screen timer row at all five accessibility sizes and verify width/height with the real hosted card.
-[ ] Rename Rest sound defaults to explain immediate timer sound and the narrated-plan fallback; update existing UI expectations.
-[ ] Run focused regressions, the complete affected unit target, hosted layout/UI verification, formatting and repository checks; record evidence locally.
-[ ] Save the review fixes, push the branch, refresh Codex review, and wait for required GitHub checks and mergeability.
+[x] Rename Rest sound defaults to explain sound as timer rest begins and during narrated quiet time; update existing UI expectations.
+[x] Run focused regressions, the complete affected unit target, hosted layout/UI verification, formatting and repository checks; record evidence locally.
+[x] Prepare the verified review fixes for the branch save and refreshed PR review. Record subsequent GitHub review, checks and mergeability in the local PR ledger and on PR #15.
 
 ## Open questions
 - None. Use the existing admission limit and historical wording; no new product behavior or remote update service is needed.
@@ -29,3 +29,5 @@ Codex review at f08b538 also identifies the largest-text timer width and the mis
 The first review slice passes 264 checks (full unit target plus hosted countdown and three focused timer UI cases), zero failures and five intentional skips. The pre-fix late-fallback regression failed and its exact-boundary/already-admitted controls passed. All 51 repository checks and strict Swift formatting pass. The additional Codex layout and default-label fixes remain next.
 
 The layout slice first reproduced width and height overflow at larger accessibility settings. After bounding the timer width and compact card text, all six layout tests and the actual hosted screenshot test pass at the largest system text setting. The screenshot shows the countdown, ending time, and both status lines without clipping; the app countdown remains uncapped.
+
+Both saved-sound default UI cases pass, covering persistence, quick-timer selection, narrated review and unavailable-rain normalization. The copy describes conditional narrated quiet time, since a plan need not have time before or after narration. Strict formatting, all 51 repository checks and whitespace validation pass on the final implementation.
