@@ -744,6 +744,14 @@ final class NapRunController: NSObject, ObservableObject {
       reachDeadline(token: token)
       return
     }
+    // Failed setup must meet the same admission limit as successful rain.
+    // A sound failure after admission may still continue the rest in silence.
+    if playback.plan.isTimer && waitingForPlayback
+      && !playback.plan.canStartTimer(at: clock())
+    {
+      fail("The timer start took too long. Set a new timer.", token: token)
+      return
+    }
     let wasPaused = phase == .paused || phase == .interrupted
     let previousPhase = phase
     releaseAmbience()

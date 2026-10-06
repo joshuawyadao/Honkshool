@@ -77,6 +77,7 @@ private final class RunFakePlayer: NapRunAudioPlaying {
 @MainActor
 private final class RunFakeAmbience: NapAmbiencePlaying {
   var onFailure: ((String) -> Void)?
+  var onPrepare: (() -> Void)?
   var onPlay: (() -> Void)?
   var prepares = true
   var starts = true
@@ -87,6 +88,7 @@ private final class RunFakeAmbience: NapAmbiencePlaying {
 
   func prepareToPlay() -> Bool {
     prepareCount += 1
+    onPrepare?()
     return prepares
   }
   func play() -> Bool {
@@ -281,6 +283,89 @@ final class NapRunControllerTests: XCTestCase {
     XCTAssertEqual(run.phase, .failed)
     XCTAssertEqual(rain.playCount, 0)
     XCTAssertTrue(run.records.isEmpty)
+    XCTAssertTrue(history.saved.isEmpty)
+  }
+
+  private enum TimerRainSetupFailure: String, CaseIterable {
+    case preparation, factory, activation, play
+  }
+
+  private func timerAfterRainSetupFailure(
+    _ failure: TimerRainSetupFailure, elapsed: TimeInterval
+  ) throws -> (run: NapRunController, plan: NapPlan, history: RunHistoryRecorder) {
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let rain = RunFakeAmbience()
+    let history = RunHistoryRecorder()
+    let plan = try timer(
+      now: clock.now, duration: 60,
+      sound: .ambience(id: PreparedAmbience.gentleRainID), alarm: true)
+    let failAtSelectedTime = { clock.now = plan.start.addingTimeInterval(elapsed) }
+    rain.prepares = failure != .preparation
+    rain.starts = failure != .play
+    if failure == .preparation { rain.onPrepare = failAtSelectedTime }
+    if failure == .play { rain.onPlay = failAtSelectedTime }
+    let run = controller(
+      clock: clock, scheduler: scheduler, player: RunFakePlayer(),
+      activation: {
+        if failure == .activation {
+          failAtSelectedTime()
+          throw NapRunError.audioUnavailable
+        }
+      }, history: history,
+      ambienceFactory: { _ in
+        if failure == .factory {
+          failAtSelectedTime()
+          throw NapRunError.audioUnavailable
+        }
+        return rain
+      })
+    let receipt = ScheduledNapAlarm(
+      planID: plan.id, id: UUID(), deadline: try XCTUnwrap(plan.wakeAlarm))
+    try run.startTimer(plan: plan, scheduledAlarm: receipt)
+    return (run, plan, history)
+  }
+
+  func testFailedTimerRainSetupPastStartLimitNeverAdmitsSilentRest() throws {
+    for failure in TimerRainSetupFailure.allCases {
+      let (run, plan, history) = try timerAfterRainSetupFailure(failure, elapsed: 3.001)
+      XCTAssertEqual(run.phase, .failed, failure.rawValue)
+      XCTAssertFalse(run.hasPassedPlaybackAdmission, failure.rawValue)
+      XCTAssertTrue(run.statusMessage.contains("took too long"), run.statusMessage)
+      XCTAssertEqual(run.presentationPlan?.deadline, plan.deadline, failure.rawValue)
+      XCTAssertTrue(history.saved.isEmpty, failure.rawValue)
+    }
+  }
+
+  func testFailedTimerRainSetupAtStartLimitStillAdmitsSilentRest() throws {
+    for failure in TimerRainSetupFailure.allCases {
+      let (run, plan, history) = try timerAfterRainSetupFailure(failure, elapsed: 3)
+      XCTAssertEqual(run.phase, .resting, failure.rawValue)
+      XCTAssertTrue(run.hasPassedPlaybackAdmission, failure.rawValue)
+      XCTAssertEqual(run.presentationPlan?.deadline, plan.deadline, failure.rawValue)
+      XCTAssertTrue(history.saved.isEmpty, failure.rawValue)
+      run.stop()
+    }
+  }
+
+  func testAdmittedTimerRainFailureAfterStartLimitKeepsSilentRestAndDeadline() throws {
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let rain = RunFakeAmbience()
+    let history = RunHistoryRecorder()
+    let run = controller(
+      clock: clock, scheduler: scheduler, player: RunFakePlayer(),
+      history: history, ambience: rain)
+    let plan = try timer(
+      now: clock.now, duration: 60, sound: .ambience(id: PreparedAmbience.gentleRainID))
+    try run.startTimer(plan: plan)
+    scheduler.advance(to: plan.start.addingTimeInterval(4))
+    rain.fail()
+    XCTAssertEqual(run.phase, .resting)
+    XCTAssertTrue(run.hasPassedPlaybackAdmission)
+    XCTAssertEqual(run.presentationPlan?.deadline, plan.deadline)
+    scheduler.advance(to: plan.deadline)
+    XCTAssertEqual(run.phase, .finished)
     XCTAssertTrue(history.saved.isEmpty)
   }
 

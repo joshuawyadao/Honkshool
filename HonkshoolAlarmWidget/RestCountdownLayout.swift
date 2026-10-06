@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// This countdown describes the fixed rest window. It does not claim that
-/// audio is audible or that a system alarm has been delivered.
+/// audio is audible or that a system alarm has been delivered. State labels
+/// describe the last app update; external changes can precede reconciliation.
 struct RestCountdownPresentation {
   let state: RestActivityAttributes.ContentState
   let isStale: Bool
@@ -9,9 +10,9 @@ struct RestCountdownPresentation {
   var playbackLabel: String {
     guard !isStale else { return "Rest window ended" }
     switch state.playback {
-    case .narrating: return "Narrated rest"
-    case .ambience: return "Rest with sound"
-    case .resting: return "Quiet rest"
+    case .narrating: return "Narration started"
+    case .ambience: return "Rest sound started"
+    case .resting: return "Quiet rest started"
     case .paused: return "Playback paused"
     case .interrupted: return "Playback interrupted"
     case .stopped: return "Playback stopped"
@@ -22,10 +23,10 @@ struct RestCountdownPresentation {
     guard !isStale else { return "Check wake alarm in app" }
     switch state.alarm {
     case .none: return "No wake alarm"
-    case .scheduled: return "Wake alarm set"
-    case .snoozed: return "Wake alarm snoozed"
-    case .paused: return "Wake alarm paused"
-    case .alerting: return "Wake alarm alerting"
+    case .scheduled: return "Wake alarm was set"
+    case .snoozed: return "Wake alarm was snoozed"
+    case .paused: return "Wake alarm was paused"
+    case .alerting: return "Wake alarm was alerting"
     case .unknown: return "Wake alarm unverified"
     }
   }

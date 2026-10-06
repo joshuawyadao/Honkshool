@@ -56,7 +56,7 @@ final class RestLiveActivityUITests: XCTestCase {
     if allow.waitForExistence(timeout: 3) { allow.tap() }
     let restLabel = springboard.staticTexts["Rest"]
     XCTAssertTrue(restLabel.waitForExistence(timeout: 10))
-    XCTAssertTrue(springboard.staticTexts["Quiet rest"].exists)
+    XCTAssertTrue(springboard.staticTexts["Quiet rest started"].exists)
     XCTAssertTrue(springboard.staticTexts["No wake alarm"].exists)
     let screenshot = springboard.screenshot()
     let shot = XCTAttachment(screenshot: screenshot)

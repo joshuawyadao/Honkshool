@@ -36,7 +36,29 @@ final class RestCountdownLayoutTests: XCTestCase {
   func testPausedAndStoppedPlaybackKeepAlarmStatusDistinct() {
     XCTAssertEqual(make(.paused).playbackLabel, "Playback paused")
     XCTAssertEqual(make(.stopped).playbackLabel, "Playback stopped")
-    XCTAssertEqual(make(.stopped).alarmLabel, "Wake alarm set")
+    XCTAssertEqual(make(.stopped).alarmLabel, "Wake alarm was set")
+  }
+
+  func testActiveModeLabelsReportStartEventsInsteadOfCurrentPlayback() {
+    XCTAssertEqual(make(.narrating).playbackLabel, "Narration started")
+    XCTAssertEqual(make(.ambience).playbackLabel, "Rest sound started")
+    XCTAssertEqual(make(.resting).playbackLabel, "Quiet rest started")
+  }
+
+  func testAlarmLabelsDescribeTheLastReportedState() {
+    for (alarm, expected) in [
+      (RestActivityAttributes.AlarmStatus.scheduled, "Wake alarm was set"),
+      (.snoozed, "Wake alarm was snoozed"),
+      (.paused, "Wake alarm was paused"),
+      (.alerting, "Wake alarm was alerting"),
+    ] {
+      let start = Date.now
+      let presentation = RestCountdownPresentation(
+        state: .init(
+          countdownStart: start, deadline: start.addingTimeInterval(600),
+          playback: .stopped, alarm: alarm), isStale: false)
+      XCTAssertEqual(presentation.alarmLabel, expected, "State snapshot: \(alarm)")
+    }
   }
 
   func testCrossDayEndingFitsWithLocaleAndTimeZoneVariants() throws {
