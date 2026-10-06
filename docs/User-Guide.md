@@ -66,6 +66,8 @@ To end both listening and the wake alarm, **stop playback, cancel the alarm, and
 
 A system interruption or lost audio output can pause playback. Honkshool requires a manual resume rather than unexpectedly restarting. The app requests exclusive playback, so existing music or a podcast yields when its audio session activates. iOS owns the exact Lock Screen media/alarm presentation; current production rain controls and physical headphone-disconnection behavior still need direct observation.
 
+An iOS media-service reset ends a run that has an initialized narration or rain player, including paused audio, and requires a new explicit start. An admitted silent timer, including rain that already fell back to silence, has no player to reset and continues to its fixed deadline. The separately scheduled wake alarm remains independent.
+
 The planned deadline stays fixed even if you pause or start late. Playback never extends the window to finish a session. Cutoff depends on app execution, which iOS can delay while suspended; the independently scheduled system alarm is a separate path. Current verification and its limits are in the [feasibility guide](Feasibility-Spike.md).
 
 ## Continue a journey or revisit a session

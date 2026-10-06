@@ -260,6 +260,95 @@ final class NapRunControllerTests: XCTestCase {
     }
   }
 
+  func testMediaResetPreservesAdmittedSilentTimersAndTheirDeadline() async throws {
+    for failedRain in [false, true] {
+      let clock = RunTestClock()
+      let scheduler = RunTestScheduler(clock: clock)
+      let rain = RunFakeAmbience()
+      rain.prepares = false
+      let narration = RunFakePlayer()
+      let history = RunHistoryRecorder()
+      let run = controller(
+        clock: clock, scheduler: scheduler, player: narration,
+        observeSystemEvents: true, history: history, ambience: rain)
+      let plan = try timer(
+        now: clock.now,
+        sound: failedRain ? .ambience(id: PreparedAmbience.gentleRainID) : .silence,
+        alarm: true)
+      let receipt = ScheduledNapAlarm(
+        planID: plan.id, id: UUID(), deadline: try XCTUnwrap(plan.wakeAlarm))
+      try run.startTimer(plan: plan, scheduledAlarm: receipt)
+      scheduler.advance(to: plan.start.addingTimeInterval(5))
+      run.scenePhaseChanged(isActive: false)
+
+      NotificationCenter.default.post(
+        name: AVAudioSession.mediaServicesWereResetNotification, object: nil)
+      try await Task.sleep(for: .milliseconds(50))
+
+      XCTAssertEqual(run.phase, .resting, "Silent rest does not depend on media services")
+      XCTAssertTrue(run.hasPassedPlaybackAdmission)
+      XCTAssertEqual(run.presentationPlan?.deadline, plan.deadline)
+      XCTAssertEqual(narration.playCount, 0)
+      XCTAssertEqual(rain.playCount, 0)
+      scheduler.advance(to: plan.deadline)
+      XCTAssertEqual(run.phase, .finished)
+      XCTAssertTrue(run.statusMessage.contains("wake alarm was scheduled separately"))
+      XCTAssertTrue(history.saved.isEmpty)
+    }
+  }
+
+  func testMediaResetStillEndsActiveAndPausedRain() async throws {
+    for paused in [false, true] {
+      let clock = RunTestClock()
+      let scheduler = RunTestScheduler(clock: clock)
+      let rain = RunFakeAmbience()
+      let run = controller(
+        clock: clock, scheduler: scheduler, player: RunFakePlayer(),
+        observeSystemEvents: true, ambience: rain)
+      let plan = try timer(
+        now: clock.now, sound: .ambience(id: PreparedAmbience.gentleRainID))
+      try run.startTimer(plan: plan)
+      if paused { run.pause() }
+
+      NotificationCenter.default.post(
+        name: AVAudioSession.mediaServicesWereResetNotification, object: nil)
+      try await Task.sleep(for: .milliseconds(50))
+
+      XCTAssertEqual(run.phase, .failed)
+      XCTAssertFalse(run.hasActiveRun)
+      XCTAssertTrue(run.statusMessage.contains("Audio services reset"))
+      XCTAssertGreaterThan(rain.stopCount, 0)
+      XCTAssertEqual(rain.playCount, 1, "No automatic restart after reset")
+    }
+  }
+
+  func testMediaResetStillEndsNarrationAndRecordsVerifiedPartialPlayback() async throws {
+    let catalog = try PreparedCatalog.load()
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let narration = RunFakePlayer()
+    let history = RunHistoryRecorder()
+    let run = controller(
+      clock: clock, scheduler: scheduler, player: narration,
+      observeSystemEvents: true, history: history)
+    let approved = try review(catalog: catalog, now: clock.now)
+    try run.start(review: approved, catalog: catalog)
+    scheduler.advance(to: approved.plan.start)
+    clock.now = approved.plan.start.addingTimeInterval(5)
+    narration.currentTime = 5
+
+    NotificationCenter.default.post(
+      name: AVAudioSession.mediaServicesWereResetNotification, object: nil)
+    try await Task.sleep(for: .milliseconds(50))
+
+    XCTAssertEqual(run.phase, .failed)
+    XCTAssertEqual(run.records.count, 1)
+    XCTAssertEqual(run.records.first?.playedDuration, 5)
+    XCTAssertGreaterThan(narration.stopCount, 0)
+    XCTAssertEqual(narration.playCount, 1)
+    XCTAssertFalse(history.saved.isEmpty)
+  }
+
   func testTimerRainPreparationCrossingStartWindowDoesNotPlay() throws {
     let clock = RunTestClock()
     let scheduler = RunTestScheduler(clock: clock)

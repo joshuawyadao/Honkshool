@@ -984,7 +984,11 @@ final class NapRunController: NSObject, ObservableObject {
         forName: AVAudioSession.mediaServicesWereResetNotification, object: nil, queue: .main
       ) { [weak self] _ in
         Task { @MainActor in
-          guard let self, let token = self.activeToken else { return }
+          guard let self, let token = self.activeToken,
+            self.player != nil || self.ambiencePlayer != nil
+          else { return }
+          // Only initialized audio players are invalidated by a media reset.
+          // Player-free silent rest keeps its independently scheduled deadline.
           self.fail("Audio services reset. \(self.restartInstruction)", token: token)
         }
       })
