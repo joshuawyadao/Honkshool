@@ -1,9 +1,9 @@
 # Plan
 
-Close the two concrete PR review gaps: apply the existing timer setup limit to failed rain setup before admitting silence, and make locally updated Lock Screen state explicitly historical. Preserve the fixed deadline, separately owned alarm, and current Rest flow.
+Close the concrete PR review gaps in timer admission, last-reported activity state, countdown sizing and sound default labels. The refreshed review adds compact Dynamic Island duration readability and player-free timers surviving media-service resets. Preserve the fixed deadline, separately owned alarm, system-updated ticking and current Rest flow.
 
 ## Scope
-- In: Timer silent-fallback admission, deterministic failure regressions, Live Activity snapshot wording, affected layout/hosted checks, shared Rest sound default labels and UI expectations, canonical User-Guide/Architecture/Nap-Planning-Domain/Design-Language/Screen-Implementation-Map documentation, and PR verification.
+- In: Timer silent-fallback admission and media-reset behavior, deterministic failure regressions, Live Activity snapshot wording and compact countdown sizing, affected layout/hosted checks, shared Rest sound default labels and UI expectations, canonical User-Guide/Architecture/Nap-Planning-Domain/Development/Design-Language/Screen-Implementation-Map documentation, and PR verification.
 - Out: Push infrastructure, alarm scheduling or cancellation changes, timer extension, device installation/testing, new automation, and PR merge.
 
 ## Action items
@@ -16,6 +16,10 @@ Close the two concrete PR review gaps: apply the existing timer setup limit to f
 [x] Rename Rest sound defaults to explain sound as timer rest begins and during narrated quiet time; update existing UI expectations.
 [x] Run focused regressions, the complete affected unit target, hosted layout/UI verification, formatting and repository checks; record evidence locally.
 [x] Prepare the verified review fixes for the branch save and refreshed PR review. Record subsequent GitHub review, checks and mergeability in the local PR ledger and on PR #15.
+[ ] Reproduce an admitted silent timer ending on an audio-service reset; preserve player-free rest while retaining explicit failure for affected narration/rain and its original deadline.
+[ ] Bound compact Dynamic Island typography/width for hour-long and exact-time countdowns while retaining native ticking; verify actual hosted compact pixels and appropriate layout constraints.
+[ ] Update User-Guide, Nap-Planning-Domain and Development for reset and compact presentation contracts; run focused regressions and affected controller/layout tests.
+[ ] Save each validated comment fix, acknowledge after push, request fresh review and wait for final required CI.
 
 ## Open questions
 - None. Use the existing admission limit and historical wording; no new product behavior or remote update service is needed.
@@ -31,3 +35,5 @@ The first review slice passes 264 checks (full unit target plus hosted countdown
 The layout slice first reproduced width and height overflow at larger accessibility settings. After bounding the timer width and compact card text, all six layout tests and the actual hosted screenshot test pass at the largest system text setting. The screenshot shows the countdown, ending time, and both status lines without clipping; the app countdown remains uncapped.
 
 Both saved-sound default UI cases pass, covering persistence, quick-timer selection, narrated review and unavailable-rain normalization. The copy describes conditional narrated quiet time, since a plan need not have time before or after narration. Strict formatting, all 51 repository checks and whitespace validation pass on the final implementation.
+
+Refreshed Codex review at 3195550 reports compact countdown width for hours (4198906968) and unconditional media-reset failure for silent timers (4198906982). Both are bounded correctness/presentation concerns; no product decision or new background mechanism is needed. Check no-player silence, failed-rain fallback, active/paused audio and long countdowns before saving.
