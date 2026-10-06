@@ -1,69 +1,65 @@
 # Plan
 
-Prepare PR #14 for merge by integrating the latest main branch, preserving the approved Quiet curiosity interface and the project-checkup fixes, and addressing actionable review or CI feedback. Keep the app's audio, alarm, history, and accessibility contracts intact.
+Close the concrete PR review gaps in timer admission, last-reported activity state, countdown sizing and sound default labels. The refreshed review adds compact Dynamic Island duration readability and player-free timers surviving media-service resets. Preserve the fixed deadline, separately owned alarm, system-updated ticking and current Rest flow.
 
 ## Scope
-- In: merge conflicts with main; current public guides and diagrams; confirmed Brooks/Codex feedback; narrow CI fixes; relevant tests; review and check evidence; commits and push on codex/app-icon.
-- Out: new product capabilities, unrelated refactors, changing physical acceptance claims, publishing private audit artifacts, and merging the PR.
+- In: Timer silent-fallback admission and media-reset behavior, deterministic failure regressions, Live Activity snapshot wording and compact countdown sizing, affected layout/hosted checks, shared Rest sound default labels and UI expectations, canonical User-Guide/Architecture/Nap-Planning-Domain/Development/Design-Language/Screen-Implementation-Map documentation, and PR verification.
+- Out: Push infrastructure, alarm scheduling or cancellation changes, timer extension, device installation/testing, new automation, and PR merge.
 
 ## Action items
-- [x] Inspect the main-branch checkup and documentation PR, current design/screen/accessibility guidance, affected UI fixtures, and hosted checks.
-- [x] Checkpoint this resolved plan before implementation.
-- [x] Merge main, preserving repaired Lab duration persistence and failure diagnostics alongside shared Rest navigation and fixtures.
-- [x] Reconcile README, CONTRIBUTING, current user/developer/architecture guides and diagrams with the approved functional pages while retaining setup, privacy, and historical evidence.
-- [x] Run repository checks, formatting, and focused restored-duration/navigation regressions; preserve existing assertions and adapt tests only where the UI contract changed.
-- [x] Finish Brooks and Apple-contract review, classify Codex findings, and fix each actionable cluster with focused validation and saved commits.
-- [ ] Push and wait for current-head Repository Verify and iOS Unit and UI Tests; investigate failures using retained diagnostics without weakening assertions.
-- [ ] Record final validation and any manual limits, verify fresh review/CI/mergeability state, and leave the PR unmerged.
+[x] Review the PR diff and diagnose the late rain-fallback and stale activity-label paths against the runtime and ActivityKit contracts.
+[x] Add fake-clock regressions for failed/throwing rain setup and failed play after the start limit, plus successful fallback and already-admitted sound failure controls.
+[x] Recheck timer admission before failed rain becomes silent rest, preserving alarm ownership and the original deadline.
+[x] Qualify Lock Screen mode/alarm wording as previously reported state and update presentation, layout and hosted expectations.
+[x] Update User-Guide, Architecture and Nap-Planning-Domain for snapshot limits and bounded silent fallback.
+[x] Bound the Lock Screen timer row at all five accessibility sizes and verify width/height with the real hosted card.
+[x] Rename Rest sound defaults to explain sound as timer rest begins and during narrated quiet time; update existing UI expectations.
+[x] Run focused regressions, the complete affected unit target, hosted layout/UI verification, formatting and repository checks; record evidence locally.
+[x] Prepare the verified review fixes for the branch save and refreshed PR review. Record subsequent GitHub review, checks and mergeability in the local PR ledger and on PR #15.
+[x] Reproduce an admitted silent timer ending on an audio-service reset; preserve player-free rest while retaining explicit failure for affected narration/rain and its original deadline.
+[x] Bound compact Dynamic Island typography/width for hour-long and exact-time countdowns while retaining native ticking; verify actual hosted compact pixels and appropriate layout constraints.
+[x] Update User-Guide, Nap-Planning-Domain and Development for reset and compact presentation contracts; run focused regressions and affected controller/layout tests.
+[x] Prepare validated follow-up fixes for separate saves and post-push acknowledgments; continue refreshed review and final required CI in the PR ledger.
+[x] Name the quick timer stop action Stop rest, including silence, and describe its independent wake alarm; preserve narrated Stop playback and the existing control identifier.
+[x] Extend the existing silent countdown and rain/alarm UI cases with truthful stop-label expectations; update User-Guide, run those cases and fast checks, then save and acknowledge the review item.
+[x] Use a generic Rest stopped label for a retained Live Activity, including silent timers, and matching timer status in the app; update existing stopped/alarm and timer/narration assertions and User-Guide, verify layout, coordinator and focused controller tests, then save and acknowledge the review item.
 
 ## Open questions
-- None. All actionable PR feedback and conflict fixes are authorized. Public docs must distinguish implemented pages from future atlas concepts. Raw original audit artifacts remain local.
+- None. Use the existing admission limit and historical wording; no new product behavior or remote update service is needed.
 
-## Codex feedback queue
+## Review evidence
 
-- [x] Comment 4151809411: derive Settings sound from normalized preferences and verified availability; cover available, missing, and unknown sound values and retain live saved-default updates.
-- [x] Comment 4151809417: move bundled-audio scanning off the main actor with cancellation and stale-result guards; cover verified inventory and cancelled work, and verify page navigation/recheck.
+Rain preparation failure/throw and failed play reach silent-rest admission without the successful rain path's start-limit check. A pending 60-second timer must reject fallback after its three-second allowance; a previously admitted rest can still fall back before its fixed deadline. Separately, the custom Rest Activity updates only when the app runs and becomes stale at the deadline, so alarm cancellation through the separate system card can leave older labels visible. Labels must describe the last reported event rather than prove current playback or alarm state.
 
-- [x] Comment 4151925030: move George preview verification off the main actor; expose a quiet preparing state and cancellable request, keep player/audio-session work on the main actor, and invalidate preparation on Stop, departure, background/interruption, or loss of eligibility. Add delayed-verification, cancellation/stale-request and verification-failure tests, then rerun preview UI, Release, and repository checks.
+Codex review at f08b538 also identifies the largest-text timer width and the misleading sound-default labels. Extend the same plan with bounded hosted layout and accurate default wording before implementation.
 
-## Historical main-branch plan
+The first review slice passes 264 checks (full unit target plus hosted countdown and three focused timer UI cases), zero failures and five intentional skips. The pre-fix late-fallback regression failed and its exact-boundary/already-admitted controls passed. All 51 repository checks and strict Swift formatting pass. The additional Codex layout and default-label fixes remain next.
 
-The following is the incoming PR #12 task record, retained for context. Its merge authorization and unfinished checkboxes do not apply to PR #14; the current action items above govern this task.
+The layout slice first reproduced width and height overflow at larger accessibility settings. After bounding the timer width and compact card text, all six layout tests and the actual hosted screenshot test pass at the largest system text setting. The screenshot shows the countdown, ending time, and both status lines without clipping; the app countdown remains uncapped.
 
-> Diagnose the existing UI-test timeouts blocking PR #12 and repair demonstrated test or runner reliability defects. Preserve behavioral assertions, capture actionable failure evidence, and complete review and CI before the authorized merge and branch cleanup.
->
-> ## Scope
->
-> - In: feasibility UI tests, simulator test diagnostics and CI evidence, focused reliability fixes, developer verification guidance, PR #12 review and merge.
-> - Out: new product behavior, audio assets, physical-device acceptance, unrelated worktrees, skipped assertions or automatic retries that conceal failures.
->
-> ## Action items
->
-> - [x] Inspect the two hosted timeout summaries, existing UI fixtures/helpers, CI workflow, and Development guide; confirm the current branch is clean.
-> - [x] Commit this resolved plan before implementation.
-> - [x] Reproduce the failing playback test and inspect its transitions; obtain independent Apple-contract diagnosis.
-> - [x] Preserve assertion call sites and observed UI values in failure messages; retain hosted result evidence if needed to identify the failing transition.
-> - [ ] Apply only fixes supported by evidence, preserving alarm and playback assertions; cover diagnostic script behavior with portable tests if changed.
-> - [x] Update docs/Development.md for any new diagnostic controls and artifact handling; verify no private device data enters public source.
-> - [ ] Run focused simulator checks and the portable gate, review the diff, then commit and push the bounded changes.
-> - [ ] Request current-head Codex review and observe full hosted CI; resolve addressed threads, merge PR #12 when green, and delete only its feature branch.
->
-> ## Open questions
->
-> - None. The user approved extending PR #12 to diagnose and fix existing UI-test reliability. Root cause is not yet established; no timeout increase is assumed.
->
-> ## Evidence
->
-> - Hosted attempt 2: 233 passed, one delayed-scheduling UI waiter timeout, six expected physical skips. The failing test passed an unchanged three-iteration local simulator reproduction.
-> - Hosted attempt 3: 233 passed, one alarm-enabled playback UI waiter timeout, six expected physical skips. The prior failing test passed. The summary omits the failed assertion call site and observed state; the workflow does not preserve the result bundle.
->
-> - The playback failure also passed an unchanged three-iteration local reproduction. Both hosted failures remain intermittent and their causes are unproven. The bounded correction is diagnostic: preserve expected/observed labels and source locations, with existing 5/15-second waits, and retain failed hosted simulator result bundles for seven days.
-> - Independent review caught and corrected the artifact root: upload the fresh parent directory so the downloaded archive retains TestResults.xcresult. Three portable regression cases verify successful result publication, failed-test exit preservation, and unreadable-summary exit preservation.
->
-> - Diagnostic slice validation: both affected simulator tests passed with the updated helper; all 51 portable tests passed. Brooks diff review found no additional actionable decay or test-quality concern. No production code changed; hosted current-head validation remains required.
+Both saved-sound default UI cases pass, covering persistence, quick-timer selection, narrated review and unavailable-rain normalization. The copy describes conditional narrated quiet time, since a plan need not have time before or after narration. Strict formatting, all 51 repository checks and whitespace validation pass on the final implementation.
 
-## Current PR verification
+Refreshed Codex review at 3195550 reports compact countdown width for hours (4198906968) and unconditional media-reset failure for silent timers (4198906982). Both are bounded correctness/presentation concerns; no product decision or new background mechanism is needed. Check no-player silence, failed-rain fallback, active/paused audio and long countdowns before saving.
 
-The merged interface passed 12 focused simulator cases (saved Lab bounds, Rest navigation and functional pages). The sound-summary fix passed four preference unit tests and two UI cases, including live Settings refresh and unavailable-rain fallback; all 51 portable checks and strict changed-Swift formatting pass. The asynchronous inventory fix passed three unit cases and the extended Recheck/reopen UI case; its final Sendable closure passed the three unit cases again. An unsigned Release simulator build and the 51-test repository gate pass. The final hosted checks, refreshed Codex review, and mergeability are live gates after this commit, recorded on PR #14 and in the local review ledger rather than claimed in advance here.
+The silent media-reset scenario failed before repair while both active-audio controls passed. After ignoring resets without initialized players, all 47 controller tests pass, including silent fallback with an independent alarm, active/paused rain and verified partial narration. User-Guide and Nap-Planning-Domain describe this boundary. Compact Island verification remains next.
 
-The follow-up preview correction passed all 13 selected tests (11 preview unit cases and two voice/active-rest UI cases), strict formatting, the unsigned Release simulator build, and all 51 portable tests. Preparation is cancellable before audio activation and cannot finish into a background or invalidated preview. The initial test compile error was corrected; no behavioral assertion or timeout was weakened. Fresh hosted checks and Codex review must run on this new commit.
+All seven layout cases pass, including OCR of complete compact minute/hour/ended values at AX5. The actual hosted three-hour case passes for both Lock Screen and compact Island pixels after a bounded wait for Home's dismissal animation. The first hosted attempt captured that transition and failed; the full painted-digit contract is retained. Final repository checks, strict formatting and whitespace validation pass. The independent Apple re-review found no remaining blocker in either follow-up fix.
+
+Codex review at 0faef18 identifies Stop playback on a player-free silent timer (4199100401). The action ends the timer, so quick timers should consistently say Stop rest and explain that the wake alarm remains separate. This changes wording only; existing silent and rain timer UI cases verify the action and independent alarm behavior.
+
+The final stop-label slice passes both existing silent/rain UI cases, including countdown removal and separate alarm cancellation. Quick timers say Stop rest regardless of sound; narrated plans retain Stop playback. All 51 repository checks, strict formatting and whitespace validation pass. Refreshed GitHub review and complete CI remain tracked in the local ledger.
+
+Codex review at 538baf4 identifies the corresponding retained-card label Playback stopped (4199212899) after silence-only rest ends while its verified future alarm remains. Use Rest stopped for all stopped rests rather than adding mode fields; the existing semantic state, countdown and independent alarm policy stay unchanged.
+
+Adjacent inspection found the same false playback claim in the timer controller's post-stop status. Include a timer-specific Rest stopped prefix there while preserving narrated status and the existing alarm note; extend the timer receipt and narrated snapshot tests. All 16 layout/coordinator checks pass on the retained-card label.
+
+All 16 layout/coordinator tests and both focused controller cases pass. The retained card says Rest stopped; in-app timer status uses the same phrase, while narrated status and independent alarm language remain intact. Strict formatting and all 51 repository checks pass. All reported Codex findings are addressed; final required GitHub CI is tracked separately.
+
+The independent bounded review confirms unchanged runtime/alarm behavior and finds the shared timer's diagnostic Stop button in Feasibility Lab still has the old label. Apply the same timer-aware Stop rest wording there and compile the app. No new test case is warranted for this duplicate copy-only control; existing production shared-run UI coverage and final CI still exercise the control behavior.
+
+## CI follow-up
+
+Final CI37515038944 exhausted the iOS job's 40-minute limit. Xcode continued emitting test-launch events through cancellation; the run produced no final assertion summary or retained result bundle. The expanded serial suite needs a larger bounded job budget. Raise only the iOS limit to 60 minutes, update the existing configuration assertion and Development documentation, run repository checks, save, and rerun full CI. Preserve all test selections/assertions, serial execution, pinned actions, read-only permissions and superseded-run cancellation. No new infrastructure or dependency is needed.
+
+- [x] Update and validate the bounded 60-minute iOS CI budget.
+- [x] Prepare the verified CI slice for saving; track exact-head CI and its terminal outcome in the local ledger.

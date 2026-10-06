@@ -15,12 +15,14 @@ private final class PlanAlarmFakeSystem: AlarmSystem {
   var failScheduling = false
   var omitScheduledRecord = false
   var wrongDeadline = false
+  var afterAuthorization: (() -> Void)?
   var afterSchedule: (() -> Void)?
   var scheduleCount = 0
   var cancelledIDs: [UUID] = []
 
   func requestAuthorization() async throws -> AlarmAuthorizationSnapshot {
     authorization = requestResult
+    afterAuthorization?()
     return authorization
   }
 
@@ -78,6 +80,75 @@ final class NapPlanAlarmServiceTests: XCTestCase {
     return try NapPlanner.makePlan(
       id: id, request: request, startingAt: base.addingTimeInterval(60), now: base,
       catalog: catalog.planningCatalog)
+  }
+
+  func testTimerAuthorizationPrecedesFixedDurationAndProducesExactReceipt() async throws {
+    let system = PlanAlarmFakeSystem()
+    system.authorization = .notDetermined
+    var current = base
+    system.afterAuthorization = { current = self.base.addingTimeInterval(40) }
+    let service = NapPlanAlarmService(system: system, defaults: defaults, now: { current })
+
+    let authorized = await service.authorize()
+    XCTAssertTrue(authorized)
+    let timer = try NapPlanner.makeTimer(
+      id: "quick", window: .duration(300), sound: .silence, alarmEnabled: true,
+      now: current, availableAmbienceIDs: [])
+    XCTAssertEqual(timer.start, base.addingTimeInterval(40))
+    XCTAssertEqual(timer.deadline, base.addingTimeInterval(340))
+    let scheduled = await service.schedule(for: timer)
+    let receipt = try XCTUnwrap(scheduled)
+    XCTAssertEqual(receipt.planID, timer.id)
+    XCTAssertEqual(receipt.deadline, timer.deadline)
+    XCTAssertTrue(service.isScheduled(receipt))
+    let duplicate = await service.schedule(for: timer)
+    XCTAssertNil(duplicate)
+    XCTAssertEqual(system.scheduleCount, 1)
+  }
+
+  func testTimerAuthorizationDenialCreatesNoAlarm() async throws {
+    let system = PlanAlarmFakeSystem()
+    system.authorization = .notDetermined
+    system.requestResult = .denied
+    let service = NapPlanAlarmService(system: system, defaults: defaults, now: { self.base })
+
+    let authorized = await service.authorize()
+    XCTAssertFalse(authorized)
+    XCTAssertFalse(service.hasTrackedAlarm)
+    XCTAssertEqual(system.scheduleCount, 0)
+  }
+
+  func testOneMinuteTimerSchedulingWithinThreeSecondsReturnsReceipt() async throws {
+    let system = PlanAlarmFakeSystem()
+    var current = base
+    let service = NapPlanAlarmService(system: system, defaults: defaults, now: { current })
+    let timer = try NapPlanner.makeTimer(
+      id: "quick", window: .duration(60), sound: .silence, alarmEnabled: true,
+      now: current, availableAmbienceIDs: [])
+    system.afterSchedule = { current = self.base.addingTimeInterval(3) }
+
+    let scheduled = await service.schedule(for: timer)
+    let receipt = try XCTUnwrap(scheduled)
+    XCTAssertEqual(receipt.deadline, timer.deadline)
+    XCTAssertTrue(service.isScheduled(receipt))
+    XCTAssertEqual(system.scheduleCount, 1)
+  }
+
+  func testOneMinuteTimerSchedulingBeyondThreeSecondsRetainsReceiptForCancellation() async throws {
+    let system = PlanAlarmFakeSystem()
+    var current = base
+    let service = NapPlanAlarmService(system: system, defaults: defaults, now: { current })
+    let timer = try NapPlanner.makeTimer(
+      id: "quick", window: .duration(60), sound: .silence, alarmEnabled: true,
+      now: current, availableAmbienceIDs: [])
+    system.afterSchedule = { current = self.base.addingTimeInterval(3.001) }
+
+    let scheduled = await service.schedule(for: timer)
+    XCTAssertNil(scheduled)
+    XCTAssertTrue(service.hasTrackedAlarm)
+    XCTAssertEqual(service.alarmStatus.phase, .unavailable)
+    XCTAssertTrue(service.cancel())
+    XCTAssertFalse(service.hasTrackedAlarm)
   }
 
   func testAuthorizationDenialBlocksSchedulingWithoutTrackingAnAlarm() async throws {

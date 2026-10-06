@@ -6,6 +6,7 @@ import WidgetKit
 @main
 struct HonkshoolAlarmWidgets: WidgetBundle {
   var body: some Widget {
+    RestCountdownActivity()
     HonkshoolAlarmActivity()
   }
 }

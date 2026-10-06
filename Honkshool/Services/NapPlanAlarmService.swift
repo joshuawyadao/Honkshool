@@ -22,6 +22,7 @@ final class NapPlanAlarmService: ObservableObject {
   private let now: () -> Date
   private let receiptKey = "napPlanAlarmReceipt"
   private var tracked: ScheduledNapAlarm?
+  private var isAuthorizing = false
 
   init(
     system: (any AlarmSystem)? = nil,
@@ -48,6 +49,9 @@ final class NapPlanAlarmService: ObservableObject {
   }
 
   var hasTrackedAlarm: Bool { tracked != nil || defaults.object(forKey: receiptKey) != nil }
+  /// Read-only identity for truthful Lock Screen presentation. Presence alone
+  /// is not proof that the system alarm is still scheduled.
+  var trackedReceipt: ScheduledNapAlarm? { tracked }
   var canCancelTrackedAlarm: Bool { tracked != nil }
   var needsCountdownReconciliation: Bool {
     hasTrackedAlarm && alarmStatus.phase == .snoozed && alarmStatus.nextAlertDate == nil
@@ -158,14 +162,37 @@ final class NapPlanAlarmService: ObservableObject {
     }
   }
 
+  /// Request permission before creating a timer so its duration starts after
+  /// the system prompt, never while the person is responding to it.
+  func authorize() async -> Bool {
+    guard !isAuthorizing, !isScheduling else { return false }
+    isAuthorizing = true
+    defer { isAuthorizing = false }
+    authorization = system.authorization
+    if authorization == .notDetermined {
+      do {
+        authorization = try await system.requestAuthorization()
+      } catch {
+        statusMessage = "Wake alarm authorization could not be completed."
+        return false
+      }
+    }
+    authorization = system.authorization
+    guard authorization == .authorized else {
+      statusMessage = "Allow Honkshool alarms in Settings before starting this timer."
+      return false
+    }
+    return true
+  }
+
   func schedule(for plan: NapPlan) async -> ScheduledNapAlarm? {
-    guard !isScheduling else { return nil }
+    guard !isScheduling, !isAuthorizing else { return nil }
     guard !hasTrackedAlarm else {
       statusMessage = "Cancel the existing Honkshool wake alarm before scheduling another."
       return nil
     }
     guard let wakeAlarm = plan.wakeAlarm, wakeAlarm == plan.deadline,
-      plan.deadline > now(), plan.start >= now()
+      canSchedule(plan, at: now())
     else {
       statusMessage = "This plan needs a future wake deadline before an alarm can be scheduled."
       return nil
@@ -188,7 +215,7 @@ final class NapPlanAlarmService: ObservableObject {
       statusMessage = "Allow Honkshool alarms in Settings before starting this plan."
       return nil
     }
-    guard plan.deadline > now(), plan.start >= now() else {
+    guard canSchedule(plan, at: now()) else {
       statusMessage = "The plan's start or wake deadline has passed. Review a new plan."
       return nil
     }
@@ -212,7 +239,7 @@ final class NapPlanAlarmService: ObservableObject {
     // Verify the exact system alarm; a successful call alone is not proof that
     // the intended future deadline is armed when playback begins.
     authorization = system.authorization
-    guard authorization == .authorized, plan.deadline > now(), plan.start >= now() else {
+    guard authorization == .authorized, canSchedule(plan, at: now()) else {
       setStatus(
         .init(phase: .unavailable),
         message:
@@ -240,6 +267,14 @@ final class NapPlanAlarmService: ObservableObject {
       .init(phase: .scheduled, nextAlertDate: receipt.deadline),
       message: "System wake alarm scheduled. Snooze lasts nine minutes.")
     return receipt
+  }
+
+  private func canSchedule(_ plan: NapPlan, at date: Date) -> Bool {
+    guard date.timeIntervalSinceReferenceDate.isFinite, plan.deadline > date else { return false }
+    if plan.isTimer {
+      return plan.canStartTimer(at: date)
+    }
+    return plan.start >= date
   }
 
   @discardableResult

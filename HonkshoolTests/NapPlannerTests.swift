@@ -5,6 +5,79 @@ import XCTest
 final class NapPlannerTests: XCTestCase {
   private let now = Date(timeIntervalSince1970: 1_000)
 
+  func testTimerHasImmediateFixedWindowWithoutNarrationOrTransitions() throws {
+    let plan = try NapPlanner.makeTimer(
+      id: "quick", window: .duration(600), sound: .ambience(id: "rain"),
+      alarmEnabled: true, now: now, availableAmbienceIDs: ["rain"])
+
+    XCTAssertTrue(plan.isTimer)
+    XCTAssertEqual(plan.start, now)
+    XCTAssertEqual(plan.deadline, now.addingTimeInterval(600))
+    XCTAssertEqual(plan.wakeAlarm, plan.deadline)
+    XCTAssertTrue(plan.route.isEmpty)
+    XCTAssertTrue(plan.transitions.isEmpty)
+    XCTAssertEqual(plan.segments.map(\.kind), [.rest(.ambience(id: "rain"))])
+    XCTAssertEqual(plan.segments.map(\.duration), [600])
+    XCTAssertEqual(plan.narrationStart, now)
+    XCTAssertEqual(plan.driftDuration, 0)
+    assertContinuous(plan)
+    XCTAssertFalse(try self.plan(request(duration: 600), catalog: catalog(durations: [10])).isTimer)
+  }
+
+  func testTimerWakeTimeAndUnavailableSoundPreserveChosenDeadline() throws {
+    let deadline = now.addingTimeInterval(90)
+    let plan = try NapPlanner.makeTimer(
+      id: "quiet", window: .wakeTime(deadline), sound: .ambience(id: "missing"),
+      alarmEnabled: false, now: now, availableAmbienceIDs: ["rain"])
+
+    XCTAssertEqual(plan.deadline, deadline)
+    XCTAssertNil(plan.wakeAlarm)
+    XCTAssertEqual(plan.fallback, .silence)
+    XCTAssertEqual(plan.segments.map(\.kind), [.rest(.silence)])
+  }
+
+  func testTimerStartAllowanceScalesWithDurationAndCapsAtFiveSeconds() throws {
+    let short = try NapPlanner.makeTimer(
+      id: "minute", window: .duration(60), sound: .silence,
+      alarmEnabled: false, now: now, availableAmbienceIDs: [])
+    XCTAssertTrue(short.canStartTimer(at: now.addingTimeInterval(3)))
+    XCTAssertFalse(short.canStartTimer(at: now.addingTimeInterval(3.001)))
+    XCTAssertFalse(short.canStartTimer(at: now.addingTimeInterval(-0.001)))
+
+    let long = try NapPlanner.makeTimer(
+      id: "five-minutes", window: .duration(300), sound: .silence,
+      alarmEnabled: false, now: now, availableAmbienceIDs: [])
+    XCTAssertTrue(long.canStartTimer(at: now.addingTimeInterval(5)))
+    XCTAssertFalse(long.canStartTimer(at: now.addingTimeInterval(5.001)))
+    XCTAssertFalse(
+      try plan(request(duration: 300), catalog: catalog(durations: [10]))
+        .canStartTimer(at: now))
+  }
+
+  func testTimerRejectsInvalidClockDurationAndWakeDeadline() {
+    let invalidDurations: [TimeInterval] = [0, -1, .nan, .infinity]
+    for duration in invalidDurations {
+      XCTAssertThrowsError(
+        try NapPlanner.makeTimer(
+          id: "quick", window: .duration(duration), sound: .silence,
+          alarmEnabled: false, now: now, availableAmbienceIDs: [])
+      ) { XCTAssertEqual($0 as? NapDomainError, .invalidDuration) }
+    }
+    for deadline in [now, now.addingTimeInterval(-1), Date(timeIntervalSince1970: .nan)] {
+      XCTAssertThrowsError(
+        try NapPlanner.makeTimer(
+          id: "quick", window: .wakeTime(deadline), sound: .silence,
+          alarmEnabled: false, now: now, availableAmbienceIDs: [])
+      ) { XCTAssertEqual($0 as? NapDomainError, .invalidDeadline) }
+    }
+    XCTAssertThrowsError(
+      try NapPlanner.makeTimer(
+        id: "quick", window: .duration(60), sound: .silence,
+        alarmEnabled: false, now: Date(timeIntervalSince1970: .nan),
+        availableAmbienceIDs: [])
+    ) { XCTAssertEqual($0 as? NapDomainError, .invalidDeadline) }
+  }
+
   func testExactFitIncludesSettlingNarrationAndDriftWithFixedAlarm() throws {
     let catalog = try catalog(durations: [10, 15])
     var request = request(duration: 35)

@@ -16,7 +16,7 @@ The repository includes [Config/Local.xcconfig.example](../Config/Local.xcconfig
 | [`Honkshool/Domain/`](../Honkshool/Domain/) | Nap planning, playback, content, and spike state rules. |
 | [`Honkshool/Services/`](../Honkshool/Services/) | Alarm, audio, ambience, run control, and local history adapters. |
 | [`Honkshool/Content/`](../Honkshool/Content/) and [`Honkshool/Resources/`](../Honkshool/Resources/) | Prepared catalog definitions, bundled audio, and provenance. |
-| [`Honkshool/Shared/`](../Honkshool/Shared/) and [`HonkshoolAlarmWidget/`](../HonkshoolAlarmWidget/) | Alarm metadata shared with the Lock Screen widget and the widget UI. |
+| [`Honkshool/Shared/`](../Honkshool/Shared/) and [`HonkshoolAlarmWidget/`](../HonkshoolAlarmWidget/) | Narrow alarm metadata and rest timing attributes shared with the two Lock Screen Live Activities. |
 | [`HonkshoolTests/`](../HonkshoolTests/) and [`HonkshoolUITests/`](../HonkshoolUITests/) | Swift unit, service, layout, and UI tests. |
 | [`tests/`](../tests/) | Portable Python publication and audio-asset checks. |
 | [`scripts/`](../scripts/) | Verification, simulator tests, and offline preparation tools. |
@@ -76,11 +76,23 @@ Routine UI tests use launch-time fixtures compiled only for Debug builds. They s
 
 Physical-device cases are separately gated and skipped in ordinary simulator runs. The test files use `HONKSHOOL_REAL_RAIN_TEST`, `HONKSHOOL_REAL_NAP_PLAN_ALARM_TEST`, and `HONKSHOOL_REAL_ALARM_TEST` as opt-in environment flags; Xcode passes them to its test runner with a `TEST_RUNNER_` prefix. Run them only on a connected, signed iPhone with the required alarm authorization. Follow the exact commands and acceptance notes in [Feasibility Spike](Feasibility-Spike.md#minimal-physical-device-acceptance) and its [production rain section](Feasibility-Spike.md#production-gentle-rain-acceptance-on-the-target-iphone). A passing simulator run does not establish audible quality, headphone disconnection behavior, or Lock Screen control behavior on hardware.
 
+### System-hosted countdown regression
+
+`ImageRenderer` layout tests do not exercise WidgetKit archiving. The timer text in the Lock Screen card uses an explicit, scaled width because widget timer text is horizontally flexible; requesting intrinsic size with `fixedSize()` can leave the hosted content unpainted even when its accessibility labels exist.
+
+Run `RestLiveActivityUITests` only on an isolated simulator, with `TEST_RUNNER_HONKSHOOL_HOSTED_ACTIVITY_TEST=1` and `-only-testing:HonkshoolUITests/RestLiveActivityUITests` in the normal Xcode test command. The case launches the ordinary app, starts a silent rest with the alarm off, opens Notification Center, and verifies both the hosted labels and actual screenshot text. Its teardown stops any remaining rest, including after an assertion failure. Use a disposable simulator because this test exercises that simulator's ordinary preferences and system Live Activities authorization. It is skipped without the opt-in and always skipped on physical devices. Set `-collect-test-diagnostics never` for a quick local diagnostic loop; retain its `.xcresult` evidence locally.
+
+The Rest Lock Screen card bounds its timer width and caps visual Dynamic Type at accessibility1 to preserve all content within the system's 160-point height. The in-app Rest countdown remains uncapped, and the card retains full VoiceOver labels. `RestCountdownLayoutTests` covers all five accessibility settings, three-hour timing, the longest state labels, and cross-day locale/time-zone variants at the narrow host width. On a disposable simulator, also run the hosted pixel test after `xcrun simctl ui <simulator-id> content_size accessibility-extra-extra-extra-large`; a proposed renderer width alone does not prove that hosted text painted without clipping.
+
+The compact Dynamic Island trailing slot is narrower than the Lock Screen card. `RestCompactCountdownTimer` uses the same native ticking interval with an 11-point system font, monospaced digits, and a trailing-aligned 52-point single line. This visual constraint applies only to the compact Island; expanded Island and in-app timers keep their own sizing. The layout test renders the compact timer at accessibility5 for minute, hour, expired, and long exact-time values. The isolated hosted test selects a three-hour silent rest, checks Lock Screen pixels, then checks Home Screen Island pixels separately from the status clock.
+
 ### CI
 
 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) defines the **Repository Verify** workflow with two jobs: **Repository Verify** on Ubuntu runs `./scripts/verify-repository.sh`, and **iOS Unit and UI Tests** on macOS runs `./scripts/test-ios.sh` with failure diagnostics enabled. Both jobs run for non-draft pull requests and manual `workflow_dispatch` runs. Draft pull requests skip both jobs; marking one ready for review starts them. Physical-device opt-in tests are not CI acceptance evidence.
 
-Failed CI runs retain the simulator `.xcresult` bundle as an Actions artifact for seven days. Download it from the failed run to inspect assertion locations, UI activity, and screenshots in Xcode. The test script publishes its fresh result directory through the standard `GITHUB_OUTPUT` file when available. Artifacts contain synthetic simulator test data; do not upload personal-device result bundles. Feasibility label failures report the expected and observed label at the original assertion call site; timeouts and behavioral expectations remain unchanged.
+The serial iOS suite has a bounded 60-minute CI budget to accommodate its unit and UI coverage on hosted runners; repository verification retains its five-minute limit. A 2026-10-06 run continued launching tests until cancellation at the earlier 40-minute limit, so that cancelled run is inconclusive. Assertions and test selections are unchanged.
+
+Failed CI runs retain the simulator `.xcresult` bundle as an Actions artifact for seven days. Download it from the failed run to inspect assertion locations, UI activity, and screenshots in Xcode. The test script publishes its fresh result directory through the standard `GITHUB_OUTPUT` file when available. Whole-job time-limit cancellation can skip artifact upload and leave no final summary. Artifacts contain synthetic simulator test data; do not upload personal-device result bundles. Feasibility label failures report the expected and observed label at the original assertion call site; their individual timeouts and behavioral expectations remain unchanged.
 
 ## Offline audio tools
 

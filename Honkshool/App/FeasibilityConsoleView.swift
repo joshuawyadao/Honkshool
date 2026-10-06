@@ -6,7 +6,8 @@ struct FeasibilityConsoleView: View {
   @StateObject private var audio = AudioSpikeController()
   @StateObject private var alarm = AlarmSpikeService()
   @StateObject private var napRun: NapRunController
-  @StateObject private var napAlarm = NapPlanAlarmService()
+  @StateObject private var napAlarm: NapPlanAlarmService
+  @StateObject private var restActivity: RestActivityCoordinator
   @StateObject private var historyStore: ListeningHistoryStore
 
   init() {
@@ -15,8 +16,12 @@ struct FeasibilityConsoleView: View {
     #else
       let store = ListeningHistoryStore()
     #endif
+    let run = NapRunController(history: store)
+    let napAlarm = NapPlanAlarmService()
     _historyStore = StateObject(wrappedValue: store)
-    _napRun = StateObject(wrappedValue: NapRunController(history: store))
+    _napRun = StateObject(wrappedValue: run)
+    _napAlarm = StateObject(wrappedValue: napAlarm)
+    _restActivity = StateObject(wrappedValue: RestActivityCoordinator(run: run, alarm: napAlarm))
   }
 
   @AppStorage("preferredRestMinutes", store: SpikePreferences.defaults)
@@ -84,6 +89,7 @@ struct FeasibilityConsoleView: View {
       guard scenePhase == .active else { return }
       alarm.refresh()
       napAlarm.refresh()
+      restActivity.reconcile()
     }
     .onChange(of: scenePhase) { _, next in
       napRun.scenePhaseChanged(isActive: next == .active)
@@ -100,6 +106,7 @@ struct FeasibilityConsoleView: View {
       napRun.scenePhaseChanged(isActive: scenePhase == .active)
       alarm.refresh()
       napAlarm.refresh()
+      restActivity.reconcile()
       if !evaluatedWelcome {
         evaluatedWelcome = true
         #if DEBUG
@@ -142,7 +149,7 @@ struct FeasibilityConsoleView: View {
             settingsRow("Rest defaults", value: "\(settingsDefaults.durationMinutes) min")
           }.accessibilityIdentifier("openRestDefaults")
           LabeledContent(
-            "After narration",
+            "Rest sound",
             value: settingsDefaults.soundID.map(PreparedAmbience.displayName) ?? "Silence"
           )
           .accessibilityIdentifier("settingsRestSound")
@@ -153,7 +160,7 @@ struct FeasibilityConsoleView: View {
           )
           .font(.subheadline).foregroundStyle(RestStyle.secondary)
           Text(
-            "Every rest is reviewed before it starts. Changes here apply to your next unreviewed plan."
+            "Changes here apply to your next timer or unreviewed narrated plan."
           )
           .font(.footnote).foregroundStyle(RestStyle.secondary)
         }
@@ -270,9 +277,11 @@ struct FeasibilityConsoleView: View {
         Text("Room to rest.\nA thought to follow.")
           .font(.system(.largeTitle, design: .rounded).weight(.medium))
           .foregroundStyle(RestStyle.ink)
-        Text("Gentle narration for a little downtime. Pick something to hear, then settle in.")
-          .font(.body)
-          .foregroundStyle(RestStyle.secondary)
+        Text(
+          "Set a nap timer with gentle rain or silence. Add a narrated session when you want a thought to follow."
+        )
+        .font(.body)
+        .foregroundStyle(RestStyle.secondary)
         Spacer()
         Button("Choose your first rest") {
           hasSeenQuietWelcome = true
@@ -375,6 +384,7 @@ struct FeasibilityConsoleView: View {
       NapPlanReviewView(
         run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
         isHome: isHome, onShowHistory: showHistory,
+        lockScreenTimerMessage: restActivity.availabilityMessage,
         canStart: {
           (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
             && !alarm.hasTrackedAlarm
@@ -387,6 +397,7 @@ struct FeasibilityConsoleView: View {
       NapPlanReviewView(
         run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
         isHome: isHome, onShowHistory: showHistory,
+        lockScreenTimerMessage: restActivity.availabilityMessage,
         canStart: {
           (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
             && !alarm.hasTrackedAlarm
@@ -408,8 +419,11 @@ struct FeasibilityConsoleView: View {
               .accessibilityIdentifier("parentResumeNapRun")
           }
           if napRun.hasActiveRun {
-            Button("Stop playback", role: .destructive) { napRun.stop() }
-              .accessibilityIdentifier("parentStopNapRun")
+            Button(
+              napRun.presentationPlan?.isTimer == true ? "Stop rest" : "Stop playback",
+              role: .destructive
+            ) { napRun.stop() }
+            .accessibilityIdentifier("parentStopNapRun")
           }
         }
         if !napRun.records.isEmpty {

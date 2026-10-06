@@ -77,6 +77,7 @@ private final class RunFakePlayer: NapRunAudioPlaying {
 @MainActor
 private final class RunFakeAmbience: NapAmbiencePlaying {
   var onFailure: ((String) -> Void)?
+  var onPrepare: (() -> Void)?
   var onPlay: (() -> Void)?
   var prepares = true
   var starts = true
@@ -87,6 +88,7 @@ private final class RunFakeAmbience: NapAmbiencePlaying {
 
   func prepareToPlay() -> Bool {
     prepareCount += 1
+    onPrepare?()
     return prepares
   }
   func play() -> Bool {
@@ -109,6 +111,16 @@ private final class RunHistoryRecorder: NapHistoryRecording {
 
 @MainActor
 final class NapRunControllerTests: XCTestCase {
+  private func timer(
+    now: Date, duration: TimeInterval = 120, sound: RestSound = .silence,
+    alarm: Bool = false
+  ) throws -> NapPlan {
+    try NapPlanner.makeTimer(
+      id: UUID().uuidString, window: .duration(duration), sound: sound,
+      alarmEnabled: alarm, now: now,
+      availableAmbienceIDs: [PreparedAmbience.gentleRainID])
+  }
+
   private func review(
     catalog: PreparedCatalog, now: Date, duration: TimeInterval = 1_200,
     alarm: Bool = false, selection: SessionSelection? = nil,
@@ -175,6 +187,320 @@ final class NapRunControllerTests: XCTestCase {
     return try PreparedCatalog(data: JSONSerialization.data(withJSONObject: document))
   }
 
+  func testTimerStartsRainImmediatelyAndStopsAtFixedDeadlineWithoutHistory() throws {
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let rain = RunFakeAmbience()
+    let narration = RunFakePlayer()
+    let history = RunHistoryRecorder()
+    let run = controller(
+      clock: clock, scheduler: scheduler, player: narration,
+      history: history, ambience: rain)
+    let plan = try timer(
+      now: clock.now, sound: .ambience(id: PreparedAmbience.gentleRainID))
+
+    try run.startTimer(plan: plan)
+    XCTAssertEqual(run.phase, .ambience)
+    XCTAssertEqual(rain.playCount, 1)
+    XCTAssertEqual(narration.playCount, 0)
+    XCTAssertTrue(run.records.isEmpty)
+    XCTAssertTrue(history.saved.isEmpty)
+    run.scenePhaseChanged(isActive: false)
+    XCTAssertEqual(run.phase, .ambience)
+    scheduler.advance(to: plan.deadline)
+    XCTAssertEqual(run.phase, .finished)
+    XCTAssertGreaterThan(rain.stopCount, 0)
+    XCTAssertTrue(history.saved.isEmpty)
+    XCTAssertEqual(run.presentationPlan?.deadline, plan.deadline)
+  }
+
+  func testTimerUsesSilenceImmediatelyAndRejectsDuplicateStart() throws {
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let run = controller(clock: clock, scheduler: scheduler, player: RunFakePlayer())
+    let plan = try timer(now: clock.now)
+
+    try run.startTimer(plan: plan)
+    XCTAssertEqual(run.phase, .resting)
+    XCTAssertFalse(run.statusMessage.contains("Keep Honkshool open"))
+    XCTAssertThrowsError(try run.startTimer(plan: plan)) {
+      XCTAssertEqual($0 as? NapRunError, .alreadyRunning)
+    }
+    scheduler.advance(to: plan.deadline)
+    XCTAssertEqual(run.phase, .finished)
+    XCTAssertTrue(run.records.isEmpty)
+  }
+
+  func testTimerStartWindowAndAlarmReceiptAreStrict() throws {
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let run = controller(clock: clock, scheduler: scheduler, player: RunFakePlayer())
+    let plan = try timer(now: clock.now, alarm: true)
+    let wrong = ScheduledNapAlarm(
+      planID: "different", id: UUID(), deadline: try XCTUnwrap(plan.wakeAlarm))
+    XCTAssertThrowsError(try run.startTimer(plan: plan, scheduledAlarm: wrong)) {
+      XCTAssertEqual($0 as? NapRunError, .alarmUnavailable)
+    }
+    XCTAssertThrowsError(try run.startTimer(plan: plan)) {
+      XCTAssertEqual($0 as? NapRunError, .alarmUnavailable)
+    }
+    let receipt = ScheduledNapAlarm(
+      planID: plan.id, id: UUID(), deadline: try XCTUnwrap(plan.wakeAlarm))
+    clock.now = plan.start.addingTimeInterval(5)
+    try run.startTimer(plan: plan, scheduledAlarm: receipt)
+    XCTAssertEqual(run.phase, .resting)
+    XCTAssertEqual(run.presentationPlan?.deadline, plan.deadline)
+    run.stop()
+    XCTAssertTrue(run.statusMessage.hasPrefix("Rest stopped."))
+    XCTAssertTrue(run.statusMessage.contains("wake alarm was not cancelled"))
+
+    let late = try timer(now: clock.now)
+    clock.now = late.start.addingTimeInterval(5.001)
+    XCTAssertThrowsError(try run.startTimer(plan: late)) {
+      XCTAssertEqual($0 as? NapRunError, .staleStart)
+    }
+  }
+
+  func testMediaResetPreservesAdmittedSilentTimersAndTheirDeadline() async throws {
+    for failedRain in [false, true] {
+      let clock = RunTestClock()
+      let scheduler = RunTestScheduler(clock: clock)
+      let rain = RunFakeAmbience()
+      rain.prepares = false
+      let narration = RunFakePlayer()
+      let history = RunHistoryRecorder()
+      let run = controller(
+        clock: clock, scheduler: scheduler, player: narration,
+        observeSystemEvents: true, history: history, ambience: rain)
+      let plan = try timer(
+        now: clock.now,
+        sound: failedRain ? .ambience(id: PreparedAmbience.gentleRainID) : .silence,
+        alarm: true)
+      let receipt = ScheduledNapAlarm(
+        planID: plan.id, id: UUID(), deadline: try XCTUnwrap(plan.wakeAlarm))
+      try run.startTimer(plan: plan, scheduledAlarm: receipt)
+      scheduler.advance(to: plan.start.addingTimeInterval(5))
+      run.scenePhaseChanged(isActive: false)
+
+      NotificationCenter.default.post(
+        name: AVAudioSession.mediaServicesWereResetNotification, object: nil)
+      try await Task.sleep(for: .milliseconds(50))
+
+      XCTAssertEqual(run.phase, .resting, "Silent rest does not depend on media services")
+      XCTAssertTrue(run.hasPassedPlaybackAdmission)
+      XCTAssertEqual(run.presentationPlan?.deadline, plan.deadline)
+      XCTAssertEqual(narration.playCount, 0)
+      XCTAssertEqual(rain.playCount, 0)
+      scheduler.advance(to: plan.deadline)
+      XCTAssertEqual(run.phase, .finished)
+      XCTAssertTrue(run.statusMessage.contains("wake alarm was scheduled separately"))
+      XCTAssertTrue(history.saved.isEmpty)
+    }
+  }
+
+  func testMediaResetStillEndsActiveAndPausedRain() async throws {
+    for paused in [false, true] {
+      let clock = RunTestClock()
+      let scheduler = RunTestScheduler(clock: clock)
+      let rain = RunFakeAmbience()
+      let run = controller(
+        clock: clock, scheduler: scheduler, player: RunFakePlayer(),
+        observeSystemEvents: true, ambience: rain)
+      let plan = try timer(
+        now: clock.now, sound: .ambience(id: PreparedAmbience.gentleRainID))
+      try run.startTimer(plan: plan)
+      if paused { run.pause() }
+
+      NotificationCenter.default.post(
+        name: AVAudioSession.mediaServicesWereResetNotification, object: nil)
+      try await Task.sleep(for: .milliseconds(50))
+
+      XCTAssertEqual(run.phase, .failed)
+      XCTAssertFalse(run.hasActiveRun)
+      XCTAssertTrue(run.statusMessage.contains("Audio services reset"))
+      XCTAssertGreaterThan(rain.stopCount, 0)
+      XCTAssertEqual(rain.playCount, 1, "No automatic restart after reset")
+    }
+  }
+
+  func testMediaResetStillEndsNarrationAndRecordsVerifiedPartialPlayback() async throws {
+    let catalog = try PreparedCatalog.load()
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let narration = RunFakePlayer()
+    let history = RunHistoryRecorder()
+    let run = controller(
+      clock: clock, scheduler: scheduler, player: narration,
+      observeSystemEvents: true, history: history)
+    let approved = try review(catalog: catalog, now: clock.now)
+    try run.start(review: approved, catalog: catalog)
+    scheduler.advance(to: approved.plan.start)
+    clock.now = approved.plan.start.addingTimeInterval(5)
+    narration.currentTime = 5
+
+    NotificationCenter.default.post(
+      name: AVAudioSession.mediaServicesWereResetNotification, object: nil)
+    try await Task.sleep(for: .milliseconds(50))
+
+    XCTAssertEqual(run.phase, .failed)
+    XCTAssertEqual(run.records.count, 1)
+    XCTAssertEqual(run.records.first?.playedDuration, 5)
+    XCTAssertGreaterThan(narration.stopCount, 0)
+    XCTAssertEqual(narration.playCount, 1)
+    XCTAssertFalse(history.saved.isEmpty)
+  }
+
+  func testTimerRainPreparationCrossingStartWindowDoesNotPlay() throws {
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let rain = RunFakeAmbience()
+    let history = RunHistoryRecorder()
+    let plan = try timer(
+      now: clock.now, sound: .ambience(id: PreparedAmbience.gentleRainID))
+    let run = NapRunController(
+      playerFactory: { _ in RunFakePlayer() },
+      ambienceFactory: { _ in
+        clock.now = plan.start.addingTimeInterval(5.001)
+        return rain
+      },
+      resolveAmbience: { _ in URL(fileURLWithPath: "/tmp/rain.wav") },
+      clock: { clock.now },
+      scheduler: { delay, action in scheduler.schedule(after: delay, action: action) },
+      activateAudioSession: {}, deactivateAudioSession: {},
+      observeSystemEvents: false, manageRemoteCommands: false, history: history)
+
+    try run.startTimer(plan: plan)
+    XCTAssertEqual(run.phase, .failed)
+    XCTAssertEqual(rain.playCount, 0)
+    XCTAssertTrue(run.records.isEmpty)
+    XCTAssertTrue(history.saved.isEmpty)
+  }
+
+  private enum TimerRainSetupFailure: String, CaseIterable {
+    case preparation, factory, activation, play
+  }
+
+  private func timerAfterRainSetupFailure(
+    _ failure: TimerRainSetupFailure, elapsed: TimeInterval
+  ) throws -> (run: NapRunController, plan: NapPlan, history: RunHistoryRecorder) {
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let rain = RunFakeAmbience()
+    let history = RunHistoryRecorder()
+    let plan = try timer(
+      now: clock.now, duration: 60,
+      sound: .ambience(id: PreparedAmbience.gentleRainID), alarm: true)
+    let failAtSelectedTime = { clock.now = plan.start.addingTimeInterval(elapsed) }
+    rain.prepares = failure != .preparation
+    rain.starts = failure != .play
+    if failure == .preparation { rain.onPrepare = failAtSelectedTime }
+    if failure == .play { rain.onPlay = failAtSelectedTime }
+    let run = controller(
+      clock: clock, scheduler: scheduler, player: RunFakePlayer(),
+      activation: {
+        if failure == .activation {
+          failAtSelectedTime()
+          throw NapRunError.audioUnavailable
+        }
+      }, history: history,
+      ambienceFactory: { _ in
+        if failure == .factory {
+          failAtSelectedTime()
+          throw NapRunError.audioUnavailable
+        }
+        return rain
+      })
+    let receipt = ScheduledNapAlarm(
+      planID: plan.id, id: UUID(), deadline: try XCTUnwrap(plan.wakeAlarm))
+    try run.startTimer(plan: plan, scheduledAlarm: receipt)
+    return (run, plan, history)
+  }
+
+  func testFailedTimerRainSetupPastStartLimitNeverAdmitsSilentRest() throws {
+    for failure in TimerRainSetupFailure.allCases {
+      let (run, plan, history) = try timerAfterRainSetupFailure(failure, elapsed: 3.001)
+      XCTAssertEqual(run.phase, .failed, failure.rawValue)
+      XCTAssertFalse(run.hasPassedPlaybackAdmission, failure.rawValue)
+      XCTAssertTrue(run.statusMessage.contains("took too long"), run.statusMessage)
+      XCTAssertEqual(run.presentationPlan?.deadline, plan.deadline, failure.rawValue)
+      XCTAssertTrue(history.saved.isEmpty, failure.rawValue)
+    }
+  }
+
+  func testFailedTimerRainSetupAtStartLimitStillAdmitsSilentRest() throws {
+    for failure in TimerRainSetupFailure.allCases {
+      let (run, plan, history) = try timerAfterRainSetupFailure(failure, elapsed: 3)
+      XCTAssertEqual(run.phase, .resting, failure.rawValue)
+      XCTAssertTrue(run.hasPassedPlaybackAdmission, failure.rawValue)
+      XCTAssertEqual(run.presentationPlan?.deadline, plan.deadline, failure.rawValue)
+      XCTAssertTrue(history.saved.isEmpty, failure.rawValue)
+      run.stop()
+    }
+  }
+
+  func testAdmittedTimerRainFailureAfterStartLimitKeepsSilentRestAndDeadline() throws {
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let rain = RunFakeAmbience()
+    let history = RunHistoryRecorder()
+    let run = controller(
+      clock: clock, scheduler: scheduler, player: RunFakePlayer(),
+      history: history, ambience: rain)
+    let plan = try timer(
+      now: clock.now, duration: 60, sound: .ambience(id: PreparedAmbience.gentleRainID))
+    try run.startTimer(plan: plan)
+    scheduler.advance(to: plan.start.addingTimeInterval(4))
+    rain.fail()
+    XCTAssertEqual(run.phase, .resting)
+    XCTAssertTrue(run.hasPassedPlaybackAdmission)
+    XCTAssertEqual(run.presentationPlan?.deadline, plan.deadline)
+    scheduler.advance(to: plan.deadline)
+    XCTAssertEqual(run.phase, .finished)
+    XCTAssertTrue(history.saved.isEmpty)
+  }
+
+  func testTimerCannotStartInBackgroundOrFromNarratedPlan() throws {
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let narration = RunFakePlayer()
+    let rain = RunFakeAmbience()
+    let run = controller(
+      clock: clock, scheduler: scheduler, player: narration, ambience: rain)
+    let plan = try timer(
+      now: clock.now, sound: .ambience(id: PreparedAmbience.gentleRainID))
+    run.scenePhaseChanged(isActive: false)
+    XCTAssertThrowsError(try run.startTimer(plan: plan)) {
+      XCTAssertEqual($0 as? NapRunError, .audioUnavailable)
+    }
+    XCTAssertEqual(rain.playCount, 0)
+    run.scenePhaseChanged(isActive: true)
+    let catalog = try PreparedCatalog.load()
+    let narrated = try review(catalog: catalog, now: clock.now)
+    XCTAssertThrowsError(try run.startTimer(plan: narrated.plan)) {
+      XCTAssertEqual($0 as? NapRunError, .invalidTimerPlan)
+    }
+    XCTAssertEqual(narration.playCount, 0)
+  }
+
+  func testTimerRainPlayCrossingDeadlineStopsWithoutHistory() throws {
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let rain = RunFakeAmbience()
+    let history = RunHistoryRecorder()
+    let run = controller(
+      clock: clock, scheduler: scheduler, player: RunFakePlayer(),
+      history: history, ambience: rain)
+    let plan = try timer(
+      now: clock.now, sound: .ambience(id: PreparedAmbience.gentleRainID))
+    rain.onPlay = { clock.now = plan.deadline }
+
+    try run.startTimer(plan: plan)
+    XCTAssertEqual(run.phase, .finished)
+    XCTAssertGreaterThan(rain.stopCount, 0)
+    XCTAssertTrue(run.records.isEmpty)
+    XCTAssertTrue(history.saved.isEmpty)
+  }
+
   func testPresentationSnapshotSurvivesStopAndResetDoesNotRestartPlayback() throws {
     let catalog = try PreparedCatalog.load()
     let clock = RunTestClock()
@@ -189,6 +515,7 @@ final class NapRunControllerTests: XCTestCase {
     XCTAssertEqual(run.currentNarrationTitle, approved.plan.route.first?.session.title)
     run.stop()
     XCTAssertEqual(run.presentationPlan?.deadline, approved.plan.deadline)
+    XCTAssertTrue(run.statusMessage.hasPrefix("Playback stopped."))
     XCTAssertNil(run.currentNarrationTitle)
     let playCount = player.playCount
     run.resetPresentation()

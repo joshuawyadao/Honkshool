@@ -13,6 +13,7 @@ This describes the current source implementation, not a promise about a future r
 | Preferred feasibility rest duration | Local app preferences, reused by the console |
 | Nap Plan alarm ID, plan ID, and deadline | Local preferences, so the app can reconcile a system alarm after reopening |
 | Separate feasibility test-alarm ID and original date | Local preferences; kept distinct from Nap Plan alarms. Current state is reconciled from iOS |
+| Rest countdown timing and state | ActivityKit on the device; contains plan identity, start/deadline, rest mode and alarm state, without session titles or listening history |
 | Scheduled alarm | Managed by iOS AlarmKit after authorization; remains separate from the audio run |
 | Feasibility diagnostic events | In-memory controller events shown in the app; any screenshots or externally captured logs can still contain sensitive details |
 
@@ -22,7 +23,7 @@ The history configuration explicitly disables CloudKit. Honkshool does not uploa
 
 An alarm-enabled **Start resting** requests AlarmKit authorization when needed. Denial or failed scheduling blocks that alarm-enabled plan. The app includes an explanation in its `NSAlarmKitUsageDescription`; Apple documents the [alarm permission requirement](https://developer.apple.com/documentation/bundleresources/information-property-list/nsalarmkitusagedescription).
 
-Background audio and Lock Screen media controls use iOS media services. There is no microphone permission request in this implementation. Account credentials used by Xcode to sign a development build are development setup, not a Honkshool sign-in.
+Background audio and Lock Screen media controls use iOS media services. The rest countdown is system-hosted through ActivityKit, without push updates or a server; iPhone Live Activity settings control availability. There is no microphone permission request in this implementation. Account credentials used by Xcode to sign a development build are development setup, not a Honkshool sign-in.
 
 ## Retention, removal, and reset limits
 

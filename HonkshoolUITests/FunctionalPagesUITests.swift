@@ -5,10 +5,11 @@ final class FunctionalPagesUITests: XCTestCase {
 
   func testTimeAndSoundDraftsCancelWithoutChangingThePlan() {
     let app = launch()
+    openNarratedPlan(in: app)
     XCTAssertTrue(app.switches["napPlanAlarm"].isHittable)
     XCTAssertLessThan(
       app.switches["napPlanAlarm"].frame.maxY, app.buttons["reviewNapPlan"].frame.minY)
-    capture("Rest home")
+    capture("Narrated rest choices")
     app.buttons["napPlanTimeOptions"].tap()
     app.buttons["napTimePreset-60"].tap()
     capture("Time to rest")
@@ -34,6 +35,7 @@ final class FunctionalPagesUITests: XCTestCase {
     app.tabBars.buttons["History"].tap()
     app.tabBars.buttons["Rest"].tap()
     XCTAssertFalse(app.buttons["acknowledgeRecoveredRest"].exists)
+    openNarratedPlan(in: app)
     tap("napPlanContent", in: app)
     capture("Choose a session")
     tap("sessionDetails-turning-fuel-into-motion", in: app)
@@ -58,17 +60,46 @@ final class FunctionalPagesUITests: XCTestCase {
     tap("defaultRestSound", in: app)
     app.buttons["Gentle rain"].tap()
     let alarm = app.switches["defaultRestAlarm"]
-    scrollTo(alarm, in: app)
-    alarm.tap()
+    let nativeAlarm = alarm.switches.firstMatch.exists ? alarm.switches.firstMatch : alarm
+    scrollTo(nativeAlarm, in: app)
+    XCTAssertEqual(alarm.value as? String, "1")
+    nativeAlarm.tap()
+    XCTAssertEqual(alarm.value as? String, "0")
     capture("Rest defaults")
     tap("saveRestDefaults", in: app)
     app.terminate()
     app = launch(reset: false)
+    let rain = app.buttons["timerRain"]
+    scrollTo(rain, in: app)
+    XCTAssertTrue(rain.isSelected, "Saved Rest sound also seeds the quick timer")
+    openNarratedPlan(in: app)
     tap("reviewNapPlan", in: app)
     XCTAssertEqual(
       app.staticTexts["napPlanPostNarrationSound"].label, "After narration, Gentle rain")
     XCTAssertEqual(app.staticTexts["napPlanAlarmChoice"].label, "Wake alarm, Not requested")
     XCTAssertTrue(app.descendants(matching: .any)["napPlanRouteItem-1"].exists)
+  }
+
+  func testCustomRestDefaultWheelPersistsOneMinute() {
+    var app = launch()
+    tap("openSettings", in: app)
+    tap("openRestDefaults", in: app)
+    let minutes = app.pickers["defaultRestDurationMinutes"].pickerWheels.firstMatch
+    scrollTo(minutes, in: app)
+    minutes.adjust(toPickerWheelValue: "1")
+    XCTAssertEqual(
+      app.pickers["defaultRestDurationHours"].pickerWheels.firstMatch.value as? String, "0")
+    XCTAssertEqual(minutes.value as? String, "1")
+    tap("saveRestDefaults", in: app)
+    app.terminate()
+
+    app = launch(reset: false)
+    tap("openSettings", in: app)
+    tap("openRestDefaults", in: app)
+    XCTAssertEqual(
+      app.pickers["defaultRestDurationHours"].pickerWheels.firstMatch.value as? String, "0")
+    XCTAssertEqual(
+      app.pickers["defaultRestDurationMinutes"].pickerWheels.firstMatch.value as? String, "1")
   }
 
   func testSettingsSoundSummaryMatchesAvailablePlanDefault() {
@@ -78,13 +109,14 @@ final class FunctionalPagesUITests: XCTestCase {
     tap("defaultRestSound", in: app)
     app.buttons["Gentle rain"].tap()
     tap("saveRestDefaults", in: app)
-    XCTAssertEqual(app.staticTexts["settingsRestSound"].label, "After narration, Gentle rain")
+    XCTAssertEqual(app.staticTexts["settingsRestSound"].label, "Rest sound, Gentle rain")
     app.terminate()
 
     app = launch(reset: false, environment: ["HONKSHOOL_UI_TEST_PLAN_RAIN_UNAVAILABLE": "1"])
     tap("openSettings", in: app)
-    XCTAssertEqual(app.staticTexts["settingsRestSound"].label, "After narration, Silence")
+    XCTAssertEqual(app.staticTexts["settingsRestSound"].label, "Rest sound, Silence")
     app.navigationBars.buttons.firstMatch.tap()
+    openNarratedPlan(in: app)
     tap("reviewNapPlan", in: app)
     XCTAssertEqual(app.staticTexts["napPlanPostNarrationSound"].label, "After narration, Silence")
   }
@@ -145,6 +177,7 @@ final class FunctionalPagesUITests: XCTestCase {
 
   func testFirstAlarmExplainsAccessBeforeScheduling() {
     let app = launch(environment: ["HONKSHOOL_UI_TEST_ALARM": "not-determined"])
+    openNarratedPlan(in: app)
     tap("reviewNapPlan", in: app)
     tap("confirmNapPlan", in: app)
     XCTAssertTrue(app.buttons["startNapRun"].isHittable)
@@ -163,11 +196,15 @@ final class FunctionalPagesUITests: XCTestCase {
     XCTAssertFalse(app.buttons["reviewNapPlan"].exists)
     capture("Existing wake alarm")
     tap("cancelNapPlanAlarm", in: app)
+    XCTAssertTrue(app.buttons["startRestTimer"].waitForExistence(timeout: 5))
+    XCTAssertFalse(app.buttons["reviewNapPlan"].exists)
+    openNarratedPlan(in: app)
     XCTAssertTrue(app.buttons["reviewNapPlan"].waitForExistence(timeout: 5))
   }
 
   func testLibraryAndVoicePreviewRespectAnActiveRest() {
     let app = launch()
+    openNarratedPlan(in: app)
     tap("reviewNapPlan", in: app)
     tap("confirmNapPlan", in: app)
     tap("startNapRun", in: app)
@@ -209,11 +246,18 @@ final class FunctionalPagesUITests: XCTestCase {
     button.tap()
   }
 
+  private func openNarratedPlan(in app: XCUIApplication) {
+    tap("planNarratedRest", in: app)
+    XCTAssertTrue(app.buttons["reviewNapPlan"].waitForExistence(timeout: 5))
+  }
+
   private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {
     func reachable() -> Bool {
       guard element.isHittable else { return false }
-      let footer = app.buttons["reviewNapPlan"]
-      return !footer.isHittable || element.identifier == "reviewNapPlan"
+      let review = app.buttons["reviewNapPlan"]
+      let timerStart = app.buttons["startRestTimer"]
+      let footer = review.exists && review.isHittable ? review : timerStart
+      return !footer.isHittable || element.identifier == footer.identifier
         || element.frame.maxY < footer.frame.minY
     }
     for _ in 0..<10 {

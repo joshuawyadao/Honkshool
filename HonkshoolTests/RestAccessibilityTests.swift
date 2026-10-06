@@ -5,6 +5,52 @@ import XCTest
 @testable import Honkshool
 
 final class RestAccessibilityTests: XCTestCase {
+  func testActiveRestTimerRequiresAdmissionAndExpiresAtFixedDeadline() {
+    let deadline = Date(timeIntervalSince1970: 1_000)
+    let before = deadline.addingTimeInterval(-1)
+    for phase in [NapRunPhase.waiting, .narrating, .ambience, .resting, .paused, .interrupted] {
+      let pending = ActiveRestTimerPresentation(
+        phase: phase, admitted: false, deadline: deadline, now: before)
+      XCTAssertEqual(pending.state, .hidden)
+      XCTAssertFalse(pending.showsRemainingTime)
+    }
+    for phase in [NapRunPhase.narrating, .ambience, .resting] {
+      let running = ActiveRestTimerPresentation(
+        phase: phase, admitted: true, deadline: deadline, now: before)
+      XCTAssertEqual(running.state, .running)
+      XCTAssertTrue(running.showsRemainingTime)
+      let expired = ActiveRestTimerPresentation(
+        phase: phase, admitted: true, deadline: deadline, now: deadline)
+      XCTAssertEqual(expired.state, .ended)
+      XCTAssertFalse(expired.showsRemainingTime)
+    }
+  }
+
+  func testPausedRestKeepsCountdownAndExplainsPlaybackState() {
+    let deadline = Date(timeIntervalSince1970: 1_000)
+    let now = deadline.addingTimeInterval(-30)
+    let paused = ActiveRestTimerPresentation(
+      phase: .paused, admitted: true, deadline: deadline, now: now)
+    XCTAssertEqual(paused.state, .playbackPaused)
+    XCTAssertTrue(paused.showsRemainingTime)
+    XCTAssertEqual(paused.detail, "Playback paused. Rest time continues.")
+    let interrupted = ActiveRestTimerPresentation(
+      phase: .interrupted, admitted: true, deadline: deadline, now: now)
+    XCTAssertEqual(interrupted.state, .playbackInterrupted)
+    XCTAssertEqual(interrupted.detail, "Playback interrupted. Rest time continues.")
+  }
+
+  func testStoppedFinishedAndFailedRestNeverClaimsTimerIsRunning() {
+    let deadline = Date(timeIntervalSince1970: 1_000)
+    for phase in [NapRunPhase.stopped, .finished, .failed, .idle, .waiting] {
+      let presentation = ActiveRestTimerPresentation(
+        phase: phase, admitted: true, deadline: deadline,
+        now: deadline.addingTimeInterval(-30))
+      XCTAssertEqual(presentation.state, .hidden)
+      XCTAssertFalse(presentation.showsRemainingTime)
+    }
+  }
+
   @MainActor
   func testErrorTextContrastOnEveryRestSurfaceAndAppearance() throws {
     let surfaces: [(String, Color)] = [

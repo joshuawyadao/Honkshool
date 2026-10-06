@@ -106,6 +106,103 @@ struct RestTimingRow: View {
   }
 }
 
+/// Presentation only: a countdown is evidence of an admitted rest window, not
+/// evidence that audio is playing or that a wake alarm will sound.
+struct ActiveRestTimerPresentation: Equatable {
+  enum State: Equatable {
+    case hidden
+    case running
+    case playbackPaused
+    case playbackInterrupted
+    case ended
+  }
+
+  let state: State
+
+  init(phase: NapRunPhase, admitted: Bool, deadline: Date, now: Date) {
+    guard admitted else {
+      state = .hidden
+      return
+    }
+    switch phase {
+    case .narrating, .ambience, .resting, .paused, .interrupted:
+      if now >= deadline {
+        state = .ended
+      } else if phase == .paused {
+        state = .playbackPaused
+      } else if phase == .interrupted {
+        state = .playbackInterrupted
+      } else {
+        state = .running
+      }
+    default:
+      state = .hidden
+    }
+  }
+
+  var showsRemainingTime: Bool {
+    switch state {
+    case .running, .playbackPaused, .playbackInterrupted: true
+    case .hidden, .ended: false
+    }
+  }
+
+  var detail: String? {
+    switch state {
+    case .playbackPaused: "Playback paused. Rest time continues."
+    case .playbackInterrupted: "Playback interrupted. Rest time continues."
+    default: nil
+    }
+  }
+}
+
+struct RestCountdown: View {
+  let phase: NapRunPhase
+  let admitted: Bool
+  let start: Date
+  let deadline: Date
+
+  var body: some View {
+    // Start the schedule now. A schedule starting at the future deadline can
+    // render its first context at that deadline and hide the active countdown.
+    TimelineView(.periodic(from: .now, by: 1)) { _ in
+      let presentation = ActiveRestTimerPresentation(
+        phase: phase, admitted: admitted, deadline: deadline, now: .now)
+      if presentation.state != .hidden {
+        VStack(alignment: .leading, spacing: 8) {
+          if presentation.state == .ended {
+            Text("Rest time ended")
+              .font(.system(.title2, design: .rounded).weight(.medium))
+              .accessibilityAddTraits(.isHeader)
+              .accessibilityIdentifier("restTimerEnded")
+          } else {
+            Label("Rest timer running", systemImage: "checkmark.circle")
+              .font(.headline.weight(.medium))
+              .accessibilityAddTraits(.isHeader)
+              .accessibilityIdentifier("restTimerRunning")
+            if let detail = presentation.detail {
+              Text(detail)
+                .font(.subheadline)
+                .foregroundStyle(RestStyle.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("restTimerPlaybackNote")
+            }
+            Text("Time remaining")
+              .font(.subheadline)
+              .foregroundStyle(RestStyle.secondary)
+            Text(timerInterval: start...deadline, countsDown: true)
+              .font(.system(.largeTitle, design: .rounded).weight(.medium))
+              .monospacedDigit()
+              .fixedSize(horizontal: false, vertical: true)
+              .accessibilityIdentifier("restTimeRemaining")
+          }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+      }
+    }
+  }
+}
+
 struct GooseMark: View {
   var size: CGFloat = 44
 
