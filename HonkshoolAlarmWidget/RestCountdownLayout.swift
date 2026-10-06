@@ -48,6 +48,23 @@ struct RestCountdownTimer: View {
   }
 }
 
+/// The compact Island gives its trailing region a much narrower slot than the
+/// expanded view. Keep the same native, ticking interval while fitting the
+/// longest hour-based countdown on one line at large text settings.
+struct RestCompactCountdownTimer: View {
+  let presentation: RestCountdownPresentation
+
+  var body: some View {
+    RestCountdownTimer(presentation: presentation)
+      .font(.system(size: 11, weight: .semibold))
+      .monospacedDigit()
+      .lineLimit(1)
+      .minimumScaleFactor(0.8)
+      .frame(width: 52, alignment: .trailing)
+      .multilineTextAlignment(.trailing)
+  }
+}
+
 struct RestCountdownLayout: View {
   @ScaledMetric(relativeTo: .title) private var timerWidth = 140
   let presentation: RestCountdownPresentation

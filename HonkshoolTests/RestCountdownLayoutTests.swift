@@ -1,10 +1,61 @@
 import SwiftUI
+import Vision
 import XCTest
 
 @testable import Honkshool
 
 @MainActor
 final class RestCountdownLayoutTests: XCTestCase {
+  func testCompactIslandPaintsCompleteHourAndMinuteCountdownsAtLargestTextSize() throws {
+    let scenarios: [(String, TimeInterval?, String)] = [
+      ("three hours", 3 * 3600, #"^(3:00:00|2:59:[0-5][0-9])$"#),
+      ("one hour", 3600, #"^(1:00:00|59:5[0-9])$"#),
+      ("fifty-nine minutes", 59 * 60 + 59, #"^59:[0-5][0-9]$"#),
+      ("ended", nil, #"^0:00$"#),
+      ("long exact time", 23 * 3600 + 59 * 60 + 59, #"^23:59:[0-5][0-9]$"#),
+    ]
+
+    for (name, duration, expectedPattern) in scenarios {
+      let start = Date.now
+      let view = RestCompactCountdownTimer(
+        presentation: RestCountdownPresentation(
+          state: .init(
+            countdownStart: start,
+            deadline: start.addingTimeInterval(duration ?? 0),
+            playback: .resting,
+            alarm: .none),
+          isStale: duration == nil)
+      )
+      .environment(\.dynamicTypeSize, .accessibility5)
+      .foregroundStyle(.black)
+      .background(.white)
+      let renderer = ImageRenderer(content: view)
+      renderer.scale = 4
+      let image = try XCTUnwrap(renderer.uiImage)
+      XCTAssertLessThanOrEqual(image.size.width, 52, name)
+      XCTAssertLessThanOrEqual(image.size.height, 20, name)
+
+      let attachment = XCTAttachment(image: image)
+      attachment.name = "Compact Island — \(name)"
+      attachment.lifetime = .keepAlways
+      add(attachment)
+
+      let recognition = VNRecognizeTextRequest()
+      recognition.recognitionLevel = .accurate
+      recognition.recognitionLanguages = ["en-US"]
+      recognition.usesLanguageCorrection = false
+      try VNImageRequestHandler(cgImage: XCTUnwrap(image.cgImage)).perform([recognition])
+      let renderedText =
+        recognition.results?
+        .compactMap { $0.topCandidates(1).first?.string.replacingOccurrences(of: " ", with: "") }
+        ?? []
+      XCTAssertTrue(
+        renderedText.contains {
+          $0.range(of: expectedPattern, options: .regularExpression) != nil
+        }, "\(name) must paint every digit in the compact slot: \(renderedText)")
+    }
+  }
+
   func testCountdownFitsLockScreenAtLargerTextSizes() throws {
     for size in [
       DynamicTypeSize.xLarge, .xxxLarge, .accessibility1, .accessibility2,

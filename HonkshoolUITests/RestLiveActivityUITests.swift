@@ -20,6 +20,15 @@ final class RestLiveActivityUITests: XCTestCase {
     }
     let start = app.buttons["startRestTimer"]
     XCTAssertTrue(start.waitForExistence(timeout: 5))
+    let more = app.buttons["timerMoreOptions"]
+    scrollTo(more, in: app)
+    more.tap()
+    let hours = app.pickers["timerCustomDurationHours"].pickerWheels.firstMatch
+    scrollTo(hours, in: app)
+    hours.adjust(toPickerWheelValue: "3")
+    XCTAssertEqual(hours.value as? String, "3")
+    XCTAssertEqual(
+      app.pickers["timerCustomDurationMinutes"].pickerWheels.firstMatch.value as? String, "0")
     scrollTo(app.buttons["timerSilence"], in: app)
     app.buttons["timerSilence"].tap()
     let alarm = app.switches["timerWakeAlarm"]
@@ -37,6 +46,7 @@ final class RestLiveActivityUITests: XCTestCase {
         stop.tap()
       }
     }
+    scrollTo(start, in: app)
     start.tap()
     XCTAssertTrue(app.staticTexts["napRunStatus"].waitForExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["napRunStatus"].label.contains("silence"))
@@ -64,6 +74,25 @@ final class RestLiveActivityUITests: XCTestCase {
     shot.lifetime = .keepAlways
     add(shot)
     try assertRenderedCountdown(screenshot.image)
+
+    XCUIDevice.shared.press(.home)
+    // Home returns before Notification Center's dismissal animation finishes.
+    // Wait for painted digits, rather than accepting an archived AX label.
+    var homeScreen = springboard.screenshot()
+    let compactPainted = XCTNSPredicateExpectation(
+      predicate: NSPredicate { _, _ in
+        homeScreen = springboard.screenshot()
+        return (try? self.compactCountdownLines(homeScreen.image))?.contains {
+          $0.range(of: #"^(3:00:00|2:59:[0-5][0-9])$"#, options: .regularExpression) != nil
+        } == true
+      }, object: springboard)
+    let paintResult = XCTWaiter.wait(for: [compactPainted], timeout: 8)
+    let compactShot = XCTAttachment(screenshot: homeScreen)
+    compactShot.name = "System-hosted compact Island countdown"
+    compactShot.lifetime = .keepAlways
+    add(compactShot)
+    XCTAssertEqual(paintResult, .completed, "The compact Island must paint after Home settles")
+    try assertRenderedCompactCountdown(homeScreen.image)
   }
 
   private func assertRenderedCountdown(_ image: UIImage) throws {
@@ -82,6 +111,29 @@ final class RestLiveActivityUITests: XCTestCase {
       lines.contains {
         $0.range(of: #"^\d{1,2}:\d{2}(:\d{2})?$"#, options: .regularExpression) != nil
       }, "No visible remaining countdown: \(text)")
+  }
+
+  private func assertRenderedCompactCountdown(_ image: UIImage) throws {
+    let lines = try compactCountdownLines(image)
+    XCTAssertTrue(
+      lines.contains {
+        $0.range(of: #"^(3:00:00|2:59:[0-5][0-9])$"#, options: .regularExpression) != nil
+      }, "No fully painted three-hour countdown in compact Island: \(lines)")
+  }
+
+  private func compactCountdownLines(_ image: UIImage) throws -> [String] {
+    let request = VNRecognizeTextRequest()
+    request.recognitionLevel = .accurate
+    request.recognitionLanguages = ["en-US"]
+    request.usesLanguageCorrection = false
+    // The Island's trailing slot sits to the right of center at the top of
+    // the Home Screen. This excludes the separate status-bar clock.
+    request.regionOfInterest = CGRect(x: 0.49, y: 0.88, width: 0.29, height: 0.12)
+    try VNImageRequestHandler(cgImage: XCTUnwrap(image.cgImage)).perform([request])
+    return
+      request.results?
+      .compactMap { $0.topCandidates(1).first?.string.replacingOccurrences(of: " ", with: "") }
+      ?? []
   }
 
   private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {

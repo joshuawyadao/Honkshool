@@ -29,8 +29,7 @@ struct RestCountdownActivity: Widget {
       } compactLeading: {
         Image(systemName: "moon")
       } compactTrailing: {
-        RestCountdownTimer(presentation: presentation)
-          .frame(maxWidth: 64)
+        RestCompactCountdownTimer(presentation: presentation)
       } minimal: {
         Image(systemName: "moon")
       }

@@ -17,9 +17,9 @@ Close the concrete PR review gaps in timer admission, last-reported activity sta
 [x] Run focused regressions, the complete affected unit target, hosted layout/UI verification, formatting and repository checks; record evidence locally.
 [x] Prepare the verified review fixes for the branch save and refreshed PR review. Record subsequent GitHub review, checks and mergeability in the local PR ledger and on PR #15.
 [x] Reproduce an admitted silent timer ending on an audio-service reset; preserve player-free rest while retaining explicit failure for affected narration/rain and its original deadline.
-[ ] Bound compact Dynamic Island typography/width for hour-long and exact-time countdowns while retaining native ticking; verify actual hosted compact pixels and appropriate layout constraints.
-[ ] Update User-Guide, Nap-Planning-Domain and Development for reset and compact presentation contracts; run focused regressions and affected controller/layout tests.
-[ ] Save each validated comment fix, acknowledge after push, request fresh review and wait for final required CI.
+[x] Bound compact Dynamic Island typography/width for hour-long and exact-time countdowns while retaining native ticking; verify actual hosted compact pixels and appropriate layout constraints.
+[x] Update User-Guide, Nap-Planning-Domain and Development for reset and compact presentation contracts; run focused regressions and affected controller/layout tests.
+[x] Prepare validated follow-up fixes for separate saves and post-push acknowledgments; continue refreshed review and final required CI in the PR ledger.
 
 ## Open questions
 - None. Use the existing admission limit and historical wording; no new product behavior or remote update service is needed.
@@ -39,3 +39,5 @@ Both saved-sound default UI cases pass, covering persistence, quick-timer select
 Refreshed Codex review at 3195550 reports compact countdown width for hours (4198906968) and unconditional media-reset failure for silent timers (4198906982). Both are bounded correctness/presentation concerns; no product decision or new background mechanism is needed. Check no-player silence, failed-rain fallback, active/paused audio and long countdowns before saving.
 
 The silent media-reset scenario failed before repair while both active-audio controls passed. After ignoring resets without initialized players, all 47 controller tests pass, including silent fallback with an independent alarm, active/paused rain and verified partial narration. User-Guide and Nap-Planning-Domain describe this boundary. Compact Island verification remains next.
+
+All seven layout cases pass, including OCR of complete compact minute/hour/ended values at AX5. The actual hosted three-hour case passes for both Lock Screen and compact Island pixels after a bounded wait for Home's dismissal animation. The first hosted attempt captured that transition and failed; the full painted-digit contract is retained. Final repository checks, strict formatting and whitespace validation pass. The independent Apple re-review found no remaining blocker in either follow-up fix.

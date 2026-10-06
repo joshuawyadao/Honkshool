@@ -51,6 +51,8 @@ Enable Live Activities for Honkshool in iPhone Settings if the countdown is unav
 
 At the largest accessibility text settings, the Lock Screen card keeps compact text so its countdown and status remain visible. Open Rest for the full-size countdown. VoiceOver still reads the complete card text.
 
+On supported iPhones, the Dynamic Island also shows the remaining rest time, including hours for longer rests.
+
 ## Control audio and alarms
 
 | Control | Effect |
