@@ -1015,12 +1015,16 @@ struct NapPlanReviewView: View {
           .accessibilityIdentifier("resumeNapRun")
       }
       if run.hasActiveRun {
-        Button("Stop playback") { run.stop() }
+        Button(plan?.isTimer == true ? "Stop rest" : "Stop playback") { run.stop() }
           .frame(minHeight: 44)
           .accessibilityIdentifier("stopNapRun")
         if plan?.wakeAlarm != nil {
-          Text("Stopping playback does not cancel the wake alarm.")
-            .font(.footnote).foregroundStyle(RestStyle.secondary)
+          Text(
+            plan?.isTimer == true
+              ? "Stopping rest does not cancel the wake alarm."
+              : "Stopping playback does not cancel the wake alarm."
+          )
+          .font(.footnote).foregroundStyle(RestStyle.secondary)
         }
       } else {
         if !run.records.isEmpty {

@@ -59,12 +59,13 @@ On supported iPhones, the Dynamic Island also shows the remaining rest time, inc
 | --- | --- |
 | **Pause playback** | Pauses audio. The deadline and scheduled alarm do not move. |
 | **Resume playback** | Explicitly resumes when allowed, within the remaining window. |
+| **Stop rest** | Ends a quick timer and its rain or silent rest. It leaves the separately scheduled wake alarm active. |
 | **Stop playback** | Ends the run's audio. A narration attempt can be saved as partial. It leaves the wake alarm active. |
 | **Cancel wake alarm** | Available after the run is inactive; cancels the separately tracked wake alarm. |
 | **Cancel Nap Plan wake alarm** | Cancels the tracked plan alarm from **Settings → Advanced → Feasibility Lab**. Check the resulting status. |
 | **Change your plan** or **Plan another rest** | Returns to choices for a fresh review; an old tracked alarm must still be cleared before starting. |
 
-To end both listening and the wake alarm, **stop playback, cancel the alarm, and check the result**. Cancelling an alarm alone is not an audio Stop command. The feasibility console's separate **Cancel alarm** button belongs to its test alarm.
+To end both a rest and its wake alarm, **stop rest (or stop playback for a narrated plan), cancel the alarm, and check the result**. Cancelling an alarm alone does not stop a rest or its audio. The feasibility console's separate **Cancel alarm** button belongs to its test alarm.
 
 A system interruption or lost audio output can pause playback. Honkshool requires a manual resume rather than unexpectedly restarting. The app requests exclusive playback, so existing music or a podcast yields when its audio session activates. iOS owns the exact Lock Screen media/alarm presentation; current production rain controls and physical headphone-disconnection behavior still need direct observation.
 

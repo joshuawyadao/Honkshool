@@ -130,6 +130,8 @@ final class RestShellUITests: XCTestCase {
       app.staticTexts["restTimerPlaybackNote"].label.contains("Rest time continues"))
     XCTAssertEqual(app.staticTexts["napPlanConfirmedDeadline"].label, deadline)
     scrollTo(app.buttons["stopNapRun"], in: app)
+    XCTAssertEqual(app.buttons["stopNapRun"].label, "Stop rest")
+    XCTAssertTrue(app.staticTexts["Stopping rest does not cancel the wake alarm."].exists)
     app.buttons["stopNapRun"].tap()
     XCTAssertFalse(app.staticTexts["restTimerRunning"].exists)
     XCTAssertFalse(app.staticTexts["restTimeRemaining"].exists)
@@ -168,6 +170,7 @@ final class RestShellUITests: XCTestCase {
     XCTAssertTrue(app.staticTexts["napPlanAlarmStatus"].label.contains("No wake alarm"))
     attachScreen("One-minute rest countdown")
     scrollTo(app.buttons["stopNapRun"], in: app)
+    XCTAssertEqual(app.buttons["stopNapRun"].label, "Stop rest")
     app.buttons["stopNapRun"].tap()
     XCTAssertFalse(remaining.exists)
   }

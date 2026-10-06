@@ -20,8 +20,8 @@ Close the concrete PR review gaps in timer admission, last-reported activity sta
 [x] Bound compact Dynamic Island typography/width for hour-long and exact-time countdowns while retaining native ticking; verify actual hosted compact pixels and appropriate layout constraints.
 [x] Update User-Guide, Nap-Planning-Domain and Development for reset and compact presentation contracts; run focused regressions and affected controller/layout tests.
 [x] Prepare validated follow-up fixes for separate saves and post-push acknowledgments; continue refreshed review and final required CI in the PR ledger.
-[ ] Name the quick timer stop action Stop rest, including silence, and describe its independent wake alarm; preserve narrated Stop playback and the existing control identifier.
-[ ] Extend the existing silent countdown and rain/alarm UI cases with truthful stop-label expectations; update User-Guide, run those cases and fast checks, then save and acknowledge the review item.
+[x] Name the quick timer stop action Stop rest, including silence, and describe its independent wake alarm; preserve narrated Stop playback and the existing control identifier.
+[x] Extend the existing silent countdown and rain/alarm UI cases with truthful stop-label expectations; update User-Guide, run those cases and fast checks, then save and acknowledge the review item.
 
 ## Open questions
 - None. Use the existing admission limit and historical wording; no new product behavior or remote update service is needed.
@@ -45,3 +45,5 @@ The silent media-reset scenario failed before repair while both active-audio con
 All seven layout cases pass, including OCR of complete compact minute/hour/ended values at AX5. The actual hosted three-hour case passes for both Lock Screen and compact Island pixels after a bounded wait for Home's dismissal animation. The first hosted attempt captured that transition and failed; the full painted-digit contract is retained. Final repository checks, strict formatting and whitespace validation pass. The independent Apple re-review found no remaining blocker in either follow-up fix.
 
 Codex review at 0faef18 identifies Stop playback on a player-free silent timer (4199100401). The action ends the timer, so quick timers should consistently say Stop rest and explain that the wake alarm remains separate. This changes wording only; existing silent and rain timer UI cases verify the action and independent alarm behavior.
+
+The final stop-label slice passes both existing silent/rain UI cases, including countdown removal and separate alarm cancellation. Quick timers say Stop rest regardless of sound; narrated plans retain Stop playback. All 51 repository checks, strict formatting and whitespace validation pass. Refreshed GitHub review and complete CI remain tracked in the local ledger.
