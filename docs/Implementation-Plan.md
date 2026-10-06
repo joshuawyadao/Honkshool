@@ -56,3 +56,10 @@ Adjacent inspection found the same false playback claim in the timer controller'
 All 16 layout/coordinator tests and both focused controller cases pass. The retained card says Rest stopped; in-app timer status uses the same phrase, while narrated status and independent alarm language remain intact. Strict formatting and all 51 repository checks pass. All reported Codex findings are addressed; final required GitHub CI is tracked separately.
 
 The independent bounded review confirms unchanged runtime/alarm behavior and finds the shared timer's diagnostic Stop button in Feasibility Lab still has the old label. Apply the same timer-aware Stop rest wording there and compile the app. No new test case is warranted for this duplicate copy-only control; existing production shared-run UI coverage and final CI still exercise the control behavior.
+
+## CI follow-up
+
+Final CI37515038944 exhausted the iOS job's 40-minute limit. Xcode continued emitting test-launch events through cancellation; the run produced no final assertion summary or retained result bundle. The expanded serial suite needs a larger bounded job budget. Raise only the iOS limit to 60 minutes, update the existing configuration assertion and Development documentation, run repository checks, save, and rerun full CI. Preserve all test selections/assertions, serial execution, pinned actions, read-only permissions and superseded-run cancellation. No new infrastructure or dependency is needed.
+
+- [ ] Update and validate the bounded 60-minute iOS CI budget.
+- [ ] Save the CI slice, rerun exact-head checks and record their terminal outcome in the local ledger.
