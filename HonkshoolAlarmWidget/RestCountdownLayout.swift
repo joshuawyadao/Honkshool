@@ -13,8 +13,8 @@ struct RestCountdownPresentation {
     case .narrating: return "Narration started"
     case .ambience: return "Rest sound started"
     case .resting: return "Quiet rest started"
-    case .paused: return "Playback paused"
-    case .interrupted: return "Playback interrupted"
+    case .paused: return "Playback was paused"
+    case .interrupted: return "Playback was interrupted"
     case .stopped: return "Playback stopped"
     }
   }
@@ -61,7 +61,7 @@ struct RestCountdownLayout: View {
         RestCountdownTimer(presentation: presentation)
           .font(.title.monospacedDigit())
           // WidgetKit archives timers as flexible text; never request intrinsic size.
-          .frame(width: timerWidth, alignment: .trailing)
+          .frame(width: min(timerWidth, 190), alignment: .trailing)
           .multilineTextAlignment(.trailing)
       }
       RestCountdownEnding(deadline: presentation.state.deadline)
@@ -71,6 +71,9 @@ struct RestCountdownLayout: View {
       Text(presentation.alarmLabel)
         .font(.footnote)
     }
+    // The Lock Screen host is at most 160pt tall. Keep every status visible;
+    // larger settings remain fully supported by the uncapped in-app Rest page.
+    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
     .padding(.horizontal, 14)
     .padding(.vertical, 6)
   }

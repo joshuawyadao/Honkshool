@@ -49,6 +49,8 @@ After rest begins, a separate Live Activity shows the remaining rest time, its f
 
 Enable Live Activities for Honkshool in iPhone Settings if the countdown is unavailable. A disabled or failed card does not stop an admitted rest or change its wake alarm. Very long exact-time windows can exceed the system’s eight-hour Live Activity limit. At the deadline a stale card says **Rest window ended**; it does not prove that audio stopped or an alarm sounded while the app was suspended.
 
+At the largest accessibility text settings, the Lock Screen card keeps compact text so its countdown and status remain visible. Open Rest for the full-size countdown. VoiceOver still reads the complete card text.
+
 ## Control audio and alarms
 
 | Control | Effect |
