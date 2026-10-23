@@ -47,6 +47,15 @@ The script uses the shared `Honkshool` scheme, disables parallel testing, writes
 | `HONKSHOOL_TEST_DESTINATION` | `platform=iOS Simulator,name=iPhone 17 Pro,OS=latest` | Select an installed compatible simulator. |
 | `HONKSHOOL_TEST_DERIVED_DATA` | `/tmp/HonkshoolAutomatedTests` | Choose where Xcode writes derived data. |
 | `HONKSHOOL_TEST_DIAGNOSTICS` | `never` | Set Xcode's `-collect-test-diagnostics` mode; CI uses `on-failure`. |
+| `HONKSHOOL_TEST_SCOPE` | `all` | Use `unit` for the Swift host target only; `all` runs both host and UI targets. Other values fail before Xcode or result creation. |
+
+For a faster local domain, controller or persistence iteration:
+
+```sh
+HONKSHOOL_TEST_SCOPE=unit ./scripts/test-ios.sh
+```
+
+This mode retains host integration checks, including actual bundled resources and SwiftData. It does not replace the complete suite for app changes or hardware acceptance. CI runs the default full scope.
 
 For example, if the default simulator is unavailable:
 
@@ -78,7 +87,17 @@ Physical-device cases are separately gated and skipped in ordinary simulator run
 
 ### CI
 
-[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) defines the **Repository Verify** workflow with two jobs: **Repository Verify** on Ubuntu runs `./scripts/verify-repository.sh`, and **iOS Unit and UI Tests** on macOS runs `./scripts/test-ios.sh` with failure diagnostics enabled. Both jobs run for non-draft pull requests and manual `workflow_dispatch` runs. Draft pull requests skip both jobs; marking one ready for review starts them. Physical-device opt-in tests are not CI acceptance evidence.
+[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) defines three checks for non-draft pull requests and manual `workflow_dispatch` runs:
+
+| Check | Work |
+| --- | --- |
+| **Repository Verify** | Ubuntu runs the portable gate, then `scripts/ci-policy.py` classifies the exact base/head commit diff. Only ordinary, non-executable Markdown or SVG under `docs/`, and the known root README/contribution/conduct/security Markdown files, qualify as documentation-only. |
+| **iOS Unit and UI Tests** | After repository verification, macOS runs the default complete `./scripts/test-ios.sh` with failure diagnostics whenever code, tests, resources, project/workflow settings or any unknown path changes. Manual dispatch always runs it. Verified documentation-only PRs skip this job without allocating macOS. |
+| **CI Verify** | A stable Ubuntu readiness check runs even when a dependency fails. It requires successful repository verification and full iOS success, or an explicit successful documentation-only classification with iOS skipped. Missing classification, failures and cancellations cannot pass this gate. |
+
+The classifier inspects both sides of renames and deletions, handles NUL-delimited Git paths, and checks file modes; unknown or malformed input fails conservatively. No workflow-level path filter can leave a required check waiting. Draft PRs skip these checks; marking one ready for review starts them. Existing required check names are preserved, and maintainers can require **CI Verify** without changing protection as part of this branch. Physical-device opt-in tests are not CI acceptance evidence.
+
+The full macOS job retains its 40-minute bound from main. The [resource-efficiency note](Efficiency.md) records later optimization ideas and their acceptance requirements. Do not shorten coverage or raise paid resource commitments solely to improve a timing number.
 
 Failed CI runs retain the simulator `.xcresult` bundle as an Actions artifact for seven days. Download it from the failed run to inspect assertion locations, UI activity, and screenshots in Xcode. The test script publishes its fresh result directory through the standard `GITHUB_OUTPUT` file when available. Artifacts contain synthetic simulator test data; do not upload personal-device result bundles. Feasibility label failures report the expected and observed label at the original assertion call site; timeouts and behavioral expectations remain unchanged.
 

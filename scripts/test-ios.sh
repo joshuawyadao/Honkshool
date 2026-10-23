@@ -8,6 +8,15 @@ HONKSHOOL_XCODE_PATH=${HONKSHOOL_XCODE_PATH:-/Applications/Xcode.app/Contents/De
 HONKSHOOL_TEST_DESTINATION=${HONKSHOOL_TEST_DESTINATION:-platform=iOS Simulator,name=iPhone 17 Pro,OS=latest}
 HONKSHOOL_TEST_DERIVED_DATA=${HONKSHOOL_TEST_DERIVED_DATA:-/tmp/HonkshoolAutomatedTests}
 HONKSHOOL_TEST_DIAGNOSTICS=${HONKSHOOL_TEST_DIAGNOSTICS:-never}
+HONKSHOOL_TEST_SCOPE=${HONKSHOOL_TEST_SCOPE:-all}
+
+case "$HONKSHOOL_TEST_SCOPE" in
+  all|unit) ;;
+  *)
+    printf 'ERROR: HONKSHOOL_TEST_SCOPE must be all or unit.\n' >&2
+    exit 2
+    ;;
+esac
 
 if [ ! -d "$HONKSHOOL_XCODE_PATH" ]; then
   printf 'ERROR: Xcode developer directory not found: %s\n' "$HONKSHOOL_XCODE_PATH" >&2
@@ -24,15 +33,19 @@ if [ -n "${GITHUB_OUTPUT:-}" ]; then
   printf 'result_directory=%s\n' "$test_result_directory" >> "$GITHUB_OUTPUT"
 fi
 
-if DEVELOPER_DIR="$HONKSHOOL_XCODE_PATH" xcodebuild -quiet \
+set -- -quiet \
   -project Honkshool.xcodeproj \
   -scheme Honkshool \
   -destination "$HONKSHOOL_TEST_DESTINATION" \
   -derivedDataPath "$HONKSHOOL_TEST_DERIVED_DATA" \
   -resultBundlePath "$test_result_path" \
   -collect-test-diagnostics "$HONKSHOOL_TEST_DIAGNOSTICS" \
-  -parallel-testing-enabled NO \
-  test; then
+  -parallel-testing-enabled NO
+if [ "$HONKSHOOL_TEST_SCOPE" = unit ]; then
+  set -- "$@" -only-testing:HonkshoolTests
+fi
+
+if DEVELOPER_DIR="$HONKSHOOL_XCODE_PATH" xcodebuild "$@" test; then
   printf 'PASS: Honkshool iOS automated tests completed successfully.\n'
 else
   test_exit_code=$?

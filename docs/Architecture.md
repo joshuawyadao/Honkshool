@@ -38,7 +38,7 @@ The planning domain never imports SwiftUI, SwiftData, AVFoundation, or AlarmKit.
 | `Content/PreparedCatalog`, `PreparedAmbience` | Catalog validation, revision/render identity, bundled resource availability | Only valid prepared content is offered. Missing audio does not trigger a different voice or runtime generation. |
 | `Services/NapRunController`, `NapAmbiencePlayer` | Approved playback, controls, interruptions, fixed cutoff and checkpoints | Explicit resume after interruption/output loss; stale callbacks cannot restart a stopped run. Rain creates no narration history. |
 | `Services/NapPlanAlarmService` | Production wake-alarm identity, schedule/readback, reconciliation and cancellation | An alarm-requested run requires matching verified evidence. Playback Stop preserves the separately scheduled alarm. |
-| `Services/ListeningHistoryStore` | Local SwiftData transactions, checkpoint replacement, recovery and retry | Completion alone advances progress. Errors remain visible and do not replace a failed store with an empty one. |
+| `Services/ListeningHistoryStore` | Local SwiftData transactions, checkpoint replacement, recovery and retry | Completion alone advances progress. Successful writes maintain the affected published entry incrementally; opening/recovery validates the full store. Errors remain visible and do not replace a failed store with an empty one. |
 | `App` | Dependency composition, Rest and History navigation, user review, Settings and diagnostic access | Reopening never starts audio; Continue/Resume/Replay require a fresh review. |
 | `Shared` and `HonkshoolAlarmWidget` | Alarm metadata/intents and system-hosted presentation | The widget shares narrow alarm types rather than app navigation or history state. |
 
@@ -61,7 +61,7 @@ The September 2026 checkup found no confirmed dependency cycle or need for broad
 - UI tests require Debug builds and the `-ui-testing` launch argument. Their isolated preferences/history and simulated alarms protect normal app data. Saved-duration fixtures can exercise invalid restored values without touching ordinary preferences.
 - Physical opt-in tests are separate. Simulator passes do not establish audibility, headphone behavior, Lock Screen control behavior, or subjective comfort.
 
-Run `./scripts/verify-repository.sh` for the portable gate and `./scripts/test-ios.sh` for the full simulator gate. The latter remains the CI default. For a focused local domain/controller iteration, Xcode can select the unit/integration target directly:
+Run `./scripts/verify-repository.sh` for the portable gate and `./scripts/test-ios.sh` for the full simulator gate. The latter remains the CI default for executable changes and manual runs; verified documentation-only changes omit macOS through the conservative policy described in [Development](Development.md#ci). For a focused local domain/controller iteration, use `HONKSHOOL_TEST_SCOPE=unit ./scripts/test-ios.sh` or select the unit/integration target directly:
 
 ```sh
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -quiet \
