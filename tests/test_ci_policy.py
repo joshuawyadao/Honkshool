@@ -97,6 +97,19 @@ class CIPolicyTests(unittest.TestCase):
         with self.assertRaises(policy.PolicyError):
             policy.needs_ios(self.root, "0" * 40, self.base)
 
+    def test_regular_file_symlink_conversions_select_full_ios_in_both_directions(self):
+        self.write("docs/guide.md", "guide\n")
+        self.base = self.commit()
+        document = self.root / "docs/guide.md"
+        document.unlink()
+        document.symlink_to("../README.md")
+        self.check(True)
+
+        self.base = self.git("rev-parse", "HEAD")
+        document.unlink()
+        self.write("docs/guide.md", "restored guide\n")
+        self.check(True)
+
     def test_gate_requires_exact_consistent_states(self):
         self.assertTrue(policy.gate("success", "success", "true"))
         self.assertTrue(policy.gate("success", "skipped", "false"))

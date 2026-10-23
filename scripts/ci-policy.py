@@ -15,7 +15,7 @@ ROOT_MARKDOWN = frozenset({
     "README.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "SECURITY.md",
 })
 SHA = re.compile(r"(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})\Z")
-RAW_HEADER = re.compile(rb":([0-7]{6}) ([0-7]{6}) [0-9a-f]+ [0-9a-f]+ ([AMD])\Z")
+RAW_HEADER = re.compile(rb":([0-7]{6}) ([0-7]{6}) [0-9a-f]+ [0-9a-f]+ ([ADMT])\Z")
 
 
 class PolicyError(Exception):

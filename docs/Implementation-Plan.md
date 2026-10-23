@@ -27,3 +27,4 @@ Implement the audit's confirmed repeated-work improvements on a feature branch f
 - Portable gate: 65 tests passed in 19.185 seconds after integration, plus whitespace checks. CLI fixtures cover documentation edits/deletes, code-to-doc renames, odd paths, mode changes, invalid references, manual full scope and final gate states.
 - Integration review replaced the incidental exact runner spelling check with command-behavior assertions, and scoped timeout validation to the actual iOS job so another job's timeout cannot satisfy it.
 - Complete final-head GitHub Actions checks and PR review will be recorded below when terminal.
+- PR review follow-up: handle Git's valid type-change (`T`) status conservatively by running iOS for regular-file/symlink conversions, and add both-direction fixture coverage before the next push. No open product question is required.
