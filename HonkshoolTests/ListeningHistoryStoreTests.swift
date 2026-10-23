@@ -136,6 +136,72 @@ final class ListeningHistoryStoreTests: XCTestCase {
       ])
   }
 
+  func testLargeHistoryReplacementKeepsOrderingAcrossReopen() throws {
+    let url = try tempStoreURL()
+    let store = ListeningHistoryStore(storeURL: url)
+    for index in 0..<120 {
+      let runID = String(format: "run-%03d", index)
+      store.save(
+        try record(runID: runID, at: TimeInterval(20 + index % 5)),
+        isCheckpoint: true)
+    }
+    XCTAssertNil(store.errorMessage)
+    XCTAssertEqual(store.entries.count, 120)
+
+    let replacement = try record(runID: "run-060", at: 45)
+    let final = try record(runID: "run-060", at: 50, completed: true)
+    store.save(replacement, isCheckpoint: true)
+    store.save(final, isCheckpoint: false)
+    XCTAssertNil(store.errorMessage)
+    XCTAssertEqual(store.entries.count, 120)
+    XCTAssertEqual(store.entries.first, ListeningHistoryEntry(record: final, isCheckpoint: false))
+    XCTAssertEqual(store.entries.filter { $0.id == final.id }.count, 1)
+
+    let expectedIDs = store.entries.map(\.id)
+    let expectedTimes = store.entries.map { $0.record.endedAt }
+    for pair in zip(store.entries, store.entries.dropFirst()) {
+      XCTAssertGreaterThanOrEqual(pair.0.record.endedAt, pair.1.record.endedAt)
+      if pair.0.record.endedAt == pair.1.record.endedAt {
+        XCTAssertGreaterThan(pair.0.id.runID, pair.1.id.runID)
+      }
+    }
+    let reopened = ListeningHistoryStore(storeURL: url)
+    XCTAssertNil(reopened.errorMessage)
+    XCTAssertEqual(reopened.entries.map(\.id), expectedIDs)
+    XCTAssertEqual(reopened.entries.map { $0.record.endedAt }, expectedTimes)
+    XCTAssertEqual(reopened.entries, store.entries)
+  }
+
+  func testFailedReplacementInLargeHistoryRollsBackAndRetriesLatestEvidence() throws {
+    enum InjectedFailure: Error { case save }
+    let url = try tempStoreURL()
+    let store = ListeningHistoryStore(storeURL: url)
+    for index in 0..<105 {
+      store.save(
+        try record(runID: String(format: "run-%03d", index), at: 20),
+        isCheckpoint: true)
+    }
+    XCTAssertNil(store.errorMessage)
+    let beforeFailure = store.entries
+    let newer = try record(runID: "run-050", at: 30)
+    let final = try record(runID: "run-050", at: 35, reason: .stopped)
+
+    store.beforeSave = { throw InjectedFailure.save }
+    store.save(newer, isCheckpoint: true)
+    store.save(final, isCheckpoint: false)
+    XCTAssertNotNil(store.errorMessage)
+    XCTAssertEqual(store.entries, beforeFailure)
+    XCTAssertEqual(ListeningHistoryStore(storeURL: url).entries, beforeFailure)
+
+    store.beforeSave = nil
+    store.retrySave()
+    XCTAssertNil(store.errorMessage)
+    XCTAssertEqual(store.entries.count, 105)
+    XCTAssertEqual(store.entries.first, ListeningHistoryEntry(record: final, isCheckpoint: false))
+    XCTAssertEqual(store.entries.filter { $0.id == final.id }.count, 1)
+    XCTAssertEqual(ListeningHistoryStore(storeURL: url).entries, store.entries)
+  }
+
   func testCompletedRecordCannotBeClaimedAsCheckpoint() throws {
     let store = ListeningHistoryStore(inMemoryOnly: true)
     store.save(try record(runID: "run", at: 30, completed: true), isCheckpoint: true)

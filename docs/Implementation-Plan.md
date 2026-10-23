@@ -8,8 +8,8 @@ Implement the audit's confirmed repeated-work improvements on a feature branch f
 
 ## Action items
 - [x] Inspect current main, architecture/development/domain docs, history transactions and existing portable/Swift tests; create `codex/efficiency-and-cost` from `origin/main`.
-- [ ] Checkpoint the resolved plan before implementation; keep commits local until validated.
-- [ ] Maintain the history projection incrementally after each committed write, retaining reopen validation, stale-evidence rejection, deterministic ordering and rollback/retry behavior; add representative large-history and recovery tests.
+- [x] Checkpoint the resolved plan before implementation; keep commits local until validated.
+- [x] Maintain the history projection incrementally after each committed write, retaining reopen validation, stale-evidence rejection, deterministic ordering and rollback/retry behavior; add representative large-history and recovery tests.
 - [ ] Classify only known documentation paths as eligible to omit macOS; handle renames/deletions and unknown paths conservatively, keep manual dispatch full, preserve stable reported gates and test classifier/workflow behavior.
 - [ ] Add an explicit unit-only mode to the existing iOS runner with default full coverage unchanged; test command selection and failure/result handling.
 - [ ] Update `docs/Development.md`, `docs/Architecture.md` and `docs/Nap-Planning-Domain.md`; record deferred resource recommendations and their evidence/acceptance requirements in a focused efficiency note.
@@ -18,3 +18,10 @@ Implement the audit's confirmed repeated-work improvements on a feature branch f
 
 ## Open questions
 - None. The branch excludes the separate, unmerged countdown feature and preserves the existing approved audio assets.
+
+## Validation and review ledger
+- Focused persistence suite: 11 passed, no failures/skips, iOS 26.5 simulator. Large-history cases cover 120-row ordering/reopen and 105-row failed replacement/rollback/retry.
+- New unit-only runner mode: 227 passed, five hardware-only skips, no failures across 232 host tests. The default complete suite remains unchanged in scope.
+- Independent Apple correctness review: no confirmed blocker; commits precede publication, rollback retains pending records, ordering is shared with reopen validation, and the app has one production store owner.
+- Unrelated external writers are reconciled for the affected key or at reopen; no cross-process live-sync contract is introduced.
+- Portable gate and complete final-head GitHub Actions checks will be recorded below when terminal.
