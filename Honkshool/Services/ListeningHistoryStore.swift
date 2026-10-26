@@ -122,7 +122,7 @@ final class ListeningHistoryStore: ObservableObject, NapHistoryRecording {
       }
       return
     }
-    let queued = pending.values.sorted { $0.record.endedAt < $1.record.endedAt }
+    let queued = pending.values.sorted { Self.precedes($1, $0) }
     for entry in queued {
       do {
         let key = Self.key(for: entry.id)
@@ -133,6 +133,7 @@ final class ListeningHistoryStore: ObservableObject, NapHistoryRecording {
           let old = try decode(stored)
           guard shouldAccept(entry, over: old) else {
             pending.removeValue(forKey: entry.id)
+            replacePublishedEntry(with: old)
             continue
           }
           stored.payload = try JSONEncoder().encode(Payload(entry.record))
@@ -147,18 +148,14 @@ final class ListeningHistoryStore: ObservableObject, NapHistoryRecording {
         try beforeSave?()
         try context.save()
         pending.removeValue(forKey: entry.id)
+        replacePublishedEntry(with: entry)
       } catch {
         context.rollback()
         errorMessage = "Listening progress could not be saved: \(error.localizedDescription)"
         return
       }
     }
-    do {
-      try reload(from: context)
-      errorMessage = nil
-    } catch {
-      errorMessage = "Listening history could not be read: \(error.localizedDescription)"
-    }
+    errorMessage = nil
   }
 
   private func reload(from context: ModelContext) throws {
@@ -169,12 +166,29 @@ final class ListeningHistoryStore: ObservableObject, NapHistoryRecording {
       guard keys.insert(row.key).inserted else { throw StoreError.duplicateKey }
       decoded.append(try decode(row))
     }
-    entries = decoded.sorted {
-      if $0.record.endedAt == $1.record.endedAt {
-        return Self.key(for: $0.id) > Self.key(for: $1.id)
-      }
-      return $0.record.endedAt > $1.record.endedAt
+    entries = decoded.sorted(by: Self.precedes)
+  }
+
+  // Keep the published snapshot aligned with a committed row (or a newer row found on disk).
+  // A save only fetches its own key; full validation happens when the store opens.
+  private func replacePublishedEntry(with entry: ListeningHistoryEntry) {
+    var updated = entries
+    if let index = updated.firstIndex(where: { $0.id == entry.id }) {
+      if updated[index] == entry { return }
+      updated.remove(at: index)
     }
+    let insertion = updated.firstIndex(where: { Self.precedes(entry, $0) }) ?? updated.endIndex
+    updated.insert(entry, at: insertion)
+    entries = updated
+  }
+
+  private static func precedes(_ lhs: ListeningHistoryEntry, _ rhs: ListeningHistoryEntry)
+    -> Bool
+  {
+    if lhs.record.endedAt == rhs.record.endedAt {
+      return key(for: lhs.id) > key(for: rhs.id)
+    }
+    return lhs.record.endedAt > rhs.record.endedAt
   }
 
   private func decode(_ stored: StoredPlayback) throws -> ListeningHistoryEntry {

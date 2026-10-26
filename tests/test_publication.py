@@ -191,6 +191,15 @@ class PublicRepositoryTests(unittest.TestCase):
         self.assertIn("persist-credentials: false", workflow)
         self.assertRegex(workflow, r"actions/checkout@[0-9a-f]{40}")
         self.assertIn("cancel-in-progress: true", workflow)
+        self.assertNotRegex(workflow, r"(?m)^  pull_request:\n(?:    .*\n)*?    paths:")
+        self.assertIn("name: CI Verify", workflow)
+        self.assertIn("needs: [verify, ios-tests]", workflow)
+        self.assertIn("if: always()", workflow)
+        self.assertIn("needs.verify.outputs.run_ios == 'true'", workflow)
+        self.assertIn("scripts/ci-policy.py classify", workflow)
+        self.assertIn("scripts/ci-policy.py gate", workflow)
+        self.assertIn("CI_BASE_SHA: ${{ github.event.pull_request.base.sha }}", workflow)
+        self.assertIn("CI_HEAD_SHA: ${{ github.event.pull_request.head.sha }}", workflow)
 
     def test_ios_tests_run_in_pull_requests_with_debug_only_fixtures(self) -> None:
         workflow = (PROJECT_ROOT / ".github/workflows/ci.yml").read_text(
@@ -208,9 +217,14 @@ class PublicRepositoryTests(unittest.TestCase):
 
         self.assertIn("runs-on: macos-26", workflow)
         self.assertIn("./scripts/test-ios.sh", workflow)
-        self.assertIn("timeout-minutes: 40", workflow)
-        self.assertIn("xcodebuild -quiet", test_script)
-        self.assertIn("-parallel-testing-enabled NO", test_script)
+        ios_job = re.search(
+            r"(?ms)^  ios-tests:\n(?P<body>.*?)(?=^  [A-Za-z0-9_-]+:|\Z)", workflow
+        )
+        self.assertIsNotNone(ios_job, "The complete iOS job must be present")
+        timeouts = re.findall(r"(?m)^    timeout-minutes: ([0-9]+)$", ios_job["body"])
+        self.assertEqual(len(timeouts), 1, "The iOS job must have its own time budget")
+        self.assertGreater(int(timeouts[0]), 0)
+        self.assertLessEqual(int(timeouts[0]), 60)
         self.assertIn("HONKSHOOL_TEST_DESTINATION", test_script)
         self.assertTrue(test_script.startswith("#!/bin/sh\nset -eu\n"))
         self.assertIn("#if DEBUG", fixtures)

@@ -18,6 +18,8 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    outputs:
+      run_ios: ${{ steps.classify.outputs.run_ios }}
 
     steps:
       - name: Check out repository
@@ -29,9 +31,18 @@ jobs:
       - name: Run repository checks
         run: ./scripts/verify-repository.sh
 
+      - name: Classify changes
+        id: classify
+        env:
+          CI_EVENT_NAME: ${{ github.event_name }}
+          CI_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          CI_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python3 scripts/ci-policy.py classify --event "$CI_EVENT_NAME" --base "$CI_BASE_SHA" --head "$CI_HEAD_SHA"
+
   ios-tests:
     name: iOS Unit and UI Tests
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
+    needs: verify
+    if: needs.verify.result == 'success' && needs.verify.outputs.run_ios == 'true'
     runs-on: macos-26
     timeout-minutes: 40
 
@@ -55,3 +66,23 @@ jobs:
           path: ${{ steps.ios-tests.outputs.result_directory }}
           retention-days: 7
           if-no-files-found: warn
+
+  ci-verify:
+    name: CI Verify
+    needs: [verify, ios-tests]
+    if: always() && (github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Enforce CI result policy
+        env:
+          VERIFY_RESULT: ${{ needs.verify.result }}
+          IOS_RESULT: ${{ needs.ios-tests.result }}
+          RUN_IOS: ${{ needs.verify.outputs.run_ios }}
+        run: python3 scripts/ci-policy.py gate --verify "$VERIFY_RESULT" --ios "$IOS_RESULT" --run-ios "$RUN_IOS"
