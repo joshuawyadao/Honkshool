@@ -103,7 +103,7 @@ Failed CI runs retain the simulator `.xcresult` bundle as an Actions artifact fo
 
 ## Offline audio tools
 
-These scripts are preparation and review tools, not app runtime dependencies. [Audio Preparation](Audio-Preparation.md) is the canonical guide for exact inputs, model/cache requirements, provenance, measurement, and publication decisions.
+These scripts are preparation and review tools, not app runtime dependencies. [Audio Preparation](Audio-Preparation.md) is the canonical guide for exact inputs, model/cache requirements, provenance, measurement, and publication decisions, including the isolated macOS arm64/Python 3.11 environment in [tools/audio/requirements-macos-arm64-py311.txt](../tools/audio/requirements-macos-arm64-py311.txt).
 
 | Script | Purpose |
 | --- | --- |

@@ -32,7 +32,7 @@ All 13 unchanged catalog paragraphs, totaling 1,829 words, were rendered with th
 
 The app loads this asset from catalog metadata. A missing or invalid asset visibly fails the run; it never substitutes an Apple voice. AVAudioPlayer supplies prepared-file pause/resume and completion while the existing audio-session, interruption, route-change, remote-command, and ambience path remains in control. A captured deadline task stops prepared narration or subsequent ambience at the planned wake time. Unit tests inject the player and deadline scheduler so deadline, failure, completion, and stale-callback behavior remain deterministic.
 
-Run preparation from the repository root in an isolated environment containing the package versions recorded in the provenance and the pinned Hugging Face cache:
+Run preparation from the repository root in the isolated environment described below and with the pinned Hugging Face cache:
 
 ```sh
 python3 scripts/prepare-kokoro-narration.py \
@@ -72,6 +72,28 @@ python3 scripts/prepare-kokoro-narration.py \
 ```
 
 The provenance records the observed render, not a promise of byte-identical output on every future environment. Complete listening, pronunciation, and relative-level acceptance remain open. Deterministic text and signal checks cannot establish them.
+
+### Patched preparation environment
+
+For future renders on macOS arm64 with CPython 3.11, use the complete, hash-pinned [preparation requirements](../tools/audio/requirements-macos-arm64-py311.txt). The recorded historical provenance above identifies the environment that produced the bundled audio; it is not the installation recipe for new renders.
+
+Transformers changes from `4.57.6` to `5.10.1` to address the [save_pretrained path traversal advisory](https://github.com/advisories/GHSA-xrqw-3rrv-vx5w), patched upstream in 5.10.0. PyPI withdrew 5.10.0, so this recipe uses the next available patch. Kokoro/Misaki, Torch, spaCy, NumPy, the voice, model revision and synthesis settings retain their recorded versions/settings. Transitive dependencies are captured from the newly resolved environment; this is a fix for the cited advisory, not a claim that all dependencies are free of vulnerabilities.
+
+Create a new temporary environment instead of modifying an existing preparation environment:
+
+```sh
+honkshool_tools_dir="$(mktemp -d)"
+python3.11 -m venv "$honkshool_tools_dir/venv"
+"$honkshool_tools_dir/venv/bin/python" -m pip install --require-hashes \
+  -r tools/audio/requirements-macos-arm64-py311.txt
+"$honkshool_tools_dir/venv/bin/python" -m pip check
+```
+
+Use that environment's Python for the renderer commands above. Installation requires network access; rendering uses the local verified cache offline. The requirements select macOS arm64/CPython 3.11 distributions and are not a cross-platform lock. Other platforms need their own resolved hashes and render validation. The tokenizer wheel is included by its official release URL. Model assets remain separately pinned and checked by the renderer.
+
+Validation on 2026-11-09 used CPython 3.11 on macOS arm64: dependency consistency and a hash-required clean resolution passed. A complete offline Turning Fuel Into Motion render passed the renderer's text/chunk, finite PCM, duration, level and zero-clipping checks. Its 727.625-second WAV SHA-256 was `7117b18ce10e45844b6eba29936370131290baf30131b71cf2b01d5999847f37`, identical to the existing bundled master. This establishes compatibility for that session on this environment, not all platforms or catalog inputs.
+
+Before publishing any newly generated audio, run `./scripts/verify-repository.sh`, compare text/chunk order, finite PCM, zero clipping, duration and levels, and obtain listening acceptance. Keep the existing bundled WAVs and historical provenance as the rollback boundary. Package installation and imports alone do not establish synthesis compatibility or listening acceptance.
 
 ### Short local review reel
 
