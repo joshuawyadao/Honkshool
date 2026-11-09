@@ -19,7 +19,11 @@ Save the project walkthrough as a source-linked interview reference, separating 
 - Repository gate: all 66 tests passed, including Markdown relative links and publication/privacy checks.
 - No test files changed and no iOS suite run: this branch changes documentation only.
 - Remote main matches the saved baseline `b016452`; no unrelated working-tree changes were present.
-- GitHub publication, Codex review, Brooks review and CI status pending.
+- Saved and pushed commits `d0c7e2f` (plan) and `2175916` (reference/index); opened [PR #18](https://github.com/joshuawyadao/Honkshool/pull/18).
+- Codex review requested once; first poll has no bot response yet.
+- Brooks PR Review: complete three-file documentation diff vs `main`/`b016452`, no generated files or sampling; no actionable findings across the six decay risks. Score 100/100, stable at 100. Quick test check not applicable to documentation-only changes. Canonical links and explicit proposal labels limit knowledge duplication; no production modules changed.
+- Initial GitHub read: mergeable, no conflicts; draft checks skipped. Promote after local review and wait for non-draft CI and Codex response.
+- Local review history is ignored and is not included in the branch.
 
 ## Open questions
 - None. Save the conversation's recommendations as proposals, not accepted product decisions. Use repository-relative source-root metadata to preserve public-document privacy.
