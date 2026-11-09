@@ -20,6 +20,7 @@ Honkshool is an experimental iPhone app with source installation and a small off
 | [Contributing](../CONTRIBUTING.md) | Contribution workflow and public-data expectations |
 | [Development](Development.md) | Source/script map, verification commands, test boundaries, and CI |
 | [Architecture](Architecture.md) | Module ownership, dependency direction, and platform seams |
+| [Project and interview reference](Project-Catchup.md) | Plain-English stack and nap walkthrough, recorded narration choices, and clearly labeled future delivery options |
 | [Resource efficiency](Efficiency.md) | History/CI resource controls and evidence required for later audio, startup and preparation improvements |
 | [Nap-planning domain](Nap-Planning-Domain.md) | Identity, fixed plans, actual playback, completion, resume, and persistence contracts |
 | [Feasibility evidence](Feasibility-Spike.md) | Diagnostic console, historical and current device checks, and physical opt-in tests |
