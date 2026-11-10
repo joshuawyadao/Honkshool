@@ -14,10 +14,10 @@ The experimental **Feasibility Lab** is under **Settings → Advanced**. Its bac
 
 1. **Choose content.** Rest suggests a prepared session in **How a Car Works**. Tap **Change session** to choose the first or second session. Starting with the first can include the second when the window allows. The reviewed route is the authority for what will actually play.
 2. **Choose your rest window.** Pick a duration on Rest, or tap **More options** for a custom duration or exact wake time. The window includes settling, narration, and any remaining rest; it is not a measure of time asleep. The selected window and narration estimates determine what fits.
-3. **Choose the rest sound.** Tap **After narration** for **Silence** (the default) or **Gentle rain** when its bundled audio and provenance validate. If no complete narration fits, the plan can use only the selected rest sound. Honkshool does not speed up narration to squeeze it in.
+3. **Choose the rest sound.** Tap **Rest sound** for **Silence** (the default) or **Gentle rain** when its bundled audio and provenance validate. If no complete narration fits, the plan can use only the selected rest sound. Honkshool does not speed up narration to squeeze it in. Sound-only reviews describe the rest sound and explain that there is no narration to save; narrated reviews still show what follows narration.
 4. **Choose the alarm.** Leave **Wake alarm** on if you want a system wake alarm at the fixed deadline, or turn it off. With it off, Honkshool schedules no wake alarm for that plan; set another alarm if you need one.
 5. **Review.** Tap **Review nap plan** and check the planned start, fixed wake deadline, full narration route, sound, and alarm choice. Choose any shorter alternatives before review; the current bundled catalog is one ordered two-session journey and has no branch destination.
-6. **Confirm and start.** Tap **Confirm this plan** or **Confirm quiet plan** when no narration fits, then **Start resting** before the approved start passes. The normal review lead time is about one minute; short exact-wake windows can allow less. If it expires, the ready screen changes automatically. Tap **Review updated timing**, inspect the refreshed times and route, and confirm again. This also applies when you return from the background or linger on the alarm-access explanation.
+6. **Confirm and start.** Tap **Confirm this plan** or **Confirm rest plan** when no narration fits, then **Start resting** before the approved start passes. The normal review lead time is about one minute; short exact-wake windows can allow less. If it expires, the ready screen changes automatically. Tap **Review updated timing**, inspect the refreshed times and route, and confirm again. This also applies when you return from the background or linger on the alarm-access explanation. If an exact wake time is no longer valid, the Time sheet opens with an explanation beside the controls. Choose a later time or switch to a duration; Cancel keeps your original choices.
 
 An alarm-enabled start first asks for alarm access if needed, schedules the alarm, and checks that its time matches the plan. Denied permission or failed verification blocks that start. You can explicitly choose an alarm-free plan instead. A previously tracked Nap Plan alarm must be cancelled before another plan can start. On returning to Rest, the heading reflects the checked alarm state. If Honkshool cannot check it, the alarm may still sound; retry the check or cancel it before making another plan.
 
@@ -40,6 +40,7 @@ Leaving the app too early ends the pending run and requires a new review. An ala
 | **Cancel wake alarm** | Available on the confirmed plan after the run is inactive; cancels the separately tracked wake alarm. |
 | **Cancel Nap Plan wake alarm** | Cancels the tracked plan alarm from **Settings → Advanced → Feasibility Lab**. Check the resulting status. |
 | **Change your plan** or **Plan another rest** | Returns to choices for a fresh review; an old tracked alarm must still be cleared before starting. |
+| **Back to Rest** or **Keep alarm · return to Rest** | After a run ends, returns to the Rest tab with current saved progress. A retained alarm still blocks another plan until cancelled. |
 
 To end both listening and the wake alarm, **stop playback, cancel the alarm, and check the result**. Cancelling an alarm alone is not an audio Stop command. The feasibility console's separate **Cancel alarm** button belongs to its test alarm.
 
@@ -56,6 +57,8 @@ Open the **History** tab. It shows locally saved narration attempts and journey 
 | **Continue listening** | Select the next incomplete session in the journey, using its latest valid partial position when available. |
 | **Resume from…** | Start from an available verified position in a partial session. |
 | **Replay from start** | Start that session from the beginning and keep earlier listening history. |
+
+Choosing **Resume from…** on a particular older record still uses that record’s position. After that run ends, **Back to Rest** returns to the Rest tab and offers the latest saved position for the next incomplete session, rather than repeating the original selection.
 
 Every action opens a new Nap Plan review. Reopening the app never starts audio by itself. A session advances progress only when playback reaches its actual end; reaching the plan's deadline can leave it partial. Rain-only and silence-only plans create no narration progress.
 

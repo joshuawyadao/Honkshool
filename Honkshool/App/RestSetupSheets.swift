@@ -8,11 +8,20 @@ struct RestTimeChoices: Equatable {
 
 /// A local draft keeps Cancel and interactive dismissal from changing the plan.
 struct RestTimeSheet: View {
+  @Environment(\.dynamicTypeSize) private var dynamicTypeSize
   @Environment(\.dismiss) private var dismiss
   @State private var draft: RestTimeChoices
+  @AccessibilityFocusState private var errorIsFocused: Bool
+  private let initial: RestTimeChoices
+  private let validationMessage: String?
   let onApply: (RestTimeChoices) -> Void
 
-  init(initial: RestTimeChoices, onApply: @escaping (RestTimeChoices) -> Void) {
+  init(
+    initial: RestTimeChoices, validationMessage: String? = nil,
+    onApply: @escaping (RestTimeChoices) -> Void
+  ) {
+    self.initial = initial
+    self.validationMessage = validationMessage
     _draft = State(initialValue: initial)
     self.onApply = onApply
   }
@@ -20,16 +29,21 @@ struct RestTimeSheet: View {
   var body: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 24) {
-        RestHeading("Make a little room.", subtitle: "Choose a duration or an exact ending time.")
-        RestCard(title: "Time to rest") {
+        if let validationMessage, draft.usesExactWakeTime, draft.wakeTime == initial.wakeTime {
+          Label(validationMessage, systemImage: "exclamationmark.circle")
+            .foregroundStyle(RestStyle.error)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier("napPlanError")
+            .accessibilityFocused($errorIsFocused)
+        } else if validationMessage == nil {
+          RestHeading("Make a little room.", subtitle: "Choose a duration or an exact ending time.")
+        }
+        RestCard(title: validationMessage == nil ? "Time to rest" : nil) {
+          if draft.usesExactWakeTime, validationMessage != nil { wakeTimePicker }
           Toggle("Rest until an exact time", isOn: $draft.usesExactWakeTime)
             .accessibilityIdentifier("napPlanUseExactWakeTime")
           if draft.usesExactWakeTime {
-            DatePicker(
-              "Wake time", selection: $draft.wakeTime, displayedComponents: [.date, .hourAndMinute]
-            )
-            .accessibilityLabel("Wake time")
-            .accessibilityIdentifier("napPlanExactWakeTime")
+            if validationMessage == nil { wakeTimePicker }
           } else {
             Picker("Rest for", selection: $draft.minutes) {
               ForEach([5, 10, 20, 30, 45, 60], id: \.self) { minutes in
@@ -61,6 +75,7 @@ struct RestTimeSheet: View {
       .padding(RestStyle.pageInset).background(RestStyle.background)
     }
     .restScreen()
+    .onAppear { errorIsFocused = validationMessage != nil }
     .navigationTitle("Time to rest")
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
@@ -69,6 +84,31 @@ struct RestTimeSheet: View {
       }
     }
   }
+
+  @ViewBuilder private var wakeTimePicker: some View {
+    if dynamicTypeSize.isAccessibilitySize {
+      // A combined compact picker squeezes its label and two fields into one
+      // row at accessibility sizes. Keep native date/time controls, stacked.
+      VStack(alignment: .leading, spacing: 8) {
+        Text("Wake time").font(.subheadline)
+        DatePicker("Wake date", selection: $draft.wakeTime, displayedComponents: .date)
+          .datePickerStyle(.compact).labelsHidden()
+          .accessibilityLabel("Wake date")
+          .accessibilityIdentifier("napPlanExactWakeDate")
+        DatePicker("Wake time", selection: $draft.wakeTime, displayedComponents: .hourAndMinute)
+          .datePickerStyle(.compact).labelsHidden()
+          .accessibilityLabel("Wake time")
+          .accessibilityIdentifier("napPlanExactWakeTime")
+      }
+    } else {
+      DatePicker(
+        "Wake time", selection: $draft.wakeTime, displayedComponents: [.date, .hourAndMinute]
+      )
+      .accessibilityLabel("Wake time")
+      .accessibilityIdentifier("napPlanExactWakeTime")
+    }
+  }
+
 }
 
 struct RestDurationChoices: View {
@@ -121,7 +161,9 @@ struct RestSoundSheet: View {
       VStack(alignment: .leading, spacing: 24) {
         RestHeading(
           "Let the quiet stay.",
-          subtitle: "For quiet parts of your plan, including after the last narration.")
+          subtitle: "Choose what plays during quiet parts of your rest."
+        )
+        .accessibilityIdentifier("restSoundExplanation")
         RestCard {
           choice("Silence", subtitle: "The default. Nothing more to hear.", id: nil)
           if availableIDs.contains(PreparedAmbience.gentleRainID) {
@@ -151,7 +193,7 @@ struct RestSoundSheet: View {
       .padding(RestStyle.pageInset).background(RestStyle.background)
     }
     .restScreen()
-    .navigationTitle("After narration")
+    .navigationTitle("Rest sound")
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
       ToolbarItem(placement: .cancellationAction) {

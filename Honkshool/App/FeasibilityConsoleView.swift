@@ -36,6 +36,7 @@ struct FeasibilityConsoleView: View {
   @State private var runWakeDate: Date?
   @State private var loadedPreferences = false
   @State private var selectedTab: Tab = .rest
+  @State private var restRootID = UUID()
   @State private var showingSettings = false
   @State private var browsingCatalog: PreparedCatalog?
   @State private var browsingError: String?
@@ -63,6 +64,7 @@ struct FeasibilityConsoleView: View {
             settingsScreen
           }
       }
+      .id(restRootID)
       .tabItem { Label("Rest", systemImage: "moon") }
       .tag(Tab.rest)
       .accessibilityIdentifier("restTab")
@@ -142,7 +144,7 @@ struct FeasibilityConsoleView: View {
             settingsRow("Rest defaults", value: "\(settingsDefaults.durationMinutes) min")
           }.accessibilityIdentifier("openRestDefaults")
           LabeledContent(
-            "After narration",
+            "Rest sound",
             value: settingsDefaults.soundID.map(PreparedAmbience.displayName) ?? "Silence"
           )
           .accessibilityIdentifier("settingsRestSound")
@@ -254,6 +256,14 @@ struct FeasibilityConsoleView: View {
     } catch {
       browsingError = "The prepared library could not be loaded. \(error.localizedDescription)"
     }
+  }
+
+  private func returnToRest() {
+    // A completed History/library run must leave its explicit historical selection
+    // behind and rebuild the Rest root from current saved progress.
+    showingSettings = false
+    restRootID = UUID()
+    selectedTab = .rest
   }
 
   private func showHistory() {
@@ -374,7 +384,7 @@ struct FeasibilityConsoleView: View {
     #if DEBUG
       NapPlanReviewView(
         run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
-        isHome: isHome, onShowHistory: showHistory,
+        isHome: isHome, onShowHistory: showHistory, onReturnToRest: returnToRest,
         canStart: {
           (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
             && !alarm.hasTrackedAlarm
@@ -386,7 +396,7 @@ struct FeasibilityConsoleView: View {
     #else
       NapPlanReviewView(
         run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
-        isHome: isHome, onShowHistory: showHistory,
+        isHome: isHome, onShowHistory: showHistory, onReturnToRest: returnToRest,
         canStart: {
           (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
             && !alarm.hasTrackedAlarm
