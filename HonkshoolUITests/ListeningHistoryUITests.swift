@@ -132,6 +132,40 @@ final class ListeningHistoryUITests: XCTestCase {
     attachScreenshot("Rest retains the separate alarm gate", in: app)
   }
 
+  func testWaitingOnlyReturnPreservesAcknowledgedCheckpoint() {
+    let app = launch(reset: true, seed: true)
+    let acknowledge = app.buttons["acknowledgeRecoveredRest"]
+    XCTAssertTrue(acknowledge.waitForExistence(timeout: 5))
+    acknowledge.tap()
+    openHistory(in: app)
+    let resume = app.buttons["historyResume"].firstMatch
+    scrollTo(resume, in: app)
+    resume.tap()
+    let alarm = app.switches["napPlanAlarm"]
+    scrollTo(alarm, in: app)
+    alarm.tap()
+    let review = app.buttons["reviewNapPlan"]
+    scrollTo(review, in: app)
+    review.tap()
+    let confirm = app.buttons["confirmNapPlan"]
+    scrollTo(confirm, in: app)
+    confirm.tap()
+    app.buttons["startNapRun"].tap()
+    let stop = app.buttons["stopNapRun"]
+    XCTAssertTrue(stop.waitForExistence(timeout: 5))
+    scrollTo(stop, in: app)
+    stop.tap()
+    let back = app.buttons["reviewAnotherNapPlan"]
+    scrollTo(back, in: app)
+    back.tap()
+    XCTAssertTrue(app.tabBars.buttons["Rest"].isSelected)
+    XCTAssertTrue(review.waitForExistence(timeout: 5))
+    XCTAssertFalse(acknowledge.exists)
+    XCTAssertTrue(app.staticTexts["napPlanResumePosition"].label.contains("2m 0s"))
+    XCTAssertFalse(app.buttons["startNapRun"].exists)
+    XCTAssertFalse(app.staticTexts["napRunStatus"].exists)
+  }
+
   private func launch(reset: Bool, seed: Bool, realPlanClock: Bool = false) -> XCUIApplication {
     let app = XCUIApplication()
     app.launchArguments = ["-ui-testing"]

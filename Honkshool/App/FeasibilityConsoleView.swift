@@ -36,7 +36,7 @@ struct FeasibilityConsoleView: View {
   @State private var runWakeDate: Date?
   @State private var loadedPreferences = false
   @State private var selectedTab: Tab = .rest
-  @State private var restRootID = UUID()
+  @State private var restRefreshID = UUID()
   @State private var showingSettings = false
   @State private var browsingCatalog: PreparedCatalog?
   @State private var browsingError: String?
@@ -64,7 +64,6 @@ struct FeasibilityConsoleView: View {
             settingsScreen
           }
       }
-      .id(restRootID)
       .tabItem { Label("Rest", systemImage: "moon") }
       .tag(Tab.rest)
       .accessibilityIdentifier("restTab")
@@ -260,9 +259,9 @@ struct FeasibilityConsoleView: View {
 
   private func returnToRest() {
     // A completed History/library run must leave its explicit historical selection
-    // behind and rebuild the Rest root from current saved progress.
+    // behind and refresh Rest from current saved progress, preserving recovery acknowledgement.
     showingSettings = false
-    restRootID = UUID()
+    restRefreshID = UUID()
     selectedTab = .rest
   }
 
@@ -385,6 +384,7 @@ struct FeasibilityConsoleView: View {
       NapPlanReviewView(
         run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
         isHome: isHome, onShowHistory: showHistory, onReturnToRest: returnToRest,
+        restRefreshID: isHome ? restRefreshID : nil,
         canStart: {
           (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
             && !alarm.hasTrackedAlarm
@@ -397,6 +397,7 @@ struct FeasibilityConsoleView: View {
       NapPlanReviewView(
         run: napRun, alarm: napAlarm, historyStore: historyStore, startingAt: selection,
         isHome: isHome, onShowHistory: showHistory, onReturnToRest: returnToRest,
+        restRefreshID: isHome ? restRefreshID : nil,
         canStart: {
           (audio.phase == .idle || audio.phase == .stopped || audio.phase == .failed)
             && !alarm.hasTrackedAlarm

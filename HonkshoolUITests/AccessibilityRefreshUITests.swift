@@ -25,6 +25,7 @@ final class AccessibilityRefreshUITests: XCTestCase {
 
     scrollTo(app.buttons["napPlanSound"], in: app)
     app.buttons["napPlanSound"].tap()
+    XCTAssertTrue(app.navigationBars["Rest sound"].waitForExistence(timeout: 5))
     let silence = app.buttons["Silence"]
     scrollTo(silence, in: app)
     XCTAssertEqual(silence.label, "Silence. The default. Nothing more to hear.")
@@ -151,23 +152,32 @@ final class AccessibilityRefreshUITests: XCTestCase {
   }
 
   private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {
-    for _ in 0..<16 {
-      if element.isHittable { return }
-      // Keep the gesture inside content rather than the pinned primary action.
-      var bottom = app.frame.height - 140
-      for id in ["reviewNapPlan", "startNapRun", "applyNapTime", "applyNapSound"] {
-        let button = app.buttons[id]
-        if button.exists && button.isHittable { bottom = min(bottom, button.frame.minY - 30) }
-      }
-      let top: CGFloat = 145
-      bottom = max(top + 80, bottom)
-      let origin = app.coordinate(withNormalizedOffset: .zero)
-      origin.withOffset(CGVector(dx: app.frame.width * 0.7, dy: bottom))
-        .press(
-          forDuration: 0.05,
-          thenDragTo: origin.withOffset(CGVector(dx: app.frame.width * 0.7, dy: top)))
+    func visibleBounds() -> (top: CGFloat, bottom: CGFloat) {
+      let top =
+        app.navigationBars.allElementsBoundByIndex
+        .filter(\.isHittable).map { $0.frame.maxY }.max() ?? app.frame.minY
+      let bottom =
+        ["reviewNapPlan", "applyNapTime", "applyNapSound", "startNapRun"]
+        .filter { $0 != element.identifier }.map { app.buttons[$0] }
+        .filter { $0.exists && $0.isHittable }.map { $0.frame.minY }.min() ?? app.frame.maxY
+      return (top, bottom)
     }
-    XCTFail("Element is not reachable: \(element)")
+    func isFullyReachable() -> Bool {
+      guard element.exists, element.isHittable else { return false }
+      let bounds = visibleBounds()
+      return element.frame.minY >= bounds.top && element.frame.maxY < bounds.bottom
+    }
+    // Large text can make a switch hittable while its tap point is under a
+    // navigation bar or pinned Apply button. Small drags avoid skipping the
+    // usable viewport when a tall row needs to be brought completely into view.
+    for _ in 0..<24 {
+      if isFullyReachable() { return }
+      let above = element.exists && element.frame.minY < visibleBounds().top
+      let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+      let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: above ? 0.68 : 0.32))
+      start.press(forDuration: 0.01, thenDragTo: end)
+    }
+    XCTAssertTrue(isFullyReachable(), "Element is not fully reachable: \(element.identifier)")
   }
 
   private func capture(_ name: String) {

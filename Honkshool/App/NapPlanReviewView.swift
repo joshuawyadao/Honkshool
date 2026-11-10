@@ -12,6 +12,7 @@ struct NapPlanReviewView: View {
   private let isHome: Bool
   private let onShowHistory: () -> Void
   private let onReturnToRest: () -> Void
+  private let restRefreshID: UUID?
   private let initialSelection: SessionSelection?
   private let canStart: () -> Bool
   private let clock: () -> Date
@@ -61,6 +62,7 @@ struct NapPlanReviewView: View {
     isHome: Bool = false,
     onShowHistory: @escaping () -> Void = {},
     onReturnToRest: @escaping () -> Void = {},
+    restRefreshID: UUID? = nil,
     canStart: @escaping () -> Bool = { true },
     clock: @escaping () -> Date = { .now },
     confirmationClock: (() -> Date)? = nil,
@@ -74,6 +76,7 @@ struct NapPlanReviewView: View {
     self.isHome = isHome
     self.onShowHistory = onShowHistory
     self.onReturnToRest = onReturnToRest
+    self.restRefreshID = restRefreshID
     self.run = run
     self.alarm = alarm
     self.historyStore = historyStore
@@ -180,6 +183,9 @@ struct NapPlanReviewView: View {
       applyChangedDefaults()
     }
     .onChange(of: run.lastRunPlanID) { _, _ in clearConsumedReviewIfNeeded() }
+    .onChange(of: restRefreshID) { _, _ in
+      if isHome, !run.hasActiveRun { resetPlan() }
+    }
     .onDisappear { isVisible = false }
     .onChange(of: scenePhase) { _, _ in readinessNow = .now }
     .onReceive(
