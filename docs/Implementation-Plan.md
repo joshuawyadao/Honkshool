@@ -14,17 +14,20 @@ Correct alarm uncertainty, expired-start readiness, and silence-only wording whi
 - [x] Make silence-only waiting, ending, and controls describe quiet rest; preserve audio-bearing plan behavior, alarm consequences, and empty narration history.
 - [x] Add UI regressions for the three reported defects and inspect updated normal/large-text states; coordinate view ownership centrally and delegate only disjoint service/test files.
 - [x] Update User Guide, Troubleshooting, Screen Implementation Map, and Nap Planning domain documentation for the changed behavior.
-- [ ] Run focused XCTest cases, the full simulator suite, repository verification, and correctness review; record results and retained device/VoiceOver gaps.
-- [ ] Commit coherent implementation checkpoints, finish this ledger, and push the new branch with only task files staged.
+- [x] Run focused XCTest cases, the full simulator suite, repository verification, and correctness review; record results and retained device/VoiceOver gaps.
+- [x] Commit coherent implementation checkpoints, finish this ledger, and push the new branch with only task files staged.
 
 ## Open questions
 - None. Preserve the existing approved-start boundary and immutable deadline; use a calm renewed-review action instead of silently rescheduling.
 
 ## Validation ledger
-- Plan checkpoint: `e21d20a`, based on main `2fed8d3`.
+- Plan checkpoint: `e21d20a`, based on main `2fed8d3`. Implementation checkpoint: `4f02277`.
 - Repository verification: 66 checks passed.
 - Correctness review found a missing retry control in uncertain alarm recovery; added **Check again** and explicit system-controls guidance for unreadable alarm details. A second review prompted preserving permission-denial guidance and Settings access after timing expires, now covered by a UI regression.
 - Focused final simulator run: 64 passed, zero failures or skips. The first run also passed both real-clock expiry UI paths; its one quiet-rest assertion capitalization error was corrected and passed on rerun.
 - Normal and largest-text screenshots inspected: expiry messaging, preserved timestamps, reachable renewed-review action, quiet-rest control, and uncertain-alarm heading.
-- Swift formatting lint passed for all changed Swift files. Full-suite validation is in progress.
+- Full simulator suite on iPhone 17 Pro / iOS 26.5: 283 passed, six opt-in physical-device tests skipped, and one failure in the existing largest-text duration/sound UI test while scrolling to More options. That test passed unchanged on an isolated rerun; retain this as intermittent UI-test evidence rather than describing the initial full run as clean.
+- All requested-fix regressions passed in the full suite. The initial full run passed 233 unit tests and 50 UI tests; the isolated rerun passed the remaining UI case.
+- Swift formatting lint passed for all changed Swift files. Repository verification passed all 66 checks. Generated logs, screenshots, and result bundles remain outside the commit.
+- Saved branch: `codex/ux-status-recovery-fixes`; no pull request or merge is part of this task.
 - Physical-device alarm/audio acceptance and manual VoiceOver traversal remain outside this change.
