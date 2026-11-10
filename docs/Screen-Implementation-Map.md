@@ -14,8 +14,8 @@ The [approved atlas](../design/quiet-curiosity/screen-atlas.html) establishes la
 | 06 `screen-sound` | Rest → After narration sheet. | `RestSetupSheets.swift` (`RestSoundSheet`); Silence or verified Gentle rain. Cancel/dismiss keeps prior choice. |
 | 07 `screen-review` | Rest → Review nap plan. | `NapPlanReviewView.swift` (`reviewContent`); actual ordered route, deadline, rest sound, and alarm before confirmation. |
 | 08 `screen-permission` | Confirmed alarm plan → Start resting with undetermined AlarmKit access. | `NapPlanReviewView.swift` (`alarmAccessContent`) then the system permission request; alarm must be scheduled and verified before playback. |
-| 09 `screen-ready` | Rest → Confirm this plan. | `NapPlanReviewView.swift` (`confirmedContent`); Start resting remains a separate action. |
-| 10 `screen-waiting` | Started plan before approved audio or visible silence-only rest starts. | `NapPlanReviewView.swift` (`runContent`), driven by `NapRunController`; keep the app foregrounded until that state advances. |
+| 09 `screen-ready` | Rest → Confirm this plan. | `NapPlanReviewView.swift` (`confirmedContent`, `expiredStartContent`); Start resting remains separate and is replaced by Review updated timing when the approved start expires, including after foreground return. |
+| 10 `screen-waiting` | Started plan before approved audio or visible silence-only rest starts. | `NapPlanReviewView.swift` (`runContent`), driven by `NapRunController`; keep the app foregrounded until that state advances. Silence-only plans describe the rest start and offer End rest. |
 | 11 `screen-playing` | Active narration. | `NapPlanReviewView.swift` (`runContent`); fixed deadline and actual playback status. |
 | 12 `screen-paused` | Pause or audio interruption during a run. | `NapPlanReviewView.swift` (`runContent`); explicit resume when available. |
 | 13 `screen-quiet` | Planned quiet or rain after narration, or silence-only rest. | `NapPlanReviewView.swift` (`runContent`); fixed deadline, no attention-demanding prompt. |
@@ -25,7 +25,7 @@ The [approved atlas](../design/quiet-curiosity/screen-atlas.html) establishes la
 | 17 `screen-history` | History tab. | `ListeningHistoryView.swift`; Continue, valid Resume, and Replay open a fresh review. |
 | 18 `screen-saved-place` | History entry whose checkpoint cannot resume against current content/audio. | `ListeningHistoryView.swift`, also reflected in `RestContentViews.swift`; record remains visible and current audio may be chosen from the beginning. |
 | 19 `screen-alarm-failure` | Alarm-requested start fails permission or scheduling. | `NapPlanReviewView.swift` (`blockedStartContent`); playback has not started; Settings/retry/change-plan actions are explicit. |
-| 20 `screen-existing-alarm` | Rest reopened with a tracked wake alarm. | `NapPlanReviewView.swift` (`existingAlarmPage`, `trackedAlarmContent`); cancel the old alarm before another plan. |
+| 20 `screen-existing-alarm` | Rest reopened with a tracked wake alarm. | `NapPlanReviewView.swift` (`existingAlarmPage`, `trackedAlarmContent`); heading and guidance reflect verified scheduled, snoozed, paused, ringing, or uncertain state. Cancel the old alarm before another plan. |
 | 21 `screen-short-plan` | Reviewed route contains no narration that fits. | `NapPlanReviewView.swift` (`reviewContent`); the actual selected rain or silence runs to the fixed deadline after confirmation and Start. |
 | 22 `screen-rain-fallback` | Rain fails during active rest. | `NapPlanReviewView.swift` (`runContent`); visible silent rest, unchanged deadline and wake alarm. |
 | 23 `screen-recovered` | Rest reopened with a verified checkpoint as the latest saved entry. | `NapPlanReviewView.swift` (`checkpointRecovery`); no autoplay or inferred completion. |

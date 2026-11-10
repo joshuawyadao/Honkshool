@@ -4,6 +4,7 @@ import SwiftUI
 struct NapPlanReviewView: View {
   private static let plannedStartLead: TimeInterval = 60
   @Environment(\.openURL) private var openURL
+  @Environment(\.scenePhase) private var scenePhase
   @Environment(\.dismiss) private var dismiss
   @ObservedObject private var run: NapRunController
   @ObservedObject private var alarm: NapPlanAlarmService
@@ -47,6 +48,8 @@ struct NapPlanReviewView: View {
   @State private var startedPlanID: String?
   @State private var isStarting = false
   @State private var isVisible = false
+  @State private var readinessNow = Date.now
+  @State private var clockRevision = 0
 
   init(
     run: NapRunController,
@@ -112,7 +115,9 @@ struct NapPlanReviewView: View {
             .accessibilityIdentifier("napPlanCatalogError")
           } else if let catalog, let reviewCatalog {
             if let confirmed = reviewState.confirmed {
-              if showsAlarmPrimer {
+              if confirmed.hasStartExpired(at: readinessNow), !isStarting {
+                expiredStartContent(confirmed)
+              } else if showsAlarmPrimer {
                 alarmAccessContent(confirmed)
               } else {
                 confirmedContent(confirmed)
@@ -148,7 +153,8 @@ struct NapPlanReviewView: View {
           .background(RestStyle.background)
       } else if !run.hasActiveRun, !(isHome && run.phase != .idle),
         let confirmed = reviewState.confirmed, run.lastRunPlanID != confirmed.plan.id,
-        runError == nil, !showsAlarmPrimer, !alarm.hasTrackedAlarm
+        runError == nil, !showsAlarmPrimer, !alarm.hasTrackedAlarm,
+        !confirmed.hasStartExpired(at: readinessNow)
       {
         startRestAction(confirmed)
           .padding(.horizontal, RestStyle.pageInset)
@@ -162,11 +168,20 @@ struct NapPlanReviewView: View {
     .navigationBarTitleDisplayMode(.inline)
     .onAppear {
       isVisible = true
+      readinessNow = .now
       clearConsumedReviewIfNeeded()
       applyChangedDefaults()
     }
     .onChange(of: run.lastRunPlanID) { _, _ in clearConsumedReviewIfNeeded() }
     .onDisappear { isVisible = false }
+    .onChange(of: scenePhase) { _, _ in readinessNow = .now }
+    .onReceive(
+      NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)
+    ) { _ in
+      readinessNow = .now
+      clockRevision += 1
+    }
+    .task(id: readinessObservationID) { await observeStartExpiry() }
     .sheet(item: $activeSheet) { sheet in
       NavigationStack { setupSheet(sheet) }
         .presentationDragIndicator(.visible)
@@ -608,6 +623,7 @@ struct NapPlanReviewView: View {
   }
 
   private func confirm() {
+    readinessNow = .now
     let now = confirmationClock()
     do {
       try reviewState.confirm(at: now)
@@ -634,8 +650,8 @@ struct NapPlanReviewView: View {
     } else {
       VStack(alignment: .leading, spacing: 24) {
         GooseMark(size: 84).frame(maxWidth: .infinity).padding(.vertical, 8)
-        RestHeading("Ready when\nyou are.")
-        Text("Your plan is ready. Start when you’re comfortable.")
+        RestHeading("Ready to rest.")
+        Text("Start by the planned rest time below. If it passes, we’ll review the timing again.")
           .foregroundStyle(RestStyle.secondary).accessibilityIdentifier("napPlanConfirmation")
         RestCard(title: "Rest ends at") {
           deadlineText(confirmed.plan.deadline)
@@ -665,9 +681,63 @@ struct NapPlanReviewView: View {
     }
   }
 
+  private var readinessObservationID: String {
+    "\(reviewState.confirmed?.plan.id ?? "")-\(isVisible)-\(scenePhase == .active)-\(run.hasActiveRun)-\(clockRevision)"
+  }
+
+  private func observeStartExpiry() async {
+    readinessNow = .now
+    guard isVisible, scenePhase == .active, !run.hasActiveRun,
+      let confirmed = reviewState.confirmed
+    else { return }
+    while !Task.isCancelled, !confirmed.hasStartExpired(at: readinessNow) {
+      // A single wake-up at the boundary; no visible countdown or repeated UI polling.
+      let delay = min(86_400, max(0.01, confirmed.plan.start.timeIntervalSinceNow + 0.01))
+      do { try await Task.sleep(for: .seconds(delay)) } catch { return }
+      readinessNow = .now
+    }
+  }
+
+  private func expiredStartContent(_ confirmed: NapPlanReview) -> some View {
+    VStack(alignment: .leading, spacing: 24) {
+      RestHeading(
+        "Let’s check the\ntiming again.",
+        subtitle: "Your planned start has passed. Rest hasn’t started."
+      )
+      .accessibilityIdentifier("napPlanStartExpired")
+      RestCard(title: "Your earlier timing") { confirmedTiming(confirmed.plan) }
+      if let runError {
+        errorLabel(runError, id: "napRunError")
+        if alarm.authorization == .denied { alarmSettingsButton }
+      }
+      if alarm.hasTrackedAlarm {
+        trackedAlarmContent
+      } else {
+        Button("Review updated timing") {
+          reviewState = NapPlanReviewState()
+          showsAlarmPrimer = false
+          runError = nil
+          startFailure = nil
+          if let catalog, let reviewCatalog {
+            review(
+              catalog, reviewCatalog: reviewCatalog,
+              options: sessionOptions(in: catalog, reviewCatalog: reviewCatalog), at: .now)
+          }
+        }
+        .buttonStyle(RestButtonStyle()).accessibilityIdentifier("reviewUpdatedNapTiming")
+      }
+      Button("Change your plan") { resetPlan() }
+        .frame(minHeight: 44).accessibilityIdentifier("reviewAnotherNapPlan")
+      Text("Your choices stay the same. Check the new timing and confirm before starting.")
+        .foregroundStyle(RestStyle.secondary)
+    }
+  }
+
   private func startRestAction(_ confirmed: NapPlanReview) -> some View {
     VStack(spacing: 8) {
       Button("Start resting") {
+        readinessNow = .now
+        guard !confirmed.hasStartExpired(at: readinessNow) else { return }
         if confirmed.plan.wakeAlarm != nil && alarm.authorization == .notDetermined {
           showsAlarmPrimer = true
         } else {
@@ -696,13 +766,21 @@ struct NapPlanReviewView: View {
           RestStyle.secondary)
       }
       Button("Continue to alarm access") {
+        readinessNow = .now
         showsAlarmPrimer = false
+        guard !confirmed.hasStartExpired(at: readinessNow) else { return }
         Task { await startConfirmed(confirmed) }
       }
       .buttonStyle(RestButtonStyle()).accessibilityIdentifier("continueAlarmAccess")
       Button("Go back to your choices") { resetPlan() }
         .frame(minHeight: 44).accessibilityIdentifier("cancelAlarmAccess")
     }
+  }
+
+  private var alarmSettingsButton: some View {
+    Button("Open iPhone Settings") {
+      if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+    }.buttonStyle(RestButtonStyle()).accessibilityIdentifier("openAlarmSettings")
   }
 
   private func blockedStartContent(_ confirmed: NapPlanReview, message: String) -> some View {
@@ -718,9 +796,7 @@ struct NapPlanReviewView: View {
         if alarm.authorization == .denied {
           Text("Allow alarms for Honkshool in iPhone Settings, then try again.")
             .foregroundStyle(RestStyle.secondary)
-          Button("Open iPhone Settings") {
-            if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
-          }.buttonStyle(RestButtonStyle()).accessibilityIdentifier("openAlarmSettings")
+          alarmSettingsButton
         }
       }
       if alarm.hasTrackedAlarm {
@@ -777,8 +853,8 @@ struct NapPlanReviewView: View {
   private var existingAlarmPage: some View {
     VStack(alignment: .leading, spacing: 24) {
       RestHeading(
-        "Your alarm\nis still set.",
-        subtitle: "Your earlier wake alarm remains separate from playback.")
+        alarm.recoveryHeading,
+        subtitle: alarm.recoveryExplanation)
       trackedAlarmContent
       Text("Your listening history is ready for another time.").foregroundStyle(RestStyle.secondary)
       historyButton
@@ -829,12 +905,16 @@ struct NapPlanReviewView: View {
           .accessibilityIdentifier("resumeNapRun")
       }
       if run.hasActiveRun {
-        Button("Stop playback") { run.stop() }
+        Button(run.stopActionTitle) { run.stop() }
           .frame(minHeight: 44)
           .accessibilityIdentifier("stopNapRun")
         if plan?.wakeAlarm != nil {
-          Text("Stopping playback does not cancel the wake alarm.")
-            .font(.footnote).foregroundStyle(RestStyle.secondary)
+          Text(
+            run.isSilenceOnlyRest
+              ? "Ending rest does not cancel the wake alarm."
+              : "Stopping playback does not cancel the wake alarm."
+          )
+          .font(.footnote).foregroundStyle(RestStyle.secondary)
         }
       } else {
         if !run.records.isEmpty {
@@ -890,6 +970,12 @@ struct NapPlanReviewView: View {
         Text("Cancel the existing alarm before making another plan.")
           .font(.subheadline).foregroundStyle(RestStyle.secondary)
           .accessibilityIdentifier("napRunPreviousAlarmGate")
+        if alarm.alarmStatus.phase == .unavailable {
+          Button("Check again") { alarm.refresh() }
+            .buttonStyle(RestButtonStyle(secondary: true))
+            .disabled(alarm.isScheduling)
+            .accessibilityIdentifier("retryNapPlanAlarmCheck")
+        }
         if alarm.canCancelTrackedAlarm {
           Button("Cancel wake alarm") {
             if !alarm.cancel() { runError = alarm.statusMessage }
@@ -984,7 +1070,10 @@ struct NapPlanReviewView: View {
     guard !isStarting else { return }
     isStarting = true
     startFailure = nil
-    defer { isStarting = false }
+    defer {
+      readinessNow = .now
+      isStarting = false
+    }
     guard canStart() else {
       runError = "Stop the feasibility audio and cancel its test alarm before starting a Nap Plan."
       return

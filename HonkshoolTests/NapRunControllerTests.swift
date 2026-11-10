@@ -463,6 +463,9 @@ final class NapRunControllerTests: XCTestCase {
 
     try run.start(review: approved, catalog: catalog)
     XCTAssertEqual(run.phase, .waiting)
+    XCTAssertFalse(run.isSilenceOnlyRest)
+    XCTAssertEqual(run.stopActionTitle, "Stop playback")
+    XCTAssertTrue(run.statusMessage.contains("playback begins"))
     XCTAssertEqual(player.playCount, 0)
     scheduler.advance(to: approved.plan.start)
     XCTAssertEqual(run.phase, .narrating)
@@ -473,11 +476,127 @@ final class NapRunControllerTests: XCTestCase {
     XCTAssertEqual(run.records.count, 1)
     XCTAssertTrue(try XCTUnwrap(run.records.first).isCompleted)
     XCTAssertEqual(run.phase, .resting)
+    XCTAssertFalse(run.isSilenceOnlyRest)
+    XCTAssertEqual(run.stopActionTitle, "Stop playback")
     XCTAssertEqual(approved.plan.deadline, approved.plan.start.addingTimeInterval(1_200))
 
     scheduler.advance(to: approved.plan.deadline)
     XCTAssertEqual(run.phase, .finished)
     XCTAssertEqual(run.records.count, 1)
+  }
+
+  func testSilenceOnlyRestUsesHonestWaitingActiveAndEarlyStopStatus() throws {
+    let catalog = try PreparedCatalog.load()
+    for alarmEnabled in [false, true] {
+      let clock = RunTestClock()
+      let scheduler = RunTestScheduler(clock: clock)
+      let narration = RunFakePlayer()
+      let rain = RunFakeAmbience()
+      let history = RunHistoryRecorder()
+      var activations = 0
+      let run = controller(
+        clock: clock, scheduler: scheduler, player: narration,
+        activation: { activations += 1 }, history: history, ambience: rain)
+      XCTAssertFalse(run.isSilenceOnlyRest)
+      XCTAssertEqual(run.stopActionTitle, "Stop playback")
+      let approved = try review(
+        catalog: catalog, now: clock.now, duration: 100, alarm: alarmEnabled)
+      XCTAssertTrue(approved.plan.route.isEmpty)
+      XCTAssertEqual(approved.plan.fallback, .silence)
+      let receipt = approved.plan.wakeAlarm.map {
+        ScheduledNapAlarm(planID: approved.plan.id, id: UUID(), deadline: $0)
+      }
+
+      try run.start(review: approved, catalog: catalog, scheduledAlarm: receipt)
+      XCTAssertEqual(run.phase, .waiting)
+      XCTAssertTrue(run.isSilenceOnlyRest)
+      XCTAssertEqual(run.stopActionTitle, "End rest")
+      XCTAssertEqual(
+        run.statusMessage,
+        "Keep Honkshool open until quiet rest begins at the approved start.")
+      scheduler.advance(to: approved.plan.start)
+      XCTAssertEqual(run.phase, .resting)
+      XCTAssertEqual(run.statusMessage, "Quiet rest continues until the fixed deadline.")
+      XCTAssertFalse(run.canPause)
+      XCTAssertEqual(activations, 0)
+      XCTAssertEqual(narration.playCount, 0)
+      XCTAssertEqual(rain.playCount, 0)
+
+      run.stop()
+      XCTAssertEqual(run.phase, .stopped)
+      XCTAssertEqual(run.stopActionTitle, "End rest")
+      XCTAssertEqual(
+        run.statusMessage,
+        alarmEnabled
+          ? "Quiet rest ended. The wake alarm was not cancelled here; check its status separately."
+          : "Quiet rest ended. No wake alarm was scheduled.")
+      XCTAssertTrue(run.records.isEmpty)
+      XCTAssertTrue(history.saved.isEmpty)
+      XCTAssertEqual(activations, 0)
+      scheduler.advance(to: approved.plan.deadline)
+      XCTAssertEqual(run.phase, .stopped)
+      run.resetPresentation()
+      XCTAssertFalse(run.isSilenceOnlyRest)
+      XCTAssertEqual(run.stopActionTitle, "Stop playback")
+    }
+  }
+
+  func testSilenceOnlyRestDeadlineKeepsWakeAlarmSeparateWithoutAudioEvidence() throws {
+    let catalog = try PreparedCatalog.load()
+    for alarmEnabled in [false, true] {
+      let clock = RunTestClock()
+      let scheduler = RunTestScheduler(clock: clock)
+      let narration = RunFakePlayer()
+      let rain = RunFakeAmbience()
+      let history = RunHistoryRecorder()
+      var activations = 0
+      let run = controller(
+        clock: clock, scheduler: scheduler, player: narration,
+        activation: { activations += 1 }, history: history, ambience: rain)
+      let approved = try review(
+        catalog: catalog, now: clock.now, duration: 100, alarm: alarmEnabled)
+      let receipt = approved.plan.wakeAlarm.map {
+        ScheduledNapAlarm(planID: approved.plan.id, id: UUID(), deadline: $0)
+      }
+
+      try run.start(review: approved, catalog: catalog, scheduledAlarm: receipt)
+      scheduler.advance(to: approved.plan.start)
+      scheduler.advance(to: approved.plan.deadline)
+      XCTAssertEqual(run.phase, .finished)
+      XCTAssertEqual(
+        run.statusMessage,
+        alarmEnabled
+          ? "The fixed rest deadline arrived. Quiet rest ended; the system wake alarm was scheduled separately."
+          : "The fixed rest deadline arrived. Quiet rest ended.")
+      XCTAssertTrue(run.isSilenceOnlyRest)
+      XCTAssertTrue(run.records.isEmpty)
+      XCTAssertTrue(history.saved.isEmpty)
+      XCTAssertEqual(activations, 0)
+      XCTAssertEqual(narration.playCount, 0)
+      XCTAssertEqual(rain.playCount, 0)
+    }
+  }
+
+  func testSilenceOnlyRestForegroundExitBeforeStartRequiresNewReview() throws {
+    let catalog = try PreparedCatalog.load()
+    let clock = RunTestClock()
+    let scheduler = RunTestScheduler(clock: clock)
+    let narration = RunFakePlayer()
+    let history = RunHistoryRecorder()
+    let run = controller(
+      clock: clock, scheduler: scheduler, player: narration, history: history)
+    let approved = try review(catalog: catalog, now: clock.now, duration: 100)
+
+    try run.start(review: approved, catalog: catalog)
+    run.scenePhaseChanged(isActive: false)
+    XCTAssertEqual(run.phase, .failed)
+    XCTAssertEqual(
+      run.statusMessage,
+      "The app left the foreground before quiet rest began. Review a new Nap Plan.")
+    scheduler.advance(to: approved.plan.deadline)
+    XCTAssertEqual(run.phase, .failed)
+    XCTAssertEqual(narration.playCount, 0)
+    XCTAssertTrue(history.saved.isEmpty)
   }
 
   func testPauseTimeIsExcludedAndStopRetainsAudioCheckpoint() throws {
@@ -746,8 +865,12 @@ final class NapRunControllerTests: XCTestCase {
       sound: .ambience(id: PreparedAmbience.gentleRainID))
     XCTAssertTrue(approved.plan.route.isEmpty)
     try run.start(review: approved, catalog: catalog)
+    XCTAssertFalse(run.isSilenceOnlyRest)
+    XCTAssertEqual(run.stopActionTitle, "Stop playback")
+    XCTAssertTrue(run.statusMessage.contains("playback begins"))
     scheduler.advance(to: approved.plan.start)
     XCTAssertEqual(run.phase, .ambience)
+    XCTAssertEqual(run.stopActionTitle, "Stop playback")
     XCTAssertEqual(narration.playCount, 0)
 
     NotificationCenter.default.post(

@@ -15,6 +15,11 @@ struct NapPlanReview: Equatable, Sendable {
   let selectedSession: SessionSelection
   let approvedTransitions: [JourneyTransition]
   let route: [NapPlanReviewRouteItem]
+
+  /// Matches the run's inclusive start boundary without changing the approved snapshot.
+  func hasStartExpired(at now: Date) -> Bool {
+    !now.timeIntervalSinceReferenceDate.isFinite || now > plan.start || now >= plan.deadline
+  }
 }
 
 enum NapPlanReviewError: Error, Equatable {

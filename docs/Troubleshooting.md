@@ -22,7 +22,7 @@ Use the visible app or Xcode message first. This is an experimental build, so ke
 | You need the diagnostic controls | From **Rest**, open **Settings → Advanced → Feasibility Lab**. Its audio and test-alarm controls are separate from the Nap Plan. |
 | Start says to stop feasibility audio or cancel a test alarm | Stop that console run and explicitly cancel its test alarm. Then return to the Nap Plan. |
 | A previous wake alarm blocks a new plan | Use **Cancel wake alarm** on Rest after playback stops, or **Cancel Nap Plan wake alarm** in **Settings → Advanced → Feasibility Lab**, and check the result before starting another. |
-| The approved start passed | Review the updated deadline and route, confirm again, and tap **Start resting** before the new approved start. Do not assume the old confirmation is still valid. |
+| The approved start passed | The ready screen replaces Start with **Review updated timing**. Tap it, review the new deadline and route, and confirm again. An exact wake time that is already past needs a new selection. Timing never moves without a fresh review. |
 | Alarm access is denied or scheduling fails | The alarm-enabled plan cannot start. Check the app's alarm permission in iOS Settings and review again, or deliberately turn off **Wake alarm** and review an alarm-free plan. |
 | Audio failed after an alarm was scheduled | The alarm can still be active. Read the status and cancel it explicitly if no longer wanted. |
 | The review has no narration | The selected complete narration may not fit within the selected window. Choose a longer rest window or accept the reviewed rain/silence-only plan. |
@@ -35,7 +35,8 @@ Use the visible app or Xcode message first. This is an experimental build, so ke
 | Gentle rain is unavailable | Its bundled file/provenance did not validate or could not play. Silence remains available. Contributors can run repository/asset checks; users should not replace the audio with an arbitrary file. |
 | Rain goes silent | The app falls back visibly to silence if rain fails. A failure before narration while backgrounded can end the run; follow the displayed fresh-review instruction. |
 | Audio pauses after an interruption or output change | Restore the desired output and explicitly resume when the app allows it. Pause does not extend the fixed deadline. |
-| Stop did not stop the wake alarm | Expected: **Stop playback** controls audio. Explicitly **Cancel wake alarm** and check its result. |
+| Stop did not stop the wake alarm | Expected: **Stop playback** and silence-only **End rest** leave the alarm separate. Explicitly **Cancel wake alarm** and check its result. |
+| Rest says it could not check the wake alarm | The saved alarm may still sound. Retry the check or cancel it before starting another plan. A saved alarm record alone does not verify that the alarm is scheduled. |
 | A session is marked partial | Audio did not reach the session's actual end. A deadline or manual Stop can leave partial progress; duration estimates do not count as completion. |
 | A rain-only nap is absent from narration history | Expected: rain and silence do not create narration attempts or completed-session progress. |
 | Resume is unavailable after a content change | A saved position must match the current script revision and prepared audio. Choose the current session from the beginning on Rest, or use **Replay from start** if shown. Playback still requires available prepared audio and a new review. |

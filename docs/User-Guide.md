@@ -17,9 +17,9 @@ The experimental **Feasibility Lab** is under **Settings → Advanced**. Its bac
 3. **Choose the rest sound.** Tap **After narration** for **Silence** (the default) or **Gentle rain** when its bundled audio and provenance validate. If no complete narration fits, the plan can use only the selected rest sound. Honkshool does not speed up narration to squeeze it in.
 4. **Choose the alarm.** Leave **Wake alarm** on if you want a system wake alarm at the fixed deadline, or turn it off. With it off, Honkshool schedules no wake alarm for that plan; set another alarm if you need one.
 5. **Review.** Tap **Review nap plan** and check the planned start, fixed wake deadline, full narration route, sound, and alarm choice. Choose any shorter alternatives before review; the current bundled catalog is one ordered two-session journey and has no branch destination.
-6. **Confirm and start.** Tap **Confirm this plan** or **Confirm quiet plan** when no narration fits, then **Start resting** before the approved start passes. The normal review lead time is about one minute; short exact-wake windows can allow less. If it expires, review the refreshed times and route again.
+6. **Confirm and start.** Tap **Confirm this plan** or **Confirm quiet plan** when no narration fits, then **Start resting** before the approved start passes. The normal review lead time is about one minute; short exact-wake windows can allow less. If it expires, the ready screen changes automatically. Tap **Review updated timing**, inspect the refreshed times and route, and confirm again. This also applies when you return from the background or linger on the alarm-access explanation.
 
-An alarm-enabled start first asks for alarm access if needed, schedules the alarm, and checks that its time matches the plan. Denied permission or failed verification blocks that start. You can explicitly choose an alarm-free plan instead. A previously tracked Nap Plan alarm must be cancelled before another plan can start.
+An alarm-enabled start first asks for alarm access if needed, schedules the alarm, and checks that its time matches the plan. Denied permission or failed verification blocks that start. You can explicitly choose an alarm-free plan instead. A previously tracked Nap Plan alarm must be cancelled before another plan can start. On returning to Rest, the heading reflects the checked alarm state. If Honkshool cannot check it, the alarm may still sound; retry the check or cancel it before making another plan.
 
 ## When can I lock the phone?
 
@@ -35,7 +35,8 @@ Leaving the app too early ends the pending run and requires a new review. An ala
 | --- | --- |
 | **Pause playback** | Pauses audio. The deadline and scheduled alarm do not move. |
 | **Resume playback** | Explicitly resumes when allowed, within the remaining window. |
-| **Stop playback** | Ends the run's audio. A narration attempt can be saved as partial. It leaves the wake alarm active. |
+| **Stop playback** | Ends a plan with narration or rain. A narration attempt can be saved as partial. It does not cancel the wake alarm. |
+| **End rest** | Ends a silence-only plan with no narration. It creates no narration history and does not cancel the wake alarm. |
 | **Cancel wake alarm** | Available on the confirmed plan after the run is inactive; cancels the separately tracked wake alarm. |
 | **Cancel Nap Plan wake alarm** | Cancels the tracked plan alarm from **Settings → Advanced → Feasibility Lab**. Check the resulting status. |
 | **Change your plan** or **Plan another rest** | Returns to choices for a fresh review; an old tracked alarm must still be cleared before starting. |

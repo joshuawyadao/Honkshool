@@ -142,7 +142,9 @@ final class NapPlanReviewUITests: XCTestCase {
     confirm.tap()
     let confirmation = app.staticTexts["napPlanConfirmation"]
     XCTAssertTrue(confirmation.waitForExistence(timeout: 5))
-    XCTAssertEqual(confirmation.label, "Your plan is ready. Start when you’re comfortable.")
+    XCTAssertEqual(
+      confirmation.label,
+      "Start by the planned rest time below. If it passes, we’ll review the timing again.")
     XCTAssertFalse(app.staticTexts["napRunStatus"].exists)
     XCTAssertTrue(app.buttons["startNapRun"].exists)
     XCTAssertTrue(app.staticTexts["napPlanConfirmedStart"].label.contains("Planned rest start"))
@@ -278,7 +280,7 @@ final class NapPlanReviewUITests: XCTestCase {
 
   func testAlarmDenialBlocksRequestedRunWithoutAudio() {
     let app = launchReview(additionalEnvironment: [
-      "HONKSHOOL_UI_TEST_ALARM": "denied"
+      "HONKSHOOL_UI_TEST_ALARM": "denied", "HONKSHOOL_UI_TEST_PLAN_NOW": "",
     ])
     let review = app.buttons["reviewNapPlan"]
     scrollTo(review, in: app)
@@ -292,6 +294,11 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertTrue(app.staticTexts["napRunError"].waitForExistence(timeout: 5))
     XCTAssertFalse(app.staticTexts["napRunStatus"].exists)
     XCTAssertFalse(app.buttons["cancelNapPlanAlarm"].exists)
+    XCTAssertTrue(app.buttons["reviewUpdatedNapTiming"].waitForExistence(timeout: 70))
+    XCTAssertTrue(app.staticTexts["napRunError"].exists)
+    XCTAssertTrue(app.buttons["openAlarmSettings"].exists)
+    XCTAssertFalse(app.buttons["retryNapStart"].exists)
+    XCTAssertFalse(app.buttons["startNapRun"].exists)
   }
 
   func testShortWindowReviewsSilenceOnlyAndNoAlarm() {
@@ -323,8 +330,12 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertTrue(parentStatus.label.contains("Keep Honkshool open"))
     let stop = app.buttons["stopNapRun"]
     scrollTo(stop, in: app)
+    XCTAssertEqual(stop.label, "End rest")
+    XCTAssertFalse(parentStatus.label.localizedCaseInsensitiveContains("playback"))
+    capture("Quiet rest waiting", in: app)
     stop.tap()
-    XCTAssertTrue(parentStatus.label.contains("Playback stopped"))
+    XCTAssertTrue(parentStatus.label.contains("Quiet rest ended"))
+    capture("Quiet rest ended", in: app)
     XCTAssertFalse(app.buttons["stopNapRun"].exists)
 
     let reopen = app.buttons["reviewAnotherNapPlan"]
@@ -475,9 +486,107 @@ final class NapPlanReviewUITests: XCTestCase {
     XCTAssertFalse(app.staticTexts["napPlanConfirmation"].exists)
   }
 
-  private func launchReview(additionalEnvironment: [String: String] = [:]) -> XCUIApplication {
+  func testReadyExpiresWithoutTapAndRequiresFreshReview() {
+    let app = launchReview(additionalEnvironment: ["HONKSHOOL_UI_TEST_PLAN_NOW": ""])
+    let alarm = app.switches["napPlanAlarm"]
+    scrollTo(alarm, in: app)
+    alarm.tap()
+    reviewAndConfirm(in: app)
+    let deadline = app.staticTexts["napPlanConfirmedDeadline"].label
+    XCTAssertTrue(app.buttons["startNapRun"].exists)
+    capture("Ready before expiry", in: app)
+    XCTAssertTrue(app.buttons["reviewUpdatedNapTiming"].waitForExistence(timeout: 70))
+    XCTAssertFalse(app.buttons["startNapRun"].exists)
+    XCTAssertFalse(app.staticTexts["napRunStatus"].exists)
+    XCTAssertEqual(app.staticTexts["napPlanConfirmedDeadline"].label, deadline)
+    capture("Expired ready state", in: app)
+    app.buttons["reviewUpdatedNapTiming"].tap()
+    XCTAssertFalse(app.buttons["startNapRun"].exists)
+    XCTAssertTrue(app.buttons["confirmNapPlan"].exists)
+    XCTAssertEqual(app.staticTexts["napPlanAlarmChoice"].label, "Wake alarm, Not requested")
+    let confirm = app.buttons["confirmNapPlan"]
+    scrollTo(confirm, in: app)
+    confirm.tap()
+    XCTAssertTrue(app.buttons["startNapRun"].exists)
+    XCTAssertNotEqual(app.staticTexts["napPlanConfirmedDeadline"].label, deadline)
+  }
+
+  func testAlarmPrimerExpiresWhileBackgroundedAndReturnsToReviewAtLargestText() {
+    let app = launchReview(
+      additionalEnvironment: [
+        "HONKSHOOL_UI_TEST_PLAN_NOW": "", "HONKSHOOL_UI_TEST_ALARM": "not-determined",
+      ], largestText: true)
+    reviewAndConfirm(in: app)
+    app.buttons["startNapRun"].tap()
+    XCTAssertTrue(app.buttons["continueAlarmAccess"].waitForExistence(timeout: 5))
+    XCUIDevice.shared.press(.home)
+    let until = Date.now.addingTimeInterval(65)
+    let elapsed = XCTNSPredicateExpectation(
+      predicate: NSPredicate { _, _ in Date.now >= until }, object: nil)
+    XCTAssertEqual(XCTWaiter.wait(for: [elapsed], timeout: 70), .completed)
+    app.activate()
+    XCTAssertTrue(app.buttons["reviewUpdatedNapTiming"].waitForExistence(timeout: 5))
+    XCTAssertFalse(app.buttons["continueAlarmAccess"].exists)
+    XCTAssertFalse(app.buttons["startNapRun"].exists)
+    XCTAssertFalse(app.staticTexts["napRunStatus"].exists)
+    XCTAssertFalse(app.buttons["cancelNapPlanAlarm"].exists)
+    capture("Expired primer at largest text", in: app)
+    scrollTo(app.buttons["reviewUpdatedNapTiming"], in: app)
+    XCTAssertTrue(app.buttons["reviewUpdatedNapTiming"].isHittable)
+    capture("Expired timing recovery action at largest text", in: app)
+  }
+
+  func testUnverifiedRetainedAlarmDoesNotClaimItIsSet() {
+    let app = launchReview()
+    reviewAndConfirm(in: app)
+    app.buttons["startNapRun"].tap()
+    XCTAssertTrue(app.staticTexts["napRunStatus"].waitForExistence(timeout: 5))
+    let stop = app.buttons["stopNapRun"]
+    scrollTo(stop, in: app)
+    stop.tap()
+    app.terminate()
+    app.launchEnvironment["HONKSHOOL_UI_TEST_RESET"] = "0"
+    app.launchEnvironment["HONKSHOOL_UI_TEST_ALARM"] = "read-failure"
+    app.launch()
+    XCTAssertTrue(app.buttons["cancelNapPlanAlarm"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["We couldn’t check\nyour wake alarm."].exists)
+    XCTAssertFalse(app.staticTexts["Your alarm\nis still set."].exists)
+    XCTAssertFalse(app.buttons["startNapRun"].exists)
+    XCTAssertFalse(app.buttons["reviewNapPlan"].exists)
+    capture("Unverified retained alarm", in: app)
+    let retry = app.buttons["retryNapPlanAlarmCheck"]
+    scrollTo(retry, in: app)
+    retry.tap()
+    XCTAssertTrue(app.staticTexts["We couldn’t check\nyour wake alarm."].exists)
+    XCTAssertTrue(app.buttons["cancelNapPlanAlarm"].exists)
+  }
+
+  private func reviewAndConfirm(in app: XCUIApplication) {
+    let review = app.buttons["reviewNapPlan"]
+    scrollTo(review, in: app)
+    review.tap()
+    let confirm = app.buttons["confirmNapPlan"]
+    scrollTo(confirm, in: app)
+    confirm.tap()
+  }
+
+  private func capture(_ name: String, in app: XCUIApplication) {
+    let attachment = XCTAttachment(screenshot: app.screenshot())
+    attachment.name = name
+    attachment.lifetime = .keepAlways
+    add(attachment)
+  }
+
+  private func launchReview(
+    additionalEnvironment: [String: String] = [:], largestText: Bool = false
+  ) -> XCUIApplication {
     let app = XCUIApplication()
     app.launchArguments = ["-ui-testing"]
+    if largestText {
+      app.launchArguments += [
+        "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+      ]
+    }
     app.launchEnvironment = [
       "HONKSHOOL_UI_TEST_ALARM": "authorized",
       "HONKSHOOL_UI_TEST_AUDIO": "1",
