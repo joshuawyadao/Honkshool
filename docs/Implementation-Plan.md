@@ -18,5 +18,6 @@ Require CI and validate an unsigned Release build in addition to simulator tests
 - Baseline: `57b56272a81e8e3fd8d7c3665576a1c964f62c03` (`HEAD`), isolated from the original checkout.
 - Existing in-progress changes in original project folders remain untouched.
 - Missing hosting/account capabilities are reported as concrete limitations; they are not permission to weaken required checks.
-- Portable gate: 67 tests passed. Local unsigned Release build was attempted with Xcode 27.2 and failed because this sandbox denied `sandbox-exec` to Swift macro plugins; hosted CI must establish build acceptance. No physical-device or signed release check was performed.
+- Portable gate: 74 tests passed. The unsigned Release build passed locally with Xcode 27.2 outside the restricted sandbox; hosted CI must still establish simulator and build acceptance. No physical-device or signed release check was performed.
 - Canonical `docs/Development.md` is updated; final save/push is owned by the parent task.
+- Hosted run `43938715961` on macOS image `20261102.0473.1` failed before tests because Xcode exposed only generic simulator placeholders. The CI job now provisions and later removes an owned simulator, with a conditional iOS runtime download. Its hosted test/build result is pending.

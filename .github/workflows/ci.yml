@@ -54,6 +54,10 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Provision owned iOS simulator
+        id: simulator
+        run: python3 scripts/ci-simulator.py prepare
+
       - name: Run iOS tests
         id: ios-tests
         env:
@@ -78,6 +82,12 @@ jobs:
           path: ${{ steps.ios-tests.outputs.result_directory }}
           retention-days: 7
           if-no-files-found: warn
+
+      - name: Remove owned iOS simulator
+        if: ${{ always() && steps.simulator.outputs.simulator_id != '' }}
+        env:
+          HONKSHOOL_SIMULATOR_ID: ${{ steps.simulator.outputs.simulator_id }}
+        run: python3 scripts/ci-simulator.py cleanup "$HONKSHOOL_SIMULATOR_ID"
 
   ci-verify:
     name: CI Verify
