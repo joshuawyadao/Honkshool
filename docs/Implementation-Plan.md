@@ -31,5 +31,7 @@ Integration validation: `./scripts/verify-repository.sh` passed all 92 tests on 
 
 Observed run43982368000 at2c6c589: unit/other jobs stop before tests because the first `simctl list -j runtimes` exceeds the new 30-second deadline on hosted macOS. Keep the pinned toolchain and bounded orchestration; allow a finite 180-second cold inventory budget, add a synthetic slow-start regression plus timeout diagnostic assertion, rerun portable checks, push and obtain fresh review/current-head native CI. No app or UI expectations change.
 
-- [ ] Demonstrate the cold-inventory regression before the fix, adjust only the inventory deadline, and verify eventual success and bounded timeout.
+- [x] Demonstrate the cold-inventory regression before the fix, adjust only the inventory deadline, and verify eventual success and bounded timeout.
 - [ ] Rerun portable checks and hosted native CI at the corrected head; classify all prior failed/cancelled results explicitly.
+
+Cold-inventory validation: two new cases failed against the 30-second original. The modeled 75-second cold start succeeds with the bounded 180-second inventory budget; an expired inventory reports the finite deadline. Full repository verification passes all94 tests and whitespace checks pass. All other command budgets and test/Release selection are unchanged. Fresh hosted checks/review follow the push.

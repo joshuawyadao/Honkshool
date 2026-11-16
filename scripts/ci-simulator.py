@@ -16,7 +16,7 @@ UUID = re.compile(r"[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\Z")
 
 def command(*args: str) -> str:
     timeout = 900 if args[:2] == ("xcodebuild", "-downloadPlatform") else {
-        "list": 30,
+        "list": 180,
         "create": 60,
         "boot": 90,
         "bootstatus": 300,

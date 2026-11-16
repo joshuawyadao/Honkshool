@@ -123,6 +123,30 @@ class CISimulatorTests(unittest.TestCase):
         run.assert_called_once_with(arguments, check=False, text=True,
                                     capture_output=True, timeout=300)
 
+    def test_cold_runtime_inventory_has_bounded_startup_time(self):
+        arguments = ("xcrun", "simctl", "list", "-j", "runtimes")
+        def cold_inventory(_arguments, **kwargs):
+            # The hosted runner's first CoreSimulator inventory exceeded 30s.
+            # Model a response after 75s without actually waiting.
+            if kwargs["timeout"] < 75:
+                raise subprocess.TimeoutExpired(_arguments, kwargs["timeout"])
+            return subprocess.CompletedProcess(_arguments, 0, '{"runtimes": []}', "")
+
+        with patch.object(simulator.subprocess, "run", side_effect=cold_inventory) as run:
+            self.assertEqual(simulator.simctl_json("runtimes"), [])
+        run.assert_called_once_with(arguments, check=False, text=True,
+                                    capture_output=True, timeout=180)
+
+    def test_cold_runtime_inventory_timeout_remains_finite(self):
+        arguments = ("xcrun", "simctl", "list", "-j", "runtimes")
+        with patch.object(simulator.subprocess, "run",
+                          side_effect=subprocess.TimeoutExpired(arguments, 180)) as run:
+            with self.assertRaisesRegex(RuntimeError,
+                                        "simctl list -j runtimes timed out after 180 seconds"):
+                simulator.simctl_json("runtimes")
+        run.assert_called_once_with(arguments, check=False, text=True,
+                                    capture_output=True, timeout=180)
+
     def test_shutdown_timeout_still_attempts_owned_deletion(self):
         with patch.object(simulator.subprocess, "run",
                           side_effect=subprocess.TimeoutExpired("shutdown", 30)), \
