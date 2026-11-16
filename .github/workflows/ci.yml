@@ -52,6 +52,11 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Prepare iOS simulator
+        env:
+          HONKSHOOL_XCODE_PATH: /Applications/Xcode_26.6.app/Contents/Developer
+        run: python3 scripts/prepare-ios-simulator.py
+
       - name: Run iOS tests
         id: ios-tests
         env:
