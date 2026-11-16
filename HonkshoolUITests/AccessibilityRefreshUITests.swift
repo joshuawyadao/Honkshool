@@ -38,6 +38,17 @@ final class AccessibilityRefreshUITests: XCTestCase {
     XCTAssertFalse(silence.isSelected)
     capture("AX5 Sound descriptions and selection")
     app.buttons["applyNapSound"].tap()
+    let returnedToRest = XCTNSPredicateExpectation(
+      predicate: NSPredicate { _, _ in review.isHittable }, object: nil)
+    let returnResult = XCTWaiter.wait(for: [returnedToRest], timeout: 5)
+    if returnResult != .completed {
+      capture("AX5 Sound dismissal timeout")
+      let hierarchy = XCTAttachment(string: app.debugDescription)
+      hierarchy.name = "AX5 Sound dismissal hierarchy"
+      hierarchy.lifetime = .keepAlways
+      add(hierarchy)
+    }
+    XCTAssertEqual(returnResult, .completed, "Apply sound must return to the tappable Review action")
     XCTAssertTrue(app.buttons["reviewNapPlan"].isHittable)
   }
 

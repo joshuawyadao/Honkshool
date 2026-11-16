@@ -18,7 +18,7 @@ Require CI, preserve full simulator coverage in bounded independent jobs, and va
 - [x] Reproduce `FunctionalPagesUITests.testSessionDetailCanChooseBeginningAndOpenActualNotes`; both original and strengthened case pass locally. Assert Sessions presentation before scrolling, preserve all navigation/Notes assertions and retain immediate failure diagnostics. No product defect is established.
 - [ ] Test selector validity, the complete UI union, new-class inclusion, Release conditioning and aggregate failure behavior; revalidate native UI and the full hosted matrix.
 - [x] Run portable repository tests and safe build checks where supported; retain real alarm/audio checks as manual.
-- [ ] Synchronize AX5 sound-sheet dismissal before the existing Review hittability assertion; retain every preset/layout/selection check and the standard five-second transition bound.
+- [x] Synchronize AX5 sound-sheet dismissal before the existing Review hittability assertion; retain every preset/layout/selection check and the standard five-second transition bound.
 - [ ] Update canonical verification docs, save and push the isolated active-workstream branch.
 
 ## Discovery notes
@@ -38,3 +38,5 @@ Require CI, preserve full simulator coverage in bounded independent jobs, and va
 - Current slice: 77 portable tests pass; original and strengthened picker case each pass (one test, zero skips/failures). Read-only Apple contract review confirms complete target partition, fail-closed aggregate and required unit/Release. Full hosted matrix remains the acceptance check; no native full-suite pass is claimed yet.
 
 - Hosted matrix `43964621902` completes within budgets: unit/unsigned Release and plan-review pass; the other UI shard records 35 passes and one failure, with successful cleanup. Failure is AccessibilityRefreshUITests.swift:41, immediate Review-button hittability after Apply sound. Every preceding AX5 layout/label/selection assertion passes. Add a bounded explicit return-to-Rest/hittability wait while retaining all original accessibility assertions; reproduce the original case first, validate the synchronized case, then run current-source hosted CI. No app behavior defect is established.
+
+- Original and synchronized AX5 case each pass locally (one pass, zero failures/skips). The five-second hittability predicate matches asynchronous SwiftUI dismissal; it retains the final original assertion and every earlier accessibility check. All 77 portable tests pass; current-source hosted matrix remains pending.
