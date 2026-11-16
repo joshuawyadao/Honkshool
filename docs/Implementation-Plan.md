@@ -3,7 +3,7 @@
 Make PR #19's iOS CI prepare and boot an explicit compatible simulator, verify preparation failures with portable fixtures, and shepherd the pushed branch through review and passing checks.
 
 ## Scope
-- In: CI-only simulator preparation, pinned existing runner toolchain/runtime, workflow wiring, portable setup regressions, Development/Troubleshooting documentation, commit/push checkpoints, and PR #19 review/check follow-through.
+- In: CI-only simulator preparation, pinned existing runner toolchain/runtime, workflow wiring, portable setup regressions, scoped UI-test synchronization failures, Development/Troubleshooting documentation, commit/push checkpoints, and PR #19 review/check follow-through.
 - Out: app behavior, shortened test coverage, paid runners/caches, branch-protection changes, device acceptance, and merging the PR.
 
 ## Action items
@@ -15,6 +15,8 @@ Make PR #19's iOS CI prepare and boot an explicit compatible simulator, verify p
 - [x] Update Development and Troubleshooting for CI setup, pinned versions, download behavior, and destination failures; preserve the completed UX cycle and pending device/accessibility checks.
 - [x] Run focused portable tests, repository verification, Python/shell checks as applicable, and scoped correctness/Brooks review; commit and push the fix.
 - [x] Extend the hosted job budget to 60 minutes after the first bootable run exhausted 40 minutes; enable verbose CI test output with portable coverage while retaining local quiet defaults and full test scope.
+- [ ] Reproduce the remaining AX5 sound-Apply assertion with the focused UI test, inspect its recorded UI transition, and distinguish dismissal synchronization from a persistent layout or selection failure.
+- [ ] Correct only the supported cause, preserve existing accessibility assertions, verify applied sound and reachable Review after dismissal, document the synchronization rule, and run focused regression repetitions plus repository/format checks before the next push.
 - [ ] Request fresh Codex review, inspect current-head GitHub Actions, fix any remaining scoped failures, and record final evidence before reporting PR #19 merge-ready without merging.
 
 ## Open questions
@@ -31,3 +33,5 @@ Make PR #19's iOS CI prepare and boot an explicit compatible simulator, verify p
 
 - Hosted run `43937374660` at `0514272`: simulator preparation passed, cold build/initial test launch took about nine minutes, and repeated app launches continued until job cancellation at 40 minutes. No completed result bundle was published; the final test outcome is unverified. Update the initial 40-minute-budget assumption to 60 minutes with detailed CI progress logging; do not skip tests or increase individual test timeouts.
 - Timeout/logging follow-up: all 80 repository checks and shell syntax checks passed; scoped review found no actionable issue. Next hosted run must establish full-suite completion inside the new bound.
+- Hosted run `43945191271` at `16c5283` completed within 60 minutes: 289 passed, one failed, six physical-device skips. All 233 simulator unit tests passed; the sole failure is the immediate `reviewNapPlan.isHittable` assertion after sound Apply in `AccessibilityRefreshUITests` line 41. Existing label/selection assertions passed. Inspect the result recording and focused local test before changing synchronization; do not alter app behavior or weaken accessibility expectations without evidence.
+- Ranked diagnosis predictions: (1) a dismissal race clears with a bounded wait for sheet disappearance and Review hittability; (2) a persistent footer obstruction remains after that wait; (3) an unsuccessful Apply leaves the sheet present or loses the selected sound. The focused command selects only `HonkshoolUITests/AccessibilityRefreshUITests/testLargestTextDurationChoicesAndSoundDescriptions` on the iOS 26.5 review simulator; final hosted CI still runs the full suite.
