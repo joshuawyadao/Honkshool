@@ -35,6 +35,7 @@ Honkshool is an experimental iPhone app with source installation and a small off
 | [Quiet curiosity design language](Design-Language.md) | Approved visual and interaction rules for current and future screens |
 | [Screen implementation map](Screen-Implementation-Map.md) | Functional routes and states versus future atlas examples |
 | [Accessibility refresh](Accessibility-Refresh.md) | Findings addressed, verification, and device checks still pending |
+| [UX review acceptance and closure](UX-Review-Acceptance.md) | Completed review cycle, acceptance criteria, pending validation, and when to reopen review |
 | [Product brief](Product-Brief.md) | Intended experience, claim boundaries, and first-release scope; some features remain future work |
 | [Project implementation plan](Project-Implementation-Plan.md) | Durable phased roadmap and acceptance criteria |
 | [Decision log](Decision-Log.md) | Accepted choices, their reasons, and open acceptance checks |

@@ -4,6 +4,8 @@
 
 Honkshool is an iPhone-first project for calm, uninterrupted factual narration during naps and bedtime. The repository contains an experimental iOS 26 feasibility console for audio and alarm testing, a separate Nap Plan chooser/review and optional-alarm playback flow, a Foundation-only planning domain, and a validated bundled content catalog. The choose → review → play → alarm → local history flow is implemented, but complete target-device acceptance and a supported release remain pending.
 
+The UX review-and-remediation cycle is **complete as of 2026-11-16** for application baseline `b15484a`. All six confirmed product findings are fixed with regression evidence. Physical-device operation, manual VoiceOver, and accessibility audit triage remain pending; readiness for an unsupervised TestFlight trial stays **Incomplete**. The [UX acceptance and closure record](UX-Review-Acceptance.md) defines the stopping criteria and when to reopen review.
+
 The primary outcome is relaxation and rest. Interesting factual exposure is secondary, and the product must not claim subconscious learning, guaranteed retention, therapy, or treatment of insomnia or another medical condition. The owner approved [Quiet curiosity](Design-Language.md) on 2026-09-30 as the default design language for all current and future UI. Its Rest-first shell and calmer Nap Plan and History presentation are implemented. Several atlas browsing concepts now have bounded current-content pages; the [screen implementation map](Screen-Implementation-Map.md) records their routes and limits.
 
 For installation and everyday controls, start with [Getting started](Getting-Started.md) and the [user guide](User-Guide.md). The [documentation index](README.md) separates user guides, engineering contracts, and historical evidence. [Privacy and local data](Privacy.md) describes the implemented storage and permission boundary.
@@ -13,6 +15,7 @@ For installation and everyday controls, start with [Getting started](Getting-Sta
 - [App icon](App-Icon.md): approved sleeping-goose thought-bubble artwork, generation provenance, asset-catalog integration, and editing checks.
 - [Design language](Design-Language.md): approved Rest-first visual and interaction rules, semantic tokens, reusable patterns, and the capability boundary of the [33-screen atlas](../design/quiet-curiosity/screen-atlas.html).
 - [Screen implementation map](Screen-Implementation-Map.md): every atlas ID, its current route or runtime state, implementation view, and unsupported illustrative controls.
+- [UX review acceptance and closure](UX-Review-Acceptance.md): completed cycle, verified application baseline, acceptance criteria, pending validation, and reopening rules.
 - [Product brief](Product-Brief.md): purpose, language and safety boundaries, core experience, first content, technical constraints, and first-release scope.
 - [Project implementation plan](Project-Implementation-Plan.md): durable phased delivery sequence, branch-sized milestones, acceptance criteria, test strategy, and validation goal.
 - [Decision log](Decision-Log.md): accepted, pending, and deferred product and technical decisions.

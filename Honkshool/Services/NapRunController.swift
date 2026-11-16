@@ -106,6 +106,15 @@ final class NapRunController: NSObject, ObservableObject {
     return presentationPlan.route[records.count].session.title
   }
 
+  var isSilenceOnlyRest: Bool {
+    guard let presentationPlan else { return false }
+    return presentationPlan.route.isEmpty && presentationPlan.fallback == .silence
+  }
+
+  var stopActionTitle: String {
+    isSilenceOnlyRest ? "End rest" : "Stop playback"
+  }
+
   private struct PreparedRouteItem {
     let planned: PlannedSession
     let prepared: PreparedSession
@@ -253,7 +262,10 @@ final class NapRunController: NSObject, ObservableObject {
     activeToken = token
     waitingForPlayback = true
     phase = .waiting
-    statusMessage = "Keep Honkshool open until playback begins at the approved start."
+    statusMessage =
+      isSilenceOnlyRest
+      ? "Keep Honkshool open until quiet rest begins at the approved start."
+      : "Keep Honkshool open until playback begins at the approved start."
     cancelDeadline = scheduler(review.plan.deadline.timeIntervalSince(now)) { [weak self] in
       self?.reachDeadline(token: token)
     }
@@ -382,12 +394,20 @@ final class NapRunController: NSObject, ObservableObject {
     }
     recordPartialIfPossible(reason: .stopped, token: token)
     let hadWakeAlarm = activeRunHasWakeAlarm
+    let wasSilenceOnlyRest = isSilenceOnlyRest
     clearRun()
     phase = .stopped
-    statusMessage =
-      hadWakeAlarm
-      ? "Playback stopped. The wake alarm was not cancelled here; check its status separately."
-      : "Playback stopped. No wake alarm was scheduled."
+    if wasSilenceOnlyRest {
+      statusMessage =
+        hadWakeAlarm
+        ? "Quiet rest ended. The wake alarm was not cancelled here; check its status separately."
+        : "Quiet rest ended. No wake alarm was scheduled."
+    } else {
+      statusMessage =
+        hadWakeAlarm
+        ? "Playback stopped. The wake alarm was not cancelled here; check its status separately."
+        : "Playback stopped. No wake alarm was scheduled."
+    }
   }
 
   func scenePhaseChanged(isActive: Bool) {
@@ -395,7 +415,10 @@ final class NapRunController: NSObject, ObservableObject {
     guard !isActive, let token = activeToken else { return }
     if waitingForPlayback {
       fail(
-        "The app left the foreground before playback began. Review a new Nap Plan.", token: token)
+        isSilenceOnlyRest
+          ? "The app left the foreground before quiet rest began. Review a new Nap Plan."
+          : "The app left the foreground before playback began. Review a new Nap Plan.",
+        token: token)
     } else {
       captureCheckpoint(token: token)
     }
@@ -427,7 +450,11 @@ final class NapRunController: NSObject, ObservableObject {
       return
     }
     guard appIsForeground else {
-      fail("The app must stay open until playback begins. Review a new Nap Plan.", token: token)
+      fail(
+        isSilenceOnlyRest
+          ? "The app must stay open until quiet rest begins. Review a new Nap Plan."
+          : "The app must stay open until playback begins. Review a new Nap Plan.",
+        token: token)
       return
     }
     // A suspended app may deliver the start timer long after the approved instant.
@@ -695,11 +722,15 @@ final class NapRunController: NSObject, ObservableObject {
     MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
     deactivateAudioSession()
     phase = .resting
-    statusMessage =
-      restFailureMessage
-      ?? (isSettling
-        ? "Resting in silence until narration begins."
-        : "Rest continues in silence until the fixed deadline.")
+    if let restFailureMessage {
+      statusMessage = restFailureMessage
+    } else if isSettling {
+      statusMessage = "Resting in silence until narration begins."
+    } else if isSilenceOnlyRest {
+      statusMessage = "Quiet rest continues until the fixed deadline."
+    } else {
+      statusMessage = "Rest continues in silence until the fixed deadline."
+    }
     if isSettling && !appIsForeground, let token = activeToken {
       fail(
         "Rain became unavailable before narration while the app was backgrounded. Review a new Nap Plan.",
@@ -732,9 +763,15 @@ final class NapRunController: NSObject, ObservableObject {
     let hadNarration = player != nil
     let hadRain = ambiencePlayer != nil
     let hadWakeAlarm = activeRunHasWakeAlarm
+    let wasSilenceOnlyRest = isSilenceOnlyRest
     clearRun()
     phase = .finished
-    if hadNarration && now > playback.plan.deadline {
+    if wasSilenceOnlyRest {
+      statusMessage =
+        hadWakeAlarm
+        ? "The fixed rest deadline arrived. Quiet rest ended; the system wake alarm was scheduled separately."
+        : "The fixed rest deadline arrived. Quiet rest ended."
+    } else if hadNarration && now > playback.plan.deadline {
       statusMessage =
         records.last?.checkpointCapturedAt == nil
         ? "The fixed deadline passed and audio stopped. No verified partial checkpoint was available."

@@ -44,7 +44,7 @@ jobs:
     needs: verify
     if: needs.verify.result == 'success' && needs.verify.outputs.run_ios == 'true'
     runs-on: macos-26
-    timeout-minutes: 40
+    timeout-minutes: 60
 
     steps:
       - name: Check out repository
@@ -52,10 +52,16 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Prepare iOS simulator
+        env:
+          HONKSHOOL_XCODE_PATH: /Applications/Xcode_26.6.app/Contents/Developer
+        run: python3 scripts/prepare-ios-simulator.py
+
       - name: Run iOS tests
         id: ios-tests
         env:
           HONKSHOOL_TEST_DIAGNOSTICS: on-failure
+          HONKSHOOL_TEST_VERBOSE: "1"
         run: ./scripts/test-ios.sh
 
       - name: Retain failed simulator test results

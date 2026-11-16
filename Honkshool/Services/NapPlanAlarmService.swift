@@ -49,6 +49,32 @@ final class NapPlanAlarmService: ObservableObject {
 
   var hasTrackedAlarm: Bool { tracked != nil || defaults.object(forKey: receiptKey) != nil }
   var canCancelTrackedAlarm: Bool { tracked != nil }
+  var recoveryHeading: String {
+    switch alarmStatus.phase {
+    case .none: "No wake alarm\nis tracked."
+    case .scheduled: "Your wake alarm\nis still set."
+    case .snoozed: "Your wake alarm\nis snoozed."
+    case .paused: "Your wake alarm\nis paused."
+    case .alerting: "Your wake alarm\nis ringing."
+    case .unavailable: "We couldn’t check\nyour wake alarm."
+    }
+  }
+  var recoveryExplanation: String {
+    switch alarmStatus.phase {
+    case .none: "You can review a new rest plan."
+    case .scheduled:
+      "Your earlier wake alarm is scheduled in the system. Cancel it before starting a new plan."
+    case .snoozed:
+      "The system is managing its snooze countdown. Cancel the alarm before starting a new plan."
+    case .paused:
+      "Its snooze is paused in system controls. Cancel the alarm before starting a new plan."
+    case .alerting: "The system is sounding your wake alarm. Cancel it before starting a new plan."
+    case .unavailable:
+      canCancelTrackedAlarm
+        ? "Your earlier alarm may still sound. Check again or cancel it before starting a new plan."
+        : "Your earlier alarm may still sound. Check again, or clear Honkshool alarms in system controls before starting a new plan."
+    }
+  }
   var needsCountdownReconciliation: Bool {
     hasTrackedAlarm && alarmStatus.phase == .snoozed && alarmStatus.nextAlertDate == nil
   }
@@ -154,7 +180,8 @@ final class NapPlanAlarmService: ObservableObject {
     } catch {
       setStatus(
         .init(phase: .unavailable),
-        message: "Could not verify the wake alarm. Its identity is retained for cancellation.")
+        message:
+          "Could not verify the wake alarm. It may still sound; retry the check or cancel it.")
     }
   }
 
@@ -195,7 +222,7 @@ final class NapPlanAlarmService: ObservableObject {
 
     let receipt = ScheduledNapAlarm(planID: plan.id, id: UUID(), deadline: plan.deadline)
     guard persist(receipt) else {
-      statusMessage = "Could not save the wake alarm identity. Playback remains blocked."
+      statusMessage = "Could not save the wake alarm details. Playback remains blocked."
       return nil
     }
     do {
@@ -233,7 +260,8 @@ final class NapPlanAlarmService: ObservableObject {
     } catch {
       setStatus(
         .init(phase: .unavailable),
-        message: "Could not read the scheduled wake alarm. Its identity is retained.")
+        message:
+          "Could not check whether the wake alarm was set. It may still sound; retry or cancel it.")
       return nil
     }
     setStatus(
@@ -252,7 +280,7 @@ final class NapPlanAlarmService: ObservableObject {
     guard let tracked else {
       if hasTrackedAlarm {
         statusMessage =
-          "Wake alarm identity is unreadable. Clear Honkshool alarms in system controls and reopen the app."
+          "Saved wake alarm details are unreadable. Clear Honkshool alarms in system controls and reopen the app."
         return false
       }
       return true

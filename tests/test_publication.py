@@ -221,6 +221,11 @@ class PublicRepositoryTests(unittest.TestCase):
             r"(?ms)^  ios-tests:\n(?P<body>.*?)(?=^  [A-Za-z0-9_-]+:|\Z)", workflow
         )
         self.assertIsNotNone(ios_job, "The complete iOS job must be present")
+        self.assertLess(
+            ios_job["body"].index("python3 scripts/prepare-ios-simulator.py"),
+            ios_job["body"].index("./scripts/test-ios.sh"),
+            "Prepare the simulator before running the full suite",
+        )
         timeouts = re.findall(r"(?m)^    timeout-minutes: ([0-9]+)$", ios_job["body"])
         self.assertEqual(len(timeouts), 1, "The iOS job must have its own time budget")
         self.assertGreater(int(timeouts[0]), 0)

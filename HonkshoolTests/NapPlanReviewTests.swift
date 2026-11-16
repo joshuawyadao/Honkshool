@@ -233,6 +233,23 @@ final class NapPlanReviewTests: XCTestCase {
     XCTAssertEqual(plan.routeEndReason, .contentUnavailable)
   }
 
+  func testConfirmedStartExpiryPreservesSnapshotAndInclusiveBoundary() throws {
+    var state = NapPlanReviewState()
+    let start = now.addingTimeInterval(60)
+    try state.review(
+      id: "expiry", request: NapRequest(window: .duration(300), startingAt: selection("first")),
+      startingAt: start, now: now, catalog: makeCatalog())
+    try state.confirm(at: now)
+    let confirmed = try XCTUnwrap(state.confirmed)
+    XCTAssertFalse(confirmed.hasStartExpired(at: start.addingTimeInterval(-0.001)))
+    XCTAssertFalse(confirmed.hasStartExpired(at: start))
+    XCTAssertTrue(confirmed.hasStartExpired(at: start.addingTimeInterval(0.001)))
+    XCTAssertTrue(confirmed.hasStartExpired(at: confirmed.plan.deadline))
+    XCTAssertTrue(confirmed.hasStartExpired(at: Date(timeIntervalSince1970: .infinity)))
+    XCTAssertEqual(state.confirmed, confirmed)
+    XCTAssertEqual(state.confirmed?.plan.deadline, start.addingTimeInterval(300))
+  }
+
   private func selection(_ id: String) -> SessionSelection {
     SessionSelection(journeyID: id == "rally-one" ? "rally" : "cars", sessionID: id)
   }

@@ -47,6 +47,7 @@ The script uses the shared `Honkshool` scheme, disables parallel testing, writes
 | `HONKSHOOL_TEST_DESTINATION` | `platform=iOS Simulator,name=iPhone 17 Pro,OS=latest` | Select an installed compatible simulator. |
 | `HONKSHOOL_TEST_DERIVED_DATA` | `/tmp/HonkshoolAutomatedTests` | Choose where Xcode writes derived data. |
 | `HONKSHOOL_TEST_DIAGNOSTICS` | `never` | Set Xcode's `-collect-test-diagnostics` mode; CI uses `on-failure`. |
+| `HONKSHOOL_TEST_VERBOSE` | `0` | Set `1` for detailed build and test progress; CI enables it. Other values fail before Xcode or result creation. |
 | `HONKSHOOL_TEST_SCOPE` | `all` | Use `unit` for the Swift host target only; `all` runs both host and UI targets. Other values fail before Xcode or result creation. |
 
 For a faster local domain, controller or persistence iteration:
@@ -83,6 +84,8 @@ Use `build-for-testing` instead of `build` to compile test bundles without execu
 
 Routine UI tests use launch-time fixtures compiled only for Debug builds. They simulate alarm states and deterministic speech, and keep test preferences and history isolated from normal app data. These checks exercise Honkshool logic and screens without requesting real AlarmKit permission or proving locked-screen delivery.
 
+After applying a setup sheet, wait for its controls to disappear and the destination action to become hittable before asserting the resulting state. A button can exist behind a dismissing sheet; immediate hittability checks can race that transition on hosted simulators. Keep these waits bounded and preserve the accessibility and applied-selection assertions.
+
 Physical-device cases are separately gated and skipped in ordinary simulator runs. The test files use `HONKSHOOL_REAL_RAIN_TEST`, `HONKSHOOL_REAL_NAP_PLAN_ALARM_TEST`, and `HONKSHOOL_REAL_ALARM_TEST` as opt-in environment flags; Xcode passes them to its test runner with a `TEST_RUNNER_` prefix. Run them only on a connected, signed iPhone with the required alarm authorization. Follow the exact commands and acceptance notes in [Feasibility Spike](Feasibility-Spike.md#minimal-physical-device-acceptance) and its [production rain section](Feasibility-Spike.md#production-gentle-rain-acceptance-on-the-target-iphone). A passing simulator run does not establish audible quality, headphone disconnection behavior, or Lock Screen control behavior on hardware.
 
 ### CI
@@ -92,12 +95,14 @@ Physical-device cases are separately gated and skipped in ordinary simulator run
 | Check | Work |
 | --- | --- |
 | **Repository Verify** | Ubuntu runs the portable gate, then `scripts/ci-policy.py` classifies the exact base/head commit diff. Only ordinary, non-executable Markdown or SVG under `docs/`, and the known root README/contribution/conduct/security Markdown files, qualify as documentation-only. |
-| **iOS Unit and UI Tests** | After repository verification, macOS runs the default complete `./scripts/test-ios.sh` with failure diagnostics whenever code, tests, resources, project/workflow settings or any unknown path changes. Manual dispatch always runs it. Verified documentation-only PRs skip this job without allocating macOS. |
+| **iOS Unit and UI Tests** | After repository verification, macOS prepares an explicit simulator, then runs the complete `./scripts/test-ios.sh` with failure diagnostics whenever code, tests, resources, project/workflow settings or any unknown path changes. Manual dispatch always runs it. Verified documentation-only PRs skip this job without allocating macOS. |
 | **CI Verify** | A stable Ubuntu readiness check runs even when a dependency fails. It requires successful repository verification and full iOS success, or an explicit successful documentation-only classification with iOS skipped. Missing classification, failures and cancellations cannot pass this gate. |
 
 The classifier inspects both sides of renames and deletions, handles NUL-delimited Git paths, and checks file modes; unknown or malformed input fails conservatively. No workflow-level path filter can leave a required check waiting. Draft PRs skip these checks; marking one ready for review starts them. Existing required check names are preserved, and maintainers can require **CI Verify** without changing protection as part of this branch. Physical-device opt-in tests are not CI acceptance evidence.
 
-The full macOS job retains its 40-minute bound from main. The [resource-efficiency note](Efficiency.md) records later optimization ideas and their acceptance requirements. Do not shorten coverage or raise paid resource commitments solely to improve a timing number.
+The CI-only [simulator preparation script](../scripts/prepare-ios-simulator.py) uses Xcode 26.6 and iOS 26.5 from the hosted `macos-26` image. It initializes the selected Xcode installation, checks runtime availability, and downloads that iOS runtime only if missing or unavailable. It creates a dedicated iPhone 17 Pro simulator, boots it, waits for boot completion, and publishes its exact device ID through `GITHUB_ENV` to `HONKSHOOL_TEST_DESTINATION`. The test runner uses the same `HONKSHOOL_XCODE_PATH`; ordinary local defaults above remain unchanged. Setup failure stops the job before tests instead of silently skipping them or falling back to a generic destination. The dedicated device lives only for the disposable runner job.
+
+The full macOS job has a 60-minute bound. The first explicitly booted hosted run exhausted the former 40-minute budget after cold build/initial launch overhead and continuing test-app launches; its incomplete outcome is not a pass. CI emits detailed build and test progress, while local runs remain quiet by default. Test selection, assertions, individual timeouts, and the fail-closed aggregate policy remain intact. The [resource-efficiency note](Efficiency.md) records later optimization ideas and their acceptance requirements. Do not shorten coverage or raise paid resource commitments solely to improve a timing number.
 
 Failed CI runs retain the simulator `.xcresult` bundle as an Actions artifact for seven days. Download it from the failed run to inspect assertion locations, UI activity, and screenshots in Xcode. The test script publishes its fresh result directory through the standard `GITHUB_OUTPUT` file when available. Artifacts contain synthetic simulator test data; do not upload personal-device result bundles. Feasibility label failures report the expected and observed label at the original assertion call site; timeouts and behavioral expectations remain unchanged.
 

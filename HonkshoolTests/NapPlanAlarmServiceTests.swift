@@ -15,12 +15,14 @@ private final class PlanAlarmFakeSystem: AlarmSystem {
   var failScheduling = false
   var omitScheduledRecord = false
   var wrongDeadline = false
+  var afterAuthorization: (() -> Void)?
   var afterSchedule: (() -> Void)?
   var scheduleCount = 0
   var cancelledIDs: [UUID] = []
 
   func requestAuthorization() async throws -> AlarmAuthorizationSnapshot {
     authorization = requestResult
+    afterAuthorization?()
     return authorization
   }
 
@@ -80,6 +82,21 @@ final class NapPlanAlarmServiceTests: XCTestCase {
       catalog: catalog.planningCatalog)
   }
 
+  func testStartExpiringDuringAuthorizationDoesNotScheduleAnAlarm() async throws {
+    let system = PlanAlarmFakeSystem()
+    system.authorization = .notDetermined
+    let selected = try plan()
+    var current = base
+    system.afterAuthorization = { current = selected.start.addingTimeInterval(0.001) }
+    let service = NapPlanAlarmService(system: system, defaults: defaults, now: { current })
+    let result = await service.schedule(for: selected)
+    XCTAssertNil(result)
+    XCTAssertEqual(service.authorization, .authorized)
+    XCTAssertEqual(system.scheduleCount, 0)
+    XCTAssertFalse(service.hasTrackedAlarm)
+    XCTAssertTrue(service.statusMessage.contains("passed"))
+  }
+
   func testAuthorizationDenialBlocksSchedulingWithoutTrackingAnAlarm() async throws {
     let system = PlanAlarmFakeSystem()
     system.authorization = .notDetermined
@@ -105,6 +122,8 @@ final class NapPlanAlarmServiceTests: XCTestCase {
     let saved = try XCTUnwrap(defaults.data(forKey: "napPlanAlarmReceipt"))
     XCTAssertEqual(try JSONDecoder().decode(ScheduledNapAlarm.self, from: saved), receipt)
     XCTAssertTrue(service.isScheduled(receipt))
+    XCTAssertEqual(service.recoveryHeading, "Your wake alarm\nis still set.")
+    XCTAssertTrue(service.recoveryExplanation.contains("scheduled in the system"))
     let second = await service.schedule(for: try plan(id: "second"))
     XCTAssertNil(second)
     XCTAssertEqual(system.scheduleCount, 1)
@@ -121,11 +140,16 @@ final class NapPlanAlarmServiceTests: XCTestCase {
     service.refresh()
     XCTAssertTrue(service.hasTrackedAlarm)
     XCTAssertEqual(service.alarmStatus.phase, .unavailable)
+    XCTAssertEqual(service.recoveryHeading, "We couldn’t check\nyour wake alarm.")
+    XCTAssertTrue(service.recoveryExplanation.contains("may still sound"))
+    XCTAssertTrue(service.statusMessage.contains("deadline does not match"))
     system.wrongDeadline = false
     system.failReads = true
     service.refresh()
     XCTAssertTrue(service.hasTrackedAlarm)
     XCTAssertEqual(service.alarmStatus.phase, .unavailable)
+    XCTAssertTrue(service.statusMessage.contains("may still sound"))
+    XCTAssertFalse(service.statusMessage.contains("identity"))
   }
 
   func testMissingScheduledRecordDoesNotReturnReceipt() async throws {
@@ -139,6 +163,7 @@ final class NapPlanAlarmServiceTests: XCTestCase {
     service.refresh()
     XCTAssertFalse(service.hasTrackedAlarm)
     XCTAssertEqual(service.alarmStatus.phase, .none)
+    XCTAssertEqual(service.recoveryHeading, "No wake alarm\nis tracked.")
   }
 
   func testThrownScheduleRetainsIdentityUntilSystemAbsenceReconciles() async throws {
@@ -163,9 +188,11 @@ final class NapPlanAlarmServiceTests: XCTestCase {
     XCTAssertNil(result)
     XCTAssertTrue(service.hasTrackedAlarm)
     XCTAssertEqual(service.alarmStatus.phase, .unavailable)
+    XCTAssertTrue(service.statusMessage.contains("may still sound"))
     system.failReads = false
     service.refresh()
     XCTAssertEqual(service.alarmStatus.phase, .scheduled)
+    XCTAssertEqual(service.recoveryHeading, "Your wake alarm\nis still set.")
   }
 
   func testTimeAdvancingDuringScheduleBlocksStartAndKeepsAlarmForCancellation() async throws {
@@ -190,6 +217,7 @@ final class NapPlanAlarmServiceTests: XCTestCase {
 
     let restored = NapPlanAlarmService(system: system, defaults: defaults, now: { self.base })
     XCTAssertTrue(restored.isScheduled(receipt))
+    XCTAssertEqual(restored.recoveryHeading, "Your wake alarm\nis still set.")
     let snoozeDate = receipt.deadline.addingTimeInterval(540)
     system.records = [
       SystemAlarmRecord(
@@ -199,7 +227,35 @@ final class NapPlanAlarmServiceTests: XCTestCase {
     restored.refresh()
     XCTAssertEqual(restored.alarmStatus.phase, .snoozed)
     XCTAssertEqual(restored.alarmStatus.nextAlertDate, snoozeDate)
+    XCTAssertEqual(restored.recoveryHeading, "Your wake alarm\nis snoozed.")
+    XCTAssertTrue(restored.recoveryExplanation.contains("snooze countdown"))
     XCTAssertFalse(restored.isScheduled(receipt))
+  }
+
+  func testPausedAndRingingAlarmUseTheirObservedRecoveryState() async throws {
+    let system = PlanAlarmFakeSystem()
+    let service = NapPlanAlarmService(system: system, defaults: defaults, now: { self.base })
+    let selected = try plan()
+    let scheduled = await service.schedule(for: selected)
+    let receipt = try XCTUnwrap(scheduled)
+
+    system.records = [
+      SystemAlarmRecord(
+        id: receipt.id, state: .paused, originalDate: receipt.deadline,
+        countdownFireDate: nil)
+    ]
+    service.refresh()
+    XCTAssertEqual(service.recoveryHeading, "Your wake alarm\nis paused.")
+    XCTAssertTrue(service.recoveryExplanation.contains("paused in system controls"))
+
+    system.records = [
+      SystemAlarmRecord(
+        id: receipt.id, state: .alerting, originalDate: receipt.deadline,
+        countdownFireDate: nil)
+    ]
+    service.refresh()
+    XCTAssertEqual(service.recoveryHeading, "Your wake alarm\nis ringing.")
+    XCTAssertTrue(service.recoveryExplanation.contains("sounding your wake alarm"))
   }
 
   func testSnoozeDeadlineArrivingAfterAlarmUpdateIsReconciled() async throws {
@@ -238,12 +294,15 @@ final class NapPlanAlarmServiceTests: XCTestCase {
     let service = NapPlanAlarmService(system: system, defaults: defaults, now: { self.base })
     XCTAssertTrue(service.hasTrackedAlarm)
     XCTAssertFalse(service.canCancelTrackedAlarm)
+    XCTAssertEqual(service.recoveryHeading, "We couldn’t check\nyour wake alarm.")
+    XCTAssertTrue(service.recoveryExplanation.contains("system controls"))
     let result = await service.schedule(for: try plan())
     XCTAssertNil(result)
     system.records = []
     service.refresh()
     XCTAssertFalse(service.hasTrackedAlarm)
     XCTAssertNil(defaults.data(forKey: "napPlanAlarmReceipt"))
+    XCTAssertEqual(service.recoveryHeading, "No wake alarm\nis tracked.")
   }
 
   func testCancellationFailureKeepsIdentityForRetry() async throws {
@@ -255,11 +314,15 @@ final class NapPlanAlarmServiceTests: XCTestCase {
 
     XCTAssertFalse(service.cancel())
     XCTAssertTrue(service.hasTrackedAlarm)
+    XCTAssertEqual(service.recoveryHeading, "We couldn’t check\nyour wake alarm.")
+    XCTAssertTrue(service.recoveryExplanation.contains("may still sound"))
+    XCTAssertTrue(service.statusMessage.contains("retry cancellation"))
     let saved = try XCTUnwrap(defaults.data(forKey: "napPlanAlarmReceipt"))
     XCTAssertEqual(try JSONDecoder().decode(ScheduledNapAlarm.self, from: saved), receipt)
     system.failCancellation = false
     XCTAssertTrue(service.cancel())
     XCTAssertFalse(service.hasTrackedAlarm)
+    XCTAssertEqual(service.recoveryHeading, "No wake alarm\nis tracked.")
     XCTAssertEqual(system.cancelledIDs, [receipt.id])
   }
 }
