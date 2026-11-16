@@ -86,8 +86,8 @@ jobs:
           -derivedDataPath "$RUNNER_TEMP/HonkshoolRelease"
           CODE_SIGNING_ALLOWED=NO
 
-      - name: Retain failed simulator test results
-        if: ${{ failure() && steps.ios-tests.outputs.result_directory != '' }}
+      - name: Retain failed or cancelled simulator test results
+        if: ${{ always() && steps.ios-tests.outputs.result_directory != '' && steps.ios-tests.outcome != 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ios-test-results-${{ github.run_attempt }}

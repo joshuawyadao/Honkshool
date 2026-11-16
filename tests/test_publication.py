@@ -213,6 +213,7 @@ class PublicRepositoryTests(unittest.TestCase):
         self.assertIn('developer_dir="$(xcode-select -p)"', workflow)
         self.assertIn('DEVELOPER_DIR=%s\\nHONKSHOOL_XCODE_PATH=%s\\n', workflow)
         self.assertIn('"$developer_dir" "$developer_dir" >> "$GITHUB_ENV"', workflow)
+        self.assertIn("if: ${{ always() && steps.ios-tests.outputs.result_directory != '' && steps.ios-tests.outcome != 'success' }}", workflow)
 
     def test_ios_tests_run_in_pull_requests_with_debug_only_fixtures(self) -> None:
         workflow = (PROJECT_ROOT / ".github/workflows/ci.yml").read_text(
