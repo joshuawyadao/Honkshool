@@ -36,6 +36,8 @@ The Apple-platform source review found no timing, alarm, history, or navigation 
 
 ## Remaining acceptance
 
+The November review-and-remediation cycle is **complete as of 2026-11-16** at app baseline `b15484a`. Its [acceptance and closure record](UX-Review-Acceptance.md#pending-validation-register) keeps manual VoiceOver (A05) **Pending — Not tested** and audit triage (A04/UX-004) **Pending — Needs review**. Completing the review cycle does not close these checks or establish accessibility conformance; this September record retains its dated evidence.
+
 The fixes do not establish spoken VoiceOver quality merely because accessibility labels exist. On the updated iPhone, check heading-rotor movement, announcement order, and the dated History actions with VoiceOver; also try Voice Control or Switch Control if used. These settings are not enabled remotely as part of installation. Physical alarm loudness, locked-screen behavior, listening comfort, and prior audio acceptance items remain separate in the [feasibility record](Feasibility-Spike.md).
 
 The audit's additional observations about clipped scanner bounds, More options hit-region reporting, actual Stepper announcements, and prototype-only screens were not confirmed defects. They are not silently promoted to failures or claimed as fixed by these six changes. At AX5 on a compact phone, content necessarily scrolls; pinned actions and individual controls must remain reachable without reducing the selected font size.
