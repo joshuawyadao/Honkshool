@@ -10,10 +10,11 @@ Make PR #19's iOS CI prepare and boot an explicit compatible simulator, verify p
 - [x] Inspect the failed job, documented runner image, test runner overrides, CI policy, portable test harness, and Development/Troubleshooting guidance.
 - [x] Commit this resolved plan on `codex/ux-status-recovery-fixes` before implementation.
 - [x] Add `scripts/prepare-ios-simulator.py` to initialize selected Xcode, check/install iOS 26.5 when absent, create a dedicated iPhone 17 Pro simulator, boot/wait for it, and publish its exact ID to the CI test step.
-- [x] Wire preparation into the existing macOS job and retain the full unit/UI suite, diagnostic artifacts, fail-closed aggregate gate, and 40-minute bound.
+- [x] Wire preparation into the existing macOS job and retain the full unit/UI suite, diagnostic artifacts, fail-closed aggregate gate, and a bounded hosted-run time budget.
 - [x] Add portable command-level regressions for installed/missing/unavailable runtime, explicit toolchain/ID propagation, preparation failure, and no published destination until boot succeeds; coordinate file-disjoint tests with a builder.
 - [x] Update Development and Troubleshooting for CI setup, pinned versions, download behavior, and destination failures; preserve the completed UX cycle and pending device/accessibility checks.
 - [x] Run focused portable tests, repository verification, Python/shell checks as applicable, and scoped correctness/Brooks review; commit and push the fix.
+- [x] Extend the hosted job budget to 60 minutes after the first bootable run exhausted 40 minutes; enable verbose CI test output with portable coverage while retaining local quiet defaults and full test scope.
 - [ ] Request fresh Codex review, inspect current-head GitHub Actions, fix any remaining scoped failures, and record final evidence before reporting PR #19 merge-ready without merging.
 
 ## Open questions
@@ -27,3 +28,6 @@ Make PR #19's iOS CI prepare and boot an explicit compatible simulator, verify p
 - CI repair plan checkpoint: `8f850d7`. Eleven portable setup regressions pass, including exact-ID/toolchain handoff into the existing test runner. Workflow publication assertions enforce preparation before the full suite.
 - Scoped Apple-platform/Brooks review found no actionable setup issue; command flags, conditional download, exact-ID boot and fail-closed publication reviewed. Python compilation passes.
 - Repository verification: all 77 tests passed, including 11 new simulator-preparation/handoff cases; whitespace checks passed. Hosted CI and fresh Codex review are the remaining gates.
+
+- Hosted run `43937374660` at `0514272`: simulator preparation passed, cold build/initial test launch took about nine minutes, and repeated app launches continued until job cancellation at 40 minutes. No completed result bundle was published; the final test outcome is unverified. Update the initial 40-minute-budget assumption to 60 minutes with detailed CI progress logging; do not skip tests or increase individual test timeouts.
+- Timeout/logging follow-up: all 80 repository checks and shell syntax checks passed; scoped review found no actionable issue. Next hosted run must establish full-suite completion inside the new bound.

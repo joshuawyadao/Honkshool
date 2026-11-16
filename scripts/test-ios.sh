@@ -9,11 +9,20 @@ HONKSHOOL_TEST_DESTINATION=${HONKSHOOL_TEST_DESTINATION:-platform=iOS Simulator,
 HONKSHOOL_TEST_DERIVED_DATA=${HONKSHOOL_TEST_DERIVED_DATA:-/tmp/HonkshoolAutomatedTests}
 HONKSHOOL_TEST_DIAGNOSTICS=${HONKSHOOL_TEST_DIAGNOSTICS:-never}
 HONKSHOOL_TEST_SCOPE=${HONKSHOOL_TEST_SCOPE:-all}
+HONKSHOOL_TEST_VERBOSE=${HONKSHOOL_TEST_VERBOSE:-0}
 
 case "$HONKSHOOL_TEST_SCOPE" in
   all|unit) ;;
   *)
     printf 'ERROR: HONKSHOOL_TEST_SCOPE must be all or unit.\n' >&2
+    exit 2
+    ;;
+esac
+
+case "$HONKSHOOL_TEST_VERBOSE" in
+  0|1) ;;
+  *)
+    printf 'ERROR: HONKSHOOL_TEST_VERBOSE must be 0 or 1.\n' >&2
     exit 2
     ;;
 esac
@@ -33,14 +42,16 @@ if [ -n "${GITHUB_OUTPUT:-}" ]; then
   printf 'result_directory=%s\n' "$test_result_directory" >> "$GITHUB_OUTPUT"
 fi
 
-set -- -quiet \
-  -project Honkshool.xcodeproj \
+set -- -project Honkshool.xcodeproj \
   -scheme Honkshool \
   -destination "$HONKSHOOL_TEST_DESTINATION" \
   -derivedDataPath "$HONKSHOOL_TEST_DERIVED_DATA" \
   -resultBundlePath "$test_result_path" \
   -collect-test-diagnostics "$HONKSHOOL_TEST_DIAGNOSTICS" \
   -parallel-testing-enabled NO
+if [ "$HONKSHOOL_TEST_VERBOSE" = 0 ]; then
+  set -- -quiet "$@"
+fi
 if [ "$HONKSHOOL_TEST_SCOPE" = unit ]; then
   set -- "$@" -only-testing:HonkshoolTests
 fi

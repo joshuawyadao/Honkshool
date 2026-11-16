@@ -47,6 +47,7 @@ The script uses the shared `Honkshool` scheme, disables parallel testing, writes
 | `HONKSHOOL_TEST_DESTINATION` | `platform=iOS Simulator,name=iPhone 17 Pro,OS=latest` | Select an installed compatible simulator. |
 | `HONKSHOOL_TEST_DERIVED_DATA` | `/tmp/HonkshoolAutomatedTests` | Choose where Xcode writes derived data. |
 | `HONKSHOOL_TEST_DIAGNOSTICS` | `never` | Set Xcode's `-collect-test-diagnostics` mode; CI uses `on-failure`. |
+| `HONKSHOOL_TEST_VERBOSE` | `0` | Set `1` for detailed build and test progress; CI enables it. Other values fail before Xcode or result creation. |
 | `HONKSHOOL_TEST_SCOPE` | `all` | Use `unit` for the Swift host target only; `all` runs both host and UI targets. Other values fail before Xcode or result creation. |
 
 For a faster local domain, controller or persistence iteration:
@@ -99,7 +100,7 @@ The classifier inspects both sides of renames and deletions, handles NUL-delimit
 
 The CI-only [simulator preparation script](../scripts/prepare-ios-simulator.py) uses Xcode 26.6 and iOS 26.5 from the hosted `macos-26` image. It initializes the selected Xcode installation, checks runtime availability, and downloads that iOS runtime only if missing or unavailable. It creates a dedicated iPhone 17 Pro simulator, boots it, waits for boot completion, and publishes its exact device ID through `GITHUB_ENV` to `HONKSHOOL_TEST_DESTINATION`. The test runner uses the same `HONKSHOOL_XCODE_PATH`; ordinary local defaults above remain unchanged. Setup failure stops the job before tests instead of silently skipping them or falling back to a generic destination. The dedicated device lives only for the disposable runner job.
 
-The full macOS job retains its 40-minute bound from main. The [resource-efficiency note](Efficiency.md) records later optimization ideas and their acceptance requirements. Do not shorten coverage or raise paid resource commitments solely to improve a timing number.
+The full macOS job has a 60-minute bound. The first explicitly booted hosted run exhausted the former 40-minute budget after cold build/initial launch overhead and continuing test-app launches; its incomplete outcome is not a pass. CI emits detailed build and test progress, while local runs remain quiet by default. Test selection, assertions, individual timeouts, and the fail-closed aggregate policy remain intact. The [resource-efficiency note](Efficiency.md) records later optimization ideas and their acceptance requirements. Do not shorten coverage or raise paid resource commitments solely to improve a timing number.
 
 Failed CI runs retain the simulator `.xcresult` bundle as an Actions artifact for seven days. Download it from the failed run to inspect assertion locations, UI activity, and screenshots in Xcode. The test script publishes its fresh result directory through the standard `GITHUB_OUTPUT` file when available. Artifacts contain synthetic simulator test data; do not upload personal-device result bundles. Feasibility label failures report the expected and observed label at the original assertion call site; timeouts and behavioral expectations remain unchanged.
 
