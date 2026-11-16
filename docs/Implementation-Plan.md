@@ -1,10 +1,10 @@
 # Plan
 
-Require CI and validate an unsigned Release build in addition to simulator tests.
+Require CI, preserve full simulator coverage in bounded independent jobs, and validate an unsigned Release build. Diagnose and correct the observed session-picker UI regression without weakening its Notes assertions.
 
 ## Scope
 - In: Scoped CI enforcement, automated validation, meaningful orchestration regressions, and canonical verification documentation for Honkshool.
-- Out: Product feature changes, deployment, paid services or account changes, personal data, physical-device operation, and release signing/publishing.
+- Out: Unrelated product feature changes, deployment, paid services or account changes, personal data, physical-device operation, and release signing/publishing.
 
 ## Action items
 - [x] Read Development, CI policy, runner tests, and current physical-acceptance records.
@@ -13,6 +13,10 @@ Require CI and validate an unsigned Release build in addition to simulator tests
 - [x] Extend CI-policy and orchestration tests to cover relevant failure/skip/classification cases.
 - [x] Set a bounded 50-minute native job budget using observed 35–38-minute successful full jobs plus the new simulator/Release steps; preserve the complete suite and existing 60-minute policy ceiling.
 - [x] Retain available test diagnostics after cancellation as well as failure; the 40-minute run confirmed cleanup worked but its failure-only artifact condition skipped the results.
+- [ ] Extend the runner with `ui` scope and complementary `plan-review` / `other` UI shards; keep local default full and unit scope unchanged, reject invalid combinations before Xcode/results.
+- [ ] Run all unit tests and both complementary UI shards as required independent macOS matrix jobs (40 minutes each, fail-fast false), with Release on the unit entry, unique artifacts, and unchanged fail-closed aggregate.
+- [ ] Reproduce `FunctionalPagesUITests.testSessionDetailCanChooseBeginningAndOpenActualNotes`, assert that the Sessions sheet opens immediately, and fix the demonstrated root cause while preserving Notes and navigation assertions.
+- [ ] Test selector validity, the complete UI union, new-class inclusion, Release conditioning and aggregate failure behavior; revalidate native UI and the full hosted matrix.
 - [ ] Run portable repository tests and safe build checks where supported; retain real alarm/audio checks as manual.
 - [ ] Update canonical verification docs, save and push the isolated active-workstream branch.
 
@@ -25,3 +29,5 @@ Require CI and validate an unsigned Release build in addition to simulator tests
 - Hosted run `43938715961` on macOS image `20261102.0473.1` failed before tests because Xcode exposed only generic simulator placeholders. The CI job now provisions and later removes an owned simulator, with a conditional iOS runtime download. Its hosted test/build result is pending.
 - CI selects one validated Xcode developer directory before provisioning and passes it to simulator tools, `test-ios.sh`, and the unsigned Release build; this prevents a mismatch between the runner's active Xcode and the test script's local default path.
 - Hosted run `43941851333` reached the full simulator suite but was cancelled at the previous 40-minute job cap. No passing full-suite/Release result is claimed from that run. The 50-minute version retains identical test/build commands and will be revalidated.
+
+- The retained artifact from `43950692622` proves 238 unit cases executed (5 skipped, zero failures). UI recorded 52 passes, one skip, one failure and one unfinished case at the 50-minute job cutoff. The failure follows Change session with no Sessions sheet. Full CI acceptance is pending; raising the combined budget again would not resolve this regression. Separate complementary jobs preserve every test target and give useful independent evidence. Hosted cancellation also prevented confirmed simulator deletion; the replacement jobs retain bounded owned-only cleanup.
