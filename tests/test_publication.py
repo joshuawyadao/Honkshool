@@ -215,6 +215,39 @@ class PublicRepositoryTests(unittest.TestCase):
         self.assertIn('"$developer_dir" "$developer_dir" >> "$GITHUB_ENV"', workflow)
         self.assertIn("if: ${{ always() && steps.ios-tests.outputs.result_directory != '' && steps.ios-tests.outcome != 'success' }}", workflow)
 
+    def test_required_ios_matrix_keeps_complete_coverage_and_release(self) -> None:
+        workflow = (PROJECT_ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        ios_job = re.search(
+            r"(?ms)^  ios-tests:\n(?P<body>.*?)(?=^  [A-Za-z0-9_-]+:|\Z)", workflow
+        )
+        self.assertIsNotNone(ios_job)
+        body = ios_job["body"]
+        self.assertIn("name: iOS Tests (${{ matrix.key }})", body)
+        self.assertIn("fail-fast: false", body)
+        matrix = re.findall(
+            r"(?m)^          - key: ([a-z-]+)\n"
+            r"            scope: ([a-z-]+)\n"
+            r"            ui_shard: ([a-z-]+)$", body
+        )
+        self.assertEqual(matrix, [
+            ("unit", "unit", "all"),
+            ("plan-review", "ui", "plan-review"),
+            ("other", "ui", "other"),
+        ])
+        self.assertIn("HONKSHOOL_TEST_SCOPE: ${{ matrix.scope }}", body)
+        self.assertIn("HONKSHOOL_UI_SHARD: ${{ matrix.ui_shard }}", body)
+        self.assertRegex(body, r"- name: Build unsigned Release app\n        if: matrix.key == 'unit'")
+        self.assertIn("ios-test-results-${{ matrix.key }}-${{ github.run_attempt }}", body)
+        self.assertIn("if: ${{ always() && steps.simulator.outputs.simulator_id != '' }}", body)
+        # The complement is a target-wide UI selection minus exactly the
+        # dedicated class. New UI classes therefore enter the other shard.
+        runner = (PROJECT_ROOT / "scripts/test-ios.sh").read_text(encoding="utf-8")
+        self.assertIn("-only-testing:HonkshoolUITests/NapPlanReviewUITests", runner)
+        self.assertIn("-only-testing:HonkshoolUITests", runner)
+        self.assertIn("-skip-testing:HonkshoolUITests/NapPlanReviewUITests", runner)
+        self.assertIn("needs: [verify, ios-tests]", workflow)
+        self.assertIn("IOS_RESULT: ${{ needs.ios-tests.result }}", workflow)
+
     def test_ios_tests_run_in_pull_requests_with_debug_only_fixtures(self) -> None:
         workflow = (PROJECT_ROOT / ".github/workflows/ci.yml").read_text(
             encoding="utf-8"

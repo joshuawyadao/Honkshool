@@ -9,14 +9,26 @@ HONKSHOOL_TEST_DESTINATION=${HONKSHOOL_TEST_DESTINATION:-platform=iOS Simulator,
 HONKSHOOL_TEST_DERIVED_DATA=${HONKSHOOL_TEST_DERIVED_DATA:-/tmp/HonkshoolAutomatedTests}
 HONKSHOOL_TEST_DIAGNOSTICS=${HONKSHOOL_TEST_DIAGNOSTICS:-never}
 HONKSHOOL_TEST_SCOPE=${HONKSHOOL_TEST_SCOPE:-all}
+HONKSHOOL_UI_SHARD=${HONKSHOOL_UI_SHARD:-all}
 
 case "$HONKSHOOL_TEST_SCOPE" in
-  all|unit) ;;
+  all|unit|ui) ;;
   *)
-    printf 'ERROR: HONKSHOOL_TEST_SCOPE must be all or unit.\n' >&2
+    printf 'ERROR: HONKSHOOL_TEST_SCOPE must be all, unit, or ui.\n' >&2
     exit 2
     ;;
 esac
+case "$HONKSHOOL_UI_SHARD" in
+  all|plan-review|other) ;;
+  *)
+    printf 'ERROR: HONKSHOOL_UI_SHARD must be all, plan-review, or other.\n' >&2
+    exit 2
+    ;;
+esac
+if [ "$HONKSHOOL_TEST_SCOPE" != ui ] && [ "$HONKSHOOL_UI_SHARD" != all ]; then
+  printf 'ERROR: HONKSHOOL_UI_SHARD requires HONKSHOOL_TEST_SCOPE=ui.\n' >&2
+  exit 2
+fi
 
 if [ ! -d "$HONKSHOOL_XCODE_PATH" ]; then
   printf 'ERROR: Xcode developer directory not found: %s\n' "$HONKSHOOL_XCODE_PATH" >&2
@@ -43,6 +55,15 @@ set -- -quiet \
   -parallel-testing-enabled NO
 if [ "$HONKSHOOL_TEST_SCOPE" = unit ]; then
   set -- "$@" -only-testing:HonkshoolTests
+elif [ "$HONKSHOOL_TEST_SCOPE" = ui ]; then
+  if [ "$HONKSHOOL_UI_SHARD" = plan-review ]; then
+    set -- "$@" -only-testing:HonkshoolUITests/NapPlanReviewUITests
+  else
+    set -- "$@" -only-testing:HonkshoolUITests
+    if [ "$HONKSHOOL_UI_SHARD" = other ]; then
+      set -- "$@" -skip-testing:HonkshoolUITests/NapPlanReviewUITests
+    fi
+  fi
 fi
 
 if DEVELOPER_DIR="$HONKSHOOL_XCODE_PATH" xcodebuild "$@" test; then

@@ -47,7 +47,8 @@ The script uses the shared `Honkshool` scheme, disables parallel testing, writes
 | `HONKSHOOL_TEST_DESTINATION` | `platform=iOS Simulator,name=iPhone 17 Pro,OS=latest` | Select an installed compatible simulator. |
 | `HONKSHOOL_TEST_DERIVED_DATA` | `/tmp/HonkshoolAutomatedTests` | Choose where Xcode writes derived data. |
 | `HONKSHOOL_TEST_DIAGNOSTICS` | `never` | Set Xcode's `-collect-test-diagnostics` mode; CI uses `on-failure`. |
-| `HONKSHOOL_TEST_SCOPE` | `all` | Use `unit` for the Swift host target only; `all` runs both host and UI targets. Other values fail before Xcode or result creation. |
+| `HONKSHOOL_TEST_SCOPE` | `all` | `all` runs host and UI targets; `unit` runs the host target; `ui` runs the UI target selected by `HONKSHOOL_UI_SHARD`. Other values fail before Xcode or result creation. |
+| `HONKSHOOL_UI_SHARD` | `all` | With `HONKSHOOL_TEST_SCOPE=ui`, use `all` for every UI class, `plan-review` for `NapPlanReviewUITests`, or `other` for every other UI class. A non-`all` shard with another scope fails before Xcode or result creation. |
 
 For a faster local domain, controller or persistence iteration:
 
@@ -55,7 +56,7 @@ For a faster local domain, controller or persistence iteration:
 HONKSHOOL_TEST_SCOPE=unit ./scripts/test-ios.sh
 ```
 
-This mode retains host integration checks, including actual bundled resources and SwiftData. It does not replace the complete suite for app changes or hardware acceptance. CI runs the default full scope.
+This mode retains host integration checks, including actual bundled resources and SwiftData. It does not replace the complete suite for app changes or hardware acceptance. CI runs the unit scope and two complementary UI shards in separate required macOS jobs. The local default remains the complete suite.
 
 For example, if the default simulator is unavailable:
 
@@ -87,21 +88,21 @@ Physical-device cases are separately gated and skipped in ordinary simulator run
 
 ### CI
 
-[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) defines three checks for non-draft pull requests, pushes to `main`, and manual `workflow_dispatch` runs:
+[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) defines three job groups for non-draft pull requests, pushes to `main`, and manual `workflow_dispatch` runs:
 
 | Check | Work |
 | --- | --- |
 | **Repository Verify** | Ubuntu runs the portable gate, then `scripts/ci-policy.py` classifies the exact pull-request or push base/head commit diff. Only ordinary, non-executable Markdown or SVG under `docs/`, and the known root README/contribution/conduct/security Markdown files, qualify as documentation-only. |
-| **iOS Unit and UI Tests** | After repository verification, macOS provisions an iOS 26-or-newer iPhone 17 Pro simulator owned by this job, runs the default complete `./scripts/test-ios.sh` with failure diagnostics on its exact ID, then builds an unsigned Release app for a generic iOS Simulator destination whenever code, tests, resources, project/workflow settings or any unknown path changes. Manual dispatch always runs both. Verified documentation-only PRs or pushes skip this job without allocating macOS. |
+| **iOS Tests (unit / plan-review / other)** | After repository verification, three independent macOS jobs each provision and remove their own iOS 26-or-newer iPhone 17 Pro simulator. The unit job runs all Swift host tests and builds an unsigned Release app. The UI jobs run `NapPlanReviewUITests` and the complete UI target excluding that class, respectively; new UI classes join the latter automatically. Every job is required for code, tests, resources, project/workflow settings or unknown paths. Manual dispatch always runs all three. Verified documentation-only PRs or pushes skip the matrix without allocating macOS. |
 | **CI Verify** | A stable Ubuntu readiness check runs even when a dependency fails. It requires successful repository verification and full iOS success, or an explicit successful documentation-only classification with iOS skipped. Missing classification, failures and cancellations cannot pass this gate. |
 
 The classifier inspects both sides of renames and deletions, handles NUL-delimited Git paths, and checks file modes; unknown or malformed input fails conservatively. No workflow-level path filter can leave a required check waiting. Draft PRs skip these checks; marking one ready for review starts them. The same aggregate **CI Verify** check runs after merges on `main`; it requires the Release build when the iOS job is selected. Physical-device opt-in tests are not CI acceptance evidence.
 
-The macOS job validates the active `xcode-select` developer directory and publishes it as both `DEVELOPER_DIR` and `HONKSHOOL_XCODE_PATH` before provisioning, so simulator tools, the test runner, and the Release build use the same Xcode. It then selects the newest installed compatible iOS simulator runtime. If none is available, it downloads that Xcode's iOS platform, then fails if a compatible runtime is still unavailable. It creates, boots, and waits for one CI-owned iPhone 17 Pro simulator before the full suite, and always shuts down and deletes that ID afterward. A hosted image listing installed simulator SDKs does not prove that a selectable simulator device is registered on a particular runner. A missing runtime or failed boot remains a failed CI run; tests are never skipped or replaced with a compile-only check.
+Each macOS job validates the active `xcode-select` developer directory and publishes it as both `DEVELOPER_DIR` and `HONKSHOOL_XCODE_PATH` before provisioning, so simulator tools, the test runner, and the Release build use the same Xcode. It then selects the newest installed compatible iOS simulator runtime. If none is available, it downloads that Xcode's iOS platform, then fails if a compatible runtime is still unavailable. It creates, boots, and waits for one CI-owned iPhone 17 Pro simulator before its test scope, and always shuts down and deletes that ID afterward. A hosted image listing installed simulator SDKs does not prove that a selectable simulator device is registered on a particular runner. A missing runtime or failed boot remains a failed CI run; tests are never skipped or replaced with a compile-only check.
 
-The full macOS job has a 50-minute bound. Successful full jobs took 35–38 minutes before simulator provisioning and the unsigned Release build were added (runs `39889573741` and `42675122315`); the previous 40-minute limit left too little headroom for the new steps. The complete unit/UI suite remains unchanged. The [resource-efficiency note](Efficiency.md) records later optimization ideas and their acceptance requirements. Do not shorten coverage or raise paid resource commitments solely to improve a timing number.
+Each macOS matrix entry has a 40-minute bound and the matrix does not cancel sibling entries when one fails. The retained results from run `43950692622` show 238 unit cases executed (5 skipped, no failures); the UI phase recorded 52 passes, one skip, one failure and one unfinished case before the former combined 50-minute job was cancelled. The failure followed a Change session action with no Sessions sheet visible. The separate jobs preserve the full unit/UI suite and allow the UI failure to be diagnosed without consuming the unit/Release job's time budget. The [resource-efficiency note](Efficiency.md) records later optimization ideas and their acceptance requirements. Do not shorten coverage or raise paid resource commitments solely to improve a timing number.
 
-Failed or cancelled CI runs retain available simulator results as an Actions artifact for seven days. Cancellation can leave an incomplete `.xcresult` bundle; it does not establish test acceptance. Download the artifact to inspect assertion locations, UI activity, and screenshots in Xcode. The test script publishes its fresh result directory through the standard `GITHUB_OUTPUT` file when available. Artifacts contain synthetic simulator test data; do not upload personal-device result bundles. Feasibility label failures report the expected and observed label at the original assertion call site; timeouts and behavioral expectations remain unchanged.
+Failed or cancelled CI entries retain available simulator results as uniquely named Actions artifacts for seven days. Cancellation can leave an incomplete `.xcresult` bundle; it does not establish test acceptance. Download the artifact to inspect assertion locations, UI activity, and screenshots in Xcode. The test script publishes its fresh result directory through the standard `GITHUB_OUTPUT` file when available. Artifacts contain synthetic simulator test data; do not upload personal-device result bundles. Feasibility label failures report the expected and observed label at the original assertion call site; timeouts and behavioral expectations remain unchanged.
 
 ## Offline audio tools
 

@@ -35,6 +35,17 @@ final class FunctionalPagesUITests: XCTestCase {
     app.tabBars.buttons["Rest"].tap()
     XCTAssertFalse(app.buttons["acknowledgeRecoveredRest"].exists)
     tap("napPlanContent", in: app)
+    guard app.navigationBars["Sessions"].waitForExistence(timeout: 5) else {
+      capture("Missing session picker after Change session")
+      let hierarchy = XCTAttachment(string: app.debugDescription)
+      hierarchy.name = "Session picker presentation hierarchy"
+      hierarchy.lifetime = .keepAlways
+      add(hierarchy)
+      XCTFail("Change session must present the Sessions picker")
+      return
+    }
+    XCTAssertTrue(
+      app.buttons["sessionDetails-turning-fuel-into-motion"].waitForExistence(timeout: 5))
     capture("Choose a session")
     tap("sessionDetails-turning-fuel-into-motion", in: app)
     XCTAssertTrue(app.buttons["sessionUseSavedPlace"].exists)
