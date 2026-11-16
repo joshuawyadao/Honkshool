@@ -10,6 +10,7 @@ Use the visible app or Xcode message first. This is an experimental build, so ke
 | --- | --- |
 | Terminal finds only Command Line Tools | Use full Xcode. The test script accepts `HONKSHOOL_XCODE_PATH`; other commands can use `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`. See [Development](Development.md#verification). |
 | iOS platform or simulator is missing | Install the relevant component through Xcode's settings, then choose an installed destination. Override `HONKSHOOL_TEST_DESTINATION` for tests. |
+| CI cannot find an iOS test destination | Inspect **Select Xcode for all iOS checks** and **Provision owned iOS simulator**: pinned Xcode 26.6, iOS 26.5 runtime availability/download, device creation, and boot completion must all succeed. Tests receive an exact simulator ID, so do not substitute generic destinations or count a zero-test run as passing. See [CI setup](Development.md#ci). |
 | Signing team is missing | Create and edit the ignored `Config/Local.xcconfig` using your own Team ID. Do not publish it. |
 | Bundle identifier cannot be registered | Your team may not own the repository's identifiers. Follow the personal-fork signing steps in [Getting started](Getting-Started.md#install-a-development-build-on-an-iphone); check both app and widget targets. |
 | Phone will not launch the development build | Unlock/connect it, inspect Xcode's device-support and signing message, and complete the phone's Trust/Developer Mode prompts. A newer phone OS may need newer Xcode. |

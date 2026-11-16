@@ -1,39 +1,28 @@
 # Plan
 
-Require CI, preserve full simulator coverage in bounded independent jobs, and validate an unsigned Release build. Synchronize UI transitions without weakening behavior or accessibility assertions.
+Integrate the scoped CI baseline with current reviewed main, preserve its recovery/timing/sound UX, and prepare a reviewed PR with complete passing native checks.
 
 ## Scope
-- In: CI enforcement, owned simulator lifecycle, complete native test/build checks, orchestration regressions and verification documentation.
-- Out: Unrelated features, deployment, paid resources, personal data, physical alarms/audio/devices and release signing/publishing.
+- In: Normal merge of main `84f0b10`, CI/runner integration, bounded full unit/UI shards and unsigned Release, combined portable regressions, transition-test synchronization, documentation, review fixes and current-head validation.
+- Out: Product behavior changes, unrelated active PRs, physical alarm/audio/device use, paid resources and merging the final PR.
 
 ## Action items
-- [x] Read Development, CI policy, runner tests and physical acceptance records.
-- [x] Require strict GitHub Actions CI Verify for main merges, with pull requests and no bypass.
-- [x] Verify main pushes and conservative PR changes; keep documentation-only classification and aggregate results fail-closed.
-- [x] Select one Xcode for provisioning/tests/Release, create a job-owned iOS simulator with finite deadlines, and always remove its exact ID.
-- [x] Preserve full local default/unit scope and add complementary UI shards with invalid selector refusal before side effects.
-- [x] Require all unit tests/unsigned Release plus plan-review and remaining UI jobs, with independent 40-minute limits and fail-fast false.
-- [x] Retain failed/cancelled diagnostics with distinct artifact names and seven-day retention.
-- [x] Wait for Sessions and its detail link before scrolling; preserve recovery, History, Notes and beginning assertions.
-- [x] Wait up to five seconds for Review hittability after Apply sound; retain all original AX5 layout/label/selection/hittability assertions and add timeout diagnostics.
-- [x] Run all 77 portable checks, local unsigned Release and original/synchronized isolated UI cases.
-- [x] Complete current-source hosted CI, update canonical docs, save and push the isolated branch.
+- [x] Inspect current-main PR19 and task branch intents; checkpoint this resolved integration plan before merging (`d1e9d78`).
+- [x] Preserve main's product sources, stronger AX5 sheet-absence/applied-sound assertions and this branch's immediate timeout diagnostics; retain the picker transition checks.
+- [x] Combine CI/toolchain/runtime preparation, full unit/plan-review/other shard execution, owned cleanup, diagnostics and both sets of portable regression intent.
+- [x] Resolve all conflicts and inspect the actual main-relative diff; all 92 portable regressions and staged whitespace checks pass. Save the normal merge without rewriting published history.
+- [ ] Complete coverage and Brooks review, open the scoped PR, request exact-head Codex review and handle actionable findings.
+- [ ] Verify current-head build/unit/UI/Release CI and actual required CI Verify, clean mergeability and no unresolved blocking feedback; leave unmerged.
 
 ## Discovery notes
-- Base: `57b56272a81e8e3fd8d7c3665576a1c964f62c03`, isolated from the original checkout. Existing project work remains untouched.
-- Combined 40/50-minute jobs timed out. Retained results justified complementary jobs; no tests were dropped to meet a budget.
-- Earlier hosted UI failures exposed missing transition synchronization. Both original and strengthened isolated picker/AX5 cases pass locally; no product behavior defect was established or app behavior changed.
-- Complete hosted run https://github.com/joshuawyadao/Honkshool/actions/runs/43972459300 at `102bd85` passes repository checks, unit/unsigned Release, both UI shards, owned simulator cleanup and CI Verify. Every matrix entry finishes within its 40-minute bound.
-- Every UI class is covered: plan-review selects NapPlanReviewUITests; the other shard selects the entire UI target minus that class, so future classes enter automatically. Any shard/build failure or cancellation fails the aggregate.
-- Canonical documentation: `docs/Development.md`. Real alarm audibility, routes, lock-screen controls and recipient/device acceptance remain manual; simulator evidence does not complete them.
+- Earlier task-only source `102bd85` passed full CI43972459300; this is baseline evidence, not validation of the integrated PR head.
+- Main PR19 independently added pinned CI preparation, verbose logs, scoped AX5 transition synchronization and newer product behavior. Preserve those reviewed contracts while applying this branch's full-suite partition and unsigned Release requirement.
+- Canonical docs: Development and Troubleshooting. Implementation-Plan is replaceable task tracking; preserve durable main documentation.
+- Local fixture validation, broad unit/UI/Release checks and mock alarm/audio paths remain separate from physical acceptance in the manual checklist.
 
 ## Open questions
 None.
 
-## PR review cycle — current target integration
+Integration decision: keep main's Xcode 26.6/iOS 26.5 CI pins and verbose progress while using the bounded owned-simulator helper for all matrix entries. New pin regressions reject an empty pin, choose 26.5 over newer installed runtimes, and download only the exact pinned version when absent. The existing preparation utility and its independent command-level tests remain available; CI and Troubleshooting identify the active owned helper explicitly.
 
-- [ ] Merge current main `84f0b10` while preserving its reviewed recovery/timing/sound UX and this branch's CI and transition-test changes.
-- [ ] Resolve any conflicts after reviewing both intents, inspect the final main-relative scope, and repeat affected portable/native checks.
-- [ ] Open the scoped PR, obtain current-head Brooks/Codex review, address actionable findings and require terminal passing current-head CI. Leave the PR unmerged.
-
-No open questions; this is integration of the requested CI work with the latest reviewed main.
+Integration validation: `./scripts/verify-repository.sh` passed all 92 tests on the resolved merge working tree; `git diff --cached --check` passed. Product source files match current main; the two UI-test changes preserve and strengthen transition outcomes. Current-head hosted native validation and Codex review remain pending.

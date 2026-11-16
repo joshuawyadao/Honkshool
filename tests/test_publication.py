@@ -210,7 +210,7 @@ class PublicRepositoryTests(unittest.TestCase):
         self.assertLess(selection, provisioning)
         self.assertLess(provisioning, tests)
         self.assertLess(tests, release)
-        self.assertIn('developer_dir="$(xcode-select -p)"', workflow)
+        self.assertIn('developer_dir="/Applications/Xcode_26.6.app/Contents/Developer"', workflow)
         self.assertIn('DEVELOPER_DIR=%s\\nHONKSHOOL_XCODE_PATH=%s\\n', workflow)
         self.assertIn('"$developer_dir" "$developer_dir" >> "$GITHUB_ENV"', workflow)
         self.assertIn("if: ${{ always() && steps.ios-tests.outputs.result_directory != '' && steps.ios-tests.outcome != 'success' }}", workflow)
@@ -263,11 +263,17 @@ class PublicRepositoryTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         self.assertIn("runs-on: macos-26", workflow)
+        self.assertIn('HONKSHOOL_CI_IOS_VERSION: "26.5"', workflow)
         self.assertIn("./scripts/test-ios.sh", workflow)
         ios_job = re.search(
             r"(?ms)^  ios-tests:\n(?P<body>.*?)(?=^  [A-Za-z0-9_-]+:|\Z)", workflow
         )
         self.assertIsNotNone(ios_job, "The complete iOS job must be present")
+        self.assertLess(
+            ios_job["body"].index("python3 scripts/ci-simulator.py prepare"),
+            ios_job["body"].index("./scripts/test-ios.sh"),
+            "Prepare the simulator before running the full suite",
+        )
         timeouts = re.findall(r"(?m)^    timeout-minutes: ([0-9]+)$", ios_job["body"])
         self.assertEqual(len(timeouts), 1, "The iOS job must have its own time budget")
         self.assertGreater(int(timeouts[0]), 0)

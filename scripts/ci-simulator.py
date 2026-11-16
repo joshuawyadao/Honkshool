@@ -38,12 +38,16 @@ def simctl_json(kind: str) -> list[dict]:
 
 
 def current_runtime() -> dict | None:
+    pinned = os.environ.get("HONKSHOOL_CI_IOS_VERSION")
+    if pinned is not None and not re.fullmatch(r"\d+(?:\.\d+)*", pinned):
+        raise RuntimeError("Invalid pinned CI iOS runtime version")
     candidates = [
         runtime for runtime in simctl_json("runtimes")
         if runtime.get("isAvailable") is True
         and runtime.get("identifier", "").startswith("com.apple.CoreSimulator.SimRuntime.iOS-")
         and re.fullmatch(r"\d+(?:\.\d+)*", runtime.get("version", ""))
         and tuple(map(int, runtime["version"].split("."))) >= (26, 0)
+        and (pinned is None or runtime.get("version") == pinned)
     ]
     return max(candidates, key=lambda runtime: tuple(map(int, runtime["version"].split("."))), default=None)
 
@@ -52,7 +56,8 @@ def prepare() -> None:
     runtime = current_runtime()
     if runtime is None:
         print("No compatible installed iOS simulator runtime; downloading Xcode's iOS platform.", flush=True)
-        command("xcodebuild", "-downloadPlatform", "iOS")
+        pinned = os.environ.get("HONKSHOOL_CI_IOS_VERSION")
+        command("xcodebuild", "-downloadPlatform", "iOS", *(["-buildVersion", pinned] if pinned else []))
         runtime = current_runtime()
     if runtime is None:
         raise RuntimeError("No available iOS 26-or-newer simulator runtime after platform download")

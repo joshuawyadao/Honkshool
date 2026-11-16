@@ -47,6 +47,8 @@ jobs:
     if: needs.verify.result == 'success' && needs.verify.outputs.run_ios == 'true'
     runs-on: macos-26
     timeout-minutes: 40
+    env:
+      HONKSHOOL_CI_IOS_VERSION: "26.5"
     strategy:
       fail-fast: false
       matrix:
@@ -70,7 +72,7 @@ jobs:
       - name: Select Xcode for all iOS checks
         shell: bash
         run: |
-          developer_dir="$(xcode-select -p)"
+          developer_dir="/Applications/Xcode_26.6.app/Contents/Developer"
           if [[ ! -d "$developer_dir" || ! -x "$developer_dir/usr/bin/xcodebuild" ]]; then
             echo "Selected Xcode developer directory is unavailable: $developer_dir" >&2
             exit 1
@@ -89,6 +91,7 @@ jobs:
           HONKSHOOL_TEST_DIAGNOSTICS: on-failure
           HONKSHOOL_TEST_SCOPE: ${{ matrix.scope }}
           HONKSHOOL_UI_SHARD: ${{ matrix.ui_shard }}
+          HONKSHOOL_TEST_VERBOSE: "1"
         run: ./scripts/test-ios.sh
 
       - name: Build unsigned Release app

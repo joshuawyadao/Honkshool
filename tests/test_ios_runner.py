@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class IOSRunnerTests(unittest.TestCase):
     def run_runner(self, exit_code, summary_valid=True, scope=None, shard=None,
-                   invalid=False):
+                   verbose=None, invalid=False):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             bin_dir = root / "bin"
@@ -48,6 +48,8 @@ class IOSRunnerTests(unittest.TestCase):
                 TMPDIR=str(root),
                 FAKE_XCODE_ARGS=str(root / "xcode-args"),
             )
+            if verbose is not None:
+                env["HONKSHOOL_TEST_VERBOSE"] = verbose
             if scope is not None:
                 env["HONKSHOOL_TEST_SCOPE"] = scope
             if shard is not None:
@@ -75,7 +77,26 @@ class IOSRunnerTests(unittest.TestCase):
         self.assertIn("PASS:", result.stdout)
         self.assertEqual(args[-1], "test")
         self.assertNotIn("-only-testing:HonkshoolTests", args)
+        self.assertIn("-quiet", args)
         self.assertEqual(args[args.index("-parallel-testing-enabled") + 1], "NO")
+
+    def test_verbose_ci_keeps_full_tests_and_results_without_quiet_filter(self):
+        result, args = self.run_runner(0, verbose="1")
+        self.assertEqual(result.returncode, 0)
+        self.assertNotIn("-quiet", args)
+        self.assertNotIn("-only-testing:HonkshoolTests", args)
+        self.assertIn("-resultBundlePath", args)
+        self.assertEqual(args[-1], "test")
+
+    def test_verbose_failure_preserves_original_exit_and_summary(self):
+        result, _ = self.run_runner(65, verbose="1")
+        self.assertEqual(result.returncode, 65)
+        self.assertIn("Playback: Expected Stopped", result.stdout)
+
+    def test_invalid_verbosity_fails_before_results_or_xcode(self):
+        result, _ = self.run_runner(0, verbose="invalid", invalid=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("must be 0 or 1", result.stderr)
 
     def test_unit_scope_selects_only_unit_tests(self):
         result, args = self.run_runner(0, scope="unit")
@@ -106,11 +127,6 @@ class IOSRunnerTests(unittest.TestCase):
                 result, _ = self.run_runner(0, scope=scope, shard=shard, invalid=True)
                 self.assertEqual(result.returncode, 2)
                 self.assertIn(error, result.stderr)
-
-    def test_invalid_scope_fails_before_creating_results_or_invoking_xcode(self):
-        result, _ = self.run_runner(0, scope="invalid", invalid=True)
-        self.assertEqual(result.returncode, 2)
-        self.assertIn("must be all, unit, or ui", result.stderr)
 
     def test_failure_publishes_bundle_and_preserves_test_exit_code(self):
         result, _ = self.run_runner(65)

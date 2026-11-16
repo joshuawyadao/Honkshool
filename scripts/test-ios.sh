@@ -10,6 +10,7 @@ HONKSHOOL_TEST_DERIVED_DATA=${HONKSHOOL_TEST_DERIVED_DATA:-/tmp/HonkshoolAutomat
 HONKSHOOL_TEST_DIAGNOSTICS=${HONKSHOOL_TEST_DIAGNOSTICS:-never}
 HONKSHOOL_TEST_SCOPE=${HONKSHOOL_TEST_SCOPE:-all}
 HONKSHOOL_UI_SHARD=${HONKSHOOL_UI_SHARD:-all}
+HONKSHOOL_TEST_VERBOSE=${HONKSHOOL_TEST_VERBOSE:-0}
 
 case "$HONKSHOOL_TEST_SCOPE" in
   all|unit|ui) ;;
@@ -30,6 +31,14 @@ if [ "$HONKSHOOL_TEST_SCOPE" != ui ] && [ "$HONKSHOOL_UI_SHARD" != all ]; then
   exit 2
 fi
 
+case "$HONKSHOOL_TEST_VERBOSE" in
+  0|1) ;;
+  *)
+    printf 'ERROR: HONKSHOOL_TEST_VERBOSE must be 0 or 1.\n' >&2
+    exit 2
+    ;;
+esac
+
 if [ ! -d "$HONKSHOOL_XCODE_PATH" ]; then
   printf 'ERROR: Xcode developer directory not found: %s\n' "$HONKSHOOL_XCODE_PATH" >&2
   printf 'Set HONKSHOOL_XCODE_PATH to the active Xcode Developer directory.\n' >&2
@@ -45,14 +54,16 @@ if [ -n "${GITHUB_OUTPUT:-}" ]; then
   printf 'result_directory=%s\n' "$test_result_directory" >> "$GITHUB_OUTPUT"
 fi
 
-set -- -quiet \
-  -project Honkshool.xcodeproj \
+set -- -project Honkshool.xcodeproj \
   -scheme Honkshool \
   -destination "$HONKSHOOL_TEST_DESTINATION" \
   -derivedDataPath "$HONKSHOOL_TEST_DERIVED_DATA" \
   -resultBundlePath "$test_result_path" \
   -collect-test-diagnostics "$HONKSHOOL_TEST_DIAGNOSTICS" \
   -parallel-testing-enabled NO
+if [ "$HONKSHOOL_TEST_VERBOSE" = 0 ]; then
+  set -- -quiet "$@"
+fi
 if [ "$HONKSHOOL_TEST_SCOPE" = unit ]; then
   set -- "$@" -only-testing:HonkshoolTests
 elif [ "$HONKSHOOL_TEST_SCOPE" = ui ]; then
