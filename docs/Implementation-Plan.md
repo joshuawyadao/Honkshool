@@ -29,3 +29,11 @@ Require CI, preserve full simulator coverage in bounded independent jobs, and va
 
 ## Open questions
 None.
+
+## PR review cycle — current target integration
+
+- [ ] Merge current main `84f0b10` while preserving its reviewed recovery/timing/sound UX and this branch's CI and transition-test changes.
+- [ ] Resolve any conflicts after reviewing both intents, inspect the final main-relative scope, and repeat affected portable/native checks.
+- [ ] Open the scoped PR, obtain current-head Brooks/Codex review, address actionable findings and require terminal passing current-head CI. Leave the PR unmerged.
+
+No open questions; this is integration of the requested CI work with the latest reviewed main.
