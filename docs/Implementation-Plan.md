@@ -26,3 +26,10 @@ None.
 Integration decision: keep main's Xcode 26.6/iOS 26.5 CI pins and verbose progress while using the bounded owned-simulator helper for all matrix entries. New pin regressions reject an empty pin, choose 26.5 over newer installed runtimes, and download only the exact pinned version when absent. The existing preparation utility and its independent command-level tests remain available; CI and Troubleshooting identify the active owned helper explicitly.
 
 Integration validation: `./scripts/verify-repository.sh` passed all 92 tests on the resolved merge working tree; `git diff --cached --check` passed. Product source files match current main; the two UI-test changes preserve and strengthen transition outcomes. Current-head hosted native validation and Codex review remain pending.
+
+## PR CI correction — cold CoreSimulator inventory
+
+Observed run43982368000 at2c6c589: unit/other jobs stop before tests because the first `simctl list -j runtimes` exceeds the new 30-second deadline on hosted macOS. Keep the pinned toolchain and bounded orchestration; allow a finite 180-second cold inventory budget, add a synthetic slow-start regression plus timeout diagnostic assertion, rerun portable checks, push and obtain fresh review/current-head native CI. No app or UI expectations change.
+
+- [ ] Demonstrate the cold-inventory regression before the fix, adjust only the inventory deadline, and verify eventual success and bounded timeout.
+- [ ] Rerun portable checks and hosted native CI at the corrected head; classify all prior failed/cancelled results explicitly.
