@@ -84,6 +84,8 @@ Use `build-for-testing` instead of `build` to compile test bundles without execu
 
 Routine UI tests use launch-time fixtures compiled only for Debug builds. They simulate alarm states and deterministic speech, and keep test preferences and history isolated from normal app data. These checks exercise Honkshool logic and screens without requesting real AlarmKit permission or proving locked-screen delivery.
 
+After applying a setup sheet, wait for its controls to disappear and the destination action to become hittable before asserting the resulting state. A button can exist behind a dismissing sheet; immediate hittability checks can race that transition on hosted simulators. Keep these waits bounded and preserve the accessibility and applied-selection assertions.
+
 Physical-device cases are separately gated and skipped in ordinary simulator runs. The test files use `HONKSHOOL_REAL_RAIN_TEST`, `HONKSHOOL_REAL_NAP_PLAN_ALARM_TEST`, and `HONKSHOOL_REAL_ALARM_TEST` as opt-in environment flags; Xcode passes them to its test runner with a `TEST_RUNNER_` prefix. Run them only on a connected, signed iPhone with the required alarm authorization. Follow the exact commands and acceptance notes in [Feasibility Spike](Feasibility-Spike.md#minimal-physical-device-acceptance) and its [production rain section](Feasibility-Spike.md#production-gentle-rain-acceptance-on-the-target-iphone). A passing simulator run does not establish audible quality, headphone disconnection behavior, or Lock Screen control behavior on hardware.
 
 ### CI

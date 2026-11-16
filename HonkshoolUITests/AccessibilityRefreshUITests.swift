@@ -38,7 +38,16 @@ final class AccessibilityRefreshUITests: XCTestCase {
     XCTAssertFalse(silence.isSelected)
     capture("AX5 Sound descriptions and selection")
     app.buttons["applyNapSound"].tap()
-    XCTAssertTrue(app.buttons["reviewNapPlan"].isHittable)
+    // Done starts sheet dismissal; the Rest footer can exist before it is
+    // accessible again, especially on a slower hosted simulator.
+    let returnedToRest = XCTNSPredicateExpectation(
+      predicate: NSPredicate { _, _ in
+        !app.buttons["applyNapSound"].exists && review.isHittable
+      }, object: nil)
+    XCTAssertEqual(XCTWaiter.wait(for: [returnedToRest], timeout: 5), .completed)
+    XCTAssertTrue(review.isHittable)
+    XCTAssertTrue(app.buttons["napPlanSound"].label.contains("Gentle rain"))
+    capture("AX5 Applied sound and reachable Review")
   }
 
   func testLargestTextTimingSurvivesReviewConfirmationAndStart() {
