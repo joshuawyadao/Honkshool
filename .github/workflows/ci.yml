@@ -46,7 +46,7 @@ jobs:
     needs: verify
     if: needs.verify.result == 'success' && needs.verify.outputs.run_ios == 'true'
     runs-on: macos-26
-    timeout-minutes: 40
+    timeout-minutes: 50
 
     steps:
       - name: Check out repository

@@ -11,6 +11,7 @@ Require CI and validate an unsigned Release build in addition to simulator tests
 - [x] Require the existing aggregate CI Verify status before main merges.
 - [x] Add bounded unsigned Release build validation and main push handling without changing app behavior.
 - [x] Extend CI-policy and orchestration tests to cover relevant failure/skip/classification cases.
+- [x] Set a bounded 50-minute native job budget using observed 35–38-minute successful full jobs plus the new simulator/Release steps; preserve the complete suite and existing 60-minute policy ceiling.
 - [ ] Run portable repository tests and safe build checks where supported; retain real alarm/audio checks as manual.
 - [ ] Update canonical verification docs, save and push the isolated active-workstream branch.
 
