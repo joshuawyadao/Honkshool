@@ -1,27 +1,25 @@
 # Plan
 
-Document the accepted stopping criteria and close the Honkshool UX review cycle at the verified app baseline while preserving pending device and accessibility validation.
+Make PR #19's iOS CI prepare and boot an explicit compatible simulator, verify preparation failures with portable fixtures, and shepherd the pushed branch through review and passing checks.
 
 ## Scope
-- In: a durable UX acceptance/closure record, documentation index and project-status links, explicit pending checks and reopening rules, repository verification, commit checkpoints, and push on the current branch.
-- Out: application or test changes, another UX audit, simulator/device testing, a readiness upgrade, PR creation, and release publishing.
+- In: CI-only simulator preparation, pinned existing runner toolchain/runtime, workflow wiring, portable setup regressions, Development/Troubleshooting documentation, commit/push checkpoints, and PR #19 review/check follow-through.
+- Out: app behavior, shortened test coverage, paid runners/caches, branch-protection changes, device acceptance, and merging the PR.
 
 ## Action items
-- [x] Inspect the existing review contract, implementation validation record, documentation index, project overview, accessibility record, and repository documentation checks.
-- [x] Checkpoint this resolved plan before editing the acceptance record.
-- [x] Create `docs/UX-Review-Acceptance.md` with the five acceptance criteria, completed cycle status, verified app baseline, findings disposition, and preserved test evidence.
-- [x] Record pending J12 device operation, A05 manual VoiceOver, and A04/UX-004 audit triage with concrete completion evidence; keep human learnability unverified and the unsupervised TestFlight assessment incomplete.
-- [x] Link the record from `docs/README.md`, `docs/Project-Overview.md`, and `docs/Accessibility-Refresh.md`; define when focused checks or a new broad review are warranted.
-- [x] Check documentation consistency and run `./scripts/verify-repository.sh`; no test-file changes or iOS rerun are needed because executable behavior is unchanged.
-- [x] Commit the documentation and completed plan, then push `codex/ux-status-recovery-fixes` with only task files staged.
+- [x] Inspect the failed job, documented runner image, test runner overrides, CI policy, portable test harness, and Development/Troubleshooting guidance.
+- [ ] Commit this resolved plan on `codex/ux-status-recovery-fixes` before implementation.
+- [ ] Add `scripts/prepare-ios-simulator.py` to initialize selected Xcode, check/install iOS 26.5 when absent, create a dedicated iPhone 17 Pro simulator, boot/wait for it, and publish its exact ID to the CI test step.
+- [ ] Wire preparation into the existing macOS job and retain the full unit/UI suite, diagnostic artifacts, fail-closed aggregate gate, and 40-minute bound.
+- [ ] Add portable command-level regressions for installed/missing/unavailable runtime, explicit toolchain/ID propagation, preparation failure, and no published destination until boot succeeds; coordinate file-disjoint tests with a builder.
+- [ ] Update Development and Troubleshooting for CI setup, pinned versions, download behavior, and destination failures; preserve the completed UX cycle and pending device/accessibility checks.
+- [ ] Run focused portable tests, repository verification, Python/shell checks as applicable, and scoped correctness/Brooks review; commit and push the fix.
+- [ ] Request fresh Codex review, inspect current-head GitHub Actions, fix any remaining scoped failures, and record final evidence before reporting PR #19 merge-ready without merging.
 
 ## Open questions
-- None. The owner authorizes completion of the review-and-remediation work, not reclassification of unperformed validation as passed.
+- None. The owner explicitly authorized fixing CI infrastructure and rerunning checks until merge-ready.
 
 ## Validation ledger
-- Plan checkpoint: `b301be6`.
-- Documentation-only change; no app/test behavior changed, so no new tests or iOS rerun are required. Reuse the recorded simulator evidence without presenting it as a fresh run.
-- Repository verification: all 66 checks passed, including Markdown relative links and publication/privacy checks. Whitespace checks passed.
-- Documentation consistency reviewed: all six product findings close at app baseline `b15484a`; J12/A05 remain Pending — Not tested, A04/UX-004 remains Pending — Needs review, and unsupervised TestFlight readiness remains Incomplete.
-- Added the durable UX acceptance record and linked it from the index, project overview, and historical accessibility record. No unrelated files or generated evidence are included.
-- Saved on `codex/ux-status-recovery-fixes`; the closeout commit contains this ledger.
+- Prior head `57b5627`: Repository Verify passed; iOS job failed before build/tests with unavailable destination and zero tests executed; CI Verify failed correctly. Existing workflow/runner script were unchanged in that PR head.
+- Prior Codex and Brooks review found no actionable findings at `57b5627`; review must be refreshed after the CI changes.
+- Runtime image reference: GitHub actions/runner-images macos-26-arm64 version 20261102.0473 documents Xcode 26.6 and iOS 26.5 with iPhone 17 Pro. Preserve existing local test defaults; CI prepares its own explicit destination.
