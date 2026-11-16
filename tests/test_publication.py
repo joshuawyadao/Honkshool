@@ -203,6 +203,16 @@ class PublicRepositoryTests(unittest.TestCase):
         self.assertIn("-configuration Release", workflow)
         self.assertIn("-destination 'generic/platform=iOS Simulator'", workflow)
         self.assertIn("CODE_SIGNING_ALLOWED=NO", workflow)
+        selection = workflow.index("- name: Select Xcode for all iOS checks")
+        provisioning = workflow.index("- name: Provision owned iOS simulator")
+        tests = workflow.index("- name: Run iOS tests")
+        release = workflow.index("- name: Build unsigned Release app")
+        self.assertLess(selection, provisioning)
+        self.assertLess(provisioning, tests)
+        self.assertLess(tests, release)
+        self.assertIn('developer_dir="$(xcode-select -p)"', workflow)
+        self.assertIn('DEVELOPER_DIR=%s\\nHONKSHOOL_XCODE_PATH=%s\\n', workflow)
+        self.assertIn('"$developer_dir" "$developer_dir" >> "$GITHUB_ENV"', workflow)
 
     def test_ios_tests_run_in_pull_requests_with_debug_only_fixtures(self) -> None:
         workflow = (PROJECT_ROOT / ".github/workflows/ci.yml").read_text(

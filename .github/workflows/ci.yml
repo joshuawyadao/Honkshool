@@ -54,6 +54,18 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Select Xcode for all iOS checks
+        shell: bash
+        run: |
+          developer_dir="$(xcode-select -p)"
+          if [[ ! -d "$developer_dir" || ! -x "$developer_dir/usr/bin/xcodebuild" ]]; then
+            echo "Selected Xcode developer directory is unavailable: $developer_dir" >&2
+            exit 1
+          fi
+          printf 'DEVELOPER_DIR=%s\nHONKSHOOL_XCODE_PATH=%s\n' \
+            "$developer_dir" "$developer_dir" >> "$GITHUB_ENV"
+          DEVELOPER_DIR="$developer_dir" xcodebuild -version
+
       - name: Provision owned iOS simulator
         id: simulator
         run: python3 scripts/ci-simulator.py prepare
