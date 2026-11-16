@@ -3,6 +3,8 @@ name: Repository Verify
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+  push:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -15,7 +17,7 @@ permissions:
 jobs:
   verify:
     name: Repository Verify
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
@@ -35,8 +37,8 @@ jobs:
         id: classify
         env:
           CI_EVENT_NAME: ${{ github.event_name }}
-          CI_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          CI_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          CI_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: python3 scripts/ci-policy.py classify --event "$CI_EVENT_NAME" --base "$CI_BASE_SHA" --head "$CI_HEAD_SHA"
 
   ios-tests:
@@ -58,6 +60,16 @@ jobs:
           HONKSHOOL_TEST_DIAGNOSTICS: on-failure
         run: ./scripts/test-ios.sh
 
+      - name: Build unsigned Release app
+        run: >-
+          xcodebuild -quiet build
+          -project Honkshool.xcodeproj
+          -scheme Honkshool
+          -configuration Release
+          -destination 'generic/platform=iOS Simulator'
+          -derivedDataPath "$RUNNER_TEMP/HonkshoolRelease"
+          CODE_SIGNING_ALLOWED=NO
+
       - name: Retain failed simulator test results
         if: ${{ failure() && steps.ios-tests.outputs.result_directory != '' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -70,7 +82,7 @@ jobs:
   ci-verify:
     name: CI Verify
     needs: [verify, ios-tests]
-    if: always() && (github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false)
+    if: always() && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
 

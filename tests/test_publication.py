@@ -186,7 +186,7 @@ class PublicRepositoryTests(unittest.TestCase):
 
         self.assertIn("pull_request:", workflow)
         self.assertIn("workflow_dispatch:", workflow)
-        self.assertNotRegex(workflow, r"(?m)^  push:")
+        self.assertRegex(workflow, r"(?m)^  push:\n    branches: \[main\]")
         self.assertIn("contents: read", workflow)
         self.assertIn("persist-credentials: false", workflow)
         self.assertRegex(workflow, r"actions/checkout@[0-9a-f]{40}")
@@ -198,8 +198,11 @@ class PublicRepositoryTests(unittest.TestCase):
         self.assertIn("needs.verify.outputs.run_ios == 'true'", workflow)
         self.assertIn("scripts/ci-policy.py classify", workflow)
         self.assertIn("scripts/ci-policy.py gate", workflow)
-        self.assertIn("CI_BASE_SHA: ${{ github.event.pull_request.base.sha }}", workflow)
-        self.assertIn("CI_HEAD_SHA: ${{ github.event.pull_request.head.sha }}", workflow)
+        self.assertIn("CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}", workflow)
+        self.assertIn("CI_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}", workflow)
+        self.assertIn("-configuration Release", workflow)
+        self.assertIn("-destination 'generic/platform=iOS Simulator'", workflow)
+        self.assertIn("CODE_SIGNING_ALLOWED=NO", workflow)
 
     def test_ios_tests_run_in_pull_requests_with_debug_only_fixtures(self) -> None:
         workflow = (PROJECT_ROOT / ".github/workflows/ci.yml").read_text(

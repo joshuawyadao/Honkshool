@@ -72,7 +72,7 @@ For an unsigned simulator build, including when a simulator runtime is not yet i
 ```sh
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
   xcodebuild -project Honkshool.xcodeproj -scheme Honkshool \
-  -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+  -configuration Release -destination 'generic/platform=iOS Simulator' \
   -derivedDataPath /tmp/HonkshoolDerivedData \
   CODE_SIGNING_ALLOWED=NO build
 ```
@@ -87,15 +87,15 @@ Physical-device cases are separately gated and skipped in ordinary simulator run
 
 ### CI
 
-[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) defines three checks for non-draft pull requests and manual `workflow_dispatch` runs:
+[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) defines three checks for non-draft pull requests, pushes to `main`, and manual `workflow_dispatch` runs:
 
 | Check | Work |
 | --- | --- |
-| **Repository Verify** | Ubuntu runs the portable gate, then `scripts/ci-policy.py` classifies the exact base/head commit diff. Only ordinary, non-executable Markdown or SVG under `docs/`, and the known root README/contribution/conduct/security Markdown files, qualify as documentation-only. |
-| **iOS Unit and UI Tests** | After repository verification, macOS runs the default complete `./scripts/test-ios.sh` with failure diagnostics whenever code, tests, resources, project/workflow settings or any unknown path changes. Manual dispatch always runs it. Verified documentation-only PRs skip this job without allocating macOS. |
+| **Repository Verify** | Ubuntu runs the portable gate, then `scripts/ci-policy.py` classifies the exact pull-request or push base/head commit diff. Only ordinary, non-executable Markdown or SVG under `docs/`, and the known root README/contribution/conduct/security Markdown files, qualify as documentation-only. |
+| **iOS Unit and UI Tests** | After repository verification, macOS runs the default complete `./scripts/test-ios.sh` with failure diagnostics, then an unsigned Release build for a generic iOS Simulator destination whenever code, tests, resources, project/workflow settings or any unknown path changes. Manual dispatch always runs both. Verified documentation-only PRs or pushes skip this job without allocating macOS. |
 | **CI Verify** | A stable Ubuntu readiness check runs even when a dependency fails. It requires successful repository verification and full iOS success, or an explicit successful documentation-only classification with iOS skipped. Missing classification, failures and cancellations cannot pass this gate. |
 
-The classifier inspects both sides of renames and deletions, handles NUL-delimited Git paths, and checks file modes; unknown or malformed input fails conservatively. No workflow-level path filter can leave a required check waiting. Draft PRs skip these checks; marking one ready for review starts them. Existing required check names are preserved, and maintainers can require **CI Verify** without changing protection as part of this branch. Physical-device opt-in tests are not CI acceptance evidence.
+The classifier inspects both sides of renames and deletions, handles NUL-delimited Git paths, and checks file modes; unknown or malformed input fails conservatively. No workflow-level path filter can leave a required check waiting. Draft PRs skip these checks; marking one ready for review starts them. The same aggregate **CI Verify** check runs after merges on `main`; it requires the Release build when the iOS job is selected. Physical-device opt-in tests are not CI acceptance evidence.
 
 The full macOS job retains its 40-minute bound from main. The [resource-efficiency note](Efficiency.md) records later optimization ideas and their acceptance requirements. Do not shorten coverage or raise paid resource commitments solely to improve a timing number.
 

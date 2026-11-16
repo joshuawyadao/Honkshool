@@ -86,7 +86,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
     classify = subparsers.add_parser("classify")
-    classify.add_argument("--event", required=True, choices=("pull_request", "workflow_dispatch"))
+    classify.add_argument("--event", required=True, choices=("pull_request", "push", "workflow_dispatch"))
     classify.add_argument("--base", default="")
     classify.add_argument("--head", default="")
     check = subparsers.add_parser("gate")
