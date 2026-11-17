@@ -186,7 +186,7 @@ class PublicRepositoryTests(unittest.TestCase):
 
         self.assertIn("pull_request:", workflow)
         self.assertIn("workflow_dispatch:", workflow)
-        self.assertNotRegex(workflow, r"(?m)^  push:")
+        self.assertRegex(workflow, r"(?m)^  push:\n    branches: \[main\]")
         self.assertIn("contents: read", workflow)
         self.assertIn("persist-credentials: false", workflow)
         self.assertRegex(workflow, r"actions/checkout@[0-9a-f]{40}")
@@ -198,8 +198,55 @@ class PublicRepositoryTests(unittest.TestCase):
         self.assertIn("needs.verify.outputs.run_ios == 'true'", workflow)
         self.assertIn("scripts/ci-policy.py classify", workflow)
         self.assertIn("scripts/ci-policy.py gate", workflow)
-        self.assertIn("CI_BASE_SHA: ${{ github.event.pull_request.base.sha }}", workflow)
-        self.assertIn("CI_HEAD_SHA: ${{ github.event.pull_request.head.sha }}", workflow)
+        self.assertIn("CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}", workflow)
+        self.assertIn("CI_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}", workflow)
+        self.assertIn("-configuration Release", workflow)
+        self.assertIn("-destination 'generic/platform=iOS Simulator'", workflow)
+        self.assertIn("CODE_SIGNING_ALLOWED=NO", workflow)
+        selection = workflow.index("- name: Select Xcode for all iOS checks")
+        provisioning = workflow.index("- name: Provision owned iOS simulator")
+        tests = workflow.index("- name: Run iOS tests")
+        release = workflow.index("- name: Build unsigned Release app")
+        self.assertLess(selection, provisioning)
+        self.assertLess(provisioning, tests)
+        self.assertLess(tests, release)
+        self.assertIn('developer_dir="/Applications/Xcode_26.6.app/Contents/Developer"', workflow)
+        self.assertIn('DEVELOPER_DIR=%s\\nHONKSHOOL_XCODE_PATH=%s\\n', workflow)
+        self.assertIn('"$developer_dir" "$developer_dir" >> "$GITHUB_ENV"', workflow)
+        self.assertIn("if: ${{ always() && steps.ios-tests.outputs.result_directory != '' && steps.ios-tests.outcome != 'success' }}", workflow)
+
+    def test_required_ios_matrix_keeps_complete_coverage_and_release(self) -> None:
+        workflow = (PROJECT_ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        ios_job = re.search(
+            r"(?ms)^  ios-tests:\n(?P<body>.*?)(?=^  [A-Za-z0-9_-]+:|\Z)", workflow
+        )
+        self.assertIsNotNone(ios_job)
+        body = ios_job["body"]
+        self.assertIn("name: iOS Tests (${{ matrix.key }})", body)
+        self.assertIn("fail-fast: false", body)
+        matrix = re.findall(
+            r"(?m)^          - key: ([a-z-]+)\n"
+            r"            scope: ([a-z-]+)\n"
+            r"            ui_shard: ([a-z-]+)$", body
+        )
+        self.assertEqual(matrix, [
+            ("unit", "unit", "all"),
+            ("plan-review", "ui", "plan-review"),
+            ("other", "ui", "other"),
+        ])
+        self.assertIn("HONKSHOOL_TEST_SCOPE: ${{ matrix.scope }}", body)
+        self.assertIn("HONKSHOOL_UI_SHARD: ${{ matrix.ui_shard }}", body)
+        self.assertRegex(body, r"- name: Build unsigned Release app\n        if: matrix.key == 'unit'")
+        self.assertIn("ios-test-results-${{ matrix.key }}-${{ github.run_attempt }}", body)
+        self.assertIn("if: ${{ always() && steps.simulator.outputs.simulator_id != '' }}", body)
+        # The complement is a target-wide UI selection minus exactly the
+        # dedicated class. New UI classes therefore enter the other shard.
+        runner = (PROJECT_ROOT / "scripts/test-ios.sh").read_text(encoding="utf-8")
+        self.assertIn("-only-testing:HonkshoolUITests/NapPlanReviewUITests", runner)
+        self.assertIn("-only-testing:HonkshoolUITests", runner)
+        self.assertIn("-skip-testing:HonkshoolUITests/NapPlanReviewUITests", runner)
+        self.assertIn("needs: [verify, ios-tests]", workflow)
+        self.assertIn("IOS_RESULT: ${{ needs.ios-tests.result }}", workflow)
 
     def test_ios_tests_run_in_pull_requests_with_debug_only_fixtures(self) -> None:
         workflow = (PROJECT_ROOT / ".github/workflows/ci.yml").read_text(
@@ -216,13 +263,14 @@ class PublicRepositoryTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         self.assertIn("runs-on: macos-26", workflow)
+        self.assertIn('HONKSHOOL_CI_IOS_VERSION: "26.5"', workflow)
         self.assertIn("./scripts/test-ios.sh", workflow)
         ios_job = re.search(
             r"(?ms)^  ios-tests:\n(?P<body>.*?)(?=^  [A-Za-z0-9_-]+:|\Z)", workflow
         )
         self.assertIsNotNone(ios_job, "The complete iOS job must be present")
         self.assertLess(
-            ios_job["body"].index("python3 scripts/prepare-ios-simulator.py"),
+            ios_job["body"].index("python3 scripts/ci-simulator.py prepare"),
             ios_job["body"].index("./scripts/test-ios.sh"),
             "Prepare the simulator before running the full suite",
         )

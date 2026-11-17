@@ -144,6 +144,31 @@ class CIPolicyTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         self.assertEqual(output.read_text(), "run_ios=false\n")
 
+    def test_push_classifies_merged_changes_and_keeps_documentation_policy(self):
+        self.write("docs/guide.md", "documentation update\n")
+        docs_head = self.commit()
+        output = self.root / "github-output"
+        env = dict(os.environ, GITHUB_OUTPUT=str(output))
+        docs = subprocess.run(
+            [sys.executable, str(SCRIPT), "classify", "--event", "push",
+             "--base", self.base, "--head", docs_head],
+            cwd=self.root, env=env, capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(docs.returncode, 0)
+        self.assertEqual(output.read_text(), "run_ios=false\n")
+
+        self.base = docs_head
+        self.write("App.swift", "merged code update\n")
+        code_head = self.commit()
+        output.unlink()
+        code = subprocess.run(
+            [sys.executable, str(SCRIPT), "classify", "--event", "push",
+             "--base", self.base, "--head", code_head],
+            cwd=self.root, env=env, capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(code.returncode, 0)
+        self.assertEqual(output.read_text(), "run_ios=true\n")
+
     def test_classifier_error_does_not_publish_output(self):
         output = self.root / "github-output"
         env = dict(os.environ, GITHUB_OUTPUT=str(output))

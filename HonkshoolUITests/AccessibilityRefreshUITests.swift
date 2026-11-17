@@ -38,13 +38,21 @@ final class AccessibilityRefreshUITests: XCTestCase {
     XCTAssertFalse(silence.isSelected)
     capture("AX5 Sound descriptions and selection")
     app.buttons["applyNapSound"].tap()
-    // Done starts sheet dismissal; the Rest footer can exist before it is
-    // accessible again, especially on a slower hosted simulator.
+    // Apply starts asynchronous dismissal; require both sheet absence and a
+    // reachable Rest footer before preserving the original accessibility checks.
     let returnedToRest = XCTNSPredicateExpectation(
       predicate: NSPredicate { _, _ in
         !app.buttons["applyNapSound"].exists && review.isHittable
       }, object: nil)
-    XCTAssertEqual(XCTWaiter.wait(for: [returnedToRest], timeout: 5), .completed)
+    let returnResult = XCTWaiter.wait(for: [returnedToRest], timeout: 5)
+    if returnResult != .completed {
+      capture("AX5 Sound dismissal timeout")
+      let hierarchy = XCTAttachment(string: app.debugDescription)
+      hierarchy.name = "AX5 Sound dismissal hierarchy"
+      hierarchy.lifetime = .keepAlways
+      add(hierarchy)
+    }
+    XCTAssertEqual(returnResult, .completed, "Apply sound must return to the tappable Review action")
     XCTAssertTrue(review.isHittable)
     XCTAssertTrue(app.buttons["napPlanSound"].label.contains("Gentle rain"))
     capture("AX5 Applied sound and reachable Review")

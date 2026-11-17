@@ -1,39 +1,37 @@
 # Plan
 
-Make PR #19's iOS CI prepare and boot an explicit compatible simulator, verify preparation failures with portable fixtures, and shepherd the pushed branch through review and passing checks.
+Integrate the scoped CI baseline with current reviewed main, preserve its recovery/timing/sound UX, and prepare a reviewed PR with complete passing native checks.
 
 ## Scope
-- In: CI-only simulator preparation, pinned existing runner toolchain/runtime, workflow wiring, portable setup regressions, scoped UI-test synchronization failures, Development/Troubleshooting documentation, commit/push checkpoints, and PR #19 review/check follow-through.
-- Out: app behavior, shortened test coverage, paid runners/caches, branch-protection changes, device acceptance, and merging the PR.
+- In: Normal merge of main `84f0b10`, CI/runner integration, bounded full unit/UI shards and unsigned Release, combined portable regressions, transition-test synchronization, documentation, review fixes and current-head validation.
+- Out: Product behavior changes, unrelated active PRs, physical alarm/audio/device use, paid resources and merging the final PR.
 
 ## Action items
-- [x] Inspect the failed job, documented runner image, test runner overrides, CI policy, portable test harness, and Development/Troubleshooting guidance.
-- [x] Commit this resolved plan on `codex/ux-status-recovery-fixes` before implementation.
-- [x] Add `scripts/prepare-ios-simulator.py` to initialize selected Xcode, check/install iOS 26.5 when absent, create a dedicated iPhone 17 Pro simulator, boot/wait for it, and publish its exact ID to the CI test step.
-- [x] Wire preparation into the existing macOS job and retain the full unit/UI suite, diagnostic artifacts, fail-closed aggregate gate, and a bounded hosted-run time budget.
-- [x] Add portable command-level regressions for installed/missing/unavailable runtime, explicit toolchain/ID propagation, preparation failure, and no published destination until boot succeeds; coordinate file-disjoint tests with a builder.
-- [x] Update Development and Troubleshooting for CI setup, pinned versions, download behavior, and destination failures; preserve the completed UX cycle and pending device/accessibility checks.
-- [x] Run focused portable tests, repository verification, Python/shell checks as applicable, and scoped correctness/Brooks review; commit and push the fix.
-- [x] Extend the hosted job budget to 60 minutes after the first bootable run exhausted 40 minutes; enable verbose CI test output with portable coverage while retaining local quiet defaults and full test scope.
-- [x] Run the focused AX5 sound-Apply baseline, inspect the recorded failing CI transition, and distinguish dismissal synchronization from a persistent layout or selection failure.
-- [x] Correct only the supported cause, preserve existing accessibility assertions, verify applied sound and reachable Review after dismissal, document the synchronization rule, and run focused regression repetitions plus repository/format checks before the next push.
-- [ ] Request fresh Codex review, inspect current-head GitHub Actions, fix any remaining scoped failures, and record final evidence before reporting PR #19 merge-ready without merging.
+- [x] Inspect current-main PR19 and task branch intents; checkpoint this resolved integration plan before merging (`d1e9d78`).
+- [x] Preserve main's product sources, stronger AX5 sheet-absence/applied-sound assertions and this branch's immediate timeout diagnostics; retain the picker transition checks.
+- [x] Combine CI/toolchain/runtime preparation, full unit/plan-review/other shard execution, owned cleanup, diagnostics and both sets of portable regression intent.
+- [x] Resolve all conflicts and inspect the actual main-relative diff; all 92 portable regressions and staged whitespace checks pass. Save the normal merge without rewriting published history.
+- [ ] Complete coverage and Brooks review, open the scoped PR, request exact-head Codex review and handle actionable findings.
+- [ ] Verify current-head build/unit/UI/Release CI and actual required CI Verify, clean mergeability and no unresolved blocking feedback; leave unmerged.
+
+## Discovery notes
+- Earlier task-only source `102bd85` passed full CI43972459300; this is baseline evidence, not validation of the integrated PR head.
+- Main PR19 independently added pinned CI preparation, verbose logs, scoped AX5 transition synchronization and newer product behavior. Preserve those reviewed contracts while applying this branch's full-suite partition and unsigned Release requirement.
+- Canonical docs: Development and Troubleshooting. Implementation-Plan is replaceable task tracking; preserve durable main documentation.
+- Local fixture validation, broad unit/UI/Release checks and mock alarm/audio paths remain separate from physical acceptance in the manual checklist.
 
 ## Open questions
-- None. The owner explicitly authorized fixing CI infrastructure and rerunning checks until merge-ready.
+None.
 
-## Validation ledger
-- Prior head `57b5627`: Repository Verify passed; iOS job failed before build/tests with unavailable destination and zero tests executed; CI Verify failed correctly. Existing workflow/runner script were unchanged in that PR head.
-- Prior Codex and Brooks review found no actionable findings at `57b5627`; review must be refreshed after the CI changes.
-- Runtime image reference: GitHub actions/runner-images macos-26-arm64 version 20261102.0473 documents Xcode 26.6 and iOS 26.5 with iPhone 17 Pro. Preserve existing local test defaults; CI prepares its own explicit destination.
+Integration decision: keep main's Xcode 26.6/iOS 26.5 CI pins and verbose progress while using the bounded owned-simulator helper for all matrix entries. New pin regressions reject an empty pin, choose 26.5 over newer installed runtimes, and download only the exact pinned version when absent. The existing preparation utility and its independent command-level tests remain available; CI and Troubleshooting identify the active owned helper explicitly.
 
-- CI repair plan checkpoint: `8f850d7`. Eleven portable setup regressions pass, including exact-ID/toolchain handoff into the existing test runner. Workflow publication assertions enforce preparation before the full suite.
-- Scoped Apple-platform/Brooks review found no actionable setup issue; command flags, conditional download, exact-ID boot and fail-closed publication reviewed. Python compilation passes.
-- Repository verification: all 77 tests passed, including 11 new simulator-preparation/handoff cases; whitespace checks passed. Hosted CI and fresh Codex review are the remaining gates.
+Integration validation: `./scripts/verify-repository.sh` passed all 92 tests on the resolved merge working tree; `git diff --cached --check` passed. Product source files match current main; the two UI-test changes preserve and strengthen transition outcomes. Current-head hosted native validation and Codex review remain pending.
 
-- Hosted run `43937374660` at `0514272`: simulator preparation passed, cold build/initial test launch took about nine minutes, and repeated app launches continued until job cancellation at 40 minutes. No completed result bundle was published; the final test outcome is unverified. Update the initial 40-minute-budget assumption to 60 minutes with detailed CI progress logging; do not skip tests or increase individual test timeouts.
-- Timeout/logging follow-up: all 80 repository checks and shell syntax checks passed; scoped review found no actionable issue. Next hosted run must establish full-suite completion inside the new bound.
-- Hosted run `43945191271` at `16c5283` completed within 60 minutes: 289 passed, one failed, six physical-device skips. All 233 simulator unit tests passed; the sole failure is the immediate `reviewNapPlan.isHittable` assertion after sound Apply in `AccessibilityRefreshUITests` line 41. Existing label/selection assertions passed. Inspect the result recording and focused local test before changing synchronization; do not alter app behavior or weaken accessibility expectations without evidence.
-- Ranked diagnosis predictions: (1) a dismissal race clears with a bounded wait for sheet disappearance and Review hittability; (2) a persistent footer obstruction remains after that wait; (3) an unsuccessful Apply leaves the sheet present or loses the selected sound. The focused command selects only `HonkshoolUITests/AccessibilityRefreshUITests/testLargestTextDurationChoicesAndSoundDescriptions` on the iOS 26.5 review simulator; final hosted CI still runs the full suite.
-- Focused baseline passed locally (one test, 58.445 seconds); the original CI failure is intermittent rather than reproduced locally. The CI recording's final frame shows Gentle rain applied and the Review footer visible after dismissal. Together with the immediate post-Done assertion and asynchronous SwiftUI dismissal, this supports test synchronization rather than a persistent layout/selection defect. Add one five-second predicate wait for sheet absence and Review hittability, retaining the original hittability assertion and adding applied-sound verification. No production code change is supported.
-- Updated focused regression: three iterations passed with zero failures (55.809, 53.247, 52.717 seconds). All 80 repository checks and strict formatting for the changed Swift test passed; incremental Apple/Brooks review found no actionable concerns. Fresh hosted full-suite CI and exact-head Codex review remain required after pushing this follow-up.
+## PR CI correction — cold CoreSimulator inventory
+
+Observed run43982368000 at2c6c589: unit/other jobs stop before tests because the first `simctl list -j runtimes` exceeds the new 30-second deadline on hosted macOS. Keep the pinned toolchain and bounded orchestration; allow a finite 180-second cold inventory budget, add a synthetic slow-start regression plus timeout diagnostic assertion, rerun portable checks, push and obtain fresh review/current-head native CI. No app or UI expectations change.
+
+- [x] Demonstrate the cold-inventory regression before the fix, adjust only the inventory deadline, and verify eventual success and bounded timeout.
+- [ ] Rerun portable checks and hosted native CI at the corrected head; classify all prior failed/cancelled results explicitly.
+
+Cold-inventory validation: two new cases failed against the 30-second original. The modeled 75-second cold start succeeds with the bounded 180-second inventory budget; an expired inventory reports the finite deadline. Full repository verification passes all94 tests and whitespace checks pass. All other command budgets and test/Release selection are unchanged. Fresh hosted checks/review follow the push.

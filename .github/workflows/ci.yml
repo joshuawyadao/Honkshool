@@ -3,6 +3,8 @@ name: Repository Verify
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+  push:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -15,7 +17,7 @@ permissions:
 jobs:
   verify:
     name: Repository Verify
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
@@ -35,16 +37,31 @@ jobs:
         id: classify
         env:
           CI_EVENT_NAME: ${{ github.event_name }}
-          CI_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          CI_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          CI_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: python3 scripts/ci-policy.py classify --event "$CI_EVENT_NAME" --base "$CI_BASE_SHA" --head "$CI_HEAD_SHA"
 
   ios-tests:
-    name: iOS Unit and UI Tests
+    name: iOS Tests (${{ matrix.key }})
     needs: verify
     if: needs.verify.result == 'success' && needs.verify.outputs.run_ios == 'true'
     runs-on: macos-26
-    timeout-minutes: 60
+    timeout-minutes: 40
+    env:
+      HONKSHOOL_CI_IOS_VERSION: "26.5"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - key: unit
+            scope: unit
+            ui_shard: all
+          - key: plan-review
+            scope: ui
+            ui_shard: plan-review
+          - key: other
+            scope: ui
+            ui_shard: other
 
     steps:
       - name: Check out repository
@@ -52,31 +69,61 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Prepare iOS simulator
-        env:
-          HONKSHOOL_XCODE_PATH: /Applications/Xcode_26.6.app/Contents/Developer
-        run: python3 scripts/prepare-ios-simulator.py
+      - name: Select Xcode for all iOS checks
+        shell: bash
+        run: |
+          developer_dir="/Applications/Xcode_26.6.app/Contents/Developer"
+          if [[ ! -d "$developer_dir" || ! -x "$developer_dir/usr/bin/xcodebuild" ]]; then
+            echo "Selected Xcode developer directory is unavailable: $developer_dir" >&2
+            exit 1
+          fi
+          printf 'DEVELOPER_DIR=%s\nHONKSHOOL_XCODE_PATH=%s\n' \
+            "$developer_dir" "$developer_dir" >> "$GITHUB_ENV"
+          DEVELOPER_DIR="$developer_dir" xcodebuild -version
+
+      - name: Provision owned iOS simulator
+        id: simulator
+        run: python3 scripts/ci-simulator.py prepare
 
       - name: Run iOS tests
         id: ios-tests
         env:
           HONKSHOOL_TEST_DIAGNOSTICS: on-failure
+          HONKSHOOL_TEST_SCOPE: ${{ matrix.scope }}
+          HONKSHOOL_UI_SHARD: ${{ matrix.ui_shard }}
           HONKSHOOL_TEST_VERBOSE: "1"
         run: ./scripts/test-ios.sh
 
-      - name: Retain failed simulator test results
-        if: ${{ failure() && steps.ios-tests.outputs.result_directory != '' }}
+      - name: Build unsigned Release app
+        if: matrix.key == 'unit'
+        run: >-
+          xcodebuild -quiet build
+          -project Honkshool.xcodeproj
+          -scheme Honkshool
+          -configuration Release
+          -destination 'generic/platform=iOS Simulator'
+          -derivedDataPath "$RUNNER_TEMP/HonkshoolRelease"
+          CODE_SIGNING_ALLOWED=NO
+
+      - name: Retain failed or cancelled simulator test results
+        if: ${{ always() && steps.ios-tests.outputs.result_directory != '' && steps.ios-tests.outcome != 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: ios-test-results-${{ github.run_attempt }}
+          name: ios-test-results-${{ matrix.key }}-${{ github.run_attempt }}
           path: ${{ steps.ios-tests.outputs.result_directory }}
           retention-days: 7
           if-no-files-found: warn
 
+      - name: Remove owned iOS simulator
+        if: ${{ always() && steps.simulator.outputs.simulator_id != '' }}
+        env:
+          HONKSHOOL_SIMULATOR_ID: ${{ steps.simulator.outputs.simulator_id }}
+        run: python3 scripts/ci-simulator.py cleanup "$HONKSHOOL_SIMULATOR_ID"
+
   ci-verify:
     name: CI Verify
     needs: [verify, ios-tests]
-    if: always() && (github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false)
+    if: always() && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
 

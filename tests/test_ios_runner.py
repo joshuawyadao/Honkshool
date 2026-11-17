@@ -11,7 +11,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class IOSRunnerTests(unittest.TestCase):
-    def run_runner(self, exit_code, summary_valid=True, scope=None, verbose=None):
+    def run_runner(self, exit_code, summary_valid=True, scope=None, shard=None,
+                   verbose=None, invalid=False):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             bin_dir = root / "bin"
@@ -51,11 +52,13 @@ class IOSRunnerTests(unittest.TestCase):
                 env["HONKSHOOL_TEST_VERBOSE"] = verbose
             if scope is not None:
                 env["HONKSHOOL_TEST_SCOPE"] = scope
+            if shard is not None:
+                env["HONKSHOOL_UI_SHARD"] = shard
             result = subprocess.run(
                 ["sh", str(ROOT / "scripts/test-ios.sh")],
                 env=env, capture_output=True, text=True, check=False,
             )
-            if scope == "invalid" or verbose == "invalid":
+            if invalid:
                 self.assertFalse(output.exists())
                 self.assertFalse((root / "xcode-args").exists())
                 self.assertEqual(list(root.glob("honkshool-test-results.*")), [])
@@ -91,7 +94,7 @@ class IOSRunnerTests(unittest.TestCase):
         self.assertIn("Playback: Expected Stopped", result.stdout)
 
     def test_invalid_verbosity_fails_before_results_or_xcode(self):
-        result, _ = self.run_runner(0, verbose="invalid")
+        result, _ = self.run_runner(0, verbose="invalid", invalid=True)
         self.assertEqual(result.returncode, 2)
         self.assertIn("must be 0 or 1", result.stderr)
 
@@ -101,10 +104,29 @@ class IOSRunnerTests(unittest.TestCase):
         self.assertIn("-only-testing:HonkshoolTests", args)
         self.assertEqual(args[-1], "test")
 
-    def test_invalid_scope_fails_before_creating_results_or_invoking_xcode(self):
-        result, _ = self.run_runner(0, scope="invalid")
-        self.assertEqual(result.returncode, 2)
-        self.assertIn("must be all or unit", result.stderr)
+    def test_ui_shards_partition_entire_ui_target(self):
+        _, all_ui = self.run_runner(0, scope="ui")
+        _, review = self.run_runner(0, scope="ui", shard="plan-review")
+        _, other = self.run_runner(0, scope="ui", shard="other")
+        self.assertIn("-only-testing:HonkshoolUITests", all_ui)
+        self.assertNotIn("-skip-testing:HonkshoolUITests/NapPlanReviewUITests", all_ui)
+        self.assertIn("-only-testing:HonkshoolUITests/NapPlanReviewUITests", review)
+        self.assertNotIn("-only-testing:HonkshoolUITests", review)
+        self.assertIn("-only-testing:HonkshoolUITests", other)
+        self.assertIn("-skip-testing:HonkshoolUITests/NapPlanReviewUITests", other)
+
+    def test_invalid_selector_combinations_fail_before_xcode_or_results(self):
+        cases = (
+            ("invalid", None, "HONKSHOOL_TEST_SCOPE"),
+            ("ui", "invalid", "HONKSHOOL_UI_SHARD"),
+            ("unit", "plan-review", "requires HONKSHOOL_TEST_SCOPE=ui"),
+            (None, "other", "requires HONKSHOOL_TEST_SCOPE=ui"),
+        )
+        for scope, shard, error in cases:
+            with self.subTest(scope=scope, shard=shard):
+                result, _ = self.run_runner(0, scope=scope, shard=shard, invalid=True)
+                self.assertEqual(result.returncode, 2)
+                self.assertIn(error, result.stderr)
 
     def test_failure_publishes_bundle_and_preserves_test_exit_code(self):
         result, _ = self.run_runner(65)
